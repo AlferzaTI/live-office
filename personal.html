@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,17 +14,24 @@
             <h1>ALFERZA LIVE OFFICE</h1>
             <span>Monitoreo en tiempo real</span>
         </div>
+
         <div class="personal-topbar-right">
-            <span class="live-indicator"><i></i> EN VIVO</span>
+            <span class="live-indicator">
+                <i></i> EN VIVO
+            </span>
         </div>
     </header>
+
 
     <div class="personal-layout">
 
         <!-- SIDEBAR -->
         <aside class="personal-sidebar">
+
             <div class="sidebar-title">MENÚ</div>
+
             <nav>
+
                 <a href="index.html">
                     <span class="menu-icon">🏢</span>
                     <span>Oficina</span>
@@ -50,71 +56,118 @@
                     <span class="menu-icon">⚙️</span>
                     <span>Configuración</span>
                 </a>
+
             </nav>
 
             <div class="sidebar-bottom">
                 <span>ALFERZA</span>
                 <small>LIVE OFFICE v1.0</small>
             </div>
+
         </aside>
+
 
         <!-- CONTENIDO -->
         <main class="personal-content">
 
             <section class="page-header">
+
                 <div>
-                    <span class="page-kicker">PERSONAL / UBICACIÓN</span>
+                    <span class="page-kicker">
+                        PERSONAL / UBICACIÓN
+                    </span>
+
                     <h2>Personal de ALFERZA</h2>
-                    <p>Distribución de colaboradores por piso, sala y puesto de trabajo.</p>
+
+                    <p>
+                        Distribución de colaboradores por piso,
+                        sala y puesto de trabajo.
+                    </p>
                 </div>
 
                 <div class="office-status">
                     <span></span>
                     Oficina activa
                 </div>
+
             </section>
+
 
             <!-- TOOLBAR -->
             <section class="personal-toolbar">
 
                 <div class="toolbar-search">
+
                     <span>⌕</span>
+
                     <input
                         type="text"
                         id="personalSearch"
                         placeholder="Buscar colaborador, puesto o área..."
                         autocomplete="off"
                     >
+
                 </div>
 
+
                 <div class="floor-tabs" id="floorTabs">
-                    <button type="button" class="floor-tab" data-floor="1">
+
+                    <button
+                        type="button"
+                        class="floor-tab"
+                        data-floor="1"
+                    >
                         1<sup>er</sup> Piso
                     </button>
 
-                    <button type="button" class="floor-tab active" data-floor="2">
+                    <button
+                        type="button"
+                        class="floor-tab active"
+                        data-floor="2"
+                    >
                         2<sup>do</sup> Piso
                     </button>
 
-                    <button type="button" class="floor-tab" data-floor="3">
+                    <button
+                        type="button"
+                        class="floor-tab"
+                        data-floor="3"
+                    >
                         3<sup>er</sup> Piso
                     </button>
+
                 </div>
 
-                <button type="button" id="refreshPersonal">
+
+                <button
+                    type="button"
+                    id="refreshPersonal"
+                >
                     ↻ <span>Actualizar</span>
                 </button>
 
+
                 <div class="employee-total">
-                    <strong id="employeeCount">25</strong>
-                    <span>trabajadores</span>
+
+                    <strong id="employeeCount">
+                        25
+                    </strong>
+
+                    <span>
+                        trabajadores
+                    </span>
+
                 </div>
 
             </section>
 
+
             <!-- LEYENDA -->
             <div class="legend">
-                <span class="legend-title">Estado</span>
+
+                <span class="legend-title">
+                    Estado
+                </span>
 
                 <span>
                     <i class="dot available"></i>
@@ -137,214 +190,419 @@
                 </span>
 
                 <span class="legend-note">
-                    Los estados se sincronizarán en vivo con Microsoft Teams (misma fuente que la vista Oficina).
+                    Los estados se sincronizarán en vivo con Microsoft Teams
+                    (misma fuente que la vista Oficina).
                 </span>
+
             </div>
 
+
             <!-- ================= PISO 2 ================= -->
-            <section class="floor-view" data-floor-view="2">
+            <section
+                class="floor-view"
+                data-floor-view="2"
+            >
 
                 <div class="floor-grid floor-grid-3col">
 
+
                     <!-- SALA 2 — COLUMNA 1 -->
                     <article class="room">
+
                         <div class="room-header room-header-purple">
-                            <h3>Sala 2</h3>
-                            <span>Contabilidad, Finanzas y Tesorería</span>
+
+                            <h3>
+                                Sala 2
+                            </h3>
+
+                            <span>
+                                Contabilidad, Finanzas y Tesorería
+                            </span>
+
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Pamela Chuguirio"
-                                     data-role="Asistente de Tesorería">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Pamela Chuguirio"
+                                    data-role="Asistente de Tesorería"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Pamela Chuguirio</span>
-                                        <span class="employee-role">Asistente de Tesorería</span>
+                                        <span class="employee-name">
+                                            Pamela Chuguirio
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Tesorería
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Rosmery Calcina"
-                                     data-role="Contador">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Rosmery Calcina"
+                                    data-role="Contador"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Rosmery Calcina</span>
-                                        <span class="employee-role">Contador</span>
+                                        <span class="employee-name">
+                                            Rosmery Calcina
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Contador
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Eduhar Rojas"
-                                     data-role="Coordinador de Contabilidad y Finanzas">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Eduhar Rojas"
+                                    data-role="Coordinador de Contabilidad y Finanzas"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Eduhar Rojas</span>
-                                        <span class="employee-role">Coordinador de Contabilidad y Finanzas</span>
+                                        <span class="employee-name">
+                                            Eduhar Rojas
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador de Contabilidad y Finanzas
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Katerine Gallegos"
-                                     data-role="Asistente de Finanzas">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Katerine Gallegos"
+                                    data-role="Asistente de Finanzas"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Katerine Gallegos</span>
-                                        <span class="employee-role">Asistente de Finanzas</span>
+                                        <span class="employee-name">
+                                            Katerine Gallegos
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Finanzas
+                                        </span>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Nataly Rojas"
-                                     data-role="Asistente Logístico de Pagos">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Nataly Rojas"
+                                    data-role="Asistente Logístico de Pagos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Nataly Rojas</span>
-                                        <span class="employee-role">Asistente Logístico de Pagos</span>
+                                        <span class="employee-name">
+                                            Nataly Rojas
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Logístico de Pagos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Angie Choque"
-                                     data-role="Practicante de Contabilidad">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Angie Choque"
+                                    data-role="Practicante de Contabilidad"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Angie Choque</span>
-                                        <span class="employee-role">Practicante de Contabilidad</span>
+                                        <span class="employee-name">
+                                            Angie Choque
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Practicante de Contabilidad
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Yoselin Holguino"
-                                     data-role="Asistente Logístico">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Yoselin Holguino"
+                                    data-role="Asistente Logístico"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Yoselin Holguino</span>
-                                        <span class="employee-role">Asistente Logístico</span>
+                                        <span class="employee-name">
+                                            Yoselin Holguino
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Logístico
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Claudia Ugarte"
-                                     data-role="Coordinador Junior Administrativo">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Claudia Ugarte"
+                                    data-role="Coordinador Junior Administrativo"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Claudia Ugarte</span>
-                                        <span class="employee-role">Coordinador Junior Administrativo</span>
+                                        <span class="employee-name">
+                                            Claudia Ugarte
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador Junior Administrativo
+                                        </span>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
+
                     </article>
 
 
                     <!-- SALA 2 — COLUMNA 2 -->
                     <article class="room">
+
                         <div class="room-header room-header-purple">
-                            <h3>Sala 2</h3>
-                            <span>Contabilidad, Planillas y TI</span>
+
+                            <h3>
+                                Sala 2
+                            </h3>
+
+                            <span>
+                                Contabilidad, Planillas y TI
+                            </span>
+
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Ana Navarro"
-                                     data-role="Auxiliar de Contabilidad">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Ana Navarro"
+                                    data-role="Auxiliar de Contabilidad"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Ana Navarro</span>
-                                        <span class="employee-role">Auxiliar de Contabilidad</span>
+                                        <span class="employee-name">
+                                            Ana Navarro
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Auxiliar de Contabilidad
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Briggitte Quispe"
-                                     data-role="Asistente Contable">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Briggitte Quispe"
+                                    data-role="Asistente Contable"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Briggitte Quispe</span>
-                                        <span class="employee-role">Asistente Contable</span>
+                                        <span class="employee-name">
+                                            Briggitte Quispe
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Contable
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Maria Rosario"
-                                     data-role="Asistente de Finanzas">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Maria Rosario"
+                                    data-role="Asistente de Finanzas"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Maria Rosario</span>
-                                        <span class="employee-role">Asistente de Finanzas</span>
+                                        <span class="employee-name">
+                                            Maria Rosario
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Finanzas
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Bryan Ponce"
-                                     data-role="Asistente Contable">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Bryan Ponce"
+                                    data-role="Asistente Contable"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Bryan Ponce</span>
-                                        <span class="employee-role">Asistente Contable</span>
+                                        <span class="employee-name">
+                                            Bryan Ponce
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Contable
+                                        </span>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Maria Lopez"
-                                     data-role="Analista de Planillas">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Maria Lopez"
+                                    data-role="Analista de Planillas"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Maria Lopez</span>
-                                        <span class="employee-role">Analista de Planillas</span>
+                                        <span class="employee-name">
+                                            Maria Lopez
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Planillas
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Nikole Phacsi"
-                                     data-role="Analista de Recursos Humanos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Nikole Phacsi"
+                                    data-role="Analista de Recursos Humanos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Nikole Phacsi</span>
-                                        <span class="employee-role">Analista de Recursos Humanos</span>
+                                        <span class="employee-name">
+                                            Nikole Phacsi
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Recursos Humanos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Luis Barrionuevo"
-                                     data-role="Coordinador de TI">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Luis Barrionuevo"
+                                    data-role="Coordinador de TI"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Luis Barrionuevo</span>
-                                        <span class="employee-role">Coordinador de TI</span>
+                                        <span class="employee-name">
+                                            Luis Barrionuevo
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador de TI
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Alvaro Durand"
-                                     data-role="Auxiliar de TI">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Alvaro Durand"
+                                    data-role="Auxiliar de TI"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Alvaro Durand</span>
-                                        <span class="employee-role">Auxiliar de TI</span>
+                                        <span class="employee-name">
+                                            Alvaro Durand
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Auxiliar de TI
+                                        </span>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
+
                     </article>
 
 
@@ -352,110 +610,228 @@
                     <article class="room room-tall">
 
                         <div class="room-header room-header-purple">
-                            <h3>Almacén</h3>
-                            <span>Recursos Humanos, Calidad y Administración</span>
+
+                            <h3>
+                                Almacén
+                            </h3>
+
+                            <span>
+                                Recursos Humanos, Calidad y Administración
+                            </span>
+
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Ximena Cerpa"
-                                     data-role="Asistente Legal">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Ximena Cerpa"
+                                    data-role="Asistente Legal"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Ximena Cerpa</span>
-                                        <span class="employee-role">Asistente Legal</span>
+                                        <span class="employee-name">
+                                            Ximena Cerpa
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Legal
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Alejandra Arenas"
-                                     data-role="Analista de Recursos Humanos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Alejandra Arenas"
+                                    data-role="Analista de Recursos Humanos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Alejandra Arenas</span>
-                                        <span class="employee-role">Analista de Recursos Humanos</span>
+                                        <span class="employee-name">
+                                            Alejandra Arenas
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Recursos Humanos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Katia Mamani"
-                                     data-role="Analista Legal">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Katia Mamani"
+                                    data-role="Analista Legal"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Katia Mamani</span>
-                                        <span class="employee-role">Analista Legal</span>
+                                        <span class="employee-name">
+                                            Katia Mamani
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista Legal
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Daniela Pastor"
-                                     data-role="Asistente de bienestar social">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Daniela Pastor"
+                                    data-role="Asistente de bienestar social"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Daniela Pastor</span>
-                                        <span class="employee-role">Asistente de bienestar social</span>
+                                        <span class="employee-name">
+                                            Daniela Pastor
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de bienestar social
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Lizbeth Zela"
-                                     data-role="Analista Senior de Recursos Humanos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Lizbeth Zela"
+                                    data-role="Analista Senior de Recursos Humanos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Lizbeth Zela</span>
-                                        <span class="employee-role">Analista Senior de Recursos Humanos</span>
+                                        <span class="employee-name">
+                                            Lizbeth Zela
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista Senior de Recursos Humanos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Carmen Huanqui"
-                                     data-role="Analista SIG">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Carmen Huanqui"
+                                    data-role="Analista SIG"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Carmen Huanqui</span>
-                                        <span class="employee-role">Analista SIG</span>
+                                        <span class="employee-name">
+                                            Carmen Huanqui
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista SIG
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Britanny Vega"
-                                     data-role="Asistente de Recursos Humanos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Britanny Vega"
+                                    data-role="Asistente de Recursos Humanos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Britanny Vega</span>
-                                        <span class="employee-role">Asistente de Recursos Humanos</span>
+                                        <span class="employee-name">
+                                            Britanny Vega
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Recursos Humanos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Karina Pastor"
-                                     data-role="Asistente de Calidad">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Karina Pastor"
+                                    data-role="Asistente de Calidad"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Karina Pastor</span>
-                                        <span class="employee-role">Asistente de Calidad</span>
+                                        <span class="employee-name">
+                                            Karina Pastor
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Calidad
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Paola Alvizuri"
-                                     data-role="Jefe de Administración">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Paola Alvizuri"
+                                    data-role="Jefe de Administración"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Paola Alvizuri</span>
-                                        <span class="employee-role">Jefe de Administración</span>
+                                        <span class="employee-name">
+                                            Paola Alvizuri
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Jefe de Administración
+                                        </span>
                                     </div>
                                 </div>
 
@@ -465,18 +841,25 @@
                     </article>
 
                 </div>
+
             </section>
 
 
             <!-- ================= PISO 1 ================= -->
-            <section class="floor-view" data-floor-view="1" hidden>
+            <section
+                class="floor-view"
+                data-floor-view="1"
+                hidden
+            >
 
                 <div class="floor-grid floor-grid-2col">
+
 
                     <!-- SALA IZQUIERDA -->
                     <article class="room">
 
                         <div class="room-header room-header-purple room-header-pending">
+
                             <h3>
                                 Sala
                                 <span title="Falta confirmar el nombre real de esta sala">
@@ -487,113 +870,226 @@
                             <span>
                                 Marketing, Diseño y Experiencia al Cliente
                             </span>
+
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Ericka Salinas"
-                                     data-role="Analista de Experiencia al Cliente">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Ericka Salinas"
+                                    data-role="Analista de Experiencia al Cliente"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Ericka Salinas</span>
-                                        <span class="employee-role">Analista de Experiencia al Cliente</span>
+                                        <span class="employee-name">
+                                            Ericka Salinas
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Experiencia al Cliente
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Alondra Chávez"
-                                     data-role="Auxiliar Comercial">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Alondra Chávez"
+                                    data-role="Auxiliar Comercial"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Alondra Chávez</span>
-                                        <span class="employee-role">Auxiliar Comercial</span>
+                                        <span class="employee-name">
+                                            Alondra Chávez
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Auxiliar Comercial
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Bryan Mamani"
-                                     data-role="Diseñador Gráfico">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Bryan Mamani"
+                                    data-role="Diseñador Gráfico"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Bryan Mamani</span>
-                                        <span class="employee-role">Diseñador Gráfico</span>
+                                        <span class="employee-name">
+                                            Bryan Mamani
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Diseñador Gráfico
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Maria Arispe"
-                                     data-role="Asistente de Marketing">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Maria Arispe"
+                                    data-role="Asistente de Marketing"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Maria Arispe</span>
-                                        <span class="employee-role">Asistente de Marketing</span>
+                                        <span class="employee-name">
+                                            Maria Arispe
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Marketing
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Afonso Contreras"
-                                     data-role="Asistente de Marketing">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Afonso Contreras"
+                                    data-role="Asistente de Marketing"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Alfonso Contreras</span>
-                                        <span class="employee-role">Asistente de Marketing</span>
+                                        <span class="employee-name">
+                                            Alfonso Contreras
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Marketing
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Karina Felix"
-                                     data-role="Asistente de Marketing">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Karina Felix"
+                                    data-role="Asistente de Marketing"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Karina Felix</span>
-                                        <span class="employee-role">Asistente de Marketing</span>
+                                        <span class="employee-name">
+                                            Karina Felix
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Marketing
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Diego Pari"
-                                     data-role="Diseñador Gráfico">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Diego Pari"
+                                    data-role="Diseñador Gráfico"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Diego Pari</span>
-                                        <span class="employee-role">Diseñador Gráfico</span>
+                                        <span class="employee-name">
+                                            Diego Pari
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Diseñador Gráfico
+                                        </span>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
+
                     </article>
 
 
@@ -601,110 +1097,228 @@
                     <article class="room">
 
                         <div class="room-header room-header-purple">
-                            <h3>Sala 2</h3>
-                            <span>Comercial, Operaciones y Gerencia</span>
+
+                            <h3>
+                                Sala 2
+                            </h3>
+
+                            <span>
+                                Comercial, Operaciones y Gerencia
+                            </span>
+
                         </div>
 
+
                         <div class="room-cluster">
+
                             <div class="desks">
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Frank Castillo"
-                                     data-role="Analista de Inversiones">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Frank Castillo"
+                                    data-role="Analista de Inversiones"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Frank Castillo</span>
-                                        <span class="employee-role">Analista de Inversiones</span>
+                                        <span class="employee-name">
+                                            Frank Castillo
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Inversiones
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Yoselin Huayta"
-                                     data-role="Auxiliar Comercial">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Yoselin Huayta"
+                                    data-role="Auxiliar Comercial"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Yoselin Huayta</span>
-                                        <span class="employee-role">Auxiliar Comercial</span>
+                                        <span class="employee-name">
+                                            Yoselin Huayta
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Auxiliar Comercial
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Edward Anover"
-                                     data-role="Asistente Comercial">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Edward Anover"
+                                    data-role="Asistente Comercial"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Edward Anover</span>
-                                        <span class="employee-role">Asistente Comercial</span>
+                                        <span class="employee-name">
+                                            Edward Anover
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente Comercial
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Adriana Cisneros"
-                                     data-role="Asistente de Gerencia">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Adriana Cisneros"
+                                    data-role="Asistente de Gerencia"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Adriana Cisneros</span>
-                                        <span class="employee-role">Asistente de Gerencia</span>
+                                        <span class="employee-name">
+                                            Adriana Cisneros
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Gerencia
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Milagros Palma"
-                                     data-role="Jefe de Operaciones">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Milagros Palma"
+                                    data-role="Jefe de Operaciones"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Milagros Palma</span>
-                                        <span class="employee-role">Jefe de Operaciones</span>
+                                        <span class="employee-name">
+                                            Milagros Palma
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Jefe de Operaciones
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Veronica Chuquicallata"
-                                     data-role="Asistente de Planeamiento y Control">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Veronica Chuquicallata"
+                                    data-role="Asistente de Planeamiento y Control"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Veronica Chuquicallata</span>
-                                        <span class="employee-role">Asistente de Planeamiento y Control</span>
+                                        <span class="employee-name">
+                                            Veronica Chuquicallata
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Planeamiento y Control
+                                        </span>
                                     </div>
                                 </div>
 
@@ -714,64 +1328,124 @@
                     </article>
 
                 </div>
+
             </section>
 
 
             <!-- ================= PISO 3 ================= -->
-            <section class="floor-view" data-floor-view="3" hidden>
+            <section
+                class="floor-view"
+                data-floor-view="3"
+                hidden
+            >
 
                 <div class="floor-grid floor-grid-2col">
+
 
                     <!-- COMEDOR — Sr. Julio / Sala 3 -->
                     <article class="room">
 
                         <div class="room-header room-header-purple">
-                            <h3>Comedor</h3>
-                            <span>Oficina Técnica y Coordinación de Proyectos</span>
+
+                            <h3>
+                                Comedor
+                            </h3>
+
+                            <span>
+                                Oficina Técnica y Coordinación de Proyectos
+                            </span>
+
                         </div>
 
+
                         <div class="room-cluster">
-                            <span class="room-cluster-label">Sr. Julio</span>
+
+                            <span class="room-cluster-label">
+                                Sr. Julio
+                            </span>
 
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Walter Landeo"
-                                     data-role="Jefe de Oficina Técnica">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Walter Landeo"
+                                    data-role="Jefe de Oficina Técnica"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Walter Landeo</span>
-                                        <span class="employee-role">Jefe de Oficina Técnica</span>
+                                        <span class="employee-name">
+                                            Walter Landeo
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Jefe de Oficina Técnica
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Vera Valdivia"
-                                     data-role="Coordinador de Proyectos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Vera Valdivia"
+                                    data-role="Coordinador de Proyectos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Vera Valdivia</span>
-                                        <span class="employee-role">Coordinador de Proyectos</span>
+                                        <span class="employee-name">
+                                            Vera Valdivia
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador de Proyectos
+                                        </span>
                                     </div>
                                 </div>
 
@@ -780,47 +1454,93 @@
 
 
                         <div class="room-cluster">
-                            <span class="room-cluster-label">Sala 3</span>
+
+                            <span class="room-cluster-label">
+                                Sala 3
+                            </span>
 
                             <div class="desks">
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Julio Colque"
-                                     data-role="Coordinador de Proyectos">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Julio Colque"
+                                    data-role="Coordinador de Proyectos"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Julio Colque</span>
-                                        <span class="employee-role">Coordinador de Proyectos</span>
+                                        <span class="employee-name">
+                                            Julio Colque
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador de Proyectos
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Estephani Pino"
-                                     data-role="Asistente de Arquitectura">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Estephani Pino"
+                                    data-role="Asistente de Arquitectura"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Estephani Pino</span>
-                                        <span class="employee-role">Asistente de Arquitectura</span>
+                                        <span class="employee-name">
+                                            Estephani Pino
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Asistente de Arquitectura
+                                        </span>
                                     </div>
                                 </div>
 
@@ -834,111 +1554,228 @@
                     <article class="room">
 
                         <div class="room-header room-header-purple">
-                            <h3>Comedor</h3>
-                            <span>Arquitectura, Planeamiento de Obra y BIM</span>
+
+                            <h3>
+                                Comedor
+                            </h3>
+
+                            <span>
+                                Arquitectura, Planeamiento de Obra y BIM
+                            </span>
+
                         </div>
+
 
                         <div class="room-cluster">
 
                             <div class="desks">
 
-                                <div class="employee employee-available"
-                                     data-name="Emily Rojas"
-                                     data-role="Auxiliar de Arquitectura">
-                                    <div class="employee-avatar">👤<i></i></div>
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Emily Rojas"
+                                    data-role="Auxiliar de Arquitectura"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Emily Rojas</span>
-                                        <span class="employee-role">Auxiliar de Arquitectura</span>
+                                        <span class="employee-name">
+                                            Emily Rojas
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Auxiliar de Arquitectura
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Joan Pinto"
-                                     data-role="Coordinador de Planeamiento de Obra">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Joan Pinto"
+                                    data-role="Coordinador de Planeamiento de Obra"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Joan Pinto</span>
-                                        <span class="employee-role">Coordinador de Planeamiento de Obra</span>
+                                        <span class="employee-name">
+                                            Joan Pinto
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador de Planeamiento de Obra
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Noelia Hannco"
-                                     data-role="Analista de Arquitectura">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Noelia Hannco"
+                                    data-role="Analista de Arquitectura"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Noelia Hannco</span>
-                                        <span class="employee-role">Analista de Arquitectura</span>
+                                        <span class="employee-name">
+                                            Noelia Hannco
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Analista de Arquitectura
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-unlabeled"
-                                     data-name="Colaborador"
-                                     data-role="Información pendiente de registrar">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-unlabeled"
+                                    data-name="Colaborador"
+                                    data-role="Información pendiente de registrar"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Colaborador</span>
-                                        <span class="employee-role">Info. pendiente</span>
+                                        <span class="employee-name">
+                                            Colaborador
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Info. pendiente
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-available"
-                                     data-name="Gerald Millio"
-                                     data-role="Coordinador BIM">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-available"
+                                    data-name="Gerald Millio"
+                                    data-role="Coordinador BIM"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Gerald Millio</span>
-                                        <span class="employee-role">Coordinador BIM</span>
+                                        <span class="employee-name">
+                                            Gerald Millio
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Coordinador BIM
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-unlabeled"
-                                     data-name="Colaborador"
-                                     data-role="Información pendiente de registrar">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-unlabeled"
+                                    data-name="Colaborador"
+                                    data-role="Información pendiente de registrar"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Colaborador</span>
-                                        <span class="employee-role">Info. pendiente</span>
+                                        <span class="employee-name">
+                                            Colaborador
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Info. pendiente
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-unlabeled"
-                                     data-name="Colaborador"
-                                     data-role="Información pendiente de registrar">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-unlabeled"
+                                    data-name="Colaborador"
+                                    data-role="Información pendiente de registrar"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Colaborador</span>
-                                        <span class="employee-role">Info. pendiente</span>
+                                        <span class="employee-name">
+                                            Colaborador
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Info. pendiente
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-vacant"
-                                     data-name="Puesto libre"
-                                     data-role="Sin asignar">
-                                    <div class="employee-avatar">➕</div>
+
+                                <div
+                                    class="employee employee-vacant"
+                                    data-name="Puesto libre"
+                                    data-role="Sin asignar"
+                                >
+                                    <div class="employee-avatar">
+                                        ➕
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">S/N</span>
-                                        <span class="employee-role">Puesto disponible</span>
+                                        <span class="employee-name">
+                                            S/N
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Puesto disponible
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div class="employee employee-unlabeled"
-                                     data-name="Colaborador"
-                                     data-role="Información pendiente de registrar">
-                                    <div class="employee-avatar">👤<i></i></div>
+
+                                <div
+                                    class="employee employee-unlabeled"
+                                    data-name="Colaborador"
+                                    data-role="Información pendiente de registrar"
+                                >
+                                    <div class="employee-avatar">
+                                        👤<i></i>
+                                    </div>
+
                                     <div class="employee-info">
-                                        <span class="employee-name">Colaborador</span>
-                                        <span class="employee-role">Info. pendiente</span>
+                                        <span class="employee-name">
+                                            Colaborador
+                                        </span>
+
+                                        <span class="employee-role">
+                                            Info. pendiente
+                                        </span>
                                     </div>
                                 </div>
 
@@ -948,9 +1785,11 @@
                     </article>
 
                 </div>
+
             </section>
 
         </main>
+
     </div>
 
 
@@ -958,7 +1797,10 @@
          MODAL DETALLE DE COLABORADOR
          ========================================= -->
 
-    <div class="employee-modal-overlay" id="employeeModalOverlay">
+    <div
+        class="employee-modal-overlay"
+        id="employeeModalOverlay"
+    >
 
         <div
             class="employee-modal"
@@ -976,28 +1818,45 @@
                 ✕
             </button>
 
-            <div class="employee-modal-avatar" id="modalAvatar">
+
+            <div
+                class="employee-modal-avatar"
+                id="modalAvatar"
+            >
                 👤
             </div>
 
+
             <div class="employee-modal-body">
 
-                <span class="employee-modal-status" id="modalStatus">
+                <span
+                    class="employee-modal-status"
+                    id="modalStatus"
+                >
                     <i></i>
-                    <span id="modalStatusText">Disponible</span>
+                    <span id="modalStatusText">
+                        Disponible
+                    </span>
                 </span>
+
 
                 <h3 id="modalEmployeeName">
                     Nombre del colaborador
                 </h3>
 
-                <p class="employee-modal-role" id="modalEmployeeRole">
+
+                <p
+                    class="employee-modal-role"
+                    id="modalEmployeeRole"
+                >
                     Cargo
                 </p>
+
 
                 <div class="employee-modal-meta">
 
                     <div class="employee-modal-meta-item">
+
                         <span class="employee-modal-meta-label">
                             Piso
                         </span>
@@ -1008,9 +1867,12 @@
                         >
                             —
                         </span>
+
                     </div>
 
+
                     <div class="employee-modal-meta-item">
+
                         <span class="employee-modal-meta-label">
                             Sala / Área
                         </span>
@@ -1021,6 +1883,7 @@
                         >
                             —
                         </span>
+
                     </div>
 
                 </div>
@@ -1039,20 +1902,16 @@
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
 
-    <!-- =========================================
-         JAVASCRIPT
-         ========================================= -->
-
     <script>
 
-        /* =========================================
+        /* =========================================================
            CONFIGURACIÓN MSAL
-           MISMA CONFIGURACIÓN DEL INDEX
-           ========================================= */
+           ========================================================= */
 
         const msalConfig = {
 
             auth: {
+
                 clientId:
                     "5d98417c-74a7-4fab-8f2c-41ac127be696",
 
@@ -1061,10 +1920,12 @@
 
                 redirectUri:
                     "https://alvaroalferza.github.io/live-office/blank.html"
+
             },
 
             cache: {
-                cacheLocation: "sessionStorage"
+                cacheLocation: "sessionStorage",
+                storeAuthStateInCookie: false
             }
 
         };
@@ -1080,14 +1941,19 @@
             new msal.PublicClientApplication(msalConfig);
 
 
-        /* =========================================
-           OBTENER TOKEN
-           ========================================= */
+        /* =========================================================
+           TOKEN
+           ========================================================= */
 
         async function obtenerToken() {
 
+            let cuentas =
+                msalInstance.getAllAccounts();
+
             let cuenta =
-                msalInstance.getAllAccounts()[0];
+                cuentas.length > 0
+                    ? cuentas[0]
+                    : null;
 
 
             if (!cuenta) {
@@ -1097,42 +1963,51 @@
                         scopes
                     });
 
-                cuenta = loginResponse.account;
+                cuenta =
+                    loginResponse.account;
+
             }
 
 
             try {
 
-                const response =
+                const respuesta =
                     await msalInstance.acquireTokenSilent({
+
                         scopes,
+
                         account: cuenta
+
                     });
 
-                return response.accessToken;
+                return respuesta.accessToken;
 
             } catch (error) {
 
-                const response =
+                console.warn(
+                    "Token silencioso no disponible. Abriendo autenticación...",
+                    error
+                );
+
+                const respuesta =
                     await msalInstance.acquireTokenPopup({
                         scopes
                     });
 
-                return response.accessToken;
+                return respuesta.accessToken;
+
             }
 
         }
 
 
-        /* =========================================
+        /* =========================================================
            NORMALIZAR NOMBRES
-           Permite comparar correctamente nombres
-           aunque haya mayúsculas, tildes, etc.
-           ========================================= */
+           ========================================================= */
 
         function normalizarNombre(nombre) {
 
-            return nombre
+            return String(nombre || "")
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
                 .toLowerCase()
@@ -1142,106 +2017,47 @@
         }
 
 
-        /* =========================================
-           OBTENER USUARIOS DE ALFERZA
-           ========================================= */
+        /* =========================================================
+           OBTENER TODOS LOS USUARIOS DE MICROSOFT 365
+           
+           IMPORTANTE:
+           Ya no filtramos únicamente por "mail".
+           Se utiliza mail O userPrincipalName.
+           ========================================================= */
 
         async function obtenerUsuariosAlferza(TOKEN) {
 
-            const respuesta = await fetch(
-                "https://graph.microsoft.com/v1.0/users?$top=999",
-                {
-                    headers: {
-                        Authorization: `Bearer ${TOKEN}`
-                    }
-                }
-            );
+            const usuarios = [];
+
+            let url =
+                "https://graph.microsoft.com/v1.0/users" +
+                "?$select=id,displayName,mail,userPrincipalName,accountEnabled" +
+                "&$top=999";
 
 
-            if (!respuesta.ok) {
+            while (url) {
 
-                throw new Error(
-                    `Error obteniendo usuarios: ${respuesta.status}`
-                );
-
-            }
-
-
-            const data =
-                await respuesta.json();
-
-
-            return (data.value || []).filter(
-                usuario =>
-                    usuario.mail &&
-                    usuario.mail
-                        .toLowerCase()
-                        .endsWith("@alferza.pe")
-            );
-
-        }
-
-
-        /* =========================================
-           OBTENER PRESENCIA DE TODOS
-           
-           Microsoft Graph permite consultar
-           múltiples usuarios en una sola petición.
-           ========================================= */
-
-        async function obtenerPresencias(TOKEN, usuarios) {
-
-            const ids =
-                usuarios.map(usuario => usuario.id);
-
-
-            const presenciaPorId = {};
-
-
-            /*
-             * Graph admite un máximo de usuarios
-             * por llamada. Dividimos en bloques de 650.
-             */
-
-            const bloques = [];
-
-
-            for (let i = 0; i < ids.length; i += 650) {
-
-                bloques.push(
-                    ids.slice(i, i + 650)
-                );
-
-            }
-
-
-            for (const bloque of bloques) {
-
-                const respuesta = await fetch(
-                    "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
-                    {
-                        method: "POST",
-
-                        headers: {
-                            Authorization: `Bearer ${TOKEN}`,
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-                            ids: bloque
-                        })
-                    }
-                );
+                const respuesta =
+                    await fetch(
+                        url,
+                        {
+                            headers: {
+                                Authorization:
+                                    `Bearer ${TOKEN}`
+                            }
+                        }
+                    );
 
 
                 if (!respuesta.ok) {
 
-                    console.error(
-                        "Error obteniendo presencia:",
-                        respuesta.status
+                    const texto =
+                        await respuesta.text();
+
+                    throw new Error(
+                        `Error obteniendo usuarios: ${respuesta.status} ${texto}`
                     );
 
-                    continue;
                 }
 
 
@@ -1249,10 +2065,146 @@
                     await respuesta.json();
 
 
-                (data.value || []).forEach(presencia => {
+                if (Array.isArray(data.value)) {
 
-                    presenciaPorId[presencia.id] =
-                        presencia;
+                    usuarios.push(
+                        ...data.value
+                    );
+
+                }
+
+
+                url =
+                    data["@odata.nextLink"] || null;
+
+            }
+
+
+            /*
+             * No descartamos usuarios porque mail esté vacío.
+             *
+             * Se usa mail o userPrincipalName.
+             *
+             * accountEnabled no se utiliza para eliminar
+             * personas porque Graph puede devolver presencia
+             * aunque ese dato no venga como esperábamos.
+             */
+
+            return usuarios.filter(usuario => {
+
+                const correo =
+                    (
+                        usuario.mail ||
+                        usuario.userPrincipalName ||
+                        ""
+                    ).toLowerCase();
+
+
+                /*
+                 * Si pertenece a ALFERZA lo utilizamos.
+                 *
+                 * También permitimos usuarios cuyo displayName
+                 * coincide con una tarjeta de esta página.
+                 *
+                 * Esto evita perder personas por diferencias
+                 * entre mail y UPN.
+                 */
+
+                return (
+                    correo.endsWith("@alferza.pe") ||
+                    Boolean(usuario.displayName)
+                );
+
+            });
+
+        }
+
+
+        /* =========================================================
+           OBTENER PRESENCIA
+           ========================================================= */
+
+        async function obtenerPresencias(
+            TOKEN,
+            usuarios
+        ) {
+
+            const ids =
+                usuarios
+                    .map(usuario => usuario.id)
+                    .filter(Boolean);
+
+
+            const presenciaPorId =
+                new Map();
+
+
+            /*
+             * Microsoft Graph permite hasta 650 IDs
+             * por llamada.
+             */
+
+            for (
+                let inicio = 0;
+                inicio < ids.length;
+                inicio += 650
+            ) {
+
+                const bloque =
+                    ids.slice(
+                        inicio,
+                        inicio + 650
+                    );
+
+
+                const respuesta =
+                    await fetch(
+                        "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                Authorization:
+                                    `Bearer ${TOKEN}`,
+
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                ids: bloque
+                            })
+                        }
+                    );
+
+
+                if (!respuesta.ok) {
+
+                    const texto =
+                        await respuesta.text();
+
+                    throw new Error(
+                        `Error obteniendo presencia: ${respuesta.status} ${texto}`
+                    );
+
+                }
+
+
+                const data =
+                    await respuesta.json();
+
+
+                (data.value || []).forEach(item => {
+
+                    if (!item.id) {
+                        return;
+                    }
+
+
+                    presenciaPorId.set(
+                        item.id,
+                        item.presence || {}
+                    );
 
                 });
 
@@ -1264,60 +2216,110 @@
         }
 
 
-        /* =========================================
-           CONVERTIR ESTADO GRAPH
-           AL SISTEMA VISUAL DE PERSONAL
-           ========================================= */
+        /* =========================================================
+           CONVERTIR PRESENCIA DE GRAPH
+           
+           availability es el estado principal.
+           activity sirve como respaldo para llamadas/reuniones.
+           ========================================================= */
 
-        function obtenerClaseEstado(estado) {
+        function obtenerClaseEstado(
+            availability,
+            activity = ""
+        ) {
 
-            switch (estado) {
-
-                case "Available":
-                    return "available";
-
-
-                case "Busy":
-                case "InAMeeting":
-                case "OnACall":
-                    return "busy";
-
-
-                case "Away":
-                case "BeRightBack":
-                    return "away";
+            const disponibilidad =
+                String(
+                    availability || ""
+                ).toLowerCase();
 
 
-                default:
-                    return "offline";
+            const actividad =
+                String(
+                    activity || ""
+                ).toLowerCase();
+
+
+            /* DISPONIBLE */
+
+            if (
+                disponibilidad === "available"
+            ) {
+
+                return "available";
 
             }
+
+
+            /* OCUPADO */
+
+            if (
+                disponibilidad === "busy" ||
+                disponibilidad === "donotdisturb" ||
+                disponibilidad === "urgentinterruptions" ||
+                disponibilidad === "presenting" ||
+                disponibilidad === "incall" ||
+                disponibilidad === "inameeting" ||
+                actividad === "busy" ||
+                actividad === "donotdisturb" ||
+                actividad === "urgentinterruptions" ||
+                actividad === "presenting" ||
+                actividad === "incall" ||
+                actividad === "inameeting"
+            ) {
+
+                return "busy";
+
+            }
+
+
+            /* AUSENTE */
+
+            if (
+                disponibilidad === "away" ||
+                disponibilidad === "berightback" ||
+                actividad === "away" ||
+                actividad === "berightback"
+            ) {
+
+                return "away";
+
+            }
+
+
+            /* OFFLINE */
+
+            return "offline";
 
         }
 
 
-        /* =========================================
+        /* =========================================================
            TEXTO DEL ESTADO
-           ========================================= */
+           ========================================================= */
 
-        function obtenerTextoEstado(estado) {
+        function obtenerTextoEstado(
+            availability,
+            activity = ""
+        ) {
 
-            switch (estado) {
+            const clase =
+                obtenerClaseEstado(
+                    availability,
+                    activity
+                );
 
-                case "Available":
+
+            switch (clase) {
+
+                case "available":
                     return "Disponible";
 
-
-                case "Busy":
-                case "InAMeeting":
-                case "OnACall":
+                case "busy":
                     return "Ocupado";
 
-
-                case "Away":
-                case "BeRightBack":
+                case "away":
                     return "Ausente";
-
 
                 default:
                     return "Offline";
@@ -1327,26 +2329,22 @@
         }
 
 
-        /* =========================================
-           ACTUALIZAR TARJETA DE EMPLEADO
-           ========================================= */
+        /* =========================================================
+           ACTUALIZAR TARJETA
+           ========================================================= */
 
         function actualizarEstadoEmpleado(
             empleado,
-            estado
+            availability,
+            activity = ""
         ) {
 
-            const avatar =
-                empleado.querySelector(".employee-avatar");
+            const clase =
+                obtenerClaseEstado(
+                    availability,
+                    activity
+                );
 
-
-            const indicador =
-                avatar?.querySelector("i");
-
-
-            /*
-             * Quitamos cualquier estado anterior.
-             */
 
             empleado.classList.remove(
                 "employee-available",
@@ -1356,54 +2354,122 @@
             );
 
 
-            const clase =
-                obtenerClaseEstado(estado);
-
-
             empleado.classList.add(
-                "employee-" + clase
+                `employee-${clase}`
             );
 
 
             /*
-             * Actualizamos la bolita.
-             */
-
-            if (indicador) {
-
-                indicador.style.background = "";
-
-            }
-
-
-            /*
-             * Guardamos el estado real
-             * para el modal.
+             * Guardamos los datos reales de Graph.
              */
 
             empleado.dataset.estado =
-                estado;
+                availability || "Offline";
+
+
+            empleado.dataset.actividad =
+                activity || "";
 
 
             empleado.dataset.estadoTexto =
-                obtenerTextoEstado(estado);
+                obtenerTextoEstado(
+                    availability,
+                    activity
+                );
 
         }
 
 
-        /* =========================================
-           CARGAR PRESENCIA
-           ========================================= */
+        /* =========================================================
+           BUSCAR TARJETAS
+           
+           Utilizamos el texto visible .employee-name.
+           Esto evita problemas como:
+           data-name="Afonso Contreras"
+           visible="Alfonso Contreras"
+           ========================================================= */
+
+        function obtenerTarjetasPorNombre() {
+
+            const mapa =
+                new Map();
+
+
+            document
+                .querySelectorAll(".employee")
+                .forEach(empleado => {
+
+                    if (
+                        empleado.classList.contains(
+                            "employee-vacant"
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        empleado.classList.contains(
+                            "employee-unlabeled"
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    const elementoNombre =
+                        empleado.querySelector(
+                            ".employee-name"
+                        );
+
+
+                    const nombre =
+                        elementoNombre
+                            ? elementoNombre.textContent
+                            : empleado.dataset.name;
+
+
+                    const normalizado =
+                        normalizarNombre(
+                            nombre
+                        );
+
+
+                    if (normalizado) {
+
+                        mapa.set(
+                            normalizado,
+                            empleado
+                        );
+
+                    }
+
+                });
+
+
+            return mapa;
+
+        }
+
+
+        /* =========================================================
+           SINCRONIZAR ESTADOS
+           ========================================================= */
 
         async function cargarEstadosPersonal() {
 
             const boton =
-                document.getElementById("refreshPersonal");
+                document.getElementById(
+                    "refreshPersonal"
+                );
 
 
             if (boton) {
 
-                boton.classList.add("rotating");
+                boton.classList.add(
+                    "rotating"
+                );
+
                 boton.disabled = true;
 
             }
@@ -1412,19 +2478,45 @@
             try {
 
                 console.log(
-                    "Consultando presencia de Microsoft Teams..."
+                    "========================================"
                 );
 
+                console.log(
+                    "ALFERZA LIVE OFFICE"
+                );
+
+                console.log(
+                    "Consultando Microsoft Graph..."
+                );
+
+
+                /*
+                 * 1. TOKEN
+                 */
 
                 const TOKEN =
                     await obtenerToken();
 
+
+                /*
+                 * 2. USUARIOS
+                 */
 
                 const usuarios =
                     await obtenerUsuariosAlferza(
                         TOKEN
                     );
 
+
+                console.log(
+                    "Usuarios encontrados:",
+                    usuarios.length
+                );
+
+
+                /*
+                 * 3. PRESENCIA
+                 */
 
                 const presenciaPorId =
                     await obtenerPresencias(
@@ -1433,25 +2525,48 @@
                     );
 
 
+                console.log(
+                    "Presencias recibidas:",
+                    presenciaPorId.size
+                );
+
+
                 /*
-                 * Creamos un mapa por nombre.
+                 * 4. MAPA DE USUARIOS GRAPH
                  */
 
-                const usuariosPorNombre = {};
+                const usuariosPorNombre =
+                    new Map();
 
 
                 usuarios.forEach(usuario => {
 
                     const nombre =
                         normalizarNombre(
-                            usuario.displayName || ""
+                            usuario.displayName
                         );
 
 
-                    if (nombre) {
+                    if (!nombre) {
+                        return;
+                    }
 
-                        usuariosPorNombre[nombre] =
-                            usuario;
+
+                    /*
+                     * Si hay duplicados no reemplazamos
+                     * el primero.
+                     */
+
+                    if (
+                        !usuariosPorNombre.has(
+                            nombre
+                        )
+                    ) {
+
+                        usuariosPorNombre.set(
+                            nombre,
+                            usuario
+                        );
 
                     }
 
@@ -1459,8 +2574,15 @@
 
 
                 /*
-                 * Recorremos únicamente los
-                 * trabajadores de la maqueta.
+                 * 5. TARJETAS HTML
+                 */
+
+                const tarjetasPorNombre =
+                    obtenerTarjetasPorNombre();
+
+
+                /*
+                 * 6. ACTUALIZAR CADA PERSONA
                  */
 
                 document
@@ -1468,7 +2590,7 @@
                     .forEach(empleado => {
 
                         /*
-                         * Puestos vacantes no son trabajadores.
+                         * Vacantes no son personas.
                          */
 
                         if (
@@ -1481,8 +2603,7 @@
 
 
                         /*
-                         * Colaboradores sin nombre registrado
-                         * tampoco se consultan.
+                         * Personas sin nombre tampoco.
                          */
 
                         if (
@@ -1494,8 +2615,16 @@
                         }
 
 
+                        const elementoNombre =
+                            empleado.querySelector(
+                                ".employee-name"
+                            );
+
+
                         const nombreHTML =
-                            empleado.dataset.name || "";
+                            elementoNombre
+                                ? elementoNombre.textContent
+                                : empleado.dataset.name;
 
 
                         const nombreNormalizado =
@@ -1505,28 +2634,34 @@
 
 
                         const usuario =
-                            usuariosPorNombre[
+                            usuariosPorNombre.get(
                                 nombreNormalizado
-                            ];
+                            );
 
 
                         /*
-                         * Si el nombre no existe en
-                         * Microsoft 365, se considera
-                         * Offline.
+                         * No encontramos a la persona.
+                         *
+                         * IMPORTANTE:
+                         * no ponemos Offline automáticamente
+                         * por un error de coincidencia.
+                         *
+                         * Así no volvemos a tener el problema
+                         * de que todo termine Offline.
                          */
 
                         if (!usuario) {
 
-                            actualizarEstadoEmpleado(
-                                empleado,
-                                "Offline"
+                            console.warn(
+                                "No encontrado en Graph:",
+                                nombreHTML
                             );
 
                             empleado.dataset.graphFound =
                                 "false";
 
                             return;
+
                         }
 
 
@@ -1534,43 +2669,96 @@
                             "true";
 
 
+                        empleado.dataset.graphId =
+                            usuario.id;
+
+
+                        empleado.dataset.graphName =
+                            usuario.displayName || "";
+
+
+                        /*
+                         * PRESENCIA REAL
+                         */
+
                         const presencia =
-                            presenciaPorId[
+                            presenciaPorId.get(
                                 usuario.id
-                            ];
+                            );
 
 
-                        const estado =
-                            presencia?.availability ||
+                        /*
+                         * Si Graph no devolvió presencia
+                         * para ese ID, no destruimos el
+                         * estado anterior.
+                         */
+
+                        if (!presencia) {
+
+                            console.warn(
+                                "Sin presencia para:",
+                                usuario.displayName
+                            );
+
+                            return;
+
+                        }
+
+
+                        const availability =
+                            presencia.availability ||
                             "Offline";
 
 
+                        const activity =
+                            presencia.activity ||
+                            "";
+
+
+                        console.log(
+                            `${usuario.displayName}:`,
+                            availability,
+                            activity
+                        );
+
+
+                        /*
+                         * APLICAMOS EL ESTADO REAL.
+                         */
+
                         actualizarEstadoEmpleado(
                             empleado,
-                            estado
+                            availability,
+                            activity
                         );
 
                     });
 
 
                 console.log(
-                    "Estados de personal actualizados."
+                    "Estados actualizados correctamente."
+                );
+
+                console.log(
+                    "========================================"
                 );
 
 
             } catch (error) {
 
                 console.error(
-                    "Error cargando estados:",
+                    "ERROR SINCRONIZANDO ESTADOS:",
                     error
                 );
 
 
                 /*
-                 * Si ocurre un error de autenticación
-                 * o Graph, NO destruimos el diseño.
+                 * MUY IMPORTANTE:
                  *
-                 * Dejamos los estados actuales.
+                 * Si Graph falla, NO ponemos a todos
+                 * Offline.
+                 *
+                 * Se conservan los estados anteriores.
                  */
 
             } finally {
@@ -1594,14 +2782,16 @@
         }
 
 
-        /* =========================================
+        /* =========================================================
            DATOS DE PISOS
-           ========================================= */
+           ========================================================= */
 
         const floorData = {
+
             1: 11,
             2: 25,
             3: 12
+
         };
 
 
@@ -1677,9 +2867,9 @@
         });
 
 
-        /* =========================================
+        /* =========================================================
            BUSCADOR
-           ========================================= */
+           ========================================================= */
 
         function filtrarEmpleados(valor) {
 
@@ -1704,15 +2894,21 @@
                     ).toLowerCase();
 
 
-                    if (texto.includes(value)) {
+                    if (
+                        texto.includes(value)
+                    ) {
 
-                        employee.style.opacity = "1";
+                        employee.style.opacity =
+                            "1";
+
                         employee.style.transform =
                             "scale(1)";
 
                     } else {
 
-                        employee.style.opacity = ".18";
+                        employee.style.opacity =
+                            ".18";
+
                         employee.style.transform =
                             "scale(.96)";
 
@@ -1735,12 +2931,14 @@
         );
 
 
-        /* =========================================
+        /* =========================================================
            BOTÓN ACTUALIZAR
-           ========================================= */
+           ========================================================= */
 
         document
-            .getElementById("refreshPersonal")
+            .getElementById(
+                "refreshPersonal"
+            )
             .addEventListener(
                 "click",
                 async function () {
@@ -1751,10 +2949,10 @@
             );
 
 
-        /* =========================================
+        /* =========================================================
            ACTUALIZACIÓN AUTOMÁTICA
-           CADA 5 MINUTOS
-           ========================================= */
+           CADA 30 SEGUNDOS
+           ========================================================= */
 
         setInterval(
             () => {
@@ -1762,13 +2960,13 @@
                 cargarEstadosPersonal();
 
             },
-            300000
+            30000
         );
 
 
-        /* =========================================
+        /* =========================================================
            MODAL
-           ========================================= */
+           ========================================================= */
 
         const floorLabels = {
 
@@ -1782,23 +2980,31 @@
         const statusMeta = {
 
             available: {
+
                 label: "Disponible",
                 cls: "status-available"
+
             },
 
             busy: {
+
                 label: "Ocupado",
                 cls: "status-busy"
+
             },
 
             away: {
+
                 label: "Ausente",
                 cls: "status-away"
+
             },
 
             offline: {
+
                 label: "Offline",
                 cls: "status-offline"
+
             }
 
         };
@@ -1873,11 +3079,19 @@
 
 
             const nombre =
-                card.dataset.name || "—";
+                card.dataset.name ||
+                card.querySelector(
+                    ".employee-name"
+                )?.innerText ||
+                "—";
 
 
             const cargo =
-                card.dataset.role || "—";
+                card.dataset.role ||
+                card.querySelector(
+                    ".employee-role"
+                )?.innerText ||
+                "—";
 
 
             const sala =
@@ -1949,19 +3163,20 @@
 
             } else {
 
-                /*
-                 * Ahora usamos el estado real
-                 * obtenido de Microsoft Graph.
-                 */
-
-                const estadoGraph =
+                const availability =
                     card.dataset.estado ||
                     "Offline";
 
 
+                const activity =
+                    card.dataset.actividad ||
+                    "";
+
+
                 const estado =
                     obtenerClaseEstado(
-                        estadoGraph
+                        availability,
+                        activity
                     );
 
 
@@ -2066,9 +3281,9 @@
         );
 
 
-        /* =========================================
+        /* =========================================================
            INICIO
-           ========================================= */
+           ========================================================= */
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -2083,4 +3298,3 @@
 
 </body>
 </html>
-

@@ -2315,1032 +2315,1097 @@
     </div>
 
 
-    <!-- =====================================================
-         MICROSOFT MSAL
-         ===================================================== -->
+    <!-- MSAL -->
+<script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
-    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+<!-- Tu configuración MSAL existente -->
+<script src="msal-config.js"></script>
 
-    <!-- TU CONFIGURACIÓN MSAL EXISTENTE -->
-    <script src="msal-config.js"></script>
+<script>
+/* =========================================================
+   MICROSOFT GRAPH / TEAMS PRESENCE
+   ========================================================= */
 
+const msalInstance = new msal.PublicClientApplication({
+    ...msalConfig,
+    cache: {
+        cacheLocation: "sessionStorage"
+    }
+});
 
-    <!-- =====================================================
-         JAVASCRIPT PERSONAL
-         ===================================================== -->
+async function obtenerTokenPersonal() {
 
-    <script>
+    let cuenta = msalInstance.getAllAccounts()[0];
 
-        /* =====================================================
-           DATOS DE PISOS
-           ===================================================== */
+    if (!cuenta) {
+        const loginResponse = await msalInstance.loginPopup(loginRequest);
+        cuenta = loginResponse.account;
+    }
 
-        const floorData = {
-            1: 11,
-            2: 25,
-            3: 12
-        };
+    try {
 
+        const response = await msalInstance.acquireTokenSilent({
+            ...loginRequest,
+            account: cuenta
+        });
 
-        const floorTabs =
-            document.querySelectorAll(".floor-tab");
+        return response.accessToken;
 
+    } catch (error) {
 
-        const floorViews =
-            document.querySelectorAll(".floor-view");
+        const response = await msalInstance.acquireTokenPopup(loginRequest);
 
-
-        const employeeCount =
-            document.getElementById("employeeCount");
-
-
-        const searchInput =
-            document.getElementById("personalSearch");
-
-
-        const refreshButton =
-            document.getElementById("refreshPersonal");
+        return response.accessToken;
+    }
+}
 
 
-        /* =====================================================
-           ESTADOS
-           ===================================================== */
+/* =========================================================
+   NORMALIZAR NOMBRES
+   ========================================================= */
 
-        const statusMeta = {
+function normalizarNombre(nombre) {
 
-            available: {
-                label: "Disponible",
-                cls: "status-available"
-            },
+    return nombre
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+}
 
-            busy: {
-                label: "Ocupado",
-                cls: "status-busy"
-            },
 
-            away: {
-                label: "Ausente",
-                cls: "status-away"
-            },
+/* =========================================================
+   OBTENER USUARIOS ALFERZA
+   ========================================================= */
 
-            offline: {
-                label: "Offline",
-                cls: "status-offline"
+async function obtenerUsuariosAlferza(token) {
+
+    let usuarios = [];
+
+    let url =
+        "https://graph.microsoft.com/v1.0/users?$top=999";
+
+    while (url) {
+
+        const respuesta = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
+        });
 
-        };
-
-
-        /* =====================================================
-           NORMALIZAR NOMBRES
-           ===================================================== */
-
-        function normalizarNombre(nombre) {
-
-            return (nombre || "")
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .replace(/\s+/g, " ")
-                .trim();
-
+        if (!respuesta.ok) {
+            throw new Error(
+                `Error obteniendo usuarios: ${respuesta.status}`
+            );
         }
 
+        const data = await respuesta.json();
 
-        /* =====================================================
-           OBTENER TOKEN
-           USA msalConfig Y loginRequest
-           DESDE msal-config.js
-           ===================================================== */
+        usuarios.push(...(data.value || []));
 
-        async function obtenerToken() {
+        url = data["@odata.nextLink"] || null;
+    }
 
-            try {
-
-                let cuenta =
-                    msalInstance.getAllAccounts()[0];
+    return usuarios.filter(usuario =>
+        usuario.mail &&
+        usuario.mail.toLowerCase().endsWith("@alferza.pe")
+    );
+}
 
 
-                if (!cuenta) {
+/* =========================================================
+   OBTENER PRESENCIA DE TODOS
+   ========================================================= */
 
-                    const loginResponse =
-                        await msalInstance.loginPopup(
-                            loginRequest
-                        );
+async function obtenerPresencias(token, ids) {
 
-                    cuenta =
-                        loginResponse.account;
+    const presenciaPorId = {};
+
+    /*
+     * Graph permite consultar múltiples usuarios
+     * mediante getPresencesByUserId.
+     *
+     * Para evitar problemas con listas demasiado grandes,
+     * hacemos grupos de 100.
+     */
+
+    for (let i = 0; i < ids.length; i += 100) {
+
+        const grupo = ids.slice(i, i + 100);
+
+        try {
+
+            const respuesta = await fetch(
+                "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
+                {
+                    method: "POST",
+
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        ids: grupo
+                    })
                 }
+            );
 
-
-                try {
-
-                    const response =
-                        await msalInstance.acquireTokenSilent({
-
-                            ...loginRequest,
-
-                            account: cuenta
-
-                        });
-
-                    return response.accessToken;
-
-                } catch (silentError) {
-
-                    console.warn(
-                        "Token silencioso falló. Abriendo popup..."
-                    );
-
-                    const response =
-                        await msalInstance.acquireTokenPopup(
-                            loginRequest
-                        );
-
-                    return response.accessToken;
-
-                }
-
-            } catch (error) {
-
+            if (!respuesta.ok) {
                 console.error(
-                    "Error de autenticación:",
-                    error
+                    "Error Presence:",
+                    respuesta.status
+                );
+                continue;
+            }
+
+            const data = await respuesta.json();
+
+            (data.value || []).forEach(presencia => {
+
+                presenciaPorId[presencia.id] = presencia;
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Error consultando Presence:",
+                error
+            );
+        }
+    }
+
+    return presenciaPorId;
+}
+
+
+/* =========================================================
+   CONVERTIR PRESENCE DE TEAMS A CLASE VISUAL
+   ========================================================= */
+
+function obtenerClaseEstado(availability) {
+
+    switch (availability) {
+
+        case "Available":
+            return "available";
+
+        case "Busy":
+        case "InAMeeting":
+        case "OnACall":
+        case "DoNotDisturb":
+            return "busy";
+
+        case "Away":
+        case "BeRightBack":
+            return "away";
+
+        case "Offline":
+        case "PresenceUnknown":
+        default:
+            return "offline";
+    }
+}
+
+
+/* =========================================================
+   TEXTO DEL ESTADO
+   ========================================================= */
+
+function obtenerTextoEstado(availability) {
+
+    switch (availability) {
+
+        case "Available":
+            return "Disponible";
+
+        case "Busy":
+            return "Ocupado";
+
+        case "InAMeeting":
+            return "En reunión";
+
+        case "OnACall":
+            return "En llamada";
+
+        case "DoNotDisturb":
+            return "No molestar";
+
+        case "Away":
+            return "Ausente";
+
+        case "BeRightBack":
+            return "Vuelvo enseguida";
+
+        case "Offline":
+            return "Offline";
+
+        default:
+            return "Offline";
+    }
+}
+
+
+/* =========================================================
+   ACTUALIZAR TARJETA
+   ========================================================= */
+
+function actualizarTarjeta(card, estado) {
+
+    /*
+     * Puestos libres no se modifican.
+     */
+
+    if (card.classList.contains("employee-vacant")) {
+        return;
+    }
+
+    if (card.classList.contains("employee-unlabeled")) {
+        return;
+    }
+
+
+    const claseNueva = obtenerClaseEstado(estado);
+    const textoNuevo = obtenerTextoEstado(estado);
+
+
+    /*
+     * Eliminar estados anteriores
+     */
+
+    card.classList.remove(
+        "employee-available",
+        "employee-busy",
+        "employee-away",
+        "employee-offline"
+    );
+
+
+    /*
+     * Agregar nuevo estado
+     */
+
+    card.classList.add(
+        "employee-" + claseNueva
+    );
+
+
+    /*
+     * Guardamos el estado real de Teams
+     */
+
+    card.dataset.presence = estado;
+    card.dataset.status = claseNueva;
+
+
+    /*
+     * Avatar
+     */
+
+    const avatar = card.querySelector(".employee-avatar");
+
+    if (avatar) {
+
+        /*
+         * Conservamos el icono 👤 y solamente
+         * modificamos el indicador <i>.
+         */
+
+        let indicador = avatar.querySelector("i");
+
+        if (!indicador) {
+
+            indicador = document.createElement("i");
+
+            avatar.appendChild(indicador);
+        }
+
+        indicador.className = "";
+
+        indicador.classList.add(
+            "presence-dot",
+            claseNueva
+        );
+    }
+
+
+    /*
+     * Crear / actualizar texto de estado
+     */
+
+    let estadoElemento =
+        card.querySelector(".employee-live-status");
+
+    if (!estadoElemento) {
+
+        estadoElemento =
+            document.createElement("span");
+
+        estadoElemento.className =
+            "employee-live-status";
+
+        const info =
+            card.querySelector(".employee-info");
+
+        if (info) {
+            info.appendChild(estadoElemento);
+        }
+    }
+
+    estadoElemento.textContent =
+        textoNuevo;
+}
+
+
+/* =========================================================
+   SINCRONIZAR PERSONAL CON TEAMS
+   ========================================================= */
+
+async function sincronizarPersonal() {
+
+    console.log(
+        "🔄 Sincronizando personal con Microsoft Teams..."
+    );
+
+    try {
+
+        const token =
+            await obtenerTokenPersonal();
+
+
+        const usuarios =
+            await obtenerUsuariosAlferza(token);
+
+
+        console.log(
+            `👥 Usuarios ALFERZA encontrados: ${usuarios.length}`
+        );
+
+
+        /*
+         * Mapa por nombre
+         */
+
+        const usuariosPorNombre = {};
+
+        usuarios.forEach(usuario => {
+
+            const nombre =
+                normalizarNombre(usuario.displayName);
+
+            usuariosPorNombre[nombre] =
+                usuario;
+        });
+
+
+        /*
+         * IDs para Presence
+         */
+
+        const ids =
+            usuarios.map(usuario => usuario.id);
+
+
+        const presenciaPorId =
+            await obtenerPresencias(token, ids);
+
+
+        /*
+         * Recorrer tarjetas existentes
+         */
+
+        const tarjetas =
+            document.querySelectorAll(".employee");
+
+
+        let disponibles = 0;
+        let ocupados = 0;
+        let ausentes = 0;
+        let offline = 0;
+
+
+        tarjetas.forEach(card => {
+
+            /*
+             * No modificar puestos vacantes
+             */
+
+            if (
+                card.classList.contains("employee-vacant") ||
+                card.classList.contains("employee-unlabeled")
+            ) {
+                return;
+            }
+
+
+            const nombreHTML =
+                card.dataset.name || "";
+
+
+            const nombreNormalizado =
+                normalizarNombre(nombreHTML);
+
+
+            const usuario =
+                usuariosPorNombre[nombreNormalizado];
+
+
+            /*
+             * Si no encontramos coincidencia
+             * por nombre, intentamos buscar
+             * coincidencia parcial.
+             */
+
+            let usuarioEncontrado = usuario;
+
+
+            if (!usuarioEncontrado) {
+
+                const coincidencias =
+                    usuarios.filter(u => {
+
+                        const nombreGraph =
+                            normalizarNombre(
+                                u.displayName || ""
+                            );
+
+                        return (
+                            nombreGraph.includes(
+                                nombreNormalizado
+                            ) ||
+                            nombreNormalizado.includes(
+                                nombreGraph
+                            )
+                        );
+                    });
+
+
+                if (coincidencias.length === 1) {
+                    usuarioEncontrado =
+                        coincidencias[0];
+                }
+            }
+
+
+            /*
+             * Si no existe en Microsoft 365,
+             * queda Offline.
+             */
+
+            if (!usuarioEncontrado) {
+
+                actualizarTarjeta(
+                    card,
+                    "Offline"
                 );
 
-                throw error;
+                offline++;
 
+                return;
             }
 
-        }
+
+            const presencia =
+                presenciaPorId[
+                    usuarioEncontrado.id
+                ];
 
 
-        /* =====================================================
-           CONVERTIR ESTADO DE TEAMS
-           ===================================================== */
-
-        function convertirEstado(availability) {
-
-            switch (availability) {
-
-                case "Available":
-
-                    return {
-                        estado: "available",
-                        clase: "employee-available",
-                        label: "Disponible"
-                    };
+            const estado =
+                presencia?.availability ||
+                "Offline";
 
 
-                case "Busy":
-                case "InAMeeting":
-                case "OnACall":
-
-                    return {
-                        estado: "busy",
-                        clase: "employee-busy",
-                        label: "Ocupado"
-                    };
+            actualizarTarjeta(
+                card,
+                estado
+            );
 
 
-                case "Away":
-                case "BeRightBack":
+            /*
+             * Contadores
+             */
 
-                    return {
-                        estado: "away",
-                        clase: "employee-away",
-                        label: "Ausente"
-                    };
+            switch (obtenerClaseEstado(estado)) {
 
+                case "available":
+                    disponibles++;
+                    break;
+
+                case "busy":
+                    ocupados++;
+                    break;
+
+                case "away":
+                    ausentes++;
+                    break;
 
                 default:
-
-                    return {
-                        estado: "offline",
-                        clase: "employee-offline",
-                        label: "Offline"
-                    };
-
+                    offline++;
+                    break;
             }
-
-        }
-
-
-        /* =====================================================
-           ACTUALIZAR TARJETA
-           ===================================================== */
-
-        function actualizarTarjetaEstado(
-            card,
-            estado
-        ) {
-
-            card.classList.remove(
-                "employee-available",
-                "employee-busy",
-                "employee-away",
-                "employee-offline"
-            );
-
-
-            card.classList.add(
-                "employee-" + estado
-            );
-
-
-            card.dataset.estado =
-                estado;
-
-
-            const indicador =
-                card.querySelector(
-                    ".employee-avatar i"
-                );
-
-
-            if (indicador) {
-
-                indicador.classList.remove(
-                    "available",
-                    "busy",
-                    "away",
-                    "offline"
-                );
-
-
-                indicador.classList.add(
-                    estado
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           CARGAR PRESENCIA DE TEAMS
-           ===================================================== */
-
-        async function cargarPresenciaPersonal() {
-
-            try {
-
-                console.log(
-                    "================================="
-                );
-
-                console.log(
-                    "Actualizando presencia de Teams..."
-                );
-
-
-                const TOKEN =
-                    await obtenerToken();
-
-
-                /* =============================================
-                   OBTENER USUARIOS
-                   ============================================= */
-
-                const respuestaUsuarios =
-                    await fetch(
-                        "https://graph.microsoft.com/v1.0/users?$top=999",
-                        {
-                            headers: {
-                                Authorization:
-                                    `Bearer ${TOKEN}`
-                            }
-                        }
-                    );
-
-
-                if (!respuestaUsuarios.ok) {
-
-                    const errorText =
-                        await respuestaUsuarios.text();
-
-                    console.error(
-                        "Error obteniendo usuarios:",
-                        errorText
-                    );
-
-                    throw new Error(
-                        "No se pudieron obtener los usuarios."
-                    );
-
-                }
-
-
-                const dataUsuarios =
-                    await respuestaUsuarios.json();
-
-
-                const usuarios =
-                    dataUsuarios.value.filter(
-                        usuario =>
-                            usuario.mail &&
-                            usuario.mail
-                                .toLowerCase()
-                                .endsWith("@alferza.pe")
-                    );
-
-
-                console.log(
-                    "Usuarios ALFERZA:",
-                    usuarios.length
-                );
-
-
-                /* =============================================
-                   MAPA DE USUARIOS POR NOMBRE
-                   ============================================= */
-
-                const usuariosPorNombre =
-                    {};
-
-
-                usuarios.forEach(usuario => {
-
-                    const nombre =
-                        normalizarNombre(
-                            usuario.displayName
-                        );
-
-
-                    usuariosPorNombre[nombre] =
-                        usuario;
-
-                });
-
-
-                /* =============================================
-                   IDS
-                   ============================================= */
-
-                const idsUsuarios =
-                    usuarios.map(
-                        usuario => usuario.id
-                    );
-
-
-                let presenciaPorId =
-                    {};
-
-
-                /* =============================================
-                   PRESENCIA
-                   ============================================= */
-
-                if (idsUsuarios.length > 0) {
-
-                    const presenciaResponse =
-                        await fetch(
-                            "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
-                            {
-                                method: "POST",
-
-                                headers: {
-
-                                    Authorization:
-                                        `Bearer ${TOKEN}`,
-
-                                    "Content-Type":
-                                        "application/json"
-
-                                },
-
-                                body: JSON.stringify({
-                                    ids: idsUsuarios
-                                })
-
-                            }
-                        );
-
-
-                    if (!presenciaResponse.ok) {
-
-                        const errorText =
-                            await presenciaResponse.text();
-
-                        console.error(
-                            "Error obteniendo presencia:",
-                            errorText
-                        );
-
-                    } else {
-
-                        const presenciaData =
-                            await presenciaResponse.json();
-
-
-                        (
-                            presenciaData.value || []
-                        ).forEach(presencia => {
-
-                            presenciaPorId[
-                                presencia.id
-                            ] = presencia;
-
-                        });
-
-                    }
-
-                }
-
-
-                /* =============================================
-                   ACTUALIZAR TARJETAS
-                   ============================================= */
-
-                const empleados =
-                    document.querySelectorAll(
-                        ".employee:not(.employee-vacant)"
-                    );
-
-
-                empleados.forEach(card => {
-
-                    const nombreMapa =
-                        normalizarNombre(
-                            card.dataset.name
-                        );
-
-
-                    const usuario =
-                        usuariosPorNombre[
-                            nombreMapa
-                        ];
-
-
-                    /* -----------------------------------------
-                       NO ENCONTRADO
-                       ----------------------------------------- */
-
-                    if (!usuario) {
-
-                        console.warn(
-                            "Trabajador no encontrado en Microsoft Graph:",
-                            card.dataset.name
-                        );
-
-                        actualizarTarjetaEstado(
-                            card,
-                            "offline"
-                        );
-
-                        card.dataset.teamsStatus =
-                            "Offline";
-
-                        return;
-
-                    }
-
-
-                    /* -----------------------------------------
-                       PRESENCIA
-                       ----------------------------------------- */
-
-                    const presencia =
-                        presenciaPorId[
-                            usuario.id
-                        ];
-
-
-                    const availability =
-                        presencia?.availability ||
-                        "Offline";
-
-
-                    const resultado =
-                        convertirEstado(
-                            availability
-                        );
-
-
-                    /* -----------------------------------------
-                       ACTUALIZAR
-                       ----------------------------------------- */
-
-                    actualizarTarjetaEstado(
-                        card,
-                        resultado.estado
-                    );
-
-
-                    card.dataset.teamsStatus =
-                        availability;
-
-
-                    card.dataset.userId =
-                        usuario.id;
-
-
-                    card.dataset.email =
-                        usuario.mail || "";
-
-
-                    console.log(
-                        `${card.dataset.name} → ${availability}`
-                    );
-
-                });
-
-
-                console.log(
-                    "Presencia actualizada correctamente."
-                );
-
-
-                console.log(
-                    "================================="
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error actualizando presencia:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           PISOS
-           ===================================================== */
-
-        function activarPiso(piso) {
-
-            floorTabs.forEach(tab => {
-
-                tab.classList.toggle(
-                    "active",
-                    tab.dataset.floor === piso
-                );
-
-            });
-
-
-            floorViews.forEach(view => {
-
-                view.hidden =
-                    view.dataset.floorView !== piso;
-
-            });
-
-
-            employeeCount.innerText =
-                floorData[piso] ?? 0;
-
-
-            searchInput.value = "";
-
-            filtrarEmpleados("");
-
-        }
-
-
-        floorTabs.forEach(tab => {
-
-            tab.addEventListener(
-                "click",
-                () => {
-
-                    activarPiso(
-                        tab.dataset.floor
-                    );
-
-                }
-            );
 
         });
 
 
-        /* =====================================================
-           BUSCADOR
-           ===================================================== */
+        /*
+         * Actualizar contador general
+         */
 
-        function filtrarEmpleados(valor) {
-
-            const value =
-                valor
-                    .toLowerCase()
-                    .trim();
+        const total =
+            document.querySelectorAll(
+                ".floor-view:not([hidden]) .employee:not(.employee-vacant):not(.employee-unlabeled)"
+            ).length;
 
 
-            document
-                .querySelectorAll(
-                    ".floor-view:not([hidden]) .employee"
-                )
-                .forEach(employee => {
-
-                    const texto = (
-
-                        employee.dataset.name +
-                        " " +
-                        employee.dataset.role
-
-                    ).toLowerCase();
+        const contador =
+            document.getElementById("employeeCount");
 
 
-                    if (
-                        texto.includes(value)
-                    ) {
-
-                        employee.style.opacity =
-                            "1";
-
-                        employee.style.transform =
-                            "scale(1)";
-
-                    } else {
-
-                        employee.style.opacity =
-                            ".18";
-
-                        employee.style.transform =
-                            "scale(.96)";
-
-                    }
-
-                });
-
+        if (contador) {
+            contador.textContent = total;
         }
 
 
-        searchInput.addEventListener(
-            "input",
-            function () {
+        console.log(
+            "🟢 Disponibles:",
+            disponibles
+        );
 
-                filtrarEmpleados(
-                    this.value
-                );
+        console.log(
+            "🔴 Ocupados:",
+            ocupados
+        );
 
-            }
+        console.log(
+            "🟡 Ausentes:",
+            ausentes
+        );
+
+        console.log(
+            "⚪ Offline:",
+            offline
         );
 
 
-        /* =====================================================
-           MODAL
-           ===================================================== */
+        /*
+         * Marcar última actualización
+         */
 
-        const floorLabels = {
-
-            "1": "1ᵉʳ Piso",
-            "2": "2ᵈᵒ Piso",
-            "3": "3ᵉʳ Piso"
-
-        };
-
-
-        const modalOverlay =
+        const refresh =
             document.getElementById(
-                "employeeModalOverlay"
+                "refreshPersonal"
             );
 
+        if (refresh) {
 
-        const modalClose =
-            document.getElementById(
-                "employeeModalClose"
-            );
+            refresh.classList.remove("rotating");
 
+            void refresh.offsetWidth;
 
-        const modalAvatar =
-            document.getElementById(
-                "modalAvatar"
-            );
+            refresh.classList.add("rotating");
 
+            setTimeout(() => {
 
-        const modalStatus =
-            document.getElementById(
-                "modalStatus"
-            );
-
-
-        const modalStatusText =
-            document.getElementById(
-                "modalStatusText"
-            );
-
-
-        const modalName =
-            document.getElementById(
-                "modalEmployeeName"
-            );
-
-
-        const modalRole =
-            document.getElementById(
-                "modalEmployeeRole"
-            );
-
-
-        const modalFloor =
-            document.getElementById(
-                "modalFloor"
-            );
-
-
-        const modalRoom =
-            document.getElementById(
-                "modalRoom"
-            );
-
-
-        /* =====================================================
-           ABRIR MODAL
-           ===================================================== */
-
-        function abrirModalEmpleado(card) {
-
-            const esVacante =
-                card.classList.contains(
-                    "employee-vacant"
-                );
-
-
-            const sinDatos =
-                card.classList.contains(
-                    "employee-unlabeled"
-                );
-
-
-            const nombre =
-                card.dataset.name ||
-                "—";
-
-
-            const cargo =
-                card.dataset.role ||
-                "—";
-
-
-            const sala =
-                card.closest(".room")
-                    ?.querySelector(
-                        ".room-header-purple h3"
-                    )
-                    ?.innerText
-                    .trim()
-                    .replace(
-                        /\s+/g,
-                        " "
-                    )
-                || "—";
-
-
-            const pisoKey =
-                card.closest(
-                    ".floor-view"
-                )?.dataset.floorView;
-
-
-            modalName.innerText =
-                esVacante
-                    ? "Puesto disponible"
-                    : nombre;
-
-
-            modalRole.innerText =
-                esVacante
-                    ? "Sin colaborador asignado"
-                    : cargo;
-
-
-            modalFloor.innerText =
-                floorLabels[pisoKey] ||
-                "—";
-
-
-            modalRoom.innerText =
-                sala;
-
-
-            modalAvatar.classList.toggle(
-                "modal-avatar-vacant",
-                esVacante
-            );
-
-
-            modalAvatar.innerText =
-                esVacante
-                    ? "➕"
-                    : "👤";
-
-
-            /* ---------------------------------------------
-               VACANTE
-               --------------------------------------------- */
-
-            if (esVacante) {
-
-                modalStatus.style.display =
-                    "none";
-
-            }
-
-
-            /* ---------------------------------------------
-               SIN DATOS
-               --------------------------------------------- */
-
-            else if (sinDatos) {
-
-                modalStatus.style.display =
-                    "";
-
-
-                modalStatus.className =
-                    "employee-modal-status status-offline";
-
-
-                modalStatusText.innerText =
-                    "Puesto ocupado · sin datos registrados";
-
-            }
-
-
-            /* ---------------------------------------------
-               ESTADO REAL
-               --------------------------------------------- */
-
-            else {
-
-                const estado =
-                    card.dataset.estado ||
-                    "offline";
-
-
-                const meta =
-                    statusMeta[estado] ||
-                    statusMeta.offline;
-
-
-                modalStatus.style.display =
-                    "";
-
-
-                modalStatus.className =
-                    "employee-modal-status " +
-                    meta.cls;
-
-
-                modalStatusText.innerText =
-                    meta.label;
-
-            }
-
-
-            modalOverlay.classList.add(
-                "open"
-            );
-
-
-            document.body.classList.add(
-                "modal-open"
-            );
-
-        }
-
-
-        /* =====================================================
-           CERRAR MODAL
-           ===================================================== */
-
-        function cerrarModalEmpleado() {
-
-            modalOverlay.classList.remove(
-                "open"
-            );
-
-
-            document.body.classList.remove(
-                "modal-open"
-            );
-
-        }
-
-
-        modalClose.addEventListener(
-            "click",
-            cerrarModalEmpleado
-        );
-
-
-        modalOverlay.addEventListener(
-            "click",
-            function (e) {
-
-                if (
-                    e.target === modalOverlay
-                ) {
-
-                    cerrarModalEmpleado();
-
-                }
-
-            }
-        );
-
-
-        document.addEventListener(
-            "keydown",
-            function (e) {
-
-                if (
-                    e.key === "Escape" &&
-                    modalOverlay.classList.contains(
-                        "open"
-                    )
-                ) {
-
-                    cerrarModalEmpleado();
-
-                }
-
-            }
-        );
-
-
-        /* =====================================================
-           EVENTOS DE TARJETAS
-           ===================================================== */
-
-        document
-            .querySelectorAll(".employee")
-            .forEach(card => {
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        abrirModalEmpleado(
-                            card
-                        );
-
-                    }
-                );
-
-            });
-
-
-        /* =====================================================
-           BOTÓN ACTUALIZAR
-           ===================================================== */
-
-        refreshButton.addEventListener(
-            "click",
-            async function () {
-
-                this.classList.add(
+                refresh.classList.remove(
                     "rotating"
                 );
 
+            }, 600);
+        }
 
-                try {
 
-                    await cargarPresenciaPersonal();
+        console.log(
+            "✅ Personal sincronizado correctamente"
+        );
 
-                } finally {
 
-                    setTimeout(
-                        () => {
+    } catch (error) {
 
-                            this.classList.remove(
-                                "rotating"
-                            );
+        console.error(
+            "❌ Error sincronizando Personal:",
+            error
+        );
 
-                        },
-                        600
-                    );
+    }
+}
 
-                }
 
+/* =========================================================
+   PISOS
+   ========================================================= */
+
+const floorData = {
+    1: 11,
+    2: 25,
+    3: 12
+};
+
+const floorTabs =
+    document.querySelectorAll(".floor-tab");
+
+const floorViews =
+    document.querySelectorAll(".floor-view");
+
+const employeeCount =
+    document.getElementById("employeeCount");
+
+const searchInput =
+    document.getElementById("personalSearch");
+
+
+function activarPiso(piso) {
+
+    floorTabs.forEach(tab => {
+
+        tab.classList.toggle(
+            "active",
+            tab.dataset.floor === piso
+        );
+
+    });
+
+
+    floorViews.forEach(view => {
+
+        view.hidden =
+            view.dataset.floorView !== piso;
+
+    });
+
+
+    /*
+     * No dependemos de un número fijo:
+     * contamos los empleados reales del piso.
+     */
+
+    const totalPiso =
+        document.querySelectorAll(
+            `.floor-view[data-floor-view="${piso}"] .employee:not(.employee-vacant):not(.employee-unlabeled)`
+        ).length;
+
+
+    if (employeeCount) {
+        employeeCount.textContent =
+            totalPiso;
+    }
+
+
+    searchInput.value = "";
+
+    filtrarEmpleados("");
+}
+
+
+floorTabs.forEach(tab => {
+
+    tab.addEventListener(
+        "click",
+        () => activarPiso(tab.dataset.floor)
+    );
+
+});
+
+
+/* =========================================================
+   BUSCADOR
+   ========================================================= */
+
+function filtrarEmpleados(valor) {
+
+    const value =
+        valor.toLowerCase().trim();
+
+
+    document
+        .querySelectorAll(
+            ".floor-view:not([hidden]) .employee"
+        )
+        .forEach(employee => {
+
+            const texto = (
+
+                (employee.dataset.name || "") +
+                " " +
+                (employee.dataset.role || "")
+
+            ).toLowerCase();
+
+
+            if (texto.includes(value)) {
+
+                employee.style.opacity = "1";
+                employee.style.transform =
+                    "scale(1)";
+
+            } else {
+
+                employee.style.opacity = ".18";
+                employee.style.transform =
+                    "scale(.96)";
             }
+
+        });
+}
+
+
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        function () {
+
+            filtrarEmpleados(
+                this.value
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   BOTÓN ACTUALIZAR
+   ========================================================= */
+
+const refreshButton =
+    document.getElementById(
+        "refreshPersonal"
+    );
+
+
+if (refreshButton) {
+
+    refreshButton.addEventListener(
+        "click",
+        async function () {
+
+            this.classList.add(
+                "rotating"
+            );
+
+            await sincronizarPersonal();
+
+            setTimeout(() => {
+
+                this.classList.remove(
+                    "rotating"
+                );
+
+            }, 600);
+
+        }
+    );
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+const floorLabels = {
+
+    "1": "1ᵉʳ Piso",
+    "2": "2ᵈᵒ Piso",
+    "3": "3ᵉʳ Piso"
+
+};
+
+
+const statusMeta = {
+
+    available: {
+        label: "Disponible",
+        cls: "status-available"
+    },
+
+    busy: {
+        label: "Ocupado",
+        cls: "status-busy"
+    },
+
+    away: {
+        label: "Ausente",
+        cls: "status-away"
+    },
+
+    offline: {
+        label: "Offline",
+        cls: "status-offline"
+    }
+
+};
+
+
+const modalOverlay =
+    document.getElementById(
+        "employeeModalOverlay"
+    );
+
+const modalClose =
+    document.getElementById(
+        "employeeModalClose"
+    );
+
+const modalAvatar =
+    document.getElementById(
+        "modalAvatar"
+    );
+
+const modalStatus =
+    document.getElementById(
+        "modalStatus"
+    );
+
+const modalStatusText =
+    document.getElementById(
+        "modalStatusText"
+    );
+
+const modalName =
+    document.getElementById(
+        "modalEmployeeName"
+    );
+
+const modalRole =
+    document.getElementById(
+        "modalEmployeeRole"
+    );
+
+const modalFloor =
+    document.getElementById(
+        "modalFloor"
+    );
+
+const modalRoom =
+    document.getElementById(
+        "modalRoom"
+    );
+
+
+function abrirModalEmpleado(card) {
+
+    const esVacante =
+        card.classList.contains(
+            "employee-vacant"
+        );
+
+    const sinDatos =
+        card.classList.contains(
+            "employee-unlabeled"
         );
 
 
-        /* =====================================================
-           CARGA INICIAL
-           ===================================================== */
+    const nombre =
+        card.dataset.name || "—";
 
-        cargarPresenciaPersonal();
+    const cargo =
+        card.dataset.role || "—";
 
 
-        /* =====================================================
-           ACTUALIZACIÓN AUTOMÁTICA
-           CADA 5 MINUTOS
-           ===================================================== */
+    const sala =
+        card.closest(".room")
+            ?.querySelector(
+                ".room-header-purple h3"
+            )
+            ?.innerText
+            .trim()
+            .replace(/\s+/g, " ")
+        || "—";
 
-        setInterval(
-            cargarPresenciaPersonal,
-            300000
-        );
 
-    </script>
+    const pisoKey =
+        card.closest(".floor-view")
+            ?.dataset
+            .floorView;
+
+
+    modalName.innerText =
+        esVacante
+            ? "Puesto disponible"
+            : nombre;
+
+
+    modalRole.innerText =
+        esVacante
+            ? "Sin colaborador asignado"
+            : cargo;
+
+
+    modalFloor.innerText =
+        floorLabels[pisoKey] || "—";
+
+
+    modalRoom.innerText =
+        sala;
+
+
+    modalAvatar.classList.toggle(
+        "modal-avatar-vacant",
+        esVacante
+    );
+
+
+    modalAvatar.innerText =
+        esVacante ? "➕" : "👤";
+
+
+    if (esVacante) {
+
+        modalStatus.style.display =
+            "none";
+
+    } else if (sinDatos) {
+
+        modalStatus.style.display =
+            "";
+
+        modalStatus.className =
+            "employee-modal-status status-offline";
+
+        modalStatusText.innerText =
+            "Puesto ocupado · sin datos registrados";
+
+    } else {
+
+        const estado =
+            card.dataset.status ||
+            "offline";
+
+
+        modalStatus.style.display =
+            "";
+
+
+        modalStatus.className =
+            "employee-modal-status " +
+            (
+                statusMeta[estado]?.cls ||
+                "status-offline"
+            );
+
+
+        modalStatusText.innerText =
+            statusMeta[estado]?.label ||
+            "Offline";
+    }
+
+
+    modalOverlay.classList.add("open");
+
+    document.body.classList.add(
+        "modal-open"
+    );
+}
+
+
+function cerrarModalEmpleado() {
+
+    modalOverlay.classList.remove(
+        "open"
+    );
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+}
+
+
+/*
+ * Usamos delegación de eventos.
+ * Así funciona incluso después de
+ * modificar las clases dinámicamente.
+ */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const card =
+            event.target.closest(
+                ".employee"
+            );
+
+        if (
+            card &&
+            !event.target.closest(
+                "button"
+            )
+        ) {
+
+            abrirModalEmpleado(card);
+        }
+    }
+);
+
+
+if (modalClose) {
+
+    modalClose.addEventListener(
+        "click",
+        cerrarModalEmpleado
+    );
+
+}
+
+
+if (modalOverlay) {
+
+    modalOverlay.addEventListener(
+        "click",
+        function (e) {
+
+            if (
+                e.target === modalOverlay
+            ) {
+
+                cerrarModalEmpleado();
+            }
+
+        }
+    );
+}
+
+
+document.addEventListener(
+    "keydown",
+    function (e) {
+
+        if (
+            e.key === "Escape" &&
+            modalOverlay.classList.contains(
+                "open"
+            )
+        ) {
+
+            cerrarModalEmpleado();
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INICIO
+   ========================================================= */
+
+sincronizarPersonal();
+
+
+/*
+ * Actualizar cada 5 minutos,
+ * igual que la página Oficina.
+ */
+
+setInterval(
+    sincronizarPersonal,
+    300000
+);
+
+</script>
 
 </body>
 

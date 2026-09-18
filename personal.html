@@ -1,918 +1,340 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal | ALFERZA LIVE OFFICE</title>
-
-    <link
-        rel="stylesheet"
-        href="personal.css"
-    >
-
+    <link rel="stylesheet" href="personal.css">
 </head>
-
-
 <body>
 
-
-    <!-- =========================================
-         TOPBAR
-         ========================================= -->
-
+    <!-- TOPBAR -->
     <header class="personal-topbar">
-
         <div class="personal-brand">
-
-            <h1>
-                ALFERZA LIVE OFFICE
-            </h1>
-
-            <span>
-                Monitoreo en tiempo real
-            </span>
-
+            <h1>ALFERZA LIVE OFFICE</h1>
+            <span>Monitoreo en tiempo real</span>
         </div>
-
-
         <div class="personal-topbar-right">
-
-            <span class="live-indicator">
-                <i></i>
-                EN VIVO
-            </span>
-
+            <span class="live-indicator"><i></i> EN VIVO</span>
         </div>
-
     </header>
-
-
-
-    <!-- =========================================
-         CONTENEDOR
-         ========================================= -->
 
     <div class="personal-layout">
 
-
-        <!-- =====================================
-             SIDEBAR
-             ===================================== -->
-
+        <!-- SIDEBAR -->
         <aside class="personal-sidebar">
-
-            <div class="sidebar-title">
-                MENÚ
-            </div>
-
-
+            <div class="sidebar-title">MENÚ</div>
             <nav>
-
-                <a href="index.html">
-
-                    <span class="menu-icon">
-                        🏢
-                    </span>
-
-                    <span>
-                        Oficina
-                    </span>
-
-                </a>
-
-
-                <a
-                    href="personal.html"
-                    class="active"
-                >
-
-                    <span class="menu-icon">
-                        👥
-                    </span>
-
-                    <span>
-                        Personal
-                    </span>
-
-                </a>
-
-
-                <a href="#">
-
-                    <span class="menu-icon">
-                        📅
-                    </span>
-
-                    <span>
-                        Salas
-                    </span>
-
-                </a>
-
-
-                <a href="comunicados.html">
-
-                    <span class="menu-icon">
-                        📢
-                    </span>
-
-                    <span>
-                        Comunicados
-                    </span>
-
-                </a>
-
-
-                <a href="#">
-
-                    <span class="menu-icon">
-                        ⚙️
-                    </span>
-
-                    <span>
-                        Configuración
-                    </span>
-
-                </a>
-
+                <a href="index.html"><span class="menu-icon">🏢</span><span>Oficina</span></a>
+                <a href="personal.html" class="active"><span class="menu-icon">👥</span><span>Personal</span></a>
+                <a href="#"><span class="menu-icon">📅</span><span>Salas</span></a>
+                <a href="comunicados.html"><span class="menu-icon">📢</span><span>Comunicados</span></a>
+                <a href="#"><span class="menu-icon">⚙️</span><span>Configuración</span></a>
             </nav>
-
-
             <div class="sidebar-bottom">
-
-                <span>
-                    ALFERZA
-                </span>
-
-                <small>
-                    LIVE OFFICE v1.0
-                </small>
-
+                <span>ALFERZA</span>
+                <small>LIVE OFFICE v1.0</small>
             </div>
-
         </aside>
 
-
-
-        <!-- =====================================
-             CONTENIDO
-             ===================================== -->
-
+        <!-- CONTENIDO -->
         <main class="personal-content">
 
-
-            <!-- CABECERA -->
-
             <section class="page-header">
-
                 <div>
-
-                    <span class="page-kicker">
-                        PERSONAL / UBICACIÓN
-                    </span>
-
-                    <h2>
-                        Personal de ALFERZA
-                    </h2>
-
-                    <p>
-                        Visualización de puestos y ubicación del personal
-                        en el segundo piso.
-                    </p>
-
+                    <span class="page-kicker">PERSONAL / UBICACIÓN</span>
+                    <h2>Personal de ALFERZA</h2>
+                    <p>Distribución de colaboradores por piso, sala y puesto de trabajo.</p>
                 </div>
-
-
                 <div class="office-status">
-
                     <span></span>
-
                     Oficina activa
-
                 </div>
-
             </section>
 
-
-
-            <!-- =================================
-                 TOOLBAR
-                 ================================= -->
-
+            <!-- TOOLBAR -->
             <section class="personal-toolbar">
 
-
                 <div class="toolbar-search">
-
-                    <span>
-                        ⌕
-                    </span>
-
-                    <input
-                        type="text"
-                        id="personalSearch"
-                        placeholder="Buscar trabajador o área..."
-                        autocomplete="off"
-                    >
-
+                    <span>⌕</span>
+                    <input type="text" id="personalSearch" placeholder="Buscar colaborador, puesto o área..." autocomplete="off">
                 </div>
 
+                <div class="floor-tabs" id="floorTabs">
+                    <button type="button" class="floor-tab" data-floor="1">1<sup>er</sup> Piso</button>
+                    <button type="button" class="floor-tab active" data-floor="2">2<sup>do</sup> Piso</button>
+                    <button type="button" class="floor-tab" data-floor="3">3<sup>er</sup> Piso</button>
+                </div>
 
-                <select id="floorSelect">
-
-                    <option value="2">
-                        2do Piso
-                    </option>
-
-                    <option value="1">
-                        1er Piso
-                    </option>
-
-                </select>
-
-
-                <button
-                    type="button"
-                    id="refreshPersonal"
-                >
-
-                    ↻
-
-                    <span>
-                        Actualizar
-                    </span>
-
-                </button>
-
+                <button type="button" id="refreshPersonal">↻ <span>Actualizar</span></button>
 
                 <div class="employee-total">
-
-                    <strong id="employeeCount">
-                        10
-                    </strong>
-
-                    <span>
-                        trabajadores
-                    </span>
-
+                    <strong id="employeeCount">25</strong>
+                    <span>trabajadores</span>
                 </div>
 
             </section>
 
-
-
-            <!-- =================================
-                 LEYENDA
-                 ================================= -->
-
+            <!-- LEYENDA -->
             <div class="legend">
-
-                <span class="legend-title">
-                    Estado
-                </span>
-
-
-                <span>
-                    <i class="dot available"></i>
-                    Disponible
-                </span>
-
-
-                <span>
-                    <i class="dot busy"></i>
-                    Ocupado
-                </span>
-
-
-                <span>
-                    <i class="dot away"></i>
-                    Ausente
-                </span>
-
-
-                <span>
-                    <i class="dot offline"></i>
-                    Offline
-                </span>
-
+                <span class="legend-title">Estado</span>
+                <span><i class="dot available"></i> Disponible</span>
+                <span><i class="dot busy"></i> Ocupado</span>
+                <span><i class="dot away"></i> Ausente</span>
+                <span><i class="dot offline"></i> Offline</span>
+                <span class="legend-note">Los estados se sincronizarán en vivo con Microsoft Teams (misma fuente que la vista Oficina).</span>
             </div>
 
+            <!-- ================= PISO 2 ================= -->
+            <section class="floor-view" data-floor-view="2">
 
+                <div class="floor-grid floor-grid-3col">
 
-            <!-- =================================
-                 PLANO
-                 ================================= -->
-
-            <section class="floor-wrapper">
-
-
-                <div
-                    class="floor-plan"
-                    id="floorPlan"
-                >
-
-
-                    <!-- =========================
-                         SALA 2
-                         ========================= -->
-
-                    <article class="room room-1">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                01
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Sala 2
-                                </h3>
-
-                                <span>
-                                    Reuniones
-                                </span>
-
-                            </div>
-
+                    <!-- SALA 2 — COLUMNA 1 -->
+                    <article class="room">
+                        <div class="room-header room-header-purple">
+                            <h3>Sala 2</h3>
+                            <span>Contabilidad, Finanzas y Tesorería</span>
                         </div>
 
-
-                        <div class="meeting-room small">
-
-                            <div class="meeting-table">
+                        <div class="room-cluster">
+                            <div class="desks">
+                                <div class="employee employee-available" data-name="Pamela Chuguirio" data-role="Asistente de Tesorería">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Pamela Chuguirio</span><span class="employee-role">Asistente de Tesorería</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Rosmery Calcina" data-role="Contador">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Rosmery Calcina</span><span class="employee-role">Contador</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Eduhar Rojas" data-role="Coordinador de Contabilidad y Finanzas">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Eduhar Rojas</span><span class="employee-role">Coordinador de Contabilidad y Finanzas</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Katerine Gallegos" data-role="Asistente de Finanzas">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Katerine Gallegos</span><span class="employee-role">Asistente de Finanzas</span></div>
+                                </div>
                             </div>
-
-                            <span class="meeting-chair c1"></span>
-                            <span class="meeting-chair c2"></span>
-                            <span class="meeting-chair c3"></span>
-                            <span class="meeting-chair c4"></span>
-
                         </div>
 
+                        <div class="room-cluster">
+                            <div class="desks">
+                                <div class="employee employee-available" data-name="Nataly Rojas" data-role="Asistente Logístico de Pagos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Nataly Rojas</span><span class="employee-role">Asistente Logístico de Pagos</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Angie Choque" data-role="Practicante de Contabilidad">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Angie Choque</span><span class="employee-role">Practicante de Contabilidad</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Sergio Barrios" data-role="Analista Logístico">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Sergio Barrios</span><span class="employee-role">Analista Logístico</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Claudia Ugarte" data-role="Coordinador Junior Administrativo">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Claudia Ugarte</span><span class="employee-role">Coordinador Junior Administrativo</span></div>
+                                </div>
+                            </div>
+                        </div>
                     </article>
 
-
-
-                    <!-- =========================
-                         SALA DE REUNIONES
-                         ========================= -->
-
-                    <article class="room room-2">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                02
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Sala de reuniones
-                                </h3>
-
-                                <span>
-                                    Sala principal
-                                </span>
-
-                            </div>
-
+                    <!-- SALA 2 — COLUMNA 2 -->
+                    <article class="room">
+                        <div class="room-header room-header-purple">
+                            <h3>Sala 2</h3>
+                            <span>Contabilidad, Planillas y TI</span>
                         </div>
 
-
-                        <div class="meeting-room">
-
-                            <div class="meeting-table">
+                        <div class="room-cluster">
+                            <div class="desks">
+                                <div class="employee employee-available" data-name="Ana Navarro" data-role="Auxiliar de Contabilidad">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Ana Navarro</span><span class="employee-role">Auxiliar de Contabilidad</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Briggitte Quispe" data-role="Asistente Contable">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Briggitte Quispe</span><span class="employee-role">Asistente Contable</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Maria Rosario" data-role="Asistente de Finanzas">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Maria Rosario</span><span class="employee-role">Asistente de Finanzas</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Bryan Ponce" data-role="Asistente Contable">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Bryan Ponce</span><span class="employee-role">Asistente Contable</span></div>
+                                </div>
                             </div>
-
-                            <span class="meeting-chair c1"></span>
-                            <span class="meeting-chair c2"></span>
-                            <span class="meeting-chair c3"></span>
-                            <span class="meeting-chair c4"></span>
-                            <span class="meeting-chair c5"></span>
-                            <span class="meeting-chair c6"></span>
-
                         </div>
 
+                        <div class="room-cluster">
+                            <div class="desks">
+                                <div class="employee employee-available" data-name="Maria Lopez" data-role="Analista de Planillas">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Maria Lopez</span><span class="employee-role">Analista de Planillas</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Nikole Phacsi" data-role="Analista de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Nikole Phacsi</span><span class="employee-role">Analista de Recursos Humanos</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Luis Barrionuevo" data-role="Coordinador de TI">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Luis Barrionuevo</span><span class="employee-role">Coordinador de TI</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Alvaro Durand" data-role="Auxiliar de TI">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Alvaro Durand</span><span class="employee-role">Auxiliar de TI</span></div>
+                                </div>
+                            </div>
+                        </div>
                     </article>
 
-
-
-                    <!-- =========================
-                         OFICINA ADMINISTRATIVA
-                         ========================= -->
-
-                    <article class="room room-3">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                03
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Oficina Administrativa
-                                </h3>
-
-                                <span>
-                                    Área administrativa
-                                </span>
-
-                            </div>
-
+                    <!-- ALMACÉN -->
+                    <article class="room room-tall">
+                        <div class="room-header room-header-purple">
+                            <h3>Almacén</h3>
+                            <span>Recursos Humanos, Calidad y Administración</span>
                         </div>
 
-
-                        <div class="desks">
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="María Torres"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
+                        <div class="room-cluster">
+                            <div class="desks">
+                                <div class="employee employee-available" data-name="Maria Arispe" data-role="Auxiliar de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Maria Arispe</span><span class="employee-role">Auxiliar de Recursos Humanos</span></div>
                                 </div>
-
-                                <span>
-                                    María Torres
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-busy"
-                                data-name="Daniel Pérez"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
+                                <div class="employee employee-available" data-name="Ximena Cerpa" data-role="Asistente Legal">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Ximena Cerpa</span><span class="employee-role">Asistente Legal</span></div>
                                 </div>
-
-                                <span>
-                                    Daniel Pérez
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="Lucía Ramos"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
+                                <div class="employee employee-available" data-name="Alejandra Arenas" data-role="Analista de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Alejandra Arenas</span><span class="employee-role">Analista de Recursos Humanos</span></div>
                                 </div>
-
-                                <span>
-                                    Lucía Ramos
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-away"
-                                data-name="Carlos Vega"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
+                                <div class="employee employee-available" data-name="Valderrama" data-role="Analista Senior de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Valderrama</span><span class="employee-role">Analista Senior de Recursos Humanos</span></div>
                                 </div>
-
-                                <span>
-                                    Carlos Vega
-                                </span>
-
+                                <div class="employee employee-available" data-name="Karina Pastor" data-role="Asistente de Calidad">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Karina Pastor</span><span class="employee-role">Asistente de Calidad</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Lizbeth Zela" data-role="Analista Senior de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Lizbeth Zela</span><span class="employee-role">Analista Senior de Recursos Humanos</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Carmen Huanqui" data-role="Analista SIG">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Carmen Huanqui</span><span class="employee-role">Analista SIG</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Guillermo Mahaney" data-role="Analista de Recursos Humanos">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Guillermo Mahaney</span><span class="employee-role">Analista de Recursos Humanos</span></div>
+                                </div>
+                                <div class="employee employee-vacant" data-name="Puesto libre" data-role="Sin asignar">
+                                    <div class="employee-avatar">➕</div>
+                                    <div class="employee-info"><span class="employee-name">S/N</span><span class="employee-role">Puesto disponible</span></div>
+                                </div>
+                                <div class="employee employee-available" data-name="Paola Alvizuri" data-role="Jefe de Administración">
+                                    <div class="employee-avatar">👤<i></i></div>
+                                    <div class="employee-info"><span class="employee-name">Paola Alvizuri</span><span class="employee-role">Jefe de Administración</span></div>
+                                </div>
                             </div>
-
                         </div>
-
                     </article>
-
-
-
-                    <!-- =========================
-                         TESORERÍA
-                         ========================= -->
-
-                    <article class="room room-4">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                04
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Tesorería
-                                </h3>
-
-                                <span>
-                                    Finanzas
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="desks">
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="Ana Flores"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Ana Flores
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-busy"
-                                data-name="Pedro Ruiz"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Pedro Ruiz
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- =========================
-                         CONTABILIDAD
-                         ========================= -->
-
-                    <article class="room room-5">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                05
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Contabilidad
-                                </h3>
-
-                                <span>
-                                    Finanzas
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="desks">
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="José Vargas"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    José Vargas
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="Rosa Medina"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Rosa Medina
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-offline"
-                                data-name="Luis Castro"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Luis Castro
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- =========================
-                         RECURSOS HUMANOS
-                         ========================= -->
-
-                    <article class="room room-6">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                06
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Recursos Humanos
-                                </h3>
-
-                                <span>
-                                    Personas
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="desks">
-
-
-                            <div
-                                class="employee employee-available"
-                                data-name="Laura Sánchez"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Laura Sánchez
-                                </span>
-
-                            </div>
-
-
-                            <div
-                                class="employee employee-busy"
-                                data-name="Mario León"
-                            >
-
-                                <div class="desk"></div>
-
-                                <div class="employee-avatar">
-                                    👤
-                                    <i></i>
-                                </div>
-
-                                <span>
-                                    Mario León
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- =========================
-                         ALMACÉN
-                         ========================= -->
-
-                    <article class="room room-7">
-
-                        <div class="room-header">
-
-                            <div class="room-number">
-                                07
-                            </div>
-
-                            <div>
-
-                                <h3>
-                                    Almacén
-                                </h3>
-
-                                <span>
-                                    Operaciones
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="warehouse">
-
-                            <div class="shelf">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-
-                            <div class="shelf">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-
-                            <div class="shelf">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <!-- PASILLO -->
-
-                    <div class="main-corridor">
-                        PASILLO PRINCIPAL
-                    </div>
-
 
                 </div>
-
             </section>
 
+            <!-- ================= PISO 1 (pendiente) ================= -->
+            <section class="floor-view" data-floor-view="1" hidden>
+                <div class="floor-empty">
+                    <span class="floor-empty-icon">🏗️</span>
+                    <h3>1<sup>er</sup> Piso — información pendiente</h3>
+                    <p>Aún no tengo la relación de colaboradores y puestos de este piso. Compárteme la
+                        misma maqueta o lista (nombre + cargo por sala) y la integro con el mismo diseño.</p>
+                </div>
+            </section>
+
+            <!-- ================= PISO 3 (pendiente) ================= -->
+            <section class="floor-view" data-floor-view="3" hidden>
+                <div class="floor-empty">
+                    <span class="floor-empty-icon">🏗️</span>
+                    <h3>3<sup>er</sup> Piso — información pendiente</h3>
+                    <p>Aún no tengo la relación de colaboradores y puestos de este piso. Compárteme la
+                        misma maqueta o lista (nombre + cargo por sala) y la integro con el mismo diseño.</p>
+                </div>
+            </section>
 
         </main>
-
     </div>
 
-
-
-    <!-- =========================================
-         JAVASCRIPT
-         ========================================= -->
-
+    <!-- JAVASCRIPT -->
     <script>
 
-        const searchInput =
-            document.getElementById("personalSearch");
+        const floorData = {
+            1: 0,
+            2: 25,
+            3: 0
+        };
 
+        const floorTabs = document.querySelectorAll(".floor-tab");
+        const floorViews = document.querySelectorAll(".floor-view");
+        const employeeCount = document.getElementById("employeeCount");
+        const searchInput = document.getElementById("personalSearch");
 
-        const employees =
-            document.querySelectorAll(".employee");
+        function activarPiso(piso) {
 
+            floorTabs.forEach(tab => {
+                tab.classList.toggle("active", tab.dataset.floor === piso);
+            });
 
-        searchInput.addEventListener(
-            "input",
-            function () {
+            floorViews.forEach(view => {
+                view.hidden = view.dataset.floorView !== piso;
+            });
 
-                const value =
-                    this.value
-                        .toLowerCase()
-                        .trim();
+            employeeCount.innerText = floorData[piso] ?? 0;
 
+            searchInput.value = "";
+            filtrarEmpleados("");
+        }
 
-                employees.forEach(
-                    employee => {
+        floorTabs.forEach(tab => {
+            tab.addEventListener("click", () => activarPiso(tab.dataset.floor));
+        });
 
-                        const name =
-                            employee
-                                .dataset
-                                .name
-                                .toLowerCase();
+        function filtrarEmpleados(valor) {
 
+            const value = valor.toLowerCase().trim();
 
-                        if (
-                            name.includes(value)
-                        ) {
+            document.querySelectorAll(".floor-view:not([hidden]) .employee").forEach(employee => {
 
-                            employee.style.opacity =
-                                "1";
+                const texto = (
+                    employee.dataset.name + " " + employee.dataset.role
+                ).toLowerCase();
 
-                            employee.style.transform =
-                                "scale(1)";
-
-                        } else {
-
-                            employee.style.opacity =
-                                ".18";
-
-                            employee.style.transform =
-                                "scale(.96)";
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-
-        document
-            .getElementById("refreshPersonal")
-            .addEventListener(
-                "click",
-                function () {
-
-                    this.classList.add("rotating");
-
-                    setTimeout(
-                        () => {
-
-                            this.classList.remove(
-                                "rotating"
-                            );
-
-                        },
-                        600
-                    );
-
+                if (texto.includes(value)) {
+                    employee.style.opacity = "1";
+                    employee.style.transform = "scale(1)";
+                } else {
+                    employee.style.opacity = ".18";
+                    employee.style.transform = "scale(.96)";
                 }
-            );
+
+            });
+
+        }
+
+        searchInput.addEventListener("input", function () {
+            filtrarEmpleados(this.value);
+        });
+
+        document.getElementById("refreshPersonal").addEventListener("click", function () {
+            this.classList.add("rotating");
+            setTimeout(() => this.classList.remove("rotating"), 600);
+        });
 
     </script>
 
-
 </body>
-
 </html>

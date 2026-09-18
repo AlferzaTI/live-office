@@ -560,192 +560,171 @@ body {
 
 
 
-/* =========================================
-   FLOOR PLAN
-   ========================================= */
 
-.floor-wrapper {
-    width: 100%;
+.legend-note {
+    margin-left: auto;
 
-    overflow-x: auto;
+    color: #94a3b8;
 
-    padding-bottom: 8px;
+    font-size: 9.5px;
+    font-style: italic;
 }
 
 
-.floor-plan {
-    position: relative;
 
-    min-width: 1080px;
+/* =========================================
+   FLOOR TABS
+   ========================================= */
 
-    height: 640px;
+.floor-tabs {
+    display: flex;
 
-    overflow: hidden;
+    gap: 6px;
 
-    background-color: #e9eef4;
+    padding: 4px;
 
-    background-image:
-        linear-gradient(
-            rgba(148, 163, 184, .09) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(148, 163, 184, .09) 1px,
-            transparent 1px
-        );
+    background: #f1f5f9;
 
-    background-size: 25px 25px;
+    border: 1px solid #dbe3ec;
 
-    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+}
+
+
+.floor-tab {
+    height: 32px;
+
+    padding: 0 14px;
+
+    background: transparent;
+
+    border: 0;
+    border-radius: 6px;
+
+    color: #64748b;
+
+    font-size: 11.5px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: .18s ease;
+}
+
+
+.floor-tab sup {
+    font-size: 8px;
+}
+
+
+.floor-tab:hover {
+    color: #0f172a;
+}
+
+
+.floor-tab.active {
+    background: #fbbf24;
+
+    color: #1e1204;
+
+    box-shadow:
+        0 2px 8px rgba(251, 191, 36, .35);
+}
+
+
+
+/* =========================================
+   FLOOR GRID / ROOMS
+   ========================================= */
+
+.floor-grid {
+    display: grid;
+
+    gap: 18px;
+}
+
+
+.floor-grid-3col {
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    align-items: start;
+}
+
+
+.room {
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    background: white;
+
+    border: 1px solid #dbe3ec;
 
     border-radius: 14px;
 
-    box-shadow:
-        0 10px 30px rgba(15, 23, 42, .06);
-}
-
-
-
-/* =========================================
-   ROOMS
-   ========================================= */
-
-.room {
-    position: absolute;
-
-    padding: 13px;
-
-    background: rgba(255, 255, 255, .97);
-
-    border: 2px solid #cbd5e1;
-
-    border-radius: 10px;
-
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease;
-}
-
-
-.room:hover {
-    border-color: #94a3b8;
+    overflow: hidden;
 
     box-shadow:
-        0 8px 22px rgba(15, 23, 42, .08);
+        0 3px 10px rgba(15, 23, 42, .04);
 }
 
 
-.room-header {
-    display: flex;
-    align-items: flex-start;
+.room-header-purple {
+    padding: 12px 15px;
 
-    gap: 9px;
+    background: linear-gradient(135deg, #6d28d9, #4c1d95);
 
-    margin-bottom: 13px;
+    color: white;
+
+    text-align: center;
 }
 
 
-.room-number {
-    color: #94a3b8;
-
-    font-size: 9px;
+.room-header-purple h3 {
+    font-size: 13px;
     font-weight: 800;
 
-    letter-spacing: .05em;
+    letter-spacing: .06em;
+
+    text-transform: uppercase;
 }
 
 
-.room-header h3 {
-    color: #0f172a;
-
-    font-size: 13px;
-    font-weight: 700;
-}
-
-
-.room-header span {
+.room-header-purple span {
     display: block;
 
-    margin-top: 2px;
+    margin-top: 3px;
 
-    color: #94a3b8;
+    color: #ddd6fe;
 
-    font-size: 9px;
+    font-size: 10px;
+}
+
+
+.room-cluster {
+    padding: 0 13px;
+}
+
+
+.room-cluster:last-child {
+    padding-bottom: 13px;
+}
+
+
+.room-cluster + .room-cluster {
+    padding-top: 4px;
+
+    border-top: 1px dashed #e2e8f0;
 }
 
 
 
 /* =========================================
-   ROOM POSITIONS
-   ========================================= */
-
-.room-1 {
-    top: 25px;
-    left: 25px;
-
-    width: 250px;
-    height: 190px;
-}
-
-
-.room-2 {
-    top: 25px;
-    left: 295px;
-
-    width: 360px;
-    height: 190px;
-}
-
-
-.room-3 {
-    top: 25px;
-    right: 25px;
-
-    width: 335px;
-    height: 245px;
-}
-
-
-.room-4 {
-    top: 240px;
-    left: 25px;
-
-    width: 250px;
-    height: 180px;
-}
-
-
-.room-5 {
-    top: 240px;
-    left: 295px;
-
-    width: 360px;
-    height: 180px;
-}
-
-
-.room-6 {
-    top: 295px;
-    right: 25px;
-
-    width: 335px;
-    height: 175px;
-}
-
-
-.room-7 {
-    bottom: 25px;
-    left: 25px;
-
-    width: 300px;
-    height: 165px;
-}
-
-
-
-/* =========================================
-   DESKS
+   DESKS / EMPLOYEE CARDS
    ========================================= */
 
 .desks {
@@ -754,7 +733,7 @@ body {
     grid-template-columns:
         repeat(2, 1fr);
 
-    gap: 10px;
+    gap: 8px;
 }
 
 
@@ -764,48 +743,34 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 7px;
+    gap: 8px;
 
-    min-height: 53px;
-
-    padding: 6px;
+    padding: 7px;
 
     background: #f8fafc;
 
     border: 1px solid #e2e8f0;
 
-    border-radius: 7px;
+    border-radius: 8px;
 
     transition:
         opacity .2s ease,
-        transform .2s ease;
+        transform .2s ease,
+        border-color .2s ease;
 }
 
 
 .employee:hover {
     background: white;
-
     border-color: #cbd5e1;
-}
-
-
-.employee .desk {
-    width: 4px;
-    height: 32px;
-
-    flex-shrink: 0;
-
-    background: #cbd5e1;
-
-    border-radius: 3px;
 }
 
 
 .employee-avatar {
     position: relative;
 
-    width: 29px;
-    height: 29px;
+    width: 30px;
+    height: 30px;
 
     display: flex;
     align-items: center;
@@ -815,7 +780,7 @@ body {
 
     background: #e2e8f0;
 
-    border-radius: 7px;
+    border-radius: 8px;
 
     font-size: 14px;
 }
@@ -827,58 +792,76 @@ body {
     right: -2px;
     bottom: -2px;
 
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
 
     border: 1.5px solid white;
 
     border-radius: 50%;
+
+    background: #94a3b8;
 }
 
 
-.employee > span {
-    color: #475569;
+.employee-info {
+    display: flex;
+    flex-direction: column;
 
-    font-size: 9px;
-    font-weight: 600;
+    gap: 3px;
 
-    line-height: 1.2;
+    min-width: 0;
+}
+
+
+.employee-name {
+    color: #0f172a;
+
+    font-size: 10.5px;
+    font-weight: 700;
+
+    line-height: 1.15;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.employee-role {
+    display: inline-block;
+
+    width: fit-content;
+    max-width: 100%;
+
+    padding: 1px 6px;
+
+    background: #dcfce7;
+
+    color: #166534;
+
+    border-radius: 4px;
+
+    font-size: 8.5px;
+    font-weight: 700;
+
+    line-height: 1.35;
+
+    white-space: normal;
 }
 
 
 
 /* =========================================
-   ESTADOS
+   ESTADOS DE PRESENCIA
    ========================================= */
-
-.employee-available
-.employee-avatar {
-    background: #dcfce7;
-}
-
-
-.employee-available .employee-avatar {
-    background: #dcfce7;
-}
-
 
 .employee-available .employee-avatar i {
     background: #22c55e;
 }
 
 
-.employee-busy .employee-avatar {
-    background: #fee2e2;
-}
-
-
 .employee-busy .employee-avatar i {
     background: #ef4444;
-}
-
-
-.employee-away .employee-avatar {
-    background: #fef3c7;
 }
 
 
@@ -888,7 +871,7 @@ body {
 
 
 .employee-offline .employee-avatar {
-    background: #e2e8f0;
+    opacity: .55;
 }
 
 
@@ -899,181 +882,98 @@ body {
 
 
 /* =========================================
-   MEETING ROOMS
+   PUESTO VACANTE
    ========================================= */
 
-.meeting-room {
-    position: relative;
-
-    width: 260px;
-    height: 105px;
-
-    margin: 2px auto;
-}
-
-
-.meeting-room.small {
-    width: 170px;
-}
-
-
-.meeting-table {
-    position: absolute;
-
-    top: 28px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    width: 235px;
-    height: 55px;
-
-    background: #f8fafc;
-
-    border: 3px solid #cbd5e1;
-
-    border-radius: 35px;
-}
-
-
-.meeting-room.small .meeting-table {
-    width: 145px;
-}
-
-
-.meeting-chair {
-    position: absolute;
-
-    width: 17px;
-    height: 11px;
-
-    background: #cbd5e1;
-
-    border-radius: 4px;
-}
-
-
-.meeting-chair.c1 {
-    top: 7px;
-    left: 38px;
-}
-
-
-.meeting-chair.c2 {
-    top: 7px;
-    left: 50%;
-
-    transform: translateX(-50%);
-}
-
-
-.meeting-chair.c3 {
-    top: 7px;
-    right: 38px;
-}
-
-
-.meeting-chair.c4 {
-    bottom: 7px;
-    left: 38px;
-}
-
-
-.meeting-chair.c5 {
-    bottom: 7px;
-    left: 50%;
-
-    transform: translateX(-50%);
-}
-
-
-.meeting-chair.c6 {
-    bottom: 7px;
-    right: 38px;
-}
-
-
-
-/* =========================================
-   ALMACÉN
-   ========================================= */
-
-.warehouse {
-    display: flex;
-    align-items: flex-end;
-
-    justify-content: space-around;
-
-    height: 90px;
-
-    padding: 5px 12px;
-}
-
-
-.shelf {
-    width: 55px;
-    height: 75px;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: space-around;
-
-    padding: 4px;
-
+.employee-vacant {
     background: #f1f5f9;
 
-    border: 1px solid #cbd5e1;
+    border-style: dashed;
 
-    border-radius: 3px;
+    border-color: #cbd5e1;
 }
 
 
-.shelf span {
-    display: block;
-
-    height: 15px;
-
-    background: #cbd5e1;
-
-    border-radius: 2px;
-}
-
-
-
-/* =========================================
-   PASILLO
-   ========================================= */
-
-.main-corridor {
-    position: absolute;
-
-    top: 430px;
-    left: 350px;
-
-    width: 270px;
-    height: 70px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.employee-vacant .employee-avatar {
+    background: #e2e8f0;
 
     color: #94a3b8;
+}
 
-    font-size: 9px;
-    font-weight: 800;
 
-    letter-spacing: .18em;
+.employee-vacant .employee-name {
+    color: #94a3b8;
+}
 
-    border-top: 1px dashed #cbd5e1;
-    border-bottom: 1px dashed #cbd5e1;
+
+.employee-vacant .employee-role {
+    background: #e2e8f0;
+
+    color: #64748b;
 }
 
 
 
 /* =========================================
-   RESPONSIVE
+   ESTADO VACÍO (pisos sin datos)
    ========================================= */
+
+.floor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 70px 30px;
+
+    background: white;
+
+    border: 1px dashed #cbd5e1;
+
+    border-radius: 14px;
+
+    text-align: center;
+}
+
+
+.floor-empty-icon {
+    font-size: 30px;
+}
+
+
+.floor-empty h3 {
+    color: #0f172a;
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+.floor-empty p {
+    max-width: 420px;
+
+    color: #64748b;
+
+    font-size: 12.5px;
+
+    line-height: 1.5;
+}
+
+
+
+/* =========================================
+   RESPONSIVE — FLOOR VIEW
+   ========================================= */
+
+@media (max-width: 1100px) {
+
+    .floor-grid-3col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
 
 @media (max-width: 900px) {
 
@@ -1105,6 +1005,11 @@ body {
 
     .personal-content {
         padding: 25px 20px;
+    }
+
+
+    .floor-grid-3col {
+        grid-template-columns: 1fr;
     }
 
 }
@@ -1149,8 +1054,20 @@ body {
     }
 
 
+    .floor-tabs {
+        flex: 1;
+    }
+
+
     .legend {
         flex-wrap: wrap;
+    }
+
+
+    .legend-note {
+        margin-left: 0;
+
+        flex-basis: 100%;
     }
 
 }

@@ -804,7 +804,7 @@
                 const data = await response.json();
 
                 (data.value || []).forEach(item => {
-                    resultado.set(item.id, item.presence || {});
+                    resultado.set(item.id, item);
                 });
             }
 

@@ -1071,3 +1071,37 @@ body {
     }
 
 }
+
+
+/* =========================================
+   GRID DE 2 COLUMNAS (pisos con 2 salas)
+   ========================================= */
+
+.floor-grid-2col {
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    max-width: 760px;
+}
+
+
+.room-header-pending span[title] {
+    padding: 0 4px;
+
+    border: 1px dashed rgba(255, 255, 255, .6);
+
+    border-radius: 4px;
+
+    cursor: help;
+}
+
+
+@media (max-width: 700px) {
+
+    .floor-grid-2col {
+        grid-template-columns: 1fr;
+
+        max-width: none;
+    }
+
+}

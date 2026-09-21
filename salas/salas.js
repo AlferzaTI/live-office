@@ -1,12 +1,12 @@
+import { obtenerToken } from "./salas-api.js";
 
 /* =========================================================
    ALFERZA LIVE OFFICE
    GESTIÓN DE SALAS
 ========================================================= */
 
-
 /* =========================================================
-   DATOS
+   DATOS TEMPORALES
 ========================================================= */
 
 const reservas = [
@@ -49,7 +49,6 @@ const reservas = [
 
 ];
 
-
 /* =========================================================
    ELEMENTOS DOM
 ========================================================= */
@@ -84,15 +83,10 @@ const comedorReservas =
 const fechaActual =
     document.getElementById("fechaActual");
 
-
 /* =========================================================
    UTILIDADES
 ========================================================= */
 
-
-/**
- * Obtiene las iniciales de una persona.
- */
 function obtenerIniciales(nombre) {
 
     const partes =
@@ -101,9 +95,11 @@ function obtenerIniciales(nombre) {
             .split(/\s+/);
 
     if (partes.length === 1) {
+
         return partes[0]
             .substring(0, 2)
             .toUpperCase();
+
     }
 
     return (
@@ -113,11 +109,6 @@ function obtenerIniciales(nombre) {
 
 }
 
-
-/**
- * Genera el HTML correspondiente
- * al estado de una reserva.
- */
 function generarEstado(estado) {
 
     if (estado === "Activa") {
@@ -138,7 +129,6 @@ function generarEstado(estado) {
 
 }
 
-
 /* =========================================================
    RENDERIZAR RESERVAS
 ========================================================= */
@@ -147,25 +137,14 @@ function renderizarReservas() {
 
     tbody.innerHTML = "";
 
-    /*
-     * Si no existen reservas,
-     * mostramos el estado vacío.
-     */
-
     if (reservas.length === 0) {
 
         emptyState.hidden = false;
-
         return;
 
     }
 
     emptyState.hidden = true;
-
-
-    /*
-     * Construimos todas las filas.
-     */
 
     const filas = reservas.map(reserva => {
 
@@ -218,14 +197,12 @@ function renderizarReservas() {
 
     }).join("");
 
-
     tbody.innerHTML = filas;
 
 }
 
-
 /* =========================================================
-   CALCULAR ESTADÍSTICAS
+   ESTADÍSTICAS
 ========================================================= */
 
 function actualizarEstadisticas() {
@@ -237,12 +214,7 @@ function actualizarEstadisticas() {
     let activas = 0;
     let canceladas = 0;
 
-
     reservas.forEach(reserva => {
-
-        /*
-         * Contador por sala
-         */
 
         switch (reserva.sala) {
 
@@ -260,11 +232,6 @@ function actualizarEstadisticas() {
 
         }
 
-
-        /*
-         * Contador por estado
-         */
-
         if (reserva.estado === "Activa") {
             activas++;
         }
@@ -274,11 +241,6 @@ function actualizarEstadisticas() {
         }
 
     });
-
-
-    /*
-     * Estadísticas generales
-     */
 
     reservasHoy.textContent =
         reservas.length;
@@ -292,11 +254,6 @@ function actualizarEstadisticas() {
     totalReservasLabel.textContent =
         reservas.length;
 
-
-    /*
-     * Estadísticas por sala
-     */
-
     sala2Reservas.textContent =
         sala2;
 
@@ -308,9 +265,8 @@ function actualizarEstadisticas() {
 
 }
 
-
 /* =========================================================
-   FECHA ACTUAL
+   FECHA
 ========================================================= */
 
 function actualizarFecha() {
@@ -329,11 +285,6 @@ function actualizarFecha() {
             opciones
         );
 
-    /*
-     * Normalizamos la fecha para
-     * mantener un formato corporativo.
-     */
-
     fecha =
         fecha
             .replace(".", "")
@@ -344,9 +295,45 @@ function actualizarFecha() {
 
 }
 
+/* =========================================================
+   MICROSOFT GRAPH
+========================================================= */
+
+async function probarSite() {
+
+    try {
+
+        const token =
+            await obtenerToken();
+
+        const response =
+            await fetch(
+                "https://graph.microsoft.com/v1.0/sites?search=ReservaSalas",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+        const data =
+            await response.json();
+
+        console.log("===== SITES ENCONTRADOS =====");
+        console.log(data);
+
+    }
+    catch (error) {
+
+        console.error("===== ERROR =====");
+        console.error(error);
+
+    }
+
+}
 
 /* =========================================================
-   INICIALIZACIÓN
+   INICIAR
 ========================================================= */
 
 function iniciarSalas() {
@@ -357,12 +344,9 @@ function iniciarSalas() {
 
     actualizarFecha();
 
+    probarSite();
+
 }
-
-
-/* =========================================================
-   EJECUTAR
-========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",

@@ -13,8 +13,15 @@ const msalConfig = {
     }
 };
 
-const scopes = ["User.Read", "Presence.Read.All"];
+const scopes = [
 
+"User.Read",
+
+"Presence.Read.All",
+
+"Sites.Read.All"
+
+];
 const msalInstance = new msal.PublicClientApplication(msalConfig);
 
 /* Pide el token: usa una sesión existente si la hay,

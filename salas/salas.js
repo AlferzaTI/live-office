@@ -347,13 +347,51 @@ async function probarMicrosoftLists() {
                     item.fields
                 );
 
+                /*
+                ======================================
+                MOSTRAR NOMBRES EXACTOS DE LOS CAMPOS
+                ======================================
+                */
+
+                console.log(
+                    "CAMPOS DISPONIBLES:",
+                    Object.keys(item.fields)
+                );
+
             }
         );
 
 
         /*
         ======================================
-        9. PAGINACIÓN
+        9. MOSTRAR CAMPOS DEL PRIMER REGISTRO
+        ======================================
+        */
+
+        if (items.length > 0) {
+
+            console.log("======================================");
+            console.log("CAMPOS DEL PRIMER REGISTRO");
+            console.log("======================================");
+
+            console.log(
+                Object.keys(items[0].fields)
+            );
+
+            console.log("======================================");
+            console.log("PRIMER REGISTRO COMPLETO");
+            console.log("======================================");
+
+            console.log(
+                items[0].fields
+            );
+
+        }
+
+
+        /*
+        ======================================
+        10. PAGINACIÓN
         ======================================
         */
 
@@ -379,7 +417,7 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        10. RESUMEN FINAL
+        11. RESUMEN FINAL
         ======================================
         */
 

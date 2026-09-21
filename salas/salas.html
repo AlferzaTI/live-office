@@ -1,114 +1,138 @@
+
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Salas</title>
-    <link.css
+
+    <link rel="stylesheet" href="salas.css">
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <div class="title-section">
-        <h1>Salas Corporativas</h1>
-        <p>Monitoreo de uso y reservas</p>
+        <!-- TÍTULO -->
+        <div class="title-section">
+            <h1>Salas Corporativas</h1>
+            <p>Monitoreo de uso y reservas</p>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats">
+
+            <div class="stat-card">
+                <span>Total Salas</span>
+                <h2>3</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>Reservas Hoy</span>
+                <h2>18</h2>
+            </div>
+
+            <div class="stat-card">
+                <span>Disponibles</span>
+                <h2>2</h2>
+            </div>
+
+        </div>
+
+        <!-- SALAS -->
+        <div class="rooms">
+
+            <div class="room-card">
+
+                <div class="header">
+                    <h2>Sala 2</h2>
+                    <span class="badge available">
+                        Disponible
+                    </span>
+                </div>
+
+                <p>Piso 2</p>
+
+                <div class="progress">
+                    <div class="fill fill-60"></div>
+                </div>
+
+                <span>60% ocupación</span>
+
+            </div>
+
+
+            <div class="room-card">
+
+                <div class="header">
+                    <h2>Sala 3</h2>
+                    <span class="badge busy">
+                        Ocupada
+                    </span>
+                </div>
+
+                <p>Piso 3</p>
+
+                <div class="progress">
+                    <div class="fill fill-90"></div>
+                </div>
+
+                <span>90% ocupación</span>
+
+            </div>
+
+
+            <div class="room-card">
+
+                <div class="header">
+                    <h2>Comedor</h2>
+                    <span class="badge available">
+                        Disponible
+                    </span>
+                </div>
+
+                <p>Piso 3</p>
+
+                <div class="progress">
+                    <div class="fill fill-30"></div>
+                </div>
+
+                <span>30% ocupación</span>
+
+            </div>
+
+        </div>
+
+        <!-- RESERVAS -->
+        <div class="reservations">
+
+            <h2>Reservas del día</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Sala</th>
+                        <th>Solicitante</th>
+                        <th>Hora Inicio</th>
+                        <th>Hora Fin</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaReservas">
+                    <!-- Las reservas se cargarán mediante JavaScript -->
+                </tbody>
+
+            </table>
+
+        </div>
+
     </div>
 
-    <div class="stats">
-
-        <div class="stat-card">
-            <span>Total Salas</span>
-            <h2>3</h2>
-        </div>
-
-        <div class="stat-card">
-            <span>Reservas Hoy</span>
-            <h2>18</h2>
-        </div>
-
-        <div class="stat-card">
-            <span>Disponibles</span>
-            <h2>2</h2>
-        </div>
-
-    </div>
-
-    <div class="rooms">
-
-        <div class="room-card">
-            <div class="header">
-                <h2>Sala 2</h2>
-                <span class="badge available">Disponible</span>
-            </div>
-
-            <p>Piso 2</p>
-
-            <div class="progress">
-                <div class="fill fill-60"></div>
-            </div>
-
-            <span>60% ocupación</span>
-        </div>
-
-        <div class="room-card">
-            <div class="header">
-                <h2>Sala 3</h2>
-                <span class="badge busy">Ocupada</span>
-            </div>
-
-            <p>Piso 3</p>
-
-            <div class="progress">
-                <div class="fill fill-90"></div>
-            </div>
-
-            <span>90% ocupación</span>
-        </div>
-
-        <div class="room-card">
-            <div class="header">
-                <h2>Comedor</h2>
-                <span class="badge available">Disponible</span>
-            </div>
-
-            <p>Piso 3</p>
-
-            <div class="progress">
-                <div class="fill fill-30"></div>
-            </div>
-
-            <span>30% ocupación</span>
-        </div>
-
-    </div>
-
-    <div class="reservations">
-
-        <h2>Reservas del día</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Sala</th>
-                    <th>Solicitante</th>
-                    <th>Hora Inicio</th>
-                    <th>Hora Fin</th>
-                </tr>
-            </thead>
-
-            <tbody id="tablaReservas">
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-salas.jsscript>
+    <!-- JAVASCRIPT -->
+    <script src="salas.js"></script>
 
 </body>
 </html>
+

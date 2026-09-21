@@ -1,138 +1,151 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Salas | ALFERZA LIVE OFFICE</title>
 
-    <title>Salas</title>
-
-    <link rel="stylesheet" href="salas/salas.css">
+    <link.css
 </head>
-
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <!-- TÍTULO -->
-        <div class="title-section">
-            <h1>Salas Corporativas</h1>
-            <p>Monitoreo de uso y reservas</p>
+    <div class="page-header">
+
+        <span class="breadcrumb">
+            OFICINA / SALAS
+        </span>
+
+        <h1>Salas Corporativas</h1>
+
+        <p>
+            Monitoreo de reservas y ocupación de espacios corporativos.
+        </p>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span>Total Salas</span>
+            <h2 id="totalSalas">3</h2>
         </div>
 
-        <!-- ESTADÍSTICAS -->
-        <div class="stats">
-
-            <div class="stat-card">
-                <span>Total Salas</span>
-                <h2>3</h2>
-            </div>
-
-            <div class="stat-card">
-                <span>Reservas Hoy</span>
-                <h2>18</h2>
-            </div>
-
-            <div class="stat-card">
-                <span>Disponibles</span>
-                <h2>2</h2>
-            </div>
-
+        <div class="stat-card">
+            <span>Reservas Hoy</span>
+            <h2 id="reservasHoy">0</h2>
         </div>
 
-        <!-- SALAS -->
-        <div class="rooms">
+        <div class="stat-card">
+            <span>Activas</span>
+            <h2 id="reservasActivas">0</h2>
+        </div>
 
-            <div class="room-card">
+        <div class="stat-card">
+            <span>Canceladas</span>
+            <h2 id="reservasCanceladas">0</h2>
+        </div>
 
-                <div class="header">
-                    <h2>Sala 2</h2>
-                    <span class="badge available">
-                        Disponible
-                    </span>
+    </div>
+
+    <div class="salas-grid">
+
+        <div class="sala-card">
+            <div class="card-top">
+
+                <div>
+                    <h3>Sala 2</h3>
+                    <p>Piso 2</p>
                 </div>
 
-                <p>Piso 2</p>
-
-                <div class="progress">
-                    <div class="fill fill-60"></div>
+                <div class="estado disponible">
+                    Disponible
                 </div>
-
-                <span>60% ocupación</span>
 
             </div>
 
+            <div class="info">
+                <span id="sala2Reservas">0 Reservas</span>
+            </div>
+        </div>
 
-            <div class="room-card">
+        <div class="sala-card">
 
-                <div class="header">
-                    <h2>Sala 3</h2>
-                    <span class="badge busy">
-                        Ocupada
-                    </span>
+            <div class="card-top">
+
+                <div>
+                    <h3>Sala 3</h3>
+                    <p>Piso 3</p>
                 </div>
 
-                <p>Piso 3</p>
-
-                <div class="progress">
-                    <div class="fill fill-90"></div>
+                <div class="estado ocupada">
+                    Ocupada
                 </div>
-
-                <span>90% ocupación</span>
 
             </div>
 
-
-            <div class="room-card">
-
-                <div class="header">
-                    <h2>Comedor</h2>
-                    <span class="badge available">
-                        Disponible
-                    </span>
-                </div>
-
-                <p>Piso 3</p>
-
-                <div class="progress">
-                    <div class="fill fill-30"></div>
-                </div>
-
-                <span>30% ocupación</span>
-
+            <div class="info">
+                <span id="sala3Reservas">0 Reservas</span>
             </div>
 
         </div>
 
-        <!-- RESERVAS -->
-        <div class="reservations">
+        <div class="sala-card">
 
-            <h2>Reservas del día</h2>
+            <div class="card-top">
 
-            <table>
+                <div>
+                    <h3>Comedor</h3>
+                    <p>Piso 3</p>
+                </div>
 
-                <thead>
-                    <tr>
-                        <th>Sala</th>
-                        <th>Solicitante</th>
-                        <th>Hora Inicio</th>
-                        <th>Hora Fin</th>
-                    </tr>
-                </thead>
+                <div class="estado disponible">
+                    Disponible
+                </div>
 
-                <tbody id="tablaReservas">
-                    <!-- Las reservas se cargarán mediante JavaScript -->
-                </tbody>
+            </div>
 
-            </table>
+            <div class="info">
+                <span id="comedorReservas">0 Reservas</span>
+            </div>
 
         </div>
 
     </div>
 
-    <!-- JAVASCRIPT -->
-    <script src="salas/salas.js"></script>
+    <div class="reservas-card">
+
+        <div class="reservas-header">
+
+            <h2>Reservas Registradas</h2>
+
+        </div>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Sala</th>
+                    <th>Fecha</th>
+                    <th>Hora Inicio</th>
+                    <th>Hora Fin</th>
+                    <th>Solicitante</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaReservas">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+salas.jsscript>
 
 </body>
 </html>
-

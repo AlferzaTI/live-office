@@ -1,140 +1,767 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+:root {
+    --blue-dark: #00205c;
+    --blue: #0a84ff;
+    --blue-light: #eaf3ff;
+    --green: #16803c;
+    --green-bg: #eaf8ef;
+    --red: #d92d20;
+    --red-bg: #fff0ef;
+    --purple: #6941c6;
+    --purple-bg: #f4efff;
+    --text-primary: #101828;
+    --text-secondary: #667085;
+    --text-muted: #98a2b3;
+    --border: #e4e7ec;
+    --background: #f6f8fb;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+    --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.06);
 }
 
-body{
-    background:#f3f5f9;
-    font-family:'Segoe UI',sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container{
-    padding:30px;
+html {
+    scroll-behavior: smooth;
 }
 
-.breadcrumb{
-    color:#667085;
-    font-size:13px;
-    font-weight:600;
+body {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f8fafc 0%, #f4f7fb 100%);
+    color: var(--text-primary);
+    font-family: "Segoe UI", Inter, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-.page-header h1{
-    margin-top:10px;
-    color:#08193b;
-    font-size:42px;
+.page {
+    width: min(1500px, calc(100% - 64px));
+    margin: 0 auto;
+    padding: 42px 0 60px;
 }
 
-.page-header p{
-    margin-top:8px;
-    color:#64748b;
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
 }
 
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-top:30px;
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 17px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
 }
 
-.stat-card{
-    background:white;
-    padding:25px;
-    border-radius:18px;
-    box-shadow:0 5px 20px rgba(0,0,0,.05);
+.breadcrumb strong {
+    color: var(--blue-dark);
 }
 
-.stat-card span{
-    color:#64748b;
+.breadcrumb-separator {
+    color: #c4cbd4;
 }
 
-.stat-card h2{
-    margin-top:15px;
-    color:#08193b;
-    font-size:34px;
+.title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 17px;
 }
 
-.salas-grid{
-    margin-top:30px;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:25px;
+.title-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue-dark), #063d91);
+    box-shadow: 0 7px 16px rgba(0, 32, 92, 0.18);
 }
 
-.sala-card{
-    background:white;
-    border-radius:20px;
-    padding:25px;
-    box-shadow:0 5px 20px rgba(0,0,0,.05);
+.title-icon span {
+    position: relative;
+    width: 19px;
+    height: 17px;
+    border: 2px solid white;
+    border-radius: 3px;
 }
 
-.card-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
+.title-icon span::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 4px;
+    height: 2px;
+    background: white;
+    box-shadow: 0 5px 0 white;
 }
 
-.card-top h3{
-    color:#08193b;
-    font-size:30px;
+.page-header h1 {
+    color: var(--blue-dark);
+    font-size: clamp(30px, 3vw, 40px);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.035em;
 }
 
-.card-top p{
-    color:#64748b;
+.page-header p {
+    margin-top: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 
-.estado{
-    padding:10px 18px;
-    border-radius:999px;
-    font-size:13px;
-    font-weight:600;
+.header-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    padding-bottom: 4px;
 }
 
-.disponible{
-    background:#dcfce7;
-    color:#15803d;
+.date-label {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
 }
 
-.ocupada{
-    background:#fee2e2;
-    color:#dc2626;
+.header-date strong {
+    color: var(--blue-dark);
+    font-size: 13px;
+    letter-spacing: 0.04em;
 }
 
-.info{
-    margin-top:25px;
-    font-size:22px;
-    font-weight:700;
-    color:#7c3aed;
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 26px;
 }
 
-.reservas-card{
-    margin-top:35px;
-    background:white;
-    border-radius:20px;
-    padding:25px;
-    box-shadow:0 5px 20px rgba(0,0,0,.05);
+.stat-card {
+    position: relative;
+    min-height: 155px;
+    padding: 22px;
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.reservas-header{
-    margin-bottom:20px;
+.stat-card::after {
+    content: "";
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    right: -40px;
+    bottom: -45px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    opacity: 0.55;
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: #d5dce6;
+    box-shadow: var(--shadow-md);
 }
 
-thead{
-    background:#08193b;
-    color:white;
+.stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-th{
-    padding:15px;
-    text-align:left;
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
 
-td{
-    padding:15px;
-    border-bottom:1px solid #e5e7eb;
+.stat-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.stat-icon span {
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    background: currentColor;
+}
+
+.stat-icon.blue {
+    color: var(--blue);
+    background: var(--blue-light);
+}
+
+.stat-icon.purple {
+    color: var(--purple);
+    background: var(--purple-bg);
+}
+
+.stat-icon.green {
+    color: var(--green);
+    background: var(--green-bg);
+}
+
+.stat-icon.red {
+    color: var(--red);
+    background: var(--red-bg);
+}
+
+.stat-value {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.stat-value strong {
+    color: var(--blue-dark);
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.stat-value span {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.stat-description {
+    margin-top: 9px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.section {
+    margin-top: 48px;
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.section-kicker {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+}
+
+.section-header h2,
+.reservas-header h2 {
+    color: var(--blue-dark);
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.legend-dot {
+    width: 7px;
+    height: 7px;
+    display: inline-block;
+    border-radius: 50%;
+}
+
+.available-dot {
+    background: #20a957;
+}
+
+.busy-dot {
+    background: #ef4444;
+}
+
+.salas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+}
+
+.sala-card {
+    position: relative;
+    min-height: 225px;
+    padding: 21px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.sala-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.sala-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-dark), var(--blue));
+}
+
+.sala-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.sala-number {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: #f0f5fb;
+    color: var(--blue-dark);
+}
+
+.sala-number span {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+}
+
+.sala-number.dining {
+    background: #f3f4f6;
+    color: #475467;
+}
+
+.sala-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.sala-status i {
+    width: 6px;
+    height: 6px;
+    display: block;
+    border-radius: 50%;
+}
+
+.sala-status.available {
+    color: var(--green);
+    background: var(--green-bg);
+}
+
+.sala-status.available i {
+    background: #20a957;
+}
+
+.sala-status.busy {
+    color: var(--red);
+    background: var(--red-bg);
+}
+
+.sala-status.busy i {
+    background: #ef4444;
+}
+
+.sala-content {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 28px;
+}
+
+.sala-content h3 {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.location-icon {
+    width: 7px;
+    height: 9px;
+    display: inline-block;
+    border: 1.5px solid #98a2b3;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+}
+
+.reservation-count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.reservation-count strong {
+    color: var(--blue-dark);
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.reservation-count span {
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 9px;
+}
+
+.sala-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 27px;
+    padding-top: 15px;
+    border-top: 1px solid #eef0f3;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.sala-footer strong {
+    font-size: 10px;
+}
+
+.text-green {
+    color: var(--green);
+}
+
+.text-red {
+    color: var(--red);
+}
+
+.reservas-section {
+    margin-top: 42px;
+}
+
+.reservas-card {
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    box-shadow: var(--shadow-sm);
+}
+
+.reservas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 25px;
+    border-bottom: 1px solid var(--border);
+}
+
+.reservas-header p {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.reservation-total {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 9px 13px;
+    background: #f7f9fc;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.reservation-total strong {
+    color: var(--blue-dark);
+    font-size: 18px;
+}
+
+.reservation-total span {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 13px 24px;
+    color: #667085;
+    border-bottom: 1px solid var(--border);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-align: left;
+    white-space: nowrap;
+}
+
+td {
+    padding: 16px 24px;
+    color: #344054;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+tbody tr {
+    transition: background 0.18s ease;
+}
+
+tbody tr:hover {
+    background: #f9fbfd;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+td:first-child {
+    color: var(--blue-dark);
+    font-weight: 700;
+}
+
+.time-cell {
+    color: #475467;
+    font-weight: 600;
+}
+
+.applicant-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eaf2ff, #dce9fa);
+    color: var(--blue-dark);
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 9px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.status-badge::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+.status-active {
+    color: var(--green);
+    background: var(--green-bg);
+}
+
+.status-active::before {
+    background: #20a957;
+}
+
+.status-cancelled {
+    color: var(--red);
+    background: var(--red-bg);
+}
+
+.status-cancelled::before {
+    background: #ef4444;
+}
+
+.empty-state {
+    padding: 55px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 7px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    border-radius: 12px;
+    background: #f2f4f7;
+    color: #98a2b3;
+    font-size: 20px;
+}
+
+.empty-state strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.empty-state span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.page-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.page-footer span:first-child {
+    color: var(--blue-dark);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .salas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sala-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .page {
+        width: min(100% - 30px, 1500px);
+        padding-top: 25px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .header-date {
+        align-items: flex-start;
+    }
+
+    .page-header h1 {
+        font-size: 30px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .reservas-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 450px) {
+    .title-wrapper {
+        align-items: flex-start;
+    }
+
+    .title-icon {
+        width: 42px;
+        height: 42px;
+    }
+
+    .page-header p {
+        max-width: 280px;
+    }
+
+    .sala-content {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .reservation-count {
+        align-items: flex-start;
+    }
 }

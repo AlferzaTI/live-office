@@ -164,7 +164,7 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        4. COLUMNAS
+        4. COLUMNAS DE LA LISTA
         ======================================
         */
 
@@ -291,7 +291,7 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        7. MOSTRAR CADA REGISTRO
+        7. MOSTRAR REGISTROS
         ======================================
         */
 
@@ -312,11 +312,6 @@ async function probarMicrosoftLists() {
                 );
 
                 console.log(
-                    "ITEM COMPLETO:",
-                    item
-                );
-
-                console.log(
                     "FIELDS:"
                 );
 
@@ -330,60 +325,91 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        8. MOSTRAR TODOS LOS FIELDS
+        8. MOSTRAR CAMPOS EXACTOS
         ======================================
         */
 
         console.log("======================================");
-        console.log("TODOS LOS FIELDS");
+        console.log("CAMPOS REALES DE ReservaSalas");
         console.log("======================================");
 
-
-        items.forEach(
-            (item, index) => {
-
-                console.log(
-                    `FIELDS REGISTRO ${index + 1}:`,
-                    item.fields
-                );
-
-                /*
-                ======================================
-                MOSTRAR NOMBRES EXACTOS DE LOS CAMPOS
-                ======================================
-                */
-
-                console.log(
-                    "CAMPOS DISPONIBLES:",
-                    Object.keys(item.fields)
-                );
-
-            }
-        );
-
-
-        /*
-        ======================================
-        9. MOSTRAR CAMPOS DEL PRIMER REGISTRO
-        ======================================
-        */
 
         if (items.length > 0) {
 
-            console.log("======================================");
-            console.log("CAMPOS DEL PRIMER REGISTRO");
-            console.log("======================================");
+            const fields =
+                items[0].fields;
+
+
+            /*
+            ======================================
+            NOMBRES EXACTOS DE LOS CAMPOS
+            ======================================
+            */
 
             console.log(
-                Object.keys(items[0].fields)
+                "NOMBRES EXACTOS DE LOS CAMPOS:"
             );
 
-            console.log("======================================");
-            console.log("PRIMER REGISTRO COMPLETO");
-            console.log("======================================");
 
             console.log(
-                items[0].fields
+                Object.keys(fields)
+            );
+
+
+            /*
+            ======================================
+            MOSTRAR UNO POR UNO
+            ======================================
+            */
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "CAMPOS Y VALORES DEL PRIMER REGISTRO:"
+            );
+
+
+            Object.entries(fields).forEach(
+                ([campo, valor]) => {
+
+                    console.log(
+                        `${campo} => ${String(valor)}`
+                    );
+
+                }
+            );
+
+
+            /*
+            ======================================
+            MOSTRAR COMO JSON
+            ======================================
+            */
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "PRIMER REGISTRO COMO JSON:"
+            );
+
+
+            console.log(
+                JSON.stringify(
+                    fields,
+                    null,
+                    2
+                )
+            );
+
+        }
+        else {
+
+            console.log(
+                "No existen registros."
             );
 
         }
@@ -391,7 +417,7 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        10. PAGINACIÓN
+        9. PAGINACIÓN
         ======================================
         */
 
@@ -417,7 +443,7 @@ async function probarMicrosoftLists() {
 
         /*
         ======================================
-        11. RESUMEN FINAL
+        10. RESUMEN FINAL
         ======================================
         */
 

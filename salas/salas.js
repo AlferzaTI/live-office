@@ -2,353 +2,438 @@ import { obtenerToken } from "./salas-api.js";
 
 /* =========================================================
    ALFERZA LIVE OFFICE
-   GESTIÓN DE SALAS
+   MICROSOFT LISTS - RESERVA DE SALAS
 ========================================================= */
+
 
 /* =========================================================
-   DATOS TEMPORALES
+   OBTENER INFORMACIÓN DE MICROSOFT LISTS
 ========================================================= */
 
-const reservas = [
-
-    {
-        sala: "Sala 2",
-        fecha: "21/09/2026",
-        inicio: "08:00",
-        fin: "09:00",
-        solicitante: "Patricia Condori",
-        estado: "Activa"
-    },
-
-    {
-        sala: "Sala 2",
-        fecha: "21/09/2026",
-        inicio: "17:00",
-        fin: "17:30",
-        solicitante: "Alvaro Durand",
-        estado: "Activa"
-    },
-
-    {
-        sala: "Sala 3",
-        fecha: "21/09/2026",
-        inicio: "09:30",
-        fin: "10:30",
-        solicitante: "Tyron",
-        estado: "Activa"
-    },
-
-    {
-        sala: "Comedor",
-        fecha: "21/09/2026",
-        inicio: "12:00",
-        fin: "13:00",
-        solicitante: "Pablo",
-        estado: "Cancelada"
-    }
-
-];
-
-/* =========================================================
-   ELEMENTOS DOM
-========================================================= */
-
-const tbody =
-    document.getElementById("tablaReservas");
-
-const emptyState =
-    document.getElementById("emptyState");
-
-const reservasHoy =
-    document.getElementById("reservasHoy");
-
-const reservasActivas =
-    document.getElementById("reservasActivas");
-
-const reservasCanceladas =
-    document.getElementById("reservasCanceladas");
-
-const totalReservasLabel =
-    document.getElementById("totalReservasLabel");
-
-const sala2Reservas =
-    document.getElementById("sala2Reservas");
-
-const sala3Reservas =
-    document.getElementById("sala3Reservas");
-
-const comedorReservas =
-    document.getElementById("comedorReservas");
-
-const fechaActual =
-    document.getElementById("fechaActual");
-
-/* =========================================================
-   UTILIDADES
-========================================================= */
-
-function obtenerIniciales(nombre) {
-
-    const partes =
-        nombre
-            .trim()
-            .split(/\s+/);
-
-    if (partes.length === 1) {
-
-        return partes[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-    return (
-        partes[0][0] +
-        partes[1][0]
-    ).toUpperCase();
-
-}
-
-function generarEstado(estado) {
-
-    if (estado === "Activa") {
-
-        return `
-            <span class="status-badge status-active">
-                Activa
-            </span>
-        `;
-
-    }
-
-    return `
-        <span class="status-badge status-cancelled">
-            Cancelada
-        </span>
-    `;
-
-}
-
-/* =========================================================
-   RENDERIZAR RESERVAS
-========================================================= */
-
-function renderizarReservas() {
-
-    tbody.innerHTML = "";
-
-    if (reservas.length === 0) {
-
-        emptyState.hidden = false;
-        return;
-
-    }
-
-    emptyState.hidden = true;
-
-    const filas = reservas.map(reserva => {
-
-        const iniciales =
-            obtenerIniciales(
-                reserva.solicitante
-            );
-
-        return `
-            <tr>
-
-                <td>
-                    ${reserva.sala}
-                </td>
-
-                <td>
-                    ${reserva.fecha}
-                </td>
-
-                <td>
-                    <span class="time-cell">
-                        ${reserva.inicio}
-                        —
-                        ${reserva.fin}
-                    </span>
-                </td>
-
-                <td>
-
-                    <div class="applicant-cell">
-
-                        <div class="avatar">
-                            ${iniciales}
-                        </div>
-
-                        <span>
-                            ${reserva.solicitante}
-                        </span>
-
-                    </div>
-
-                </td>
-
-                <td>
-                    ${generarEstado(reserva.estado)}
-                </td>
-
-            </tr>
-        `;
-
-    }).join("");
-
-    tbody.innerHTML = filas;
-
-}
-
-/* =========================================================
-   ESTADÍSTICAS
-========================================================= */
-
-function actualizarEstadisticas() {
-
-    let sala2 = 0;
-    let sala3 = 0;
-    let comedor = 0;
-
-    let activas = 0;
-    let canceladas = 0;
-
-    reservas.forEach(reserva => {
-
-        switch (reserva.sala) {
-
-            case "Sala 2":
-                sala2++;
-                break;
-
-            case "Sala 3":
-                sala3++;
-                break;
-
-            case "Comedor":
-                comedor++;
-                break;
-
-        }
-
-        if (reserva.estado === "Activa") {
-            activas++;
-        }
-
-        if (reserva.estado === "Cancelada") {
-            canceladas++;
-        }
-
-    });
-
-    reservasHoy.textContent =
-        reservas.length;
-
-    reservasActivas.textContent =
-        activas;
-
-    reservasCanceladas.textContent =
-        canceladas;
-
-    totalReservasLabel.textContent =
-        reservas.length;
-
-    sala2Reservas.textContent =
-        sala2;
-
-    sala3Reservas.textContent =
-        sala3;
-
-    comedorReservas.textContent =
-        comedor;
-
-}
-
-/* =========================================================
-   FECHA
-========================================================= */
-
-function actualizarFecha() {
-
-    const ahora = new Date();
-
-    const opciones = {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-    };
-
-    let fecha =
-        ahora.toLocaleDateString(
-            "es-PE",
-            opciones
-        );
-
-    fecha =
-        fecha
-            .replace(".", "")
-            .toUpperCase();
-
-    fechaActual.textContent =
-        fecha;
-
-}
-
-/* =========================================================
-   MICROSOFT GRAPH
-========================================================= */
-
-async function probarSite() {
+async function probarMicrosoftLists() {
 
     try {
 
-        const token =
-            await obtenerToken();
+        console.log("======================================");
+        console.log("ALFERZA LIVE OFFICE");
+        console.log("MICROSOFT LISTS");
+        console.log("======================================");
 
-        const response =
+
+        /*
+        ======================================
+        0. OBTENER TOKEN
+        ======================================
+        */
+
+        const token = await obtenerToken();
+
+        console.log("TOKEN OBTENIDO");
+
+
+        /*
+        ======================================
+        1. OBTENER SITE DE SHAREPOINT
+        ======================================
+        */
+
+        const siteUrl =
+            "https://graph.microsoft.com/v1.0/sites/alferzaholding-my.sharepoint.com:/personal/soporte1_alferza_pe";
+
+        console.log("======================================");
+        console.log("CONSULTANDO SHAREPOINT SITE");
+        console.log("======================================");
+
+        console.log(siteUrl);
+
+
+        const respuestaSite =
             await fetch(
-                "https://graph.microsoft.com/v1.0/sites?search=ReservaSalas",
+                siteUrl,
                 {
+                    method: "GET",
+
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json"
                     }
                 }
             );
 
-        const data =
-            await response.json();
 
-        console.log("===== SITES ENCONTRADOS =====");
-        console.log(data);
+        if (!respuestaSite.ok) {
+
+            const error =
+                await respuestaSite.text();
+
+            throw new Error(
+                `Error obteniendo SharePoint Site (${respuestaSite.status}): ${error}`
+            );
+
+        }
+
+
+        const site =
+            await respuestaSite.json();
+
+
+        console.log("======================================");
+        console.log("SITE ENCONTRADO");
+        console.log("======================================");
+
+        console.log(site);
+
+
+        console.log("SITE ID:");
+        console.log(site.id);
+
+
+        /*
+        ======================================
+        2. OBTENER LISTA ReservaSalas
+        ======================================
+        */
+
+        const listaUrl =
+            `https://graph.microsoft.com/v1.0/sites/${site.id}/lists/ReservaSalas?expand=columns`;
+
+
+        console.log("======================================");
+        console.log("CONSULTANDO LISTA ReservaSalas");
+        console.log("======================================");
+
+        console.log(listaUrl);
+
+
+        const respuestaLista =
+            await fetch(
+                listaUrl,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json"
+                    }
+                }
+            );
+
+
+        if (!respuestaLista.ok) {
+
+            const error =
+                await respuestaLista.text();
+
+            throw new Error(
+                `Error obteniendo ReservaSalas (${respuestaLista.status}): ${error}`
+            );
+
+        }
+
+
+        const lista =
+            await respuestaLista.json();
+
+
+        console.log("======================================");
+        console.log("LISTA ENCONTRADA");
+        console.log("======================================");
+
+        console.log(lista);
+
+
+        /*
+        ======================================
+        3. INFORMACIÓN DE LA LISTA
+        ======================================
+        */
+
+        console.log("======================================");
+        console.log("INFORMACIÓN DE LA LISTA");
+        console.log("======================================");
+
+        console.log("ID:");
+        console.log(lista.id);
+
+        console.log("NOMBRE:");
+        console.log(lista.name);
+
+        console.log("DISPLAY NAME:");
+        console.log(lista.displayName);
+
+
+        /*
+        ======================================
+        4. COLUMNAS
+        ======================================
+        */
+
+        console.log("======================================");
+        console.log("COLUMNAS DE ReservaSalas");
+        console.log("======================================");
+
+
+        if (
+            lista.columns &&
+            Array.isArray(lista.columns)
+        ) {
+
+            lista.columns.forEach(
+                (columna, index) => {
+
+                    console.log(
+                        `${index + 1}.`
+                    );
+
+                    console.log(
+                        "name:",
+                        columna.name
+                    );
+
+                    console.log(
+                        "displayName:",
+                        columna.displayName
+                    );
+
+                    console.log(
+                        "description:",
+                        columna.description
+                    );
+
+                    console.log(
+                        "type:",
+                        columna.columnGroup
+                    );
+
+                    console.log(
+                        "------------------------------"
+                    );
+
+                }
+            );
+
+        }
+        else {
+
+            console.log(
+                "No se encontraron columnas."
+            );
+
+        }
+
+
+        /*
+        ======================================
+        5. OBTENER REGISTROS
+        ======================================
+        */
+
+        const itemsUrl =
+            `https://graph.microsoft.com/v1.0/sites/${site.id}/lists/${lista.id}/items?expand=fields`;
+
+
+        console.log("======================================");
+        console.log("CONSULTANDO REGISTROS");
+        console.log("======================================");
+
+        console.log(itemsUrl);
+
+
+        const respuestaItems =
+            await fetch(
+                itemsUrl,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json"
+                    }
+                }
+            );
+
+
+        if (!respuestaItems.ok) {
+
+            const error =
+                await respuestaItems.text();
+
+            throw new Error(
+                `Error obteniendo registros (${respuestaItems.status}): ${error}`
+            );
+
+        }
+
+
+        const datosItems =
+            await respuestaItems.json();
+
+
+        /*
+        ======================================
+        6. INFORMACIÓN DE REGISTROS
+        ======================================
+        */
+
+        console.log("======================================");
+        console.log("REGISTROS DE ReservaSalas");
+        console.log("======================================");
+
+
+        const items =
+            datosItems.value || [];
+
+
+        console.log(
+            `Cantidad de registros: ${items.length}`
+        );
+
+
+        /*
+        ======================================
+        7. MOSTRAR CADA REGISTRO
+        ======================================
+        */
+
+        items.forEach(
+            (item, index) => {
+
+                console.log(
+                    "======================================"
+                );
+
+                console.log(
+                    `REGISTRO ${index + 1}`
+                );
+
+                console.log(
+                    "ID:",
+                    item.id
+                );
+
+                console.log(
+                    "ITEM COMPLETO:",
+                    item
+                );
+
+                console.log(
+                    "FIELDS:"
+                );
+
+                console.log(
+                    item.fields
+                );
+
+            }
+        );
+
+
+        /*
+        ======================================
+        8. MOSTRAR TODOS LOS FIELDS
+        ======================================
+        */
+
+        console.log("======================================");
+        console.log("TODOS LOS FIELDS");
+        console.log("======================================");
+
+
+        items.forEach(
+            (item, index) => {
+
+                console.log(
+                    `FIELDS REGISTRO ${index + 1}:`,
+                    item.fields
+                );
+
+            }
+        );
+
+
+        /*
+        ======================================
+        9. PAGINACIÓN
+        ======================================
+        */
+
+        if (datosItems["@odata.nextLink"]) {
+
+            console.log("======================================");
+            console.log("HAY MÁS REGISTROS");
+            console.log("======================================");
+
+            console.log(
+                datosItems["@odata.nextLink"]
+            );
+
+        }
+        else {
+
+            console.log("======================================");
+            console.log("NO HAY MÁS REGISTROS");
+            console.log("======================================");
+
+        }
+
+
+        /*
+        ======================================
+        10. RESUMEN FINAL
+        ======================================
+        */
+
+        console.log("======================================");
+        console.log("RESUMEN");
+        console.log("======================================");
+
+        console.log(
+            "Site ID:",
+            site.id
+        );
+
+        console.log(
+            "Lista:",
+            lista.displayName || lista.name
+        );
+
+        console.log(
+            "Lista ID:",
+            lista.id
+        );
+
+        console.log(
+            "Cantidad de registros:",
+            items.length
+        );
+
+        console.log("======================================");
+        console.log("FIN DE CONSULTA");
+        console.log("======================================");
 
     }
     catch (error) {
 
-        console.error("===== ERROR =====");
+        console.error("======================================");
+        console.error("ERROR");
+        console.error("======================================");
+
         console.error(error);
 
     }
 
 }
 
+
 /* =========================================================
    INICIAR
 ========================================================= */
 
-function iniciarSalas() {
-
-    renderizarReservas();
-
-    actualizarEstadisticas();
-
-    actualizarFecha();
-
-    probarSite();
-
-}
-
 document.addEventListener(
     "DOMContentLoaded",
-    iniciarSalas
+    () => {
+
+        probarMicrosoftLists();
+
+    }
 );

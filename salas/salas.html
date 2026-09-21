@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Salas | ALFERZA LIVE OFFICE</title>
 
-    <link rel="stylesheet" href="salas.css">
+    <link rel="stylesheet" href="salas.css?v=20260921b">
 </head>
 
 <body>
 
     <main class="page">
 
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
         <header class="page-header">
+
+            <div class="header-glow"></div>
 
             <div class="header-left">
 
@@ -28,11 +32,12 @@
 
                     <div class="title-icon">
                         <span></span>
+                        <span></span>
+                        <span></span>
                     </div>
 
-                    <div>
+                    <div class="title-content">
                         <h1>Salas Corporativas</h1>
-
                         <p>
                             Monitoreo de reservas y ocupación de espacios.
                         </p>
@@ -44,170 +49,197 @@
 
             <div class="header-date">
 
-                <span class="date-label">
-                    HOY
-                </span>
+                <div class="date-icon">
+                    <span></span>
+                </div>
 
-                <strong id="fechaActual">
-                    21 SEP 2026
-                </strong>
+                <div>
+                    <span class="date-label">HOY</span>
+                    <strong id="fechaActual">21 SEP 2026</strong>
+                </div>
 
             </div>
 
         </header>
 
 
+        <!-- =====================================================
+             STATS
+        ====================================================== -->
         <section class="stats-grid">
 
-            <article class="stat-card">
+            <!-- TOTAL SALAS -->
+            <article class="stat-card stat-blue">
+
+                <div class="stat-card-glow"></div>
 
                 <div class="stat-top">
 
-                    <span class="stat-label">
-                        Total de salas
-                    </span>
+                    <div>
+                        <span class="stat-label">
+                            Total de salas
+                        </span>
+
+                        <span class="stat-mini-label">
+                            ESPACIOS DISPONIBLES
+                        </span>
+                    </div>
 
                     <div class="stat-icon blue">
-                        <span></span>
+                        <span class="building-icon"></span>
                     </div>
 
                 </div>
 
                 <div class="stat-value">
-
-                    <strong id="totalSalas">
-                        3
-                    </strong>
-
-                    <span>
-                        espacios
-                    </span>
-
+                    <strong id="totalSalas">3</strong>
+                    <span>espacios</span>
                 </div>
 
                 <div class="stat-description">
-                    Salas registradas
+                    Salas registradas en el sistema
                 </div>
+
+                <div class="stat-line"></div>
 
             </article>
 
 
-            <article class="stat-card">
+            <!-- RESERVAS HOY -->
+            <article class="stat-card stat-purple">
+
+                <div class="stat-card-glow"></div>
 
                 <div class="stat-top">
 
-                    <span class="stat-label">
-                        Reservas de hoy
-                    </span>
+                    <div>
+                        <span class="stat-label">
+                            Reservas de hoy
+                        </span>
+
+                        <span class="stat-mini-label">
+                            AGENDA DEL DÍA
+                        </span>
+                    </div>
 
                     <div class="stat-icon purple">
-                        <span></span>
+                        <span class="calendar-icon"></span>
                     </div>
 
                 </div>
 
                 <div class="stat-value">
-
-                    <strong id="reservasHoy">
-                        0
-                    </strong>
-
-                    <span>
-                        reservas
-                    </span>
-
+                    <strong id="reservasHoy">0</strong>
+                    <span>reservas</span>
                 </div>
 
                 <div class="stat-description">
-                    Reservas registradas hoy
+                    Reservas registradas para hoy
                 </div>
+
+                <div class="stat-line"></div>
 
             </article>
 
 
-            <article class="stat-card">
+            <!-- ACTIVAS -->
+            <article class="stat-card stat-green">
+
+                <div class="stat-card-glow"></div>
 
                 <div class="stat-top">
 
-                    <span class="stat-label">
-                        Reservas activas
-                    </span>
+                    <div>
+                        <span class="stat-label">
+                            Reservas activas
+                        </span>
+
+                        <span class="stat-mini-label">
+                            EN TIEMPO REAL
+                        </span>
+                    </div>
 
                     <div class="stat-icon green">
-                        <span></span>
+                        <span class="active-icon"></span>
                     </div>
 
                 </div>
 
                 <div class="stat-value">
-
-                    <strong id="reservasActivas">
-                        0
-                    </strong>
-
-                    <span>
-                        activas
-                    </span>
-
+                    <strong id="reservasActivas">0</strong>
+                    <span>activas</span>
                 </div>
 
                 <div class="stat-description">
-                    Actualmente vigentes
+                    Reservas actualmente vigentes
                 </div>
+
+                <div class="stat-line"></div>
 
             </article>
 
 
-            <article class="stat-card">
+            <!-- CANCELADAS -->
+            <article class="stat-card stat-red">
+
+                <div class="stat-card-glow"></div>
 
                 <div class="stat-top">
 
-                    <span class="stat-label">
-                        Canceladas
-                    </span>
+                    <div>
+                        <span class="stat-label">
+                            Canceladas
+                        </span>
+
+                        <span class="stat-mini-label">
+                            ESTADO DE RESERVAS
+                        </span>
+                    </div>
 
                     <div class="stat-icon red">
-                        <span></span>
+                        <span class="cancel-icon"></span>
                     </div>
 
                 </div>
 
                 <div class="stat-value">
-
-                    <strong id="reservasCanceladas">
-                        0
-                    </strong>
-
-                    <span>
-                        reservas
-                    </span>
-
+                    <strong id="reservasCanceladas">0</strong>
+                    <span>reservas</span>
                 </div>
 
                 <div class="stat-description">
-                    Reservas canceladas
+                    Reservas canceladas registradas
                 </div>
+
+                <div class="stat-line"></div>
 
             </article>
 
         </section>
 
 
+        <!-- =====================================================
+             ESTADO DE SALAS
+        ====================================================== -->
         <section class="section">
 
             <div class="section-header">
 
-                <div>
+                <div class="section-heading">
 
                     <span class="section-kicker">
-                        ESPACIOS
+                        <span class="kicker-dot"></span>
+                        ESPACIOS CORPORATIVOS
                     </span>
 
-                    <h2>
-                        Estado de las salas
-                    </h2>
+                    <h2>Estado de las salas</h2>
+
+                    <p>
+                        Consulta la disponibilidad actual de cada espacio.
+                    </p>
 
                 </div>
+
 
                 <div class="legend">
 
@@ -228,8 +260,12 @@
 
             <div class="salas-grid">
 
+                <!-- =================================================
+                     SALA 2
+                ================================================== -->
+                <article class="sala-card sala-card-blue">
 
-                <article class="sala-card">
+                    <div class="sala-card-top-line"></div>
 
                     <div class="sala-header">
 
@@ -238,11 +274,8 @@
                         </div>
 
                         <div class="sala-status available">
-
                             <i></i>
-
-                            Disponible
-
+                            <span>Disponible</span>
                         </div>
 
                     </div>
@@ -250,18 +283,17 @@
 
                     <div class="sala-content">
 
-                        <div>
+                        <div class="sala-info">
 
-                            <h3>
-                                Sala 2
-                            </h3>
+                            <span class="room-category">
+                                SALA DE REUNIONES
+                            </span>
+
+                            <h3>Sala 2</h3>
 
                             <p class="location">
-
                                 <span class="location-icon"></span>
-
                                 Piso 2
-
                             </p>
 
                         </div>
@@ -282,6 +314,11 @@
                     </div>
 
 
+                    <div class="room-progress">
+                        <span></span>
+                    </div>
+
+
                     <div class="sala-footer">
 
                         <span>
@@ -297,7 +334,12 @@
                 </article>
 
 
-                <article class="sala-card">
+                <!-- =================================================
+                     SALA 3
+                ================================================== -->
+                <article class="sala-card sala-card-purple">
+
+                    <div class="sala-card-top-line"></div>
 
                     <div class="sala-header">
 
@@ -306,11 +348,8 @@
                         </div>
 
                         <div class="sala-status busy">
-
                             <i></i>
-
-                            Ocupada
-
+                            <span>Ocupada</span>
                         </div>
 
                     </div>
@@ -318,18 +357,17 @@
 
                     <div class="sala-content">
 
-                        <div>
+                        <div class="sala-info">
 
-                            <h3>
-                                Sala 3
-                            </h3>
+                            <span class="room-category">
+                                SALA DE REUNIONES
+                            </span>
+
+                            <h3>Sala 3</h3>
 
                             <p class="location">
-
                                 <span class="location-icon"></span>
-
                                 Piso 3
-
                             </p>
 
                         </div>
@@ -350,6 +388,11 @@
                     </div>
 
 
+                    <div class="room-progress">
+                        <span></span>
+                    </div>
+
+
                     <div class="sala-footer">
 
                         <span>
@@ -365,7 +408,12 @@
                 </article>
 
 
-                <article class="sala-card">
+                <!-- =================================================
+                     COMEDOR
+                ================================================== -->
+                <article class="sala-card sala-card-orange">
+
+                    <div class="sala-card-top-line"></div>
 
                     <div class="sala-header">
 
@@ -374,11 +422,8 @@
                         </div>
 
                         <div class="sala-status available">
-
                             <i></i>
-
-                            Disponible
-
+                            <span>Disponible</span>
                         </div>
 
                     </div>
@@ -386,18 +431,17 @@
 
                     <div class="sala-content">
 
-                        <div>
+                        <div class="sala-info">
 
-                            <h3>
-                                Comedor
-                            </h3>
+                            <span class="room-category">
+                                ESPACIO COMÚN
+                            </span>
+
+                            <h3>Comedor</h3>
 
                             <p class="location">
-
                                 <span class="location-icon"></span>
-
                                 Piso 3
-
                             </p>
 
                         </div>
@@ -415,6 +459,11 @@
 
                         </div>
 
+                    </div>
+
+
+                    <div class="room-progress">
+                        <span></span>
                     </div>
 
 
@@ -437,15 +486,23 @@
         </section>
 
 
+        <!-- =====================================================
+             RESERVAS
+        ====================================================== -->
         <section class="reservas-section">
 
             <div class="reservas-card">
 
+                <div class="reservas-card-glow"></div>
+
+
+                <!-- HEADER TABLA -->
                 <div class="reservas-header">
 
-                    <div>
+                    <div class="reservas-title">
 
                         <span class="section-kicker">
+                            <span class="kicker-dot"></span>
                             AGENDA
                         </span>
 
@@ -475,6 +532,7 @@
                 </div>
 
 
+                <!-- TABLA -->
                 <div class="table-wrapper">
 
                     <table>
@@ -482,47 +540,46 @@
                         <thead>
 
                             <tr>
-
                                 <th>
-                                    SALA
+                                    <span>SALA</span>
                                 </th>
 
                                 <th>
-                                    FECHA
+                                    <span>FECHA</span>
                                 </th>
 
                                 <th>
-                                    HORARIO
+                                    <span>HORARIO</span>
                                 </th>
 
                                 <th>
-                                    SOLICITANTE
+                                    <span>SOLICITANTE</span>
                                 </th>
 
                                 <th>
-                                    ESTADO
+                                    <span>ESTADO</span>
                                 </th>
-
                             </tr>
 
                         </thead>
 
 
-                        <tbody id="tablaReservas"></tbody>
+                        <tbody id="tablaReservas">
+
+                            <!-- JS INSERTA LAS RESERVAS -->
+
+                        </tbody>
 
                     </table>
 
                 </div>
 
 
-                <div
-                    id="emptyState"
-                    class="empty-state"
-                    hidden
-                >
+                <!-- ESTADO VACÍO -->
+                <div id="emptyState" class="empty-state" hidden>
 
                     <div class="empty-icon">
-                        —
+                        <span></span>
                     </div>
 
                     <strong>
@@ -540,25 +597,52 @@
         </section>
 
 
+        <!-- =====================================================
+             FOOTER
+        ====================================================== -->
         <footer class="page-footer">
 
-            <span>
-                ALFERZA LIVE OFFICE
-            </span>
+            <div class="footer-brand">
 
-            <span>
-                Sistema de gestión corporativa
-            </span>
+                <span class="footer-logo">
+                    A
+                </span>
+
+                <div>
+                    <strong>
+                        ALFERZA LIVE OFFICE
+                    </strong>
+
+                    <span>
+                        Sistema de gestión corporativa
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="footer-status">
+
+                <span class="footer-status-dot"></span>
+
+                Sistema operativo
+
+            </div>
 
         </footer>
 
     </main>
 
 
+    <!-- =====================================================
+         MICROSOFT AUTH
+    ====================================================== -->
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
-    <script type="module" src="salas.js"></script>
+    <!-- =====================================================
+         JS PRINCIPAL
+    ====================================================== -->
+    <script type="module" src="salas.js?v=20260921b"></script>
 
 </body>
-
 </html>

@@ -203,36 +203,37 @@ function formatearHora(hora) {
 
 function normalizarReservas(items) {
 
+    if (!Array.isArray(items)) {
+        return [];
+    }
+
     return items.map(item => {
 
         /*
-         * IMPORTANTE
-         *
-         * Tus datos están llegando directamente
-         * en el objeto:
-         *
-         * {
-         *   Sala: "Sala 2",
-         *   FechaReserva: "...",
-         *   Eleccion: "Activa"
-         * }
-         *
-         * Pero dependiendo de la respuesta de Graph,
-         * también podrían venir dentro de:
+         * Microsoft Graph normalmente devuelve:
          *
          * item.fields
          *
-         * Por eso aceptamos ambas estructuras.
+         * Pero tus registros también pueden estar
+         * llegando directamente como:
+         *
+         * {
+         *     Sala: "Sala 2",
+         *     FechaReserva: "...",
+         *     Eleccion: "Activa"
+         * }
+         *
+         * Por eso soportamos ambas estructuras.
          */
 
         const fields =
-            item.fields || item;
+            item?.fields || item || {};
 
 
         return {
 
             id:
-                item.id ||
+                item?.id ||
                 fields.id ||
                 "",
 
@@ -265,13 +266,14 @@ function normalizarReservas(items) {
                 "",
 
             /*
-             * CAMPO REAL DE SHAREPOINT:
+             * CAMPO REAL DE TU LISTA:
              *
              * Eleccion
              */
 
             Estado:
                 fields.Eleccion ||
+                fields.Estado ||
                 "",
 
             FechaCreacion:
@@ -331,7 +333,7 @@ async function obtenerSitio(token) {
     }
 
 
-    return respuesta.json();
+    return await respuesta.json();
 }
 
 
@@ -371,7 +373,7 @@ async function obtenerLista(
     }
 
 
-    return respuesta.json();
+    return await respuesta.json();
 }
 
 
@@ -502,45 +504,34 @@ async function obtenerReservas() {
 
 
     /*
-     * Normalizamos los 180 registros.
+     * NORMALIZAR
      */
 
     const datos =
         normalizarReservas(items);
 
 
-    /*
-     * Mostrar algunas reservas para comprobar
-     * que ahora sí se están leyendo correctamente.
-     */
-
     console.log(
-        "======================================"
+        "Reservas normalizadas:",
+        datos.length
     );
 
-    console.log(
-        "PRIMERAS RESERVAS NORMALIZADAS"
-    );
 
     console.log(
+        "PRIMERAS RESERVAS NORMALIZADAS:",
         datos.slice(0, 5)
     );
 
-    console.log(
-        "======================================"
-    );
-
 
     /*
-     * Mostrar específicamente las reservas
-     * de HOY.
+     * COMPROBAR RESERVAS DE HOY
      */
 
     const hoy =
         obtenerFechaActualISO();
 
 
-    const reservasHoy =
+    const reservasDeHoy =
         datos.filter(
             reserva =>
                 obtenerFechaReservaISO(
@@ -554,17 +545,18 @@ async function obtenerReservas() {
     );
 
     console.log(
-        "RESERVAS ENCONTRADAS PARA HOY:",
+        "FECHA ACTUAL:",
         hoy
     );
 
     console.log(
-        reservasHoy
+        "RESERVAS ENCONTRADAS PARA HOY:",
+        reservasDeHoy
     );
 
     console.log(
         "TOTAL DE HOY:",
-        reservasHoy.length
+        reservasDeHoy.length
     );
 
     console.log(
@@ -603,13 +595,17 @@ function obtenerReservasActivasHoy() {
 
     return obtenerReservasHoy()
         .filter(
-            reserva =>
-                String(
-                    reserva.Estado
-                )
-                    .trim()
-                    .toLowerCase() ===
-                "activa"
+            reserva => {
+
+                const estado =
+                    String(
+                        reserva.Estado || ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+                return estado === "activa";
+            }
         );
 }
 
@@ -666,25 +662,33 @@ function actualizarContadores() {
 
     const activas =
         reservasHoy.filter(
-            reserva =>
-                String(
-                    reserva.Estado
-                )
-                    .trim()
-                    .toLowerCase() ===
-                "activa"
+            reserva => {
+
+                const estado =
+                    String(
+                        reserva.Estado || ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+                return estado === "activa";
+            }
         );
 
 
     const canceladas =
         reservasHoy.filter(
-            reserva =>
-                String(
-                    reserva.Estado
-                )
-                    .trim()
-                    .toLowerCase() ===
-                "cancelada"
+            reserva => {
+
+                const estado =
+                    String(
+                        reserva.Estado || ""
+                    )
+                        .trim()
+                        .toLowerCase();
+
+                return estado === "cancelada";
+            }
         );
 
 
@@ -717,30 +721,12 @@ function actualizarContadores() {
 
 
     console.log(
-        "======================================"
-    );
-
-    console.log(
-        "CONTADORES"
-    );
-
-    console.log(
-        "Reservas hoy:",
-        reservasHoy.length
-    );
-
-    console.log(
-        "Activas:",
-        activas.length
-    );
-
-    console.log(
-        "Canceladas:",
-        canceladas.length
-    );
-
-    console.log(
-        "======================================"
+        "CONTADORES:",
+        {
+            reservasHoy: reservasHoy.length,
+            activas: activas.length,
+            canceladas: canceladas.length
+        }
     );
 }
 
@@ -758,14 +744,18 @@ function actualizarContadoresSalas() {
     function contarSala(nombreSala) {
 
         return reservasHoy.filter(
-            reserva =>
-                String(
-                    reserva.Sala
-                )
-                    .trim()
-                    .toLowerCase() ===
-                nombreSala
-                    .toLowerCase()
+            reserva => {
+
+                return (
+                    String(
+                        reserva.Sala || ""
+                    )
+                        .trim()
+                        .toLowerCase() ===
+                    nombreSala
+                        .toLowerCase()
+                );
+            }
         ).length;
     }
 
@@ -773,27 +763,21 @@ function actualizarContadoresSalas() {
     if (elementos.sala2Reservas) {
 
         elementos.sala2Reservas.textContent =
-            contarSala(
-                "Sala 2"
-            );
+            contarSala("Sala 2");
     }
 
 
     if (elementos.sala3Reservas) {
 
         elementos.sala3Reservas.textContent =
-            contarSala(
-                "Sala 3"
-            );
+            contarSala("Sala 3");
     }
 
 
     if (elementos.comedorReservas) {
 
         elementos.comedorReservas.textContent =
-            contarSala(
-                "Comedor"
-            );
+            contarSala("Comedor");
     }
 }
 
@@ -818,14 +802,18 @@ function obtenerEstadoSala(
     const reservasSala =
         obtenerReservasActivasHoy()
             .filter(
-                reserva =>
-                    String(
-                        reserva.Sala
-                    )
-                        .trim()
-                        .toLowerCase() ===
-                    nombreSala
-                        .toLowerCase()
+                reserva => {
+
+                    return (
+                        String(
+                            reserva.Sala || ""
+                        )
+                            .trim()
+                            .toLowerCase() ===
+                        nombreSala
+                            .toLowerCase()
+                    );
+                }
             );
 
 
@@ -960,10 +948,8 @@ function actualizarEstadosVisualesSalas() {
 
                 estadoFooter.textContent =
                     "Ocupada";
-            }
 
-
-            else {
+            } else {
 
                 estadoTop.classList.remove(
                     "busy"
@@ -1081,8 +1067,7 @@ function renderizarTabla() {
 
 
     console.log(
-        "Renderizando tabla.",
-        "Reservas:",
+        "Renderizando tabla. Reservas:",
         reservasHoy.length
     );
 
@@ -1099,7 +1084,7 @@ function renderizarTabla() {
 
 
     /*
-     * NO HAY RESERVAS
+     * SIN RESERVAS
      */
 
     if (
@@ -1124,7 +1109,7 @@ function renderizarTabla() {
 
 
     /*
-     * SÍ HAY RESERVAS
+     * CON RESERVAS
      */
 
     if (elementos.emptyState) {
@@ -1135,7 +1120,7 @@ function renderizarTabla() {
 
 
     /*
-     * Ordenar por hora.
+     * ORDENAR POR HORA
      */
 
     const ordenadas =
@@ -1163,7 +1148,7 @@ function renderizarTabla() {
 
 
     /*
-     * Crear cada fila.
+     * CREAR FILAS
      */
 
     ordenadas.forEach(
@@ -1177,7 +1162,7 @@ function renderizarTabla() {
 
             const estado =
                 String(
-                    reserva.Estado
+                    reserva.Estado || ""
                 )
                     .trim()
                     .toLowerCase();
@@ -1305,10 +1290,9 @@ function renderizarTabla() {
             `;
 
 
-            elementos.tablaReservas
-                .appendChild(
-                    fila
-                );
+            elementos.tablaReservas.appendChild(
+                fila
+            );
         }
     );
 
@@ -1375,10 +1359,7 @@ async function cargarReservas() {
             "======================================"
         );
 
-    }
-
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "======================================"
@@ -1397,9 +1378,7 @@ async function cargarReservas() {
         );
 
 
-        if (
-            elementos.tablaReservas
-        ) {
+        if (elementos.tablaReservas) {
 
             elementos.tablaReservas.innerHTML = `
 
@@ -1437,7 +1416,7 @@ document.addEventListener(
 
 
         /*
-         * Actualizar automáticamente
+         * Actualización automática
          * cada 60 segundos.
          */
 
@@ -1452,19 +1431,15 @@ document.addEventListener(
 
 
         /*
-         * Si existe un botón
-         * #refreshSalas
+         * Botón de actualización manual
          */
 
-        if (
-            elementos.refreshButton
-        ) {
+        if (elementos.refreshButton) {
 
-            elementos.refreshButton
-                .addEventListener(
-                    "click",
-                    cargarReservas
-                );
+            elementos.refreshButton.addEventListener(
+                "click",
+                cargarReservas
+            );
         }
     }
 );

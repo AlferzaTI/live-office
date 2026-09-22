@@ -319,9 +319,9 @@ body {
 .powerapps-card {
     width: 100%;
 
-    height: calc(100vh - 260px);
+    height: calc(100vh - 225px);
 
-    min-height: 600px;
+    min-height: 650px;
 
     overflow: hidden;
 
@@ -439,9 +439,11 @@ body {
     position: absolute;
 
     width: 130%;
+
     height: 115%;
 
     left: -25%;
+
     top: -7.5%;
 
     border: none;
@@ -580,9 +582,9 @@ body {
     }
 
     .powerapps-card {
-        height: calc(100vh - 310px);
+        height: calc(100vh - 275px);
 
-        min-height: 550px;
+        min-height: 600px;
     }
 
     .connection-status {
@@ -590,7 +592,9 @@ body {
     }
 
 
-    /* IFRAME RESPONSIVE */
+    /* =====================================================
+       IFRAME RESPONSIVE
+       ===================================================== */
 
     .powerapps-container iframe {
         width: 135%;
@@ -641,15 +645,17 @@ body {
     }
 
     .powerapps-card {
-        height: calc(100vh - 350px);
+        height: calc(100vh - 315px);
 
-        min-height: 500px;
+        min-height: 550px;
 
         border-radius: 12px;
     }
 
 
-    /* IFRAME MÓVIL */
+    /* =====================================================
+       IFRAME MÓVIL
+       ===================================================== */
 
     .powerapps-container iframe {
         width: 145%;

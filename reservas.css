@@ -585,7 +585,7 @@ body {
         #f4f6f9;
 
     /*
-       Centra visualmente la aplicación.
+       Centramos completamente el iframe.
     */
 
     display: flex;
@@ -603,28 +603,38 @@ body {
 
 .powerapps-container iframe {
 
-    display: block;
+    position: absolute;
 
-    width: 100%;
+    /*
+       Le damos a Power Apps un área mayor
+       que la visible para evitar que su
+       contenido quede recortado.
+    */
 
-    height: 100%;
+    width: 115%;
+
+    height: 115%;
+
+    left: -7.5%;
+
+    top: -7.5%;
 
     border: none;
 
-    background: white;
+    background:
+        white;
 
     /*
-       Reduce visualmente Power Apps para
-       que no se vea demasiado ampliado.
+       Reducimos visualmente toda la aplicación.
     */
 
     transform:
-        scale(.88);
+        scale(.78);
 
     /*
-       La reducción se realiza desde el centro,
-       evitando que la aplicación quede pegada
-       a la izquierda.
+       La escala parte desde el centro.
+       Esto evita que Power Apps se vaya
+       visualmente hacia la izquierda.
     */
 
     transform-origin:
@@ -828,20 +838,34 @@ body {
     }
 
 
-    /*
-       En pantallas medianas reducimos
-       un poco más Power Apps.
-    */
+    /* ============================================
+       POWER APPS EN TABLET
+    ============================================ */
 
     .powerapps-container iframe {
 
+        width: 120%;
+
+        height: 120%;
+
+        left: -10%;
+
+        top: -10%;
+
         transform:
-            scale(.82);
+            scale(.72);
+
+        transform-origin:
+            center center;
 
     }
 
 }
 
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
 
 @media (max-width: 600px) {
 
@@ -901,15 +925,25 @@ body {
     }
 
 
-    /*
-       En móvil se reduce todavía más para
-       evitar que Power Apps se vea recortado.
-    */
+    /* ============================================
+       POWER APPS EN MÓVIL
+    ============================================ */
 
     .powerapps-container iframe {
 
+        width: 125%;
+
+        height: 125%;
+
+        left: -12.5%;
+
+        top: -12.5%;
+
         transform:
-            scale(.75);
+            scale(.65);
+
+        transform-origin:
+            center center;
 
     }
 

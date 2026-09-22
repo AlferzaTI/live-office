@@ -1,0 +1,872 @@
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eef4fb 0%,
+            #f5f8fc 45%,
+            #eaf1f8 100%
+        );
+
+    color: #172b4d;
+
+}
+
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.reservas-page {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.reservas-header {
+
+    min-height: 105px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding:
+        22px
+        42px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #002d72,
+            #0057b8
+        );
+
+    color: white;
+
+    box-shadow:
+        0 5px 25px rgba(0, 45, 114, .18);
+
+}
+
+
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
+
+.breadcrumb {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 9px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.3px;
+
+    opacity: .8;
+
+}
+
+
+.breadcrumb-separator {
+
+    opacity: .5;
+
+}
+
+
+.breadcrumb strong {
+
+    opacity: 1;
+
+}
+
+
+/* =========================================================
+   TITULO
+   ========================================================= */
+
+.title-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.title-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,.14);
+
+    border:
+        1px solid rgba(255,255,255,.18);
+
+    font-size: 22px;
+
+}
+
+
+.title-wrapper h1 {
+
+    font-size: 25px;
+
+    font-weight: 800;
+
+    line-height: 1.15;
+
+}
+
+
+.title-wrapper p {
+
+    margin-top: 5px;
+
+    color:
+        rgba(255,255,255,.76);
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   BOTÓN VOLVER
+   ========================================================= */
+
+.btn-volver {
+
+    padding:
+        11px
+        16px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.2);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255,255,255,.1);
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        .2s ease;
+
+}
+
+
+.btn-volver:hover {
+
+    background:
+        rgba(255,255,255,.2);
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* =========================================================
+   CONTENIDO
+   ========================================================= */
+
+.reservas-content {
+
+    flex: 1;
+
+    width: 100%;
+
+    max-width: 1500px;
+
+    margin:
+        0 auto;
+
+    padding:
+        28px
+        38px
+        35px;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO POWER APPS
+   ========================================================= */
+
+.powerapps-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.powerapps-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.powerapps-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background:
+        #e6f0ff;
+
+    font-size: 21px;
+
+}
+
+
+.powerapps-title span {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    color:
+        #0057b8;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+
+}
+
+
+.powerapps-title h2 {
+
+    color:
+        #10243e;
+
+    font-size: 20px;
+
+    font-weight: 800;
+
+}
+
+
+.powerapps-title p {
+
+    margin-top: 4px;
+
+    color:
+        #718096;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+
+.connection-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        9px
+        13px;
+
+    border:
+        1px solid #d9e8dd;
+
+    border-radius: 20px;
+
+    background:
+        #f1faf4;
+
+    color:
+        #22743d;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.status-dot {
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(34,197,94,.12);
+
+    animation:
+        pulseStatus 2s infinite;
+
+}
+
+
+@keyframes pulseStatus {
+
+    0%,
+    100% {
+
+        opacity: 1;
+
+    }
+
+    50% {
+
+        opacity: .45;
+
+    }
+
+}
+
+
+/* =========================================================
+   CARD POWER APPS
+   ========================================================= */
+
+.powerapps-card {
+
+    width: 100%;
+
+    height:
+        calc(100vh - 260px);
+
+    min-height: 600px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    background:
+        white;
+
+    border:
+        1px solid #dce5ef;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 10px 35px
+        rgba(30, 65, 100, .10);
+
+}
+
+
+/* =========================================================
+   BARRA SUPERIOR POWER APPS
+   ========================================================= */
+
+.powerapps-topbar {
+
+    height: 48px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 15px;
+
+    background:
+        #f7f9fc;
+
+    border-bottom:
+        1px solid #e5eaf0;
+
+}
+
+
+.powerapps-label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color:
+        #53657c;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: .8px;
+
+}
+
+
+.live-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+        #16a34a;
+
+}
+
+
+.btn-recargar {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background:
+        #e9eef5;
+
+    color:
+        #53657c;
+
+    font-size: 19px;
+
+    cursor: pointer;
+
+    transition:
+        .2s ease;
+
+}
+
+
+.btn-recargar:hover {
+
+    background:
+        #dce6f2;
+
+    color:
+        #0057b8;
+
+    transform:
+        rotate(180deg);
+
+}
+
+
+/* =========================================================
+   CONTENEDOR DEL IFRAME
+   ========================================================= */
+
+.powerapps-container {
+
+    position: relative;
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+    background:
+        #f4f6f9;
+
+}
+
+
+.powerapps-container iframe {
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    border: none;
+
+    background: white;
+
+}
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.powerapps-loading {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    background:
+        #f8fafc;
+
+    color:
+        #52657d;
+
+    z-index: 5;
+
+    transition:
+        opacity .35s ease,
+        visibility .35s ease;
+
+}
+
+
+.powerapps-loading.hidden {
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+}
+
+
+.powerapps-loading strong {
+
+    color:
+        #233a57;
+
+    font-size: 14px;
+
+}
+
+
+.powerapps-loading span {
+
+    font-size: 12px;
+
+    color:
+        #8392a6;
+
+}
+
+
+/* =========================================================
+   SPINNER
+   ========================================================= */
+
+.loading-spinner {
+
+    width: 36px;
+
+    height: 36px;
+
+    margin-bottom: 8px;
+
+    border:
+        3px solid #dbe5f0;
+
+    border-top-color:
+        #0057b8;
+
+    border-radius: 50%;
+
+    animation:
+        spin 1s linear infinite;
+
+}
+
+
+@keyframes spin {
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.reservas-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        15px 38px;
+
+    border-top:
+        1px solid #dbe4ee;
+
+    background:
+        rgba(255,255,255,.7);
+
+    color:
+        #718096;
+
+    font-size: 11px;
+
+}
+
+
+.reservas-footer span:first-child {
+
+    color:
+        #52657d;
+
+    font-weight: 800;
+
+    letter-spacing: .5px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .reservas-header {
+
+        padding:
+            20px;
+
+    }
+
+
+    .reservas-content {
+
+        padding:
+            22px
+            20px
+            25px;
+
+    }
+
+
+    .powerapps-heading {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .powerapps-card {
+
+        height:
+            calc(100vh - 310px);
+
+        min-height: 550px;
+
+    }
+
+
+    .connection-status {
+
+        align-self: flex-start;
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .reservas-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+
+    .header-actions {
+
+        width: 100%;
+
+    }
+
+
+    .btn-volver {
+
+        width: 100%;
+
+    }
+
+
+    .title-wrapper h1 {
+
+        font-size: 21px;
+
+    }
+
+
+    .powerapps-title h2 {
+
+        font-size: 18px;
+
+    }
+
+
+    .powerapps-title p {
+
+        display: none;
+
+    }
+
+
+    .powerapps-card {
+
+        height:
+            calc(100vh - 350px);
+
+        min-height: 500px;
+
+        border-radius: 12px;
+
+    }
+
+
+    .reservas-footer {
+
+        padding:
+            13px 20px;
+
+        flex-direction: column;
+
+        gap: 5px;
+
+        align-items: flex-start;
+
+    }
+
+}

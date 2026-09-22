@@ -1,4 +1,3 @@
-
 /* =========================================
    RESET
    ========================================= */
@@ -30,69 +29,169 @@ body {
 
 /* =========================================
    TOPBAR
+   IGUAL AL RESTO DEL SISTEMA
    ========================================= */
 
-.personal-topbar {
-    height: 74px;
+.topbar {
+    position: relative;
 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 30px;
+    height: 80px;
 
     background: #0f172a;
     color: white;
 
-    border-bottom: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0 30px;
 }
 
-.personal-brand h1 {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: .03em;
+.logo {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 2;
+
+    text-align: center;
+
+    white-space: nowrap;
 }
 
-.personal-brand span {
+.logo h1 {
+    font-size: 24px;
+    font-weight: 800;
+
+    letter-spacing: .8px;
+
+    margin: 0;
+
+    animation: logoTitleAnimation 1.2s ease-in-out infinite;
+}
+
+.logo span {
     display: block;
 
     margin-top: 3px;
 
-    color: #94a3b8;
-
-    font-size: 11px;
-}
-
-.personal-topbar-right {
-    display: flex;
-    align-items: center;
-}
-
-.live-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 12px;
 
     color: #cbd5e1;
 
-    font-size: 11px;
-    font-weight: 700;
+    letter-spacing: .5px;
 
-    letter-spacing: .08em;
+    animation: logoSubtitleAnimation 1.2s ease-in-out infinite;
 }
 
-.live-indicator i {
-    width: 7px;
-    height: 7px;
+.live-status {
+    display: flex;
+    align-items: center;
 
-    display: block;
+    gap: 9px;
 
-    background: #22c55e;
+    padding: 8px 13px;
+
+    border-radius: 20px;
+
+    background: rgba(34, 197, 94, .10);
+
+    border: 1px solid rgba(34, 197, 94, .25);
+
+    color: #86efac;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .7px;
+
+    margin-left: auto;
+
+    position: relative;
+
+    z-index: 3;
+}
+
+.live-status-dot {
+    width: 8px;
+    height: 8px;
 
     border-radius: 50%;
 
+    background: #22c55e;
+
     box-shadow:
         0 0 0 4px rgba(34, 197, 94, .12);
+
+    animation: pulseLive 2s infinite;
+}
+
+
+/* =========================================
+   ANIMACIONES TOPBAR
+   ========================================= */
+
+@keyframes logoTitleAnimation {
+
+    0% {
+        opacity: .75;
+
+        transform: translateY(2px);
+
+        text-shadow:
+            0 0 0 rgba(255, 255, 255, 0);
+    }
+
+    50% {
+        opacity: 1;
+
+        transform: translateY(0);
+
+        text-shadow:
+            0 0 14px rgba(255, 255, 255, .25);
+    }
+
+    100% {
+        opacity: .75;
+
+        transform: translateY(2px);
+
+        text-shadow:
+            0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+@keyframes logoSubtitleAnimation {
+
+    0%,
+    100% {
+        opacity: .55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulseLive {
+
+    0% {
+        box-shadow:
+            0 0 0 0 rgba(34, 197, 94, .35);
+    }
+
+    70% {
+        box-shadow:
+            0 0 0 7px rgba(34, 197, 94, 0);
+    }
+
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(34, 197, 94, 0);
+    }
 }
 
 
@@ -101,7 +200,7 @@ body {
    ========================================= */
 
 .personal-layout {
-    min-height: calc(100vh - 74px);
+    min-height: calc(100vh - 80px);
 
     display: flex;
 }
@@ -378,6 +477,7 @@ body {
 }
 
 @keyframes rotateButton {
+
     from {
         transform: rotate(0);
     }
@@ -623,10 +723,13 @@ body {
         opacity .2s ease,
         transform .2s ease,
         border-color .2s ease;
+
+    cursor: pointer;
 }
 
 .employee:hover {
     background: white;
+
     border-color: #cbd5e1;
 }
 
@@ -815,7 +918,8 @@ body {
 @media (max-width: 1100px) {
 
     .floor-grid-3col {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
 }
@@ -841,16 +945,27 @@ body {
 
 @media (max-width: 650px) {
 
-    .personal-topbar {
+    .topbar {
         padding: 0 18px;
     }
 
-    .personal-brand h1 {
-        font-size: 14px;
+    .logo h1 {
+        font-size: 16px;
     }
 
-    .personal-brand span {
-        font-size: 9px;
+    .logo span {
+        font-size: 10px;
+    }
+
+    .live-status {
+        padding: 7px 10px;
+
+        font-size: 10px;
+    }
+
+    .live-status-dot {
+        width: 7px;
+        height: 7px;
     }
 
     .page-header {
@@ -924,17 +1039,15 @@ body {
    MODAL DETALLE DE COLABORADOR
    ========================================= */
 
-.employee {
-    cursor: pointer;
-}
-
 body.modal-open {
     overflow: hidden;
 }
 
 .employee-modal-overlay {
     position: fixed;
+
     inset: 0;
+
     z-index: 1000;
 
     display: flex;
@@ -944,9 +1057,11 @@ body.modal-open {
     padding: 20px;
 
     background: rgba(15, 23, 42, .55);
+
     backdrop-filter: blur(3px);
 
     opacity: 0;
+
     visibility: hidden;
 
     transition:
@@ -956,6 +1071,7 @@ body.modal-open {
 
 .employee-modal-overlay.open {
     opacity: 1;
+
     visibility: visible;
 }
 
@@ -1007,6 +1123,7 @@ body.modal-open {
     background: #f1f5f9;
 
     border: 0;
+
     border-radius: 50%;
 
     color: #64748b;
@@ -1036,7 +1153,8 @@ body.modal-open {
     align-items: center;
     justify-content: center;
 
-    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    background:
+        linear-gradient(135deg, #eef2ff, #e0e7ff);
 
     border-radius: 20px;
 
@@ -1083,6 +1201,7 @@ body.modal-open {
 
 .status-available {
     background: #dcfce7;
+
     color: #15803d;
 }
 
@@ -1092,6 +1211,7 @@ body.modal-open {
 
 .status-busy {
     background: #fee2e2;
+
     color: #b91c1c;
 }
 
@@ -1101,6 +1221,7 @@ body.modal-open {
 
 .status-away {
     background: #fef3c7;
+
     color: #b45309;
 }
 
@@ -1110,6 +1231,7 @@ body.modal-open {
 
 .status-offline {
     background: #e2e8f0;
+
     color: #475569;
 }
 
@@ -1128,6 +1250,7 @@ body.modal-open {
 
 .employee-modal-role {
     margin-top: 4px;
+
     margin-bottom: 20px;
 
     color: #64748b;

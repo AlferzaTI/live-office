@@ -1,3 +1,4 @@
+
 /* =========================================================
    RESET
    ========================================================= */
@@ -583,8 +584,22 @@ body {
     background:
         #f4f6f9;
 
+    /*
+       Centra visualmente la aplicación.
+    */
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
 }
 
+
+/* =========================================================
+   IFRAME POWER APPS
+   ========================================================= */
 
 .powerapps-container iframe {
 
@@ -597,6 +612,23 @@ body {
     border: none;
 
     background: white;
+
+    /*
+       Reduce visualmente Power Apps para
+       que no se vea demasiado ampliado.
+    */
+
+    transform:
+        scale(.88);
+
+    /*
+       La reducción se realiza desde el centro,
+       evitando que la aplicación quede pegada
+       a la izquierda.
+    */
+
+    transform-origin:
+        center center;
 
 }
 
@@ -795,6 +827,19 @@ body {
 
     }
 
+
+    /*
+       En pantallas medianas reducimos
+       un poco más Power Apps.
+    */
+
+    .powerapps-container iframe {
+
+        transform:
+            scale(.82);
+
+    }
+
 }
 
 
@@ -852,6 +897,19 @@ body {
         min-height: 500px;
 
         border-radius: 12px;
+
+    }
+
+
+    /*
+       En móvil se reduce todavía más para
+       evitar que Power Apps se vea recortado.
+    */
+
+    .powerapps-container iframe {
+
+        transform:
+            scale(.75);
 
     }
 

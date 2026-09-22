@@ -438,7 +438,7 @@ body {
 .powerapps-container iframe {
     position: absolute;
 
-    width: 130%;
+    width: 145%;
 
     height: 115%;
 
@@ -450,7 +450,7 @@ body {
 
     background: white;
 
-    transform: scale(.75);
+    transform: scale(.78);
 
     transform-origin: center center;
 }
@@ -592,18 +592,20 @@ body {
     }
 
 
-    /* IFRAME RESPONSIVE */
+    /* =====================================================
+       IFRAME RESPONSIVE
+       ===================================================== */
 
     .powerapps-container iframe {
-        width: 135%;
+        width: 150%;
 
         height: 120%;
 
-        left: -21%;
+        left: -20%;
 
         top: -10%;
 
-        transform: scale(.68);
+        transform: scale(.70);
 
         transform-origin: center center;
     }
@@ -651,18 +653,20 @@ body {
     }
 
 
-    /* IFRAME MÓVIL */
+    /* =====================================================
+       IFRAME MÓVIL
+       ===================================================== */
 
     .powerapps-container iframe {
-        width: 145%;
+        width: 160%;
 
         height: 125%;
 
-        left: -26%;
+        left: -25%;
 
         top: -12.5%;
 
-        transform: scale(.58);
+        transform: scale(.60);
 
         transform-origin: center center;
     }

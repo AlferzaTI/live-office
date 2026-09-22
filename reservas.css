@@ -3,10 +3,12 @@
    ========================================================= */
 
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
 }
+
 
 html,
 body {
@@ -14,167 +16,187 @@ body {
     min-height: 100%;
 }
 
+
 body {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background:
-        linear-gradient(
-            135deg,
-            #eef4fb 0%,
-            #f5f8fc 45%,
-            #eaf1f8 100%
-        );
-
-    color: #172b4d;
+    background: #eef2f7;
 }
 
 
 /* =========================================================
-   PÁGINA
+   BARRA SUPERIOR
    ========================================================= */
 
-.reservas-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+.topbar {
 
+    height: 80px;
 
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.reservas-header {
-    min-height: 105px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 30px;
-
-    padding: 22px 42px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #002d72,
-            #0057b8
-        );
+    background: #0f172a;
 
     color: white;
 
-    box-shadow:
-        0 5px 25px rgba(0, 45, 114, .18);
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 0 30px;
+}
+
+
+.logo h1 {
+
+    font-size: 24px;
+
+}
+
+
+.logo span {
+
+    font-size: 12px;
+
+    color: #cbd5e1;
+
 }
 
 
 /* =========================================================
-   BREADCRUMB
+   ESTADO EN VIVO
    ========================================================= */
 
-.breadcrumb {
+.live-status {
+
     display: flex;
+
     align-items: center;
 
     gap: 9px;
 
-    margin-bottom: 9px;
+    padding: 8px 13px;
 
-    font-size: 10px;
-    font-weight: 700;
+    border-radius: 20px;
 
-    letter-spacing: 1.3px;
+    background: rgba(34, 197, 94, .10);
 
-    opacity: .8;
-}
+    border: 1px solid rgba(34, 197, 94, .25);
 
-.breadcrumb-separator {
-    opacity: .5;
-}
+    color: #86efac;
 
-.breadcrumb strong {
-    opacity: 1;
-}
-
-
-/* =========================================================
-   TITULO
-   ========================================================= */
-
-.title-wrapper {
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-}
-
-.title-icon {
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-shrink: 0;
-
-    border-radius: 13px;
-
-    background: rgba(255,255,255,.14);
-
-    border: 1px solid rgba(255,255,255,.18);
-
-    font-size: 22px;
-}
-
-.title-wrapper h1 {
-    font-size: 25px;
+    font-size: 11px;
 
     font-weight: 800;
 
-    line-height: 1.15;
+    letter-spacing: .7px;
 }
 
-.title-wrapper p {
-    margin-top: 5px;
 
-    color: rgba(255,255,255,.76);
+.live-status-dot {
 
-    font-size: 13px;
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, .12);
+
+    animation: pulseLive 2s infinite;
+}
+
+
+@keyframes pulseLive {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .45;
+    }
+
 }
 
 
 /* =========================================================
-   BOTÓN VOLVER
+   LAYOUT
    ========================================================= */
 
-.btn-volver {
-    padding: 11px 16px;
+.reservas-layout {
 
-    border: 1px solid rgba(255,255,255,.2);
+    display: flex;
 
-    border-radius: 9px;
+    min-height: calc(100vh - 80px);
 
-    background: rgba(255,255,255,.1);
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+
+    width: 250px;
+
+    flex-shrink: 0;
+
+    background: #1e293b;
 
     color: white;
 
-    font-size: 13px;
-    font-weight: 700;
+    padding: 25px;
+}
+
+
+.sidebar h2 {
+
+    margin-bottom: 20px;
+
+}
+
+
+.sidebar ul {
+
+    list-style: none;
+
+}
+
+
+.sidebar li {
+
+    padding: 15px;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
 
     cursor: pointer;
 
     transition: .2s ease;
+
 }
 
-.btn-volver:hover {
-    background: rgba(255,255,255,.2);
 
-    transform: translateY(-1px);
+.sidebar li:hover {
+
+    background: #334155;
+
+}
+
+
+/* RESERVA ACTIVA */
+
+.sidebar li.active {
+
+    background: #334155;
+
+    box-shadow:
+        inset 3px 0 0 #3b82f6;
+
 }
 
 
@@ -183,15 +205,22 @@ body {
    ========================================================= */
 
 .reservas-content {
+
     flex: 1;
 
-    width: 100%;
+    min-width: 0;
 
-    max-width: 1500px;
-
-    margin: 0 auto;
+    width: 0;
 
     padding: 28px 38px 35px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eef4fb 0%,
+            #f5f8fc 45%,
+            #eaf1f8 100%
+        );
 }
 
 
@@ -200,8 +229,11 @@ body {
    ========================================================= */
 
 .powerapps-heading {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     gap: 25px;
@@ -209,20 +241,28 @@ body {
     margin-bottom: 18px;
 }
 
+
 .powerapps-title {
+
     display: flex;
+
     align-items: center;
 
     gap: 15px;
 }
 
+
 .powerapps-icon {
+
     width: 48px;
     height: 48px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
+
+    flex-shrink: 0;
 
     border-radius: 12px;
 
@@ -231,7 +271,9 @@ body {
     font-size: 21px;
 }
 
+
 .powerapps-title span {
+
     display: block;
 
     margin-bottom: 3px;
@@ -239,12 +281,15 @@ body {
     color: #0057b8;
 
     font-size: 10px;
+
     font-weight: 800;
 
     letter-spacing: 1.2px;
 }
 
+
 .powerapps-title h2 {
+
     color: #10243e;
 
     font-size: 20px;
@@ -252,7 +297,9 @@ body {
     font-weight: 800;
 }
 
+
 .powerapps-title p {
+
     margin-top: 4px;
 
     color: #718096;
@@ -262,11 +309,13 @@ body {
 
 
 /* =========================================================
-   ESTADO
+   ESTADO DEL SISTEMA
    ========================================================= */
 
 .connection-status {
+
     display: flex;
+
     align-items: center;
 
     gap: 8px;
@@ -282,10 +331,15 @@ body {
     color: #22743d;
 
     font-size: 11px;
+
     font-weight: 700;
+
+    flex-shrink: 0;
 }
 
+
 .status-dot {
+
     width: 8px;
     height: 8px;
 
@@ -294,10 +348,11 @@ body {
     background: #22c55e;
 
     box-shadow:
-        0 0 0 4px rgba(34,197,94,.12);
+        0 0 0 4px rgba(34, 197, 94, .12);
 
     animation: pulseStatus 2s infinite;
 }
+
 
 @keyframes pulseStatus {
 
@@ -309,6 +364,7 @@ body {
     50% {
         opacity: .45;
     }
+
 }
 
 
@@ -317,15 +373,17 @@ body {
    ========================================================= */
 
 .powerapps-card {
+
     width: 100%;
 
-    height: calc(100vh - 225px);
+    height: calc(100vh - 180px);
 
-    min-height: 650px;
+    min-height: 850px;
 
     overflow: hidden;
 
     display: flex;
+
     flex-direction: column;
 
     background: white;
@@ -344,12 +402,15 @@ body {
    ========================================================= */
 
 .powerapps-topbar {
+
     height: 48px;
 
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 0 15px;
@@ -359,8 +420,11 @@ body {
     border-bottom: 1px solid #e5eaf0;
 }
 
+
 .powerapps-label {
+
     display: flex;
+
     align-items: center;
 
     gap: 8px;
@@ -368,12 +432,15 @@ body {
     color: #53657c;
 
     font-size: 10px;
+
     font-weight: 800;
 
     letter-spacing: .8px;
 }
 
+
 .live-dot {
+
     width: 7px;
     height: 7px;
 
@@ -382,11 +449,14 @@ body {
     background: #16a34a;
 }
 
+
 .btn-recargar {
+
     width: 32px;
     height: 32px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -405,20 +475,24 @@ body {
     transition: .2s ease;
 }
 
+
 .btn-recargar:hover {
+
     background: #dce6f2;
 
     color: #0057b8;
 
     transform: rotate(180deg);
+
 }
 
 
 /* =========================================================
-   CONTENEDOR DEL IFRAME
+   CONTENEDOR IFRAME
    ========================================================= */
 
 .powerapps-container {
+
     position: relative;
 
     flex: 1;
@@ -436,39 +510,40 @@ body {
    ========================================================= */
 
 .powerapps-container iframe {
+
     position: absolute;
 
-    width: 145%;
+    width: 135%;
+    height: 135%;
 
-    height: 115%;
-
-    left: -3%;
-
-    top: -7.5%;
+    left: -13%;
+    top: 0;
 
     border: none;
 
     background: white;
 
-    transform: scale(.78);
+    transform: scale(0.72);
 
-    transform-origin: center center;
+    transform-origin: top left;
 }
-
 
 /* =========================================================
    CARGANDO
    ========================================================= */
 
 .powerapps-loading {
+
     position: absolute;
 
     inset: 0;
 
     display: flex;
+
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
     gap: 8px;
@@ -484,7 +559,9 @@ body {
         visibility .35s ease;
 }
 
+
 .powerapps-loading.hidden {
+
     opacity: 0;
 
     visibility: hidden;
@@ -492,13 +569,17 @@ body {
     pointer-events: none;
 }
 
+
 .powerapps-loading strong {
+
     color: #233a57;
 
     font-size: 14px;
 }
 
+
 .powerapps-loading span {
+
     font-size: 12px;
 
     color: #8392a6;
@@ -510,6 +591,7 @@ body {
    ========================================================= */
 
 .loading-spinner {
+
     width: 36px;
     height: 36px;
 
@@ -524,40 +606,13 @@ body {
     animation: spin 1s linear infinite;
 }
 
+
 @keyframes spin {
 
     to {
         transform: rotate(360deg);
     }
-}
 
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.reservas-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 15px 38px;
-
-    border-top: 1px solid #dbe4ee;
-
-    background: rgba(255,255,255,.7);
-
-    color: #718096;
-
-    font-size: 11px;
-}
-
-.reservas-footer span:first-child {
-    color: #52657d;
-
-    font-weight: 800;
-
-    letter-spacing: .5px;
 }
 
 
@@ -567,48 +622,95 @@ body {
 
 @media (max-width: 900px) {
 
-    .reservas-header {
-        padding: 20px;
+    .reservas-layout {
+
+        flex-direction: column;
+
     }
+
+
+    .sidebar {
+
+        width: 100%;
+
+        padding: 15px 20px;
+
+    }
+
+
+    .sidebar h2 {
+
+        margin-bottom: 10px;
+
+    }
+
+
+    .sidebar ul {
+
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+    }
+
+
+    .sidebar li {
+
+        margin-bottom: 0;
+
+        padding: 12px 15px;
+
+    }
+
 
     .reservas-content {
+
+        width: 100%;
+
         padding: 22px 20px 25px;
+
     }
 
+
     .powerapps-heading {
+
         align-items: flex-start;
 
         flex-direction: column;
+
     }
 
-    .powerapps-card {
-        height: calc(100vh - 275px);
-
-        min-height: 600px;
-    }
 
     .connection-status {
+
         align-self: flex-start;
+
     }
 
 
-    /* =====================================================
-       IFRAME RESPONSIVE
-       ===================================================== */
+    .powerapps-card {
+
+        height: calc(100vh - 250px);
+
+        min-height: 700px;
+
+    }
+
 
     .powerapps-container iframe {
-        width: 150%;
 
-        height: 120%;
+        width: 100%;
 
-        left: -20%;
+        height: 100%;
 
-        top: -10%;
+        left: 0;
 
-        transform: scale(.70);
+        top: 0;
 
-        transform-origin: center center;
     }
+
 }
 
 
@@ -618,66 +720,106 @@ body {
 
 @media (max-width: 600px) {
 
-    .reservas-header {
+    .topbar {
+
+        padding: 0 20px;
+
+    }
+
+
+    .logo h1 {
+
+        font-size: 20px;
+
+    }
+
+
+    .logo span {
+
+        font-size: 10px;
+
+    }
+
+
+    .live-status {
+
+        padding: 7px 10px;
+
+        font-size: 10px;
+
+    }
+
+
+    .sidebar {
+
+        padding: 15px;
+
+    }
+
+
+    .sidebar ul {
+
+        display: block;
+
+    }
+
+
+    .sidebar li {
+
+        margin-bottom: 8px;
+
+    }
+
+
+    .reservas-content {
+
+        padding: 18px 15px 20px;
+
+    }
+
+
+    .powerapps-title {
+
         align-items: flex-start;
 
-        flex-direction: column;
     }
 
-    .header-actions {
-        width: 100%;
-    }
-
-    .btn-volver {
-        width: 100%;
-    }
-
-    .title-wrapper h1 {
-        font-size: 21px;
-    }
 
     .powerapps-title h2 {
+
         font-size: 18px;
+
     }
+
 
     .powerapps-title p {
+
         display: none;
+
     }
 
+
     .powerapps-card {
+
         height: calc(100vh - 315px);
 
         min-height: 550px;
 
         border-radius: 12px;
+
     }
 
-
-    /* =====================================================
-       IFRAME MÓVIL
-       ===================================================== */
 
     .powerapps-container iframe {
-        width: 160%;
 
-        height: 125%;
+        width: 100%;
 
-        left: -25%;
+        height: 100%;
 
-        top: -12.5%;
+        left: 0;
 
-        transform: scale(.60);
+        top: 0;
 
-        transform-origin: center center;
     }
 
-    .reservas-footer {
-        padding: 13px 20px;
-
-        flex-direction: column;
-
-        gap: 5px;
-
-        align-items: flex-start;
-    }
 }

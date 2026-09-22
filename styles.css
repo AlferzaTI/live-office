@@ -1,318 +1,786 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-body{
-    background:#eef2f7;
-    min-height:100vh;
+body {
+    background: #eef2f7;
+    min-height: 100vh;
 }
 
-/* HEADER */
 
-.topbar{
+/* =========================================================
+   TOPBAR
+   IGUAL A PERSONAL / RESERVA
+========================================================= */
 
-    height:80px;
-
-    background:#0f172a;
-
-    color:white;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:0 30px;
+.topbar {
+    position: relative;
+    height: 80px;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    overflow: hidden;
 }
 
-.logo h1{
-    font-size:24px;
+
+/* =========================================================
+   LOGO CENTRADO
+========================================================= */
+
+.logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+    white-space: nowrap;
 }
 
-.logo span{
-    font-size:12px;
-    color:#cbd5e1;
+.logo h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    margin: 0;
+
+    animation:
+        logoTitleAnimation 1.2s ease-in-out infinite;
 }
 
-.search-container input{
+.logo span {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    color: #cbd5e1;
+    letter-spacing: .5px;
 
-    width:320px;
-
-    padding:12px;
-
-    border:none;
-
-    border-radius:10px;
-
-    outline:none;
+    animation:
+        logoSubtitleAnimation 1.2s ease-in-out infinite;
 }
 
-/* LAYOUT */
 
-.container{
+/* =========================================================
+   ANIMACIÓN DEL TÍTULO
+========================================================= */
 
-    display:flex;
+@keyframes logoTitleAnimation {
 
-    min-height:calc(100vh - 130px);
-}
+    0% {
+        opacity: .75;
 
-/* SIDEBAR */
+        transform: translateY(2px);
 
-.sidebar{
-
-    width:250px;
-
-    background:#1e293b;
-
-    color:white;
-
-    padding:25px;
-}
-
-.sidebar h2{
-    margin-bottom:20px;
-}
-
-.sidebar ul{
-    list-style:none;
-}
-
-.sidebar li{
-
-    padding:15px;
-
-    margin-bottom:10px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-}
-
-.sidebar li:hover{
-    background:#334155;
-}
-
-/* MAIN */
-
-.content{
-
-    flex:1;
-
-    padding:25px;
-}
-
-/* STATS */
-
-.stats{
-    display:flex;
-    justify-content:space-between;
-    gap:20px;
-    margin-bottom:25px;
-}
-
-.stat{
-    flex:1;
-    padding:30px;
-    border-radius:15px;
-    color:white;
-    text-align:center;
-    font-weight:bold;
-    box-shadow:0 5px 15px rgba(0,0,0,.15);
-}
-
-.stat span{
-
-    display:block;
-
-    font-size:28px;
-
-    margin-bottom:5px;
-}
-
-.green{
-    background:#22c55e;
-}
-
-.red{
-    background:#ef4444;
-}
-
-.yellow{
-    background:#f59e0b;
-}
-
-.gray{
-    background:#64748b;
-}
-
-/* TITULO */
-
-.section-title{
-
-    margin-bottom:20px;
-
-    color:#0f172a;
-}
-
-/* GRID */
-
-#officeGrid{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-
-    gap:20px;
-}
-
-/* CARD */
-
-.card{
-
-    background:white;
-
-    border-radius:18px;
-
-    padding:20px;
-
-    box-shadow:0 6px 20px rgba(0,0,0,.08);
-
-    transition:.2s;
-}
-
-.card:hover{
-
-    transform:translateY(-5px);
-
-    box-shadow:0 10px 25px rgba(0,0,0,.15);
-}
-
-.card h3{
-
-    margin-bottom:10px;
-
-    color:#0f172a;
-}
-
-.card p{
-
-    color:#64748b;
-
-    word-break:break-word;
-}
-
-.status{
-
-    margin-top:15px;
-
-    display:inline-block;
-
-    padding:8px 14px;
-
-    border-radius:30px;
-
-    color:white;
-
-    font-size:13px;
-
-    font-weight:600;
-}
-
-.disponible{
-    background:#22c55e;
-}
-
-.ocupado{
-    background:#ef4444;
-}
-
-.ausente{
-    background:#f59e0b;
-}
-
-.offline{
-    background:#64748b;
-}
-
-/* FOOTER */
-
-footer{
-
-    height:50px;
-
-    background:#0f172a;
-
-    color:white;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:13px;
-}
-/* ========== PANTALLA DE CARGA ========== */
-
-.loading-overlay{
-
-    position:fixed;
-
-    inset:0;
-
-    background:rgba(238,242,247,0.97);
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:18px;
-
-    z-index:9999;
-
-    transition:opacity .3s ease;
-}
-
-.loading-overlay.oculto{
-
-    opacity:0;
-
-    pointer-events:none;
-}
-
-.gear-spinner{
-
-    font-size:56px;
-
-    animation:girar 1.4s linear infinite;
-}
-
-@keyframes girar{
-
-    from{
-        transform:rotate(0deg);
+        text-shadow:
+            0 0 0 rgba(255, 255, 255, 0);
     }
 
-    to{
-        transform:rotate(360deg);
+    50% {
+        opacity: 1;
+
+        transform: translateY(0);
+
+        text-shadow:
+            0 0 14px rgba(255, 255, 255, .25);
+    }
+
+    100% {
+        opacity: .75;
+
+        transform: translateY(2px);
+
+        text-shadow:
+            0 0 0 rgba(255, 255, 255, 0);
     }
 }
 
-.loading-overlay p{
 
-    font-size:15px;
+@keyframes logoSubtitleAnimation {
 
-    font-weight:600;
+    0%,
+    100% {
+        opacity: .55;
+    }
 
-    color:#0f172a;
+    50% {
+        opacity: 1;
+    }
+}
 
-    letter-spacing:.3px;
+
+/* =========================================================
+   ESTADO EN VIVO
+========================================================= */
+
+.live-status {
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 8px 13px;
+
+    border-radius: 20px;
+
+    background: rgba(34, 197, 94, .10);
+
+    border: 1px solid rgba(34, 197, 94, .25);
+
+    color: #86efac;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: .7px;
+
+    position: relative;
+
+    z-index: 3;
+}
+
+
+.live-status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px rgba(34, 197, 94, .12);
+
+    animation: pulseLive 2s infinite;
+}
+
+
+@keyframes pulseLive {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .45;
+    }
+}
+
+
+/* =========================================================
+   BUSCADOR
+   AHORA DEBAJO DE LA BARRA NEGRA
+========================================================= */
+
+.search-container {
+    position: absolute;
+
+    top: 95px;
+    right: 30px;
+
+    z-index: 10;
+}
+
+
+.search-container input {
+    width: 320px;
+
+    padding: 12px 15px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background: white;
+
+    color: #0f172a;
+
+    font-size: 13px;
+
+    box-shadow:
+        0 3px 10px rgba(15, 23, 42, .08);
+
+    transition: .2s ease;
+}
+
+
+.search-container input::placeholder {
+    color: #94a3b8;
+}
+
+
+.search-container input:focus {
+    border-color: #3b82f6;
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .10),
+        0 4px 12px rgba(15, 23, 42, .08);
+}
+
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.container {
+    display: flex;
+
+    min-height: calc(100vh - 130px);
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    width: 250px;
+
+    flex-shrink: 0;
+
+    background: #1e293b;
+
+    color: white;
+
+    padding: 25px;
+}
+
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+
+.sidebar ul {
+    list-style: none;
+}
+
+
+.sidebar li {
+    padding: 15px;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+.sidebar li:hover {
+    background: #334155;
+}
+
+
+/* OFICINA ACTIVA */
+
+.sidebar li:first-child {
+    background: #334155;
+
+    box-shadow:
+        inset 3px 0 0 #3b82f6;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.content {
+    flex: 1;
+
+    padding: 25px;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   ESTADÍSTICAS
+========================================================= */
+
+.stats {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+
+    /*
+       Espacio adicional para que el buscador
+       quede arriba sin tapar las estadísticas.
+    */
+    padding-top: 45px;
+}
+
+
+.stat {
+    flex: 1;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    color: white;
+
+    text-align: center;
+
+    font-weight: bold;
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, .15);
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+.stat:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, .18);
+}
+
+
+.stat span {
+    display: block;
+
+    font-size: 28px;
+
+    margin-bottom: 5px;
+}
+
+
+.stat small {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   COLORES ESTADÍSTICAS
+========================================================= */
+
+.green {
+    background: #22c55e;
+}
+
+
+.red {
+    background: #ef4444;
+}
+
+
+.yellow {
+    background: #f59e0b;
+}
+
+
+.gray {
+    background: #64748b;
+}
+
+
+/* =========================================================
+   TÍTULO DE SECCIÓN
+========================================================= */
+
+.section-title {
+    margin-bottom: 20px;
+
+    color: #0f172a;
+
+    font-size: 22px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   GRID DE PERSONAL
+========================================================= */
+
+#officeGrid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(250px, 1fr));
+
+    gap: 20px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, .08);
+
+    transition: .2s ease;
+}
+
+
+.card:hover {
+    transform: translateY(-5px);
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, .15);
+}
+
+
+.card h3 {
+    margin-bottom: 10px;
+
+    color: #0f172a;
+}
+
+
+.card p {
+    color: #64748b;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.status {
+    margin-top: 15px;
+
+    display: inline-block;
+
+    padding: 8px 14px;
+
+    border-radius: 30px;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.disponible {
+    background: #22c55e;
+}
+
+
+.ocupado {
+    background: #ef4444;
+}
+
+
+.ausente {
+    background: #f59e0b;
+}
+
+
+.offline {
+    background: #64748b;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    height: 50px;
+
+    background: #0f172a;
+
+    color: white;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   PANTALLA DE CARGA
+========================================================= */
+
+.loading-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(238, 242, 247, 0.97);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+
+    z-index: 9999;
+
+    transition: opacity .3s ease;
+}
+
+
+.loading-overlay.oculto {
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+.gear-spinner {
+    font-size: 56px;
+
+    animation:
+        girar 1.4s linear infinite;
+}
+
+
+@keyframes girar {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+.loading-overlay p {
+    font-size: 15px;
+
+    font-weight: 600;
+
+    color: #0f172a;
+
+    letter-spacing: .3px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .stats {
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        min-width: calc(50% - 10px);
+    }
+
+    #officeGrid {
+        grid-template-columns:
+            repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 210px;
+        padding: 20px;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .search-container {
+        right: 20px;
+    }
+
+    .search-container input {
+        width: 260px;
+    }
+
+    .stats {
+        padding-top: 50px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        padding: 0 18px;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .logo span {
+        font-size: 10px;
+    }
+
+    .live-status {
+        padding: 7px 10px;
+
+        font-size: 10px;
+    }
+
+    .live-status-dot {
+        width: 7px;
+        height: 7px;
+    }
+
+
+    .search-container {
+        top: 92px;
+
+        left: 18px;
+        right: 18px;
+    }
+
+    .search-container input {
+        width: 100%;
+    }
+
+
+    .container {
+        min-height: calc(100vh - 130px);
+    }
+
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+
+    .sidebar ul {
+        display: flex;
+
+        gap: 8px;
+
+        overflow-x: auto;
+    }
+
+
+    .sidebar li {
+        flex-shrink: 0;
+
+        margin-bottom: 0;
+
+        padding: 11px 14px;
+
+        font-size: 12px;
+    }
+
+
+    .content {
+        padding: 18px;
+    }
+
+
+    .stats {
+        padding-top: 55px;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+
+    .stat {
+        width: 100%;
+
+        min-width: 0;
+
+        padding: 20px;
+    }
+
+
+    #officeGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   MOBILE PEQUEÑO
+========================================================= */
+
+@media (max-width: 430px) {
+
+    .logo h1 {
+        font-size: 16px;
+
+        letter-spacing: .5px;
+    }
+
+    .logo span {
+        font-size: 8px;
+    }
+
+
+    .live-status {
+        padding: 6px 8px;
+
+        gap: 6px;
+
+        font-size: 9px;
+    }
+
+
+    .live-status-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+
+    .sidebar li {
+        padding: 10px 12px;
+    }
 }

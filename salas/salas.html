@@ -1,9 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Salas | ALFERZA LIVE OFFICE</title>
 
@@ -11,19 +17,52 @@
     <link rel="stylesheet" href="../styles.css">
 
     <!-- CSS PROPIO DE SALAS -->
-    <link rel="stylesheet" href="salas.css?v=20260921b">
+    <link rel="stylesheet" href="salas.css?v=20260921c">
+
 </head>
 
+
 <body>
+
+
+    <!-- =====================================================
+         BARRA SUPERIOR
+    ====================================================== -->
+
+    <header class="topbar">
+
+        <div class="logo">
+
+            <h1>ALFERZA LIVE OFFICE</h1>
+
+            <span>Monitoreo en tiempo real</span>
+
+        </div>
+
+
+        <div class="live-status">
+
+            <span class="live-status-dot"></span>
+
+            <span>EN VIVO</span>
+
+        </div>
+
+    </header>
+
+
 
     <!-- =====================================================
          ESTRUCTURA PRINCIPAL
     ====================================================== -->
+
     <div class="container">
+
 
         <!-- =================================================
              MENÚ LATERAL
         ================================================== -->
+
         <aside class="sidebar">
 
             <h2>MENÚ</h2>
@@ -38,7 +77,10 @@
                     👥 Personal
                 </li>
 
-                <li onclick="window.location.href='salas.html'">
+                <li
+                    class="active"
+                    onclick="window.location.href='salas.html'"
+                >
                     📅 Salas
                 </li>
 
@@ -55,45 +97,65 @@
         </aside>
 
 
+
         <!-- =================================================
              CONTENIDO DE SALAS
         ================================================== -->
+
         <main class="page">
+
 
             <!-- =================================================
                  HEADER
             ================================================== -->
+
             <header class="page-header">
 
                 <div class="header-glow"></div>
 
+
                 <div class="header-left">
 
                     <div class="breadcrumb">
+
                         <span>OFICINA</span>
-                        <span class="breadcrumb-separator">/</span>
+
+                        <span class="breadcrumb-separator">
+                            /
+                        </span>
+
                         <strong>SALAS</strong>
+
                     </div>
+
 
                     <div class="title-wrapper">
 
                         <div class="title-icon">
+
                             <span></span>
                             <span></span>
                             <span></span>
+
                         </div>
 
+
                         <div class="title-content">
-                            <h1>Salas Corporativas</h1>
+
+                            <h1>
+                                Salas Corporativas
+                            </h1>
 
                             <p>
                                 Monitoreo de reservas y ocupación de espacios.
                             </p>
+
                         </div>
 
                     </div>
 
                 </div>
+
 
 
                 <div class="header-date">
@@ -102,9 +164,17 @@
                         <span></span>
                     </div>
 
+
                     <div>
-                        <span class="date-label">HOY</span>
-                        <strong id="fechaActual">21 SEP 2026</strong>
+
+                        <span class="date-label">
+                            HOY
+                        </span>
+
+                        <strong id="fechaActual">
+                            21 SEP 2026
+                        </strong>
+
                     </div>
 
                 </div>
@@ -112,19 +182,25 @@
             </header>
 
 
+
             <!-- =================================================
                  STATS
             ================================================== -->
+
             <section class="stats-grid">
 
+
                 <!-- TOTAL SALAS -->
+
                 <article class="stat-card stat-blue">
 
                     <div class="stat-card-glow"></div>
 
+
                     <div class="stat-top">
 
                         <div>
+
                             <span class="stat-label">
                                 Total de salas
                             </span>
@@ -132,36 +208,54 @@
                             <span class="stat-mini-label">
                                 ESPACIOS DISPONIBLES
                             </span>
+
                         </div>
+
 
                         <div class="stat-icon blue">
+
                             <span class="building-icon"></span>
+
                         </div>
 
                     </div>
 
+
                     <div class="stat-value">
-                        <strong id="totalSalas">3</strong>
-                        <span>espacios</span>
+
+                        <strong id="totalSalas">
+                            3
+                        </strong>
+
+                        <span>
+                            espacios
+                        </span>
+
                     </div>
+
 
                     <div class="stat-description">
                         Salas registradas en el sistema
                     </div>
+
 
                     <div class="stat-line"></div>
 
                 </article>
 
 
+
                 <!-- RESERVAS HOY -->
+
                 <article class="stat-card stat-purple">
 
                     <div class="stat-card-glow"></div>
 
+
                     <div class="stat-top">
 
                         <div>
+
                             <span class="stat-label">
                                 Reservas de hoy
                             </span>
@@ -169,36 +263,54 @@
                             <span class="stat-mini-label">
                                 AGENDA DEL DÍA
                             </span>
+
                         </div>
+
 
                         <div class="stat-icon purple">
+
                             <span class="calendar-icon"></span>
+
                         </div>
 
                     </div>
 
+
                     <div class="stat-value">
-                        <strong id="reservasHoy">0</strong>
-                        <span>reservas</span>
+
+                        <strong id="reservasHoy">
+                            0
+                        </strong>
+
+                        <span>
+                            reservas
+                        </span>
+
                     </div>
+
 
                     <div class="stat-description">
                         Reservas registradas para hoy
                     </div>
+
 
                     <div class="stat-line"></div>
 
                 </article>
 
 
+
                 <!-- ACTIVAS -->
+
                 <article class="stat-card stat-green">
 
                     <div class="stat-card-glow"></div>
 
+
                     <div class="stat-top">
 
                         <div>
+
                             <span class="stat-label">
                                 Reservas activas
                             </span>
@@ -206,36 +318,54 @@
                             <span class="stat-mini-label">
                                 EN TIEMPO REAL
                             </span>
+
                         </div>
+
 
                         <div class="stat-icon green">
+
                             <span class="active-icon"></span>
+
                         </div>
 
                     </div>
 
+
                     <div class="stat-value">
-                        <strong id="reservasActivas">0</strong>
-                        <span>activas</span>
+
+                        <strong id="reservasActivas">
+                            0
+                        </strong>
+
+                        <span>
+                            activas
+                        </span>
+
                     </div>
+
 
                     <div class="stat-description">
                         Reservas actualmente vigentes
                     </div>
+
 
                     <div class="stat-line"></div>
 
                 </article>
 
 
+
                 <!-- CANCELADAS -->
+
                 <article class="stat-card stat-red">
 
                     <div class="stat-card-glow"></div>
 
+
                     <div class="stat-top">
 
                         <div>
+
                             <span class="stat-label">
                                 Canceladas
                             </span>
@@ -243,22 +373,36 @@
                             <span class="stat-mini-label">
                                 ESTADO DE RESERVAS
                             </span>
+
                         </div>
+
 
                         <div class="stat-icon red">
+
                             <span class="cancel-icon"></span>
+
                         </div>
 
                     </div>
 
+
                     <div class="stat-value">
-                        <strong id="reservasCanceladas">0</strong>
-                        <span>reservas</span>
+
+                        <strong id="reservasCanceladas">
+                            0
+                        </strong>
+
+                        <span>
+                            reservas
+                        </span>
+
                     </div>
+
 
                     <div class="stat-description">
                         Reservas canceladas registradas
                     </div>
+
 
                     <div class="stat-line"></div>
 
@@ -267,23 +411,32 @@
             </section>
 
 
+
             <!-- =================================================
                  ESTADO DE SALAS
             ================================================== -->
+
             <section class="section">
 
+
                 <div class="section-header">
+
 
                     <div class="section-heading">
 
                         <span class="section-kicker">
+
                             <span class="kicker-dot"></span>
+
                             ESPACIOS CORPORATIVOS
+
                         </span>
+
 
                         <h2>
                             Estado de las salas
                         </h2>
+
 
                         <p>
                             Consulta la disponibilidad actual de cada espacio.
@@ -292,16 +445,24 @@
                     </div>
 
 
+
                     <div class="legend">
 
                         <span>
+
                             <i class="legend-dot available-dot"></i>
+
                             Disponible
+
                         </span>
 
+
                         <span>
+
                             <i class="legend-dot busy-dot"></i>
+
                             Ocupada
+
                         </span>
 
                     </div>
@@ -309,24 +470,38 @@
                 </div>
 
 
+
                 <div class="salas-grid">
+
 
                     <!-- =================================================
                          SALA 2
                     ================================================== -->
+
                     <article class="sala-card sala-card-blue">
 
                         <div class="sala-card-top-line"></div>
 
+
                         <div class="sala-header">
 
                             <div class="sala-number">
-                                <span>02</span>
+
+                                <span>
+                                    02
+                                </span>
+
                             </div>
 
+
                             <div class="sala-status available">
+
                                 <i></i>
-                                <span>Disponible</span>
+
+                                <span>
+                                    Disponible
+                                </span>
+
                             </div>
 
                         </div>
@@ -340,13 +515,18 @@
                                     SALA DE REUNIONES
                                 </span>
 
+
                                 <h3>
                                     Sala 2
                                 </h3>
 
+
                                 <p class="location">
+
                                     <span class="location-icon"></span>
+
                                     Piso 2
+
                                 </p>
 
                             </div>
@@ -387,22 +567,35 @@
                     </article>
 
 
+
                     <!-- =================================================
                          SALA 3
                     ================================================== -->
+
                     <article class="sala-card sala-card-purple">
 
                         <div class="sala-card-top-line"></div>
 
+
                         <div class="sala-header">
 
                             <div class="sala-number">
-                                <span>03</span>
+
+                                <span>
+                                    03
+                                </span>
+
                             </div>
 
+
                             <div class="sala-status busy">
+
                                 <i></i>
-                                <span>Ocupada</span>
+
+                                <span>
+                                    Ocupada
+                                </span>
+
                             </div>
 
                         </div>
@@ -416,13 +609,18 @@
                                     SALA DE REUNIONES
                                 </span>
 
+
                                 <h3>
                                     Sala 3
                                 </h3>
 
+
                                 <p class="location">
+
                                     <span class="location-icon"></span>
+
                                     Piso 3
+
                                 </p>
 
                             </div>
@@ -463,22 +661,35 @@
                     </article>
 
 
+
                     <!-- =================================================
                          COMEDOR
                     ================================================== -->
+
                     <article class="sala-card sala-card-orange">
 
                         <div class="sala-card-top-line"></div>
 
+
                         <div class="sala-header">
 
                             <div class="sala-number dining">
-                                <span>CO</span>
+
+                                <span>
+                                    CO
+                                </span>
+
                             </div>
 
+
                             <div class="sala-status available">
+
                                 <i></i>
-                                <span>Disponible</span>
+
+                                <span>
+                                    Disponible
+                                </span>
+
                             </div>
 
                         </div>
@@ -492,13 +703,18 @@
                                     ESPACIO COMÚN
                                 </span>
 
+
                                 <h3>
                                     Comedor
                                 </h3>
 
+
                                 <p class="location">
+
                                     <span class="location-icon"></span>
+
                                     Piso 3
+
                                 </p>
 
                             </div>
@@ -543,10 +759,13 @@
             </section>
 
 
+
             <!-- =================================================
                  RESERVAS
             ================================================== -->
+
             <section class="reservas-section">
+
 
                 <div class="reservas-card">
 
@@ -554,18 +773,24 @@
 
 
                     <!-- HEADER TABLA -->
+
                     <div class="reservas-header">
 
                         <div class="reservas-title">
 
                             <span class="section-kicker">
+
                                 <span class="kicker-dot"></span>
+
                                 AGENDA
+
                             </span>
+
 
                             <h2>
                                 Reservas registradas
                             </h2>
+
 
                             <p>
                                 Historial de reservas correspondientes al día actual.
@@ -589,7 +814,9 @@
                     </div>
 
 
+
                     <!-- TABLA -->
+
                     <div class="table-wrapper">
 
                         <table>
@@ -634,16 +861,26 @@
                     </div>
 
 
+
                     <!-- ESTADO VACÍO -->
-                    <div id="emptyState" class="empty-state" hidden>
+
+                    <div
+                        id="emptyState"
+                        class="empty-state"
+                        hidden
+                    >
 
                         <div class="empty-icon">
+
                             <span></span>
+
                         </div>
+
 
                         <strong>
                             No hay reservas registradas
                         </strong>
+
 
                         <span>
                             No existen reservas para mostrar.
@@ -656,10 +893,13 @@
             </section>
 
 
+
             <!-- =================================================
                  FOOTER
             ================================================== -->
+
             <footer class="page-footer">
+
 
                 <div class="footer-brand">
 
@@ -667,11 +907,13 @@
                         A
                     </span>
 
+
                     <div>
 
                         <strong>
                             ALFERZA LIVE OFFICE
                         </strong>
+
 
                         <span>
                             Sistema de gestión corporativa
@@ -697,16 +939,26 @@
     </div>
 
 
+
     <!-- =====================================================
          MICROSOFT AUTH
     ====================================================== -->
+
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+
 
 
     <!-- =====================================================
          JS PRINCIPAL
     ====================================================== -->
-    <script type="module" src="salas.js?v=20260921b"></script>
+
+    <script
+        type="module"
+        src="salas.js?v=20260921c"
+    ></script>
+
 
 </body>
+
 </html>
+

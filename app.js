@@ -44,6 +44,44 @@ const loadingMessage =
 
 
 /* =========================================
+   SESIÓN
+   ========================================= */
+
+/*
+ * Esta variable permite saber si el usuario
+ * ya pasó correctamente la validación durante
+ * la sesión actual del navegador.
+ *
+ * sessionStorage:
+ * - Se mantiene al navegar entre páginas.
+ * - Se mantiene mientras la pestaña siga abierta.
+ * - Se elimina al cerrar la pestaña.
+ */
+
+const SESION_VALIDADA_KEY =
+    "alferzaSesionValidada";
+
+
+function sesionYaValidada() {
+
+    return sessionStorage.getItem(
+        SESION_VALIDADA_KEY
+    ) === "true";
+
+}
+
+
+function marcarSesionValidada() {
+
+    sessionStorage.setItem(
+        SESION_VALIDADA_KEY,
+        "true"
+    );
+
+}
+
+
+/* =========================================
    MENSAJE DE CARGA
    ========================================= */
 
@@ -67,7 +105,11 @@ function mostrarCarga(mensaje) {
 
     cambiarMensaje(mensaje);
 
-    overlay.classList.remove("oculto");
+    if (overlay) {
+
+        overlay.classList.remove("oculto");
+
+    }
 
 }
 
@@ -78,7 +120,11 @@ function mostrarCarga(mensaje) {
 
 function ocultarCarga() {
 
-    overlay.classList.add("oculto");
+    if (overlay) {
+
+        overlay.classList.add("oculto");
+
+    }
 
 }
 
@@ -477,8 +523,8 @@ async function cargarUsuarios(
 ) {
 
     /*
-     * Solo mostramos el overlay durante
-     * la carga inicial.
+     * La pantalla azul solo se muestra
+     * cuando realmente corresponde.
      */
 
     if (mostrarPantalla) {
@@ -559,6 +605,23 @@ async function cargarUsuarios(
 
 
         /* -----------------------------------------
+           MARCAR SESIÓN COMO VALIDADA
+           ----------------------------------------- */
+
+        /*
+         * IMPORTANTE:
+         * Solo se guarda después de que:
+         *
+         * 1. Microsoft autenticó
+         * 2. Se obtuvieron los usuarios
+         * 3. Se obtuvieron los estados
+         * 4. Se renderizó correctamente
+         */
+
+        marcarSesionValidada();
+
+
+        /* -----------------------------------------
            OCULTAR PANTALLA
            ----------------------------------------- */
 
@@ -593,113 +656,154 @@ async function cargarUsuarios(
 
 
         /*
-         * Si es la carga inicial,
-         * NO mostramos información parcial.
+         * Si es una actualización silenciosa,
+         * no molestamos al usuario con la pantalla.
          */
 
-        if (mostrarPantalla) {
+        if (!mostrarPantalla) {
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           REINTENTO AUTOMÁTICO
+           ----------------------------------------- */
+
+        cambiarMensaje(
+            "Conectando con Microsoft..."
+        );
+
+
+        await esperar(1500);
+
+
+        try {
+
+            /* -----------------------------------------
+               AUTENTICACIÓN
+               ----------------------------------------- */
+
+            const TOKEN =
+                await obtenerToken();
+
+
+            /* -----------------------------------------
+               USUARIOS
+               ----------------------------------------- */
 
             cambiarMensaje(
-                "Conectando con Microsoft..."
+                "Consultando personal..."
+            );
+
+
+            const data =
+                await obtenerUsuarios(
+                    TOKEN
+                );
+
+
+            const usuarios =
+                data.value.filter(
+                    usuario =>
+                        usuario.mail &&
+                        usuario.mail
+                            .toLowerCase()
+                            .endsWith(
+                                "@alferza.pe"
+                            )
+                );
+
+
+            /* -----------------------------------------
+               PRESENCIA
+               ----------------------------------------- */
+
+            cambiarMensaje(
+                "Consultando estados..."
+            );
+
+
+            const idsUsuarios =
+                usuarios.map(
+                    usuario =>
+                        usuario.id
+                );
+
+
+            const presenciaPorId =
+                await obtenerPresencia(
+                    TOKEN,
+                    idsUsuarios
+                );
+
+
+            /* -----------------------------------------
+               MOSTRAR INFORMACIÓN
+               ----------------------------------------- */
+
+            renderizarUsuarios(
+                usuarios,
+                presenciaPorId
+            );
+
+
+            /* -----------------------------------------
+               MARCAR SESIÓN VALIDADA
+               ----------------------------------------- */
+
+            marcarSesionValidada();
+
+
+            /* -----------------------------------------
+               FINALIZAR CARGA
+               ----------------------------------------- */
+
+            cambiarMensaje(
+                "Información actualizada"
+            );
+
+
+            await esperar(250);
+
+
+            ocultarCarga();
+
+
+            console.log(
+                "Conexión recuperada automáticamente."
+            );
+
+
+            return;
+
+        }
+
+
+        catch (errorSegundoIntento) {
+
+            console.error(
+                "Segundo intento fallido:",
+                errorSegundoIntento
+            );
+
+
+            cambiarMensaje(
+                "No se pudo conectar con Microsoft"
             );
 
 
             /*
-             * Reintentar automáticamente.
+             * IMPORTANTE:
+             * No marcamos la sesión como validada
+             * si la carga falló.
              *
-             * Esto evita que el usuario tenga
-             * que hacer Ctrl + Shift + R.
+             * Así, al volver a intentar entrar
+             * podremos volver a validar.
              */
 
-            await esperar(1500);
-
-
-            try {
-
-                const TOKEN =
-                    await obtenerToken();
-
-
-                const data =
-                    await obtenerUsuarios(
-                        TOKEN
-                    );
-
-
-                const usuarios =
-                    data.value.filter(
-                        usuario =>
-                            usuario.mail &&
-                            usuario.mail
-                                .toLowerCase()
-                                .endsWith(
-                                    "@alferza.pe"
-                                )
-                    );
-
-
-                cambiarMensaje(
-                    "Consultando estados..."
-                );
-
-
-                const idsUsuarios =
-                    usuarios.map(
-                        usuario =>
-                            usuario.id
-                    );
-
-
-                const presenciaPorId =
-                    await obtenerPresencia(
-                        TOKEN,
-                        idsUsuarios
-                    );
-
-
-                renderizarUsuarios(
-                    usuarios,
-                    presenciaPorId
-                );
-
-
-                cambiarMensaje(
-                    "Información actualizada"
-                );
-
-
-                await esperar(250);
-
-
-                ocultarCarga();
-
-
-                console.log(
-                    "Conexión recuperada automáticamente."
-                );
-
-
-                return;
-
-            }
-
-
-            catch (errorSegundoIntento) {
-
-                console.error(
-                    "Segundo intento fallido:",
-                    errorSegundoIntento
-                );
-
-
-                cambiarMensaje(
-                    "No se pudo conectar con Microsoft"
-                );
-
-
-                return;
-
-            }
+            return;
 
         }
 
@@ -712,7 +816,50 @@ async function cargarUsuarios(
    INICIO
    ========================================= */
 
-cargarUsuarios(true);
+/*
+ * PRIMERA ENTRADA:
+ *
+ * Si nunca se validó la sesión:
+ * -> aparece pantalla azul
+ * -> autentica
+ * -> carga información
+ * -> guarda la validación
+ *
+ *
+ * SI YA SE VALIDÓ:
+ *
+ * -> NO aparece pantalla azul
+ * -> carga directamente la información
+ *
+ *
+ * Esto permite navegar:
+ *
+ * Index
+ *   ↓
+ * Personal
+ *   ↓
+ * Reservas
+ *   ↓
+ * Salas
+ *   ↓
+ * Comunicados
+ *   ↓
+ * Index
+ *
+ * sin volver a mostrar
+ * "Verificando acceso..."
+ */
+
+if (sesionYaValidada()) {
+
+    cargarUsuarios(false);
+
+}
+else {
+
+    cargarUsuarios(true);
+
+}
 
 
 /* =========================================
@@ -720,6 +867,13 @@ cargarUsuarios(true);
    ========================================= */
 
 setInterval(() => {
+
+    /*
+     * false = NO mostrar pantalla azul.
+     *
+     * Los usuarios siguen viendo
+     * la aplicación mientras se actualiza.
+     */
 
     cargarUsuarios(false);
 

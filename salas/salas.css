@@ -3,6 +3,7 @@
    ========================================================= */
 
 :root {
+
     --blue-dark: #00205c;
     --blue: #0a84ff;
     --blue-light: #4da3ff;
@@ -27,9 +28,14 @@
     --card: #ffffff;
     --border: #dbe5ef;
 
-    --shadow-sm: 0 4px 14px rgba(16, 33, 63, 0.06);
-    --shadow-md: 0 12px 30px rgba(16, 33, 63, 0.09);
-    --shadow-lg: 0 20px 50px rgba(16, 33, 63, 0.12);
+    --shadow-sm:
+        0 4px 14px rgba(16, 33, 63, 0.06);
+
+    --shadow-md:
+        0 12px 30px rgba(16, 33, 63, 0.09);
+
+    --shadow-lg:
+        0 20px 50px rgba(16, 33, 63, 0.12);
 
     --radius: 18px;
 }
@@ -40,15 +46,21 @@
    ========================================================= */
 
 .topbar {
+
     position: relative;
+
     width: 100%;
+
     height: 80px;
 
     background: #0f172a;
+
     color: white;
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     padding: 0 30px;
@@ -59,12 +71,12 @@
 }
 
 
-/* LOGO CENTRADO */
-
 .logo {
+
     position: absolute;
 
     left: 50%;
+
     top: 50%;
 
     transform: translate(-50%, -50%);
@@ -77,41 +89,42 @@
 }
 
 
-/* TITULO */
-
 .logo h1 {
+
     margin: 0;
 
     font-size: 24px;
+
     font-weight: 800;
 
     letter-spacing: 0.8px;
 
-    animation: logoTitleAnimation 1.2s ease-in-out infinite;
+    animation:
+        logoTitleAnimation 1.2s ease-in-out infinite;
 }
 
 
-/* SUBTITULO */
-
 .logo span {
+
     display: block;
 
     margin-top: 3px;
 
     font-size: 12px;
+
     font-weight: 500;
 
     color: #cbd5e1;
 
     letter-spacing: 0.5px;
 
-    animation: logoSubtitleAnimation 1.2s ease-in-out infinite;
+    animation:
+        logoSubtitleAnimation 1.2s ease-in-out infinite;
 }
 
 
-/* ESTADO EN VIVO */
-
 .live-status {
+
     position: relative;
 
     z-index: 3;
@@ -119,6 +132,7 @@
     margin-left: auto;
 
     display: flex;
+
     align-items: center;
 
     gap: 9px;
@@ -127,23 +141,26 @@
 
     border-radius: 20px;
 
-    background: rgba(34, 197, 94, 0.10);
+    background:
+        rgba(34, 197, 94, 0.10);
 
-    border: 1px solid rgba(34, 197, 94, 0.25);
+    border:
+        1px solid rgba(34, 197, 94, 0.25);
 
     color: #86efac;
 
     font-size: 11px;
+
     font-weight: 800;
 
     letter-spacing: 0.7px;
 }
 
 
-/* PUNTO EN VIVO */
-
 .live-status-dot {
+
     width: 8px;
+
     height: 8px;
 
     flex-shrink: 0;
@@ -155,7 +172,8 @@
     box-shadow:
         0 0 0 4px rgba(34, 197, 94, 0.12);
 
-    animation: pulseLive 2s infinite;
+    animation:
+        pulseLive 2s infinite;
 }
 
 
@@ -166,31 +184,38 @@
 @keyframes logoTitleAnimation {
 
     0% {
+
         opacity: 0.75;
 
         transform: translateY(2px);
 
         text-shadow:
             0 0 0 rgba(255, 255, 255, 0);
+
     }
 
     50% {
+
         opacity: 1;
 
         transform: translateY(0);
 
         text-shadow:
             0 0 14px rgba(255, 255, 255, 0.25);
+
     }
 
     100% {
+
         opacity: 0.75;
 
         transform: translateY(2px);
 
         text-shadow:
             0 0 0 rgba(255, 255, 255, 0);
+
     }
+
 }
 
 
@@ -198,31 +223,43 @@
 
     0%,
     100% {
+
         opacity: 0.55;
+
     }
 
     50% {
+
         opacity: 1;
+
     }
+
 }
 
 
 @keyframes pulseLive {
 
     0% {
+
         box-shadow:
             0 0 0 0 rgba(34, 197, 94, 0.35);
+
     }
 
     70% {
+
         box-shadow:
             0 0 0 7px rgba(34, 197, 94, 0);
+
     }
 
     100% {
+
         box-shadow:
             0 0 0 0 rgba(34, 197, 94, 0);
+
     }
+
 }
 
 
@@ -231,17 +268,21 @@
    ========================================================= */
 
 body {
+
     background:
+
         radial-gradient(
             circle at 10% 10%,
             rgba(10, 132, 255, 0.06),
             transparent 30%
         ),
+
         radial-gradient(
             circle at 90% 20%,
             rgba(118, 87, 232, 0.05),
             transparent 30%
         ),
+
         linear-gradient(
             135deg,
             #edf3f9 0%,
@@ -257,9 +298,7 @@ body {
 
 .page {
     width: min(1500px, calc(100% - 48px));
-
     margin: 0 auto;
-
     padding: 32px 0 42px;
 }
 
@@ -278,10 +317,16 @@ body {
     box-sizing: border-box;
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
+    gap: 25px;
+
     overflow: hidden;
+
+    margin-bottom: 18px;
 
     border-radius: 22px;
 
@@ -298,24 +343,31 @@ body {
     box-shadow:
         0 18px 40px rgba(0, 32, 92, 0.20);
 
-    animation: fadeDown 0.65s ease both;
+    animation:
+        fadeDown 0.65s ease both;
 }
 
 
-/* LUZ DEL HEADER */
+/* =========================================================
+   LUZ DEL HEADER
+   ========================================================= */
 
 .header-glow {
+
     position: absolute;
 
     width: 450px;
+
     height: 450px;
 
     right: -140px;
+
     top: -250px;
 
     border-radius: 50%;
 
     background:
+
         radial-gradient(
             circle,
             rgba(255, 255, 255, 0.18),
@@ -326,54 +378,72 @@ body {
 }
 
 
-/* DECORACIÓN */
+/* =========================================================
+   DECORACIÓN
+   ========================================================= */
 
 .page-header::before {
+
     content: "";
 
     position: absolute;
 
     width: 220px;
+
     height: 220px;
 
     right: 130px;
+
     bottom: -160px;
 
     border-radius: 50%;
 
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
 }
 
 
 .page-header::after {
+
     content: "";
 
     position: absolute;
 
     width: 320px;
+
     height: 320px;
 
     right: -80px;
+
     bottom: -250px;
 
     border-radius: 50%;
 
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
 }
 
 
-/* HEADER IZQUIERDO */
+/* =========================================================
+   HEADER IZQUIERDO
+   ========================================================= */
 
 .header-left {
+
     position: relative;
+
     z-index: 2;
 }
 
 
-/* BREADCRUMB */
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
 
 .breadcrumb {
+
     display: flex;
+
     align-items: center;
 
     gap: 9px;
@@ -381,28 +451,36 @@ body {
     margin-bottom: 14px;
 
     font-size: 10px;
+
     font-weight: 700;
 
     letter-spacing: 1.2px;
 
-    color: rgba(255, 255, 255, 0.60);
+    color:
+        rgba(255, 255, 255, 0.60);
 }
 
 
 .breadcrumb strong {
+
     color: white;
 }
 
 
 .breadcrumb-separator {
+
     opacity: 0.45;
 }
 
 
-/* TITULO */
+/* =========================================================
+   TITULO
+   ========================================================= */
 
 .title-wrapper {
+
     display: flex;
+
     align-items: center;
 
     gap: 17px;
@@ -410,7 +488,9 @@ body {
 
 
 .title-icon {
+
     width: 48px;
+
     height: 48px;
 
     flex-shrink: 0;
@@ -418,16 +498,20 @@ body {
     border-radius: 14px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     flex-direction: column;
 
     gap: 4px;
 
-    background: rgba(255, 255, 255, 0.12);
+    background:
+        rgba(255, 255, 255, 0.12);
 
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
 
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.10);
@@ -435,7 +519,9 @@ body {
 
 
 .title-icon span {
+
     width: 21px;
+
     height: 3px;
 
     border-radius: 3px;
@@ -447,19 +533,23 @@ body {
 
 
 .title-icon span:nth-child(2) {
+
     width: 15px;
 }
 
 
 .title-icon span:nth-child(3) {
+
     width: 18px;
 }
 
 
 .title-content h1 {
+
     margin: 0;
 
-    font-size: clamp(27px, 3vw, 39px);
+    font-size:
+        clamp(27px, 3vw, 39px);
 
     line-height: 1.05;
 
@@ -470,17 +560,22 @@ body {
 
 
 .title-content p {
+
     margin: 9px 0 0;
 
     font-size: 13px;
 
-    color: rgba(255, 255, 255, 0.72);
+    color:
+        rgba(255, 255, 255, 0.72);
 }
 
 
-/* FECHA */
+/* =========================================================
+   FECHA
+   ========================================================= */
 
 .header-date {
+
     position: relative;
 
     z-index: 2;
@@ -490,41 +585,52 @@ body {
     padding: 14px 16px;
 
     display: flex;
+
     align-items: center;
 
     gap: 12px;
 
     border-radius: 14px;
 
-    background: rgba(255, 255, 255, 0.10);
+    background:
+        rgba(255, 255, 255, 0.10);
 
-    border: 1px solid rgba(255, 255, 255, 0.13);
+    border:
+        1px solid rgba(255, 255, 255, 0.13);
 }
 
 
 .date-icon {
+
     width: 34px;
+
     height: 34px;
 
     flex-shrink: 0;
 
     border-radius: 10px;
 
-    background: rgba(255, 255, 255, 0.11);
+    background:
+        rgba(255, 255, 255, 0.11);
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
 
 .date-icon span {
+
     position: relative;
 
     width: 15px;
+
     height: 13px;
 
-    border: 2px solid white;
+    border:
+        2px solid white;
 
     border-radius: 3px;
 
@@ -534,6 +640,7 @@ body {
 
 .date-icon span::before,
 .date-icon span::after {
+
     content: "";
 
     position: absolute;
@@ -541,6 +648,7 @@ body {
     top: -5px;
 
     width: 2px;
+
     height: 6px;
 
     border-radius: 2px;
@@ -550,16 +658,19 @@ body {
 
 
 .date-icon span::before {
+
     left: 3px;
 }
 
 
 .date-icon span::after {
+
     right: 3px;
 }
 
 
 .date-label {
+
     display: block;
 
     margin-bottom: 3px;
@@ -570,11 +681,13 @@ body {
 
     letter-spacing: 1px;
 
-    color: rgba(255, 255, 255, 0.55);
+    color:
+        rgba(255, 255, 255, 0.55);
 }
 
 
 .header-date strong {
+
     display: block;
 
     font-size: 13px;
@@ -590,6 +703,7 @@ body {
    ========================================================= */
 
 .stats-grid {
+
     display: grid;
 
     grid-template-columns:
@@ -602,6 +716,7 @@ body {
 
 
 .stat-card {
+
     position: relative;
 
     min-height: 190px;
@@ -620,7 +735,8 @@ body {
 
     box-shadow: var(--shadow-sm);
 
-    animation: fadeUp 0.7s ease both;
+    animation:
+        fadeUp 0.7s ease both;
 
     transition:
         transform 0.25s ease,
@@ -629,6 +745,7 @@ body {
 
 
 .stat-card:hover {
+
     transform: translateY(-3px);
 
     box-shadow: var(--shadow-md);
@@ -636,12 +753,15 @@ body {
 
 
 .stat-card-glow {
+
     position: absolute;
 
     width: 130px;
+
     height: 130px;
 
     top: -70px;
+
     right: -50px;
 
     border-radius: 50%;
@@ -672,18 +792,24 @@ body {
 }
 
 
-/* TOP */
+/* =========================================================
+   TOP
+   ========================================================= */
 
 .stat-top {
+
     position: relative;
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: flex-start;
 }
 
 
 .stat-label {
+
     display: block;
 
     font-size: 13px;
@@ -695,6 +821,7 @@ body {
 
 
 .stat-mini-label {
+
     display: block;
 
     margin-top: 4px;
@@ -709,14 +836,20 @@ body {
 }
 
 
-/* ICONO */
+/* =========================================================
+   ICONO
+   ========================================================= */
 
 .stat-icon {
+
     width: 39px;
+
     height: 39px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 11px;
@@ -724,52 +857,72 @@ body {
 
 
 .stat-icon.blue {
-    background: rgba(10, 132, 255, 0.10);
+
+    background:
+        rgba(10, 132, 255, 0.10);
+
     color: var(--blue);
 }
 
 
 .stat-icon.purple {
-    background: rgba(118, 87, 232, 0.10);
+
+    background:
+        rgba(118, 87, 232, 0.10);
+
     color: var(--purple);
 }
 
 
 .stat-icon.green {
-    background: rgba(22, 166, 106, 0.10);
+
+    background:
+        rgba(22, 166, 106, 0.10);
+
     color: var(--green);
 }
 
 
 .stat-icon.red {
-    background: rgba(229, 72, 77, 0.10);
+
+    background:
+        rgba(229, 72, 77, 0.10);
+
     color: var(--red);
 }
 
 
-/* BUILDING ICON */
+/* =========================================================
+   BUILDING ICON
+   ========================================================= */
 
 .building-icon {
+
     position: relative;
 
     width: 17px;
+
     height: 19px;
 
-    border: 2px solid currentColor;
+    border:
+        2px solid currentColor;
 
     border-radius: 2px;
 }
 
 
 .building-icon::after {
+
     content: "";
 
     position: absolute;
 
     left: 3px;
+
     top: 4px;
 
     width: 3px;
+
     height: 3px;
 
     background: currentColor;
@@ -781,27 +934,35 @@ body {
 }
 
 
-/* CALENDAR */
+/* =========================================================
+   CALENDAR
+   ========================================================= */
 
 .calendar-icon {
+
     position: relative;
 
     width: 18px;
+
     height: 17px;
 
-    border: 2px solid currentColor;
+    border:
+        2px solid currentColor;
 
     border-radius: 4px;
 }
 
 
 .calendar-icon::before {
+
     content: "";
 
     position: absolute;
 
     left: -2px;
+
     right: -2px;
+
     top: 4px;
 
     height: 2px;
@@ -811,14 +972,17 @@ body {
 
 
 .calendar-icon::after {
+
     content: "";
 
     position: absolute;
 
     width: 3px;
+
     height: 3px;
 
     left: 4px;
+
     top: 8px;
 
     border-radius: 50%;
@@ -832,29 +996,37 @@ body {
 }
 
 
-/* ACTIVE ICON */
+/* =========================================================
+   ACTIVE ICON
+   ========================================================= */
 
 .active-icon {
+
     position: relative;
 
     width: 17px;
+
     height: 17px;
 
-    border: 2px solid currentColor;
+    border:
+        2px solid currentColor;
 
     border-radius: 50%;
 }
 
 
 .active-icon::after {
+
     content: "";
 
     position: absolute;
 
     width: 5px;
+
     height: 5px;
 
     left: 4px;
+
     top: 4px;
 
     border-radius: 50%;
@@ -863,15 +1035,20 @@ body {
 }
 
 
-/* CANCEL ICON */
+/* =========================================================
+   CANCEL ICON
+   ========================================================= */
 
 .cancel-icon {
+
     position: relative;
 
     width: 18px;
+
     height: 18px;
 
-    border: 2px solid currentColor;
+    border:
+        2px solid currentColor;
 
     border-radius: 50%;
 }
@@ -879,14 +1056,17 @@ body {
 
 .cancel-icon::before,
 .cancel-icon::after {
+
     content: "";
 
     position: absolute;
 
     width: 10px;
+
     height: 2px;
 
     left: 2px;
+
     top: 7px;
 
     border-radius: 2px;
@@ -898,14 +1078,19 @@ body {
 
 
 .cancel-icon::after {
+
     transform: rotate(-45deg);
 }
 
 
-/* VALUES */
+/* =========================================================
+   VALUES
+   ========================================================= */
 
 .stat-value {
+
     display: flex;
+
     align-items: baseline;
 
     gap: 7px;
@@ -915,6 +1100,7 @@ body {
 
 
 .stat-value strong {
+
     font-size: 34px;
 
     line-height: 1;
@@ -928,6 +1114,7 @@ body {
 
 
 .stat-value span {
+
     font-size: 11px;
 
     font-weight: 700;
@@ -936,9 +1123,12 @@ body {
 }
 
 
-/* DESCRIPTION */
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
 
 .stat-description {
+
     margin-top: 9px;
 
     font-size: 10px;
@@ -947,13 +1137,18 @@ body {
 }
 
 
-/* LINE */
+/* =========================================================
+   LINE
+   ========================================================= */
 
 .stat-line {
+
     position: absolute;
 
     left: 21px;
+
     right: 21px;
+
     bottom: 0;
 
     height: 3px;
@@ -987,13 +1182,17 @@ body {
    ========================================================= */
 
 .section {
+
     margin-top: 28px;
 }
 
 
 .section-header {
+
     display: flex;
+
     align-items: flex-end;
+
     justify-content: space-between;
 
     gap: 20px;
@@ -1003,12 +1202,15 @@ body {
 
 
 .section-heading {
+
     min-width: 0;
 }
 
 
 .section-kicker {
+
     display: flex;
+
     align-items: center;
 
     gap: 7px;
@@ -1024,7 +1226,9 @@ body {
 
 
 .kicker-dot {
+
     width: 6px;
+
     height: 6px;
 
     border-radius: 50%;
@@ -1037,6 +1241,7 @@ body {
 
 
 .section-heading h2 {
+
     margin: 7px 0 4px;
 
     font-size: 22px;
@@ -1050,6 +1255,7 @@ body {
 
 
 .section-heading p {
+
     margin: 0;
 
     font-size: 11px;
@@ -1058,9 +1264,12 @@ body {
 }
 
 
-/* LEGEND */
+/* =========================================================
+   LEGEND
+   ========================================================= */
 
 .legend {
+
     display: flex;
 
     align-items: center;
@@ -1076,7 +1285,9 @@ body {
 
 
 .legend span {
+
     display: flex;
+
     align-items: center;
 
     gap: 6px;
@@ -1084,7 +1295,9 @@ body {
 
 
 .legend-dot {
+
     width: 8px;
+
     height: 8px;
 
     display: inline-block;
@@ -1094,6 +1307,7 @@ body {
 
 
 .available-dot {
+
     background: var(--green);
 
     box-shadow:
@@ -1102,6 +1316,7 @@ body {
 
 
 .busy-dot {
+
     background: var(--red);
 
     box-shadow:
@@ -1114,6 +1329,7 @@ body {
    ========================================================= */
 
 .salas-grid {
+
     display: grid;
 
     grid-template-columns:
@@ -1124,6 +1340,7 @@ body {
 
 
 .sala-card {
+
     position: relative;
 
     min-height: 225px;
@@ -1140,7 +1357,8 @@ body {
 
     box-shadow: var(--shadow-sm);
 
-    animation: roomAppear 0.65s ease both;
+    animation:
+        roomAppear 0.65s ease both;
 
     transition:
         transform 0.25s ease,
@@ -1149,26 +1367,33 @@ body {
 
 
 .sala-card:hover {
+
     transform: translateY(-4px);
 
     box-shadow: var(--shadow-md);
 }
 
 
-/* TOP LINE */
+/* =========================================================
+   TOP LINE
+   ========================================================= */
 
 .sala-card-top-line {
+
     position: absolute;
 
     left: 0;
+
     top: 0;
 
     width: 100%;
+
     height: 3px;
 }
 
 
 .sala-card-blue .sala-card-top-line {
+
     background:
         linear-gradient(
             90deg,
@@ -1179,6 +1404,7 @@ body {
 
 
 .sala-card-purple .sala-card-top-line {
+
     background:
         linear-gradient(
             90deg,
@@ -1189,6 +1415,7 @@ body {
 
 
 .sala-card-orange .sala-card-top-line {
+
     background:
         linear-gradient(
             90deg,
@@ -1198,22 +1425,30 @@ body {
 }
 
 
-/* HEADER SALA */
+/* =========================================================
+   HEADER SALA
+   ========================================================= */
 
 .sala-header {
+
     display: flex;
 
     justify-content: space-between;
+
     align-items: center;
 }
 
 
 .sala-number {
+
     width: 44px;
+
     height: 44px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 12px;
@@ -1225,40 +1460,52 @@ body {
 
 
 .sala-number span {
+
     letter-spacing: -0.3px;
 }
 
 
 .sala-card-blue .sala-number {
+
     color: var(--blue);
 
-    background: rgba(10, 132, 255, 0.09);
+    background:
+        rgba(10, 132, 255, 0.09);
 }
 
 
 .sala-card-purple .sala-number {
+
     color: var(--purple);
 
-    background: rgba(118, 87, 232, 0.09);
+    background:
+        rgba(118, 87, 232, 0.09);
 }
 
 
 .sala-card-orange .sala-number {
+
     color: var(--orange);
 
-    background: rgba(233, 155, 50, 0.10);
+    background:
+        rgba(233, 155, 50, 0.10);
 }
 
 
 .sala-number.dining {
+
     width: 44px;
 }
 
 
-/* STATUS */
+/* =========================================================
+   STATUS
+   ========================================================= */
 
 .sala-status {
+
     display: flex;
+
     align-items: center;
 
     gap: 7px;
@@ -1274,7 +1521,9 @@ body {
 
 
 .sala-status i {
+
     width: 7px;
+
     height: 7px;
 
     border-radius: 50%;
@@ -1282,39 +1531,51 @@ body {
 
 
 .sala-status.available {
+
     color: var(--green);
 
-    background: rgba(22, 166, 106, 0.08);
+    background:
+        rgba(22, 166, 106, 0.08);
 }
 
 
 .sala-status.available i {
+
     background: var(--green);
 
-    animation: statusPulseGreen 2s infinite;
+    animation:
+        statusPulseGreen 2s infinite;
 }
 
 
 .sala-status.busy {
+
     color: var(--red);
 
-    background: rgba(229, 72, 77, 0.08);
+    background:
+        rgba(229, 72, 77, 0.08);
 }
 
 
 .sala-status.busy i {
+
     background: var(--red);
 
-    animation: statusPulseRed 2s infinite;
+    animation:
+        statusPulseRed 2s infinite;
 }
 
 
-/* CONTENT */
+/* =========================================================
+   CONTENT
+   ========================================================= */
 
 .sala-content {
+
     display: flex;
 
     align-items: flex-end;
+
     justify-content: space-between;
 
     gap: 15px;
@@ -1324,6 +1585,7 @@ body {
 
 
 .room-category {
+
     display: block;
 
     margin-bottom: 4px;
@@ -1339,6 +1601,7 @@ body {
 
 
 .sala-info h3 {
+
     margin: 0;
 
     font-size: 20px;
@@ -1352,7 +1615,9 @@ body {
 
 
 .location {
+
     display: flex;
+
     align-items: center;
 
     gap: 6px;
@@ -1365,31 +1630,39 @@ body {
 }
 
 
-/* LOCATION ICON */
+/* =========================================================
+   LOCATION ICON
+   ========================================================= */
 
 .location-icon {
+
     position: relative;
 
     width: 9px;
+
     height: 12px;
 
-    border: 1.5px solid currentColor;
+    border:
+        1.5px solid currentColor;
 
-    border-radius: 7px 7px 7px 7px;
+    border-radius: 7px;
 
     display: inline-block;
 }
 
 
 .location-icon::after {
+
     content: "";
 
     position: absolute;
 
     width: 3px;
+
     height: 3px;
 
     left: 1.5px;
+
     top: 2.5px;
 
     border-radius: 50%;
@@ -1398,9 +1671,12 @@ body {
 }
 
 
-/* RESERVATION COUNT */
+/* =========================================================
+   RESERVATION COUNT
+   ========================================================= */
 
 .reservation-count {
+
     text-align: right;
 
     flex-shrink: 0;
@@ -1408,6 +1684,7 @@ body {
 
 
 .reservation-count strong {
+
     display: block;
 
     font-size: 25px;
@@ -1421,6 +1698,7 @@ body {
 
 
 .reservation-count span {
+
     display: block;
 
     margin-top: 4px;
@@ -1433,10 +1711,14 @@ body {
 }
 
 
-/* PROGRESS */
+/* =========================================================
+   PROGRESS
+   ========================================================= */
 
 .room-progress {
+
     width: 100%;
+
     height: 5px;
 
     margin-top: 21px;
@@ -1450,14 +1732,17 @@ body {
 
 
 .room-progress span {
+
     display: block;
 
     width: 35%;
+
     height: 100%;
 
     border-radius: inherit;
 
-    animation: progressMove 3s ease-in-out infinite;
+    animation:
+        progressMove 3s ease-in-out infinite;
 }
 
 
@@ -1476,23 +1761,29 @@ body {
 }
 
 
-/* FOOTER SALA */
+/* =========================================================
+   FOOTER SALA
+   ========================================================= */
 
 .sala-footer {
+
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     margin-top: 14px;
 
     padding-top: 13px;
 
-    border-top: 1px solid #edf1f5;
+    border-top:
+        1px solid #edf1f5;
 }
 
 
 .sala-footer span {
+
     font-size: 9px;
 
     color: var(--text-muted);
@@ -1500,6 +1791,7 @@ body {
 
 
 .sala-footer strong {
+
     font-size: 10px;
 
     font-weight: 850;
@@ -1521,11 +1813,13 @@ body {
    ========================================================= */
 
 .reservas-section {
+
     margin-top: 28px;
 }
 
 
 .reservas-card {
+
     position: relative;
 
     overflow: hidden;
@@ -1541,17 +1835,21 @@ body {
 
 
 .reservas-card-glow {
+
     position: absolute;
 
     width: 260px;
+
     height: 260px;
 
     right: -140px;
+
     top: -180px;
 
     border-radius: 50%;
 
     background:
+
         radial-gradient(
             circle,
             rgba(10, 132, 255, 0.08),
@@ -1562,9 +1860,12 @@ body {
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER RESERVAS
+   ========================================================= */
 
 .reservas-header {
+
     position: relative;
 
     z-index: 1;
@@ -1572,17 +1873,20 @@ body {
     display: flex;
 
     align-items: flex-end;
+
     justify-content: space-between;
 
     gap: 20px;
 
     padding: 24px 24px 20px;
 
-    border-bottom: 1px solid var(--border);
+    border-bottom:
+        1px solid var(--border);
 }
 
 
 .reservas-title h2 {
+
     margin: 7px 0 4px;
 
     font-size: 21px;
@@ -1596,6 +1900,7 @@ body {
 
 
 .reservas-title p {
+
     margin: 0;
 
     font-size: 10px;
@@ -1605,11 +1910,13 @@ body {
 
 
 .reservation-total {
+
     text-align: right;
 }
 
 
 .reservation-total strong {
+
     display: block;
 
     font-size: 25px;
@@ -1623,6 +1930,7 @@ body {
 
 
 .reservation-total span {
+
     display: block;
 
     margin-top: 4px;
@@ -1638,6 +1946,7 @@ body {
    ========================================================= */
 
 .table-wrapper {
+
     width: 100%;
 
     overflow-x: auto;
@@ -1645,6 +1954,7 @@ body {
 
 
 table {
+
     width: 100%;
 
     border-collapse: collapse;
@@ -1654,11 +1964,13 @@ table {
 
 
 thead {
+
     background: #f7f9fc;
 }
 
 
 th {
+
     padding: 12px 18px;
 
     text-align: left;
@@ -1671,40 +1983,49 @@ th {
 
     color: var(--text-muted);
 
-    border-bottom: 1px solid var(--border);
+    border-bottom:
+        1px solid var(--border);
 }
 
 
 td {
+
     padding: 14px 18px;
 
     font-size: 10px;
 
     color: var(--text-soft);
 
-    border-bottom: 1px solid #edf1f5;
+    border-bottom:
+        1px solid #edf1f5;
 }
 
 
 tbody tr {
+
     transition:
         background 0.2s ease;
 }
 
 
 tbody tr:hover {
+
     background: #f8fbff;
 }
 
 
 tbody tr:last-child td {
+
     border-bottom: none;
 }
 
 
-/* ESTADO TABLA */
+/* =========================================================
+   ESTADO TABLA
+   ========================================================= */
 
 .status-badge {
+
     display: inline-flex;
 
     align-items: center;
@@ -1722,9 +2043,11 @@ tbody tr:last-child td {
 
 
 .status-badge::before {
+
     content: "";
 
     width: 6px;
+
     height: 6px;
 
     border-radius: 50%;
@@ -1732,9 +2055,11 @@ tbody tr:last-child td {
 
 
 .status-badge.active {
+
     color: var(--green);
 
-    background: rgba(22, 166, 106, 0.08);
+    background:
+        rgba(22, 166, 106, 0.08);
 }
 
 
@@ -1744,9 +2069,11 @@ tbody tr:last-child td {
 
 
 .status-badge.pending {
+
     color: var(--orange);
 
-    background: rgba(233, 155, 50, 0.09);
+    background:
+        rgba(233, 155, 50, 0.09);
 }
 
 
@@ -1756,9 +2083,11 @@ tbody tr:last-child td {
 
 
 .status-badge.cancelled {
+
     color: var(--red);
 
-    background: rgba(229, 72, 77, 0.08);
+    background:
+        rgba(229, 72, 77, 0.08);
 }
 
 
@@ -1772,6 +2101,7 @@ tbody tr:last-child td {
    ========================================================= */
 
 .empty-state {
+
     min-height: 210px;
 
     padding: 30px;
@@ -1781,6 +2111,7 @@ tbody tr:last-child td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     flex-direction: column;
@@ -1790,11 +2121,15 @@ tbody tr:last-child td {
 
 
 .empty-icon {
+
     width: 48px;
+
     height: 48px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     margin-bottom: 13px;
@@ -1806,23 +2141,28 @@ tbody tr:last-child td {
 
 
 .empty-icon span {
+
     position: relative;
 
     width: 20px;
+
     height: 15px;
 
-    border: 2px solid #94a3b8;
+    border:
+        2px solid #94a3b8;
 
     border-radius: 4px;
 }
 
 
 .empty-icon span::before {
+
     content: "";
 
     position: absolute;
 
     left: 3px;
+
     right: 3px;
 
     top: 4px;
@@ -1834,6 +2174,7 @@ tbody tr:last-child td {
 
 
 .empty-state strong {
+
     display: block;
 
     font-size: 12px;
@@ -1843,6 +2184,7 @@ tbody tr:last-child td {
 
 
 .empty-state > span {
+
     display: block;
 
     margin-top: 5px;
@@ -1858,9 +2200,11 @@ tbody tr:last-child td {
    ========================================================= */
 
 .page-footer {
+
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 20px;
@@ -1869,11 +2213,13 @@ tbody tr:last-child td {
 
     padding: 18px 4px 0;
 
-    border-top: 1px solid rgba(16, 33, 63, 0.08);
+    border-top:
+        1px solid rgba(16, 33, 63, 0.08);
 }
 
 
 .footer-brand {
+
     display: flex;
 
     align-items: center;
@@ -1883,11 +2229,15 @@ tbody tr:last-child td {
 
 
 .footer-logo {
+
     width: 31px;
+
     height: 31px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 9px;
@@ -1903,6 +2253,7 @@ tbody tr:last-child td {
 
 
 .footer-brand strong {
+
     display: block;
 
     font-size: 10px;
@@ -1914,6 +2265,7 @@ tbody tr:last-child td {
 
 
 .footer-brand span:not(.footer-logo) {
+
     display: block;
 
     margin-top: 2px;
@@ -1925,6 +2277,7 @@ tbody tr:last-child td {
 
 
 .footer-status {
+
     display: flex;
 
     align-items: center;
@@ -1940,7 +2293,9 @@ tbody tr:last-child td {
 
 
 .footer-status-dot {
+
     width: 7px;
+
     height: 7px;
 
     border-radius: 50%;
@@ -1959,48 +2314,67 @@ tbody tr:last-child td {
 @keyframes fadeDown {
 
     from {
+
         opacity: 0;
 
         transform: translateY(-12px);
+
     }
 
     to {
+
         opacity: 1;
 
         transform: translateY(0);
+
     }
+
 }
 
 
 @keyframes fadeUp {
 
     from {
+
         opacity: 0;
 
         transform: translateY(14px);
+
     }
 
     to {
+
         opacity: 1;
 
         transform: translateY(0);
+
     }
+
 }
 
 
 @keyframes roomAppear {
 
     from {
+
         opacity: 0;
 
-        transform: translateY(12px) scale(0.985);
+        transform:
+            translateY(12px)
+            scale(0.985);
+
     }
 
     to {
+
         opacity: 1;
 
-        transform: translateY(0) scale(1);
+        transform:
+            translateY(0)
+            scale(1);
+
     }
+
 }
 
 
@@ -2008,14 +2382,19 @@ tbody tr:last-child td {
 
     0%,
     100% {
+
         box-shadow:
             0 0 0 0 rgba(22, 166, 106, 0.28);
+
     }
 
     50% {
+
         box-shadow:
             0 0 0 5px rgba(22, 166, 106, 0);
+
     }
+
 }
 
 
@@ -2023,14 +2402,19 @@ tbody tr:last-child td {
 
     0%,
     100% {
+
         box-shadow:
             0 0 0 0 rgba(229, 72, 77, 0.28);
+
     }
 
     50% {
+
         box-shadow:
             0 0 0 5px rgba(229, 72, 77, 0);
+
     }
+
 }
 
 
@@ -2047,6 +2431,7 @@ tbody tr:last-child td {
     100% {
         width: 25%;
     }
+
 }
 
 
@@ -2057,20 +2442,24 @@ tbody tr:last-child td {
 @media (max-width: 1100px) {
 
     .stats-grid {
+
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 
 
     .salas-grid {
+
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 
 
     .sala-card-orange {
+
         grid-column: span 2;
     }
+
 }
 
 
@@ -2081,13 +2470,16 @@ tbody tr:last-child td {
 @media (max-width: 800px) {
 
     .page {
-        width: min(100% - 28px, 1500px);
+
+        width:
+            min(100% - 28px, 1500px);
 
         padding-top: 22px;
     }
 
 
     .page-header {
+
         min-height: 175px;
 
         padding: 25px;
@@ -2095,23 +2487,28 @@ tbody tr:last-child td {
 
 
     .header-date {
+
         min-width: auto;
     }
 
 
     .title-content h1 {
+
         font-size: 28px;
     }
 
 
     .stats-grid {
+
         gap: 14px;
     }
 
 
     .salas-grid {
+
         gap: 14px;
     }
+
 }
 
 
@@ -2124,6 +2521,7 @@ tbody tr:last-child td {
     /* TOPBAR */
 
     .topbar {
+
         height: 74px;
 
         padding: 0 16px;
@@ -2131,11 +2529,13 @@ tbody tr:last-child td {
 
 
     .logo {
+
         left: 50%;
     }
 
 
     .logo h1 {
+
         font-size: 17px;
 
         letter-spacing: 0.5px;
@@ -2143,6 +2543,7 @@ tbody tr:last-child td {
 
 
     .logo span {
+
         margin-top: 2px;
 
         font-size: 9px;
@@ -2150,6 +2551,7 @@ tbody tr:last-child td {
 
 
     .live-status {
+
         padding: 6px 9px;
 
         gap: 6px;
@@ -2159,7 +2561,9 @@ tbody tr:last-child td {
 
 
     .live-status-dot {
+
         width: 6px;
+
         height: 6px;
     }
 
@@ -2167,15 +2571,19 @@ tbody tr:last-child td {
     /* PAGE */
 
     .page {
-        width: calc(100% - 20px);
 
-        padding: 15px 0 28px;
+        width:
+            calc(100% - 20px);
+
+        padding:
+            15px 0 28px;
     }
 
 
     /* HEADER */
 
     .page-header {
+
         min-height: auto;
 
         padding: 22px 19px;
@@ -2191,12 +2599,15 @@ tbody tr:last-child td {
 
 
     .title-wrapper {
+
         gap: 12px;
     }
 
 
     .title-icon {
+
         width: 40px;
+
         height: 40px;
 
         border-radius: 11px;
@@ -2204,11 +2615,13 @@ tbody tr:last-child td {
 
 
     .title-icon span {
+
         width: 18px;
     }
 
 
     .title-content h1 {
+
         font-size: 24px;
 
         letter-spacing: -0.7px;
@@ -2216,6 +2629,7 @@ tbody tr:last-child td {
 
 
     .title-content p {
+
         font-size: 10px;
 
         line-height: 1.4;
@@ -2223,6 +2637,7 @@ tbody tr:last-child td {
 
 
     .header-date {
+
         width: 100%;
 
         box-sizing: border-box;
@@ -2232,6 +2647,7 @@ tbody tr:last-child td {
     /* STATS */
 
     .stats-grid {
+
         grid-template-columns: 1fr;
 
         gap: 12px;
@@ -2241,6 +2657,7 @@ tbody tr:last-child td {
 
 
     .stat-card {
+
         min-height: 175px;
 
         padding: 18px;
@@ -2250,11 +2667,13 @@ tbody tr:last-child td {
     /* SECTIONS */
 
     .section {
+
         margin-top: 22px;
     }
 
 
     .section-header {
+
         align-items: flex-start;
 
         flex-direction: column;
@@ -2264,11 +2683,13 @@ tbody tr:last-child td {
 
 
     .section-heading h2 {
+
         font-size: 20px;
     }
 
 
     .legend {
+
         width: 100%;
     }
 
@@ -2276,6 +2697,7 @@ tbody tr:last-child td {
     /* SALAS */
 
     .salas-grid {
+
         grid-template-columns: 1fr;
 
         gap: 12px;
@@ -2283,11 +2705,13 @@ tbody tr:last-child td {
 
 
     .sala-card-orange {
+
         grid-column: auto;
     }
 
 
     .sala-card {
+
         min-height: 215px;
     }
 
@@ -2295,6 +2719,7 @@ tbody tr:last-child td {
     /* RESERVAS */
 
     .reservas-header {
+
         align-items: flex-start;
 
         flex-direction: column;
@@ -2304,11 +2729,13 @@ tbody tr:last-child td {
 
 
     .reservation-total {
+
         text-align: left;
     }
 
 
     .table-wrapper {
+
         overflow-x: auto;
     }
 
@@ -2316,12 +2743,14 @@ tbody tr:last-child td {
     /* FOOTER */
 
     .page-footer {
+
         align-items: flex-start;
 
         flex-direction: column;
 
         gap: 12px;
     }
+
 }
 
 
@@ -2332,41 +2761,49 @@ tbody tr:last-child td {
 @media (max-width: 400px) {
 
     .topbar {
+
         padding: 0 10px;
     }
 
 
     .logo h1 {
+
         font-size: 15px;
     }
 
 
     .logo span {
+
         font-size: 8px;
     }
 
 
     .live-status {
+
         padding: 5px 7px;
     }
 
 
     .live-status span:last-child {
+
         display: none;
     }
 
 
     .title-content h1 {
+
         font-size: 21px;
     }
 
 
     .title-content p {
+
         font-size: 9px;
     }
 
 
     .sala-content {
+
         align-items: flex-start;
 
         flex-direction: column;
@@ -2374,6 +2811,8 @@ tbody tr:last-child td {
 
 
     .reservation-count {
+
         text-align: left;
     }
+
 }

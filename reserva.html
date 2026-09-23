@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="es">
@@ -113,36 +112,82 @@
 
 
             <!-- =============================================
-                 ENCABEZADO DEL SISTEMA
+                 ENCABEZADO
+                 MISMO DISEÑO QUE SALAS / PERSONAL
                  ============================================= -->
 
-            <div class="powerapps-heading">
+            <section class="page-header">
+
+                <div class="header-glow"></div>
 
 
-                <div class="powerapps-title">
+                <div class="header-left">
 
 
-                    <div class="powerapps-icon">
-                        📅
+                    <div class="breadcrumb">
+
+                        <span>ALFERZA LIVE OFFICE</span>
+
+                        <span class="breadcrumb-separator">/</span>
+
+                        <strong>RESERVAS</strong>
+
+                    </div>
+
+
+
+                    <div class="title-wrapper">
+
+
+                        <div class="title-icon">
+
+                            <span></span>
+                            <span></span>
+                            <span></span>
+
+                        </div>
+
+
+                        <div class="title-content">
+
+                            <h1>
+                                Registrar una reserva
+                            </h1>
+
+                            <p>
+                                Utiliza el sistema de reservas para consultar
+                                disponibilidad y registrar tus espacios.
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="header-date">
+
+
+                    <div class="date-icon">
+
+                        <span></span>
+
                     </div>
 
 
                     <div>
 
-                        <span>
-                            SISTEMA DE RESERVAS
+                        <span class="date-label">
+                            ESTADO
                         </span>
 
-
-                        <h2>
-                            Registrar una reserva
-                        </h2>
-
-
-                        <p>
-                            Utiliza el sistema de reservas para consultar
-                            disponibilidad y registrar tus espacios.
-                        </p>
+                        <strong>
+                            Sistema conectado
+                        </strong>
 
                     </div>
 
@@ -150,18 +195,7 @@
                 </div>
 
 
-                <div class="connection-status">
-
-                    <span class="status-dot"></span>
-
-                    <span>
-                        Sistema conectado
-                    </span>
-
-                </div>
-
-
-            </div>
+            </section>
 
 
 
@@ -194,6 +228,7 @@
                         ↻
 
                     </button>
+
 
                 </div>
 
@@ -254,8 +289,10 @@
         const powerAppsFrame =
             document.getElementById("powerAppsFrame");
 
+
         const loadingPowerApps =
             document.getElementById("loadingPowerApps");
+
 
         const btnRecargar =
             document.getElementById("btnRecargar");
@@ -321,4 +358,3 @@
 </body>
 
 </html>
-

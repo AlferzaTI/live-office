@@ -347,65 +347,201 @@ body {
 
 /* =========================================
    PAGE HEADER
+   MISMO DISEÑO QUE SALAS
    ========================================= */
 
 .page-header {
 
-    display: flex;
+    position: relative;
 
-    align-items: flex-end;
+    min-height: 190px;
+
+    padding: 30px 34px;
+
+    box-sizing: border-box;
+
+    display: flex;
 
     justify-content: space-between;
 
+    align-items: center;
+
     gap: 20px;
+
+    overflow: hidden;
 
     margin-bottom: 24px;
 
+    border-radius: 22px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00205c 0%,
+            #07377f 48%,
+            #0a84ff 100%
+        );
+
+    box-shadow:
+        0 18px 40px rgba(0, 32, 92, 0.20);
+
+    animation: fadeDownPersonal 0.65s ease both;
+
 }
 
+
+/* =========================================
+   DECORACIÓN DEL HEADER
+   ========================================= */
+
+.page-header::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    right: 130px;
+
+    bottom: -160px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+}
+
+
+.page-header::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 320px;
+
+    height: 320px;
+
+    right: -80px;
+
+    bottom: -250px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+}
+
+
+/* =========================================
+   CONTENIDO DEL HEADER
+   ========================================= */
+
+.page-header > div:first-child {
+
+    position: relative;
+
+    z-index: 2;
+
+}
+
+
+/* =========================================
+   PERSONAL / UBICACIÓN
+   ========================================= */
 
 .page-kicker {
 
-    display: block;
+    display: flex;
 
-    margin-bottom: 8px;
+    align-items: center;
 
-    color: #64748b;
+    gap: 9px;
+
+    margin-bottom: 14px;
 
     font-size: 10px;
 
-    font-weight: 800;
+    font-weight: 700;
 
-    letter-spacing: .13em;
+    letter-spacing: 1.2px;
+
+    color: rgba(255, 255, 255, 0.60);
 
 }
 
+
+.page-kicker::before {
+
+    content: "";
+
+    width: 6px;
+
+    height: 6px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #0a84ff;
+
+    box-shadow:
+        0 0 0 4px rgba(10, 132, 255, 0.15);
+
+}
+
+
+/* =========================================
+   TITULO
+   ========================================= */
 
 .page-header h2 {
 
-    color: #0f172a;
+    margin: 0;
 
-    font-size: 28px;
+    color: white;
 
-    font-weight: 700;
+    font-size: clamp(27px, 3vw, 39px);
 
-    letter-spacing: -.04em;
+    line-height: 1.05;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
 
 }
 
 
+/* =========================================
+   DESCRIPCIÓN
+   ========================================= */
+
 .page-header p {
 
-    margin-top: 7px;
+    margin: 9px 0 0;
 
-    color: #64748b;
+    color: rgba(255, 255, 255, 0.72);
 
     font-size: 13px;
 
 }
 
 
+/* =========================================
+   ESTADO OFICINA
+   MISMO ESTILO GENERAL DE SALAS
+   ========================================= */
+
 .office-status {
+
+    position: relative;
+
+    z-index: 2;
 
     display: flex;
 
@@ -413,19 +549,19 @@ body {
 
     gap: 8px;
 
-    padding: 8px 13px;
+    padding: 10px 14px;
 
-    background: #ecfdf5;
+    background: rgba(255, 255, 255, 0.10);
 
-    color: #15803d;
+    color: white;
 
-    border: 1px solid #bbf7d0;
+    border: 1px solid rgba(255, 255, 255, 0.13);
 
-    border-radius: 20px;
+    border-radius: 14px;
 
-    font-size: 11px;
+    font-size: 10px;
 
-    font-weight: 700;
+    font-weight: 800;
 
     white-space: nowrap;
 
@@ -438,12 +574,41 @@ body {
 
     height: 7px;
 
-    background: #22c55e;
+    flex-shrink: 0;
+
+    background: #16a66a;
 
     border-radius: 50%;
 
+    box-shadow:
+        0 0 0 4px rgba(22, 166, 106, 0.12);
+
 }
 
+
+/* =========================================
+   ANIMACIÓN
+   ========================================= */
+
+@keyframes fadeDownPersonal {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-12px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+
+    }
+
+}
 
 /* =========================================
    TOOLBAR

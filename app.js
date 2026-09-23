@@ -44,49 +44,37 @@ const loadingMessage =
 
 
 /* =========================================
-   CLAVES DE ALMACENAMIENTO
+   SESIÓN
    ========================================= */
 
 /*
- * VALIDACION:
+ * Esta variable permite saber si el usuario
+ * ya pasó correctamente la validación durante
+ * la sesión actual del navegador.
  *
- * Indica que el usuario ya pasó por Microsoft.
- *
- * DATOS:
- *
- * Guarda la última información obtenida
- * para que Index pueda mostrarse inmediatamente
- * cuando el usuario vuelva.
+ * sessionStorage:
+ * - Se mantiene al navegar entre páginas.
+ * - Se mantiene mientras la pestaña siga abierta.
+ * - Se elimina al cerrar la pestaña.
  */
 
-const VALIDACION_KEY =
-    "alferza_live_office_validado";
-
-const DATOS_KEY =
-    "alferza_live_office_datos";
+const SESION_VALIDADA_KEY =
+    "alferzaSesionValidada";
 
 
-/* =========================================
-   COMPROBAR SI YA FUE VALIDADO
-   ========================================= */
+function sesionYaValidada() {
 
-function yaEstaValidado() {
-
-    return localStorage.getItem(
-        VALIDACION_KEY
+    return sessionStorage.getItem(
+        SESION_VALIDADA_KEY
     ) === "true";
 
 }
 
 
-/* =========================================
-   GUARDAR VALIDACIÓN
-   ========================================= */
+function marcarSesionValidada() {
 
-function guardarValidacion() {
-
-    localStorage.setItem(
-        VALIDACION_KEY,
+    sessionStorage.setItem(
+        SESION_VALIDADA_KEY,
         "true"
     );
 
@@ -115,13 +103,13 @@ function cambiarMensaje(mensaje) {
 
 function mostrarCarga(mensaje) {
 
-    if (!overlay) {
-        return;
-    }
-
     cambiarMensaje(mensaje);
 
-    overlay.classList.remove("oculto");
+    if (overlay) {
+
+        overlay.classList.remove("oculto");
+
+    }
 
 }
 
@@ -132,47 +120,9 @@ function mostrarCarga(mensaje) {
 
 function ocultarCarga() {
 
-    if (!overlay) {
-        return;
-    }
+    if (overlay) {
 
-    overlay.classList.add("oculto");
-
-}
-
-
-/* =========================================
-   GUARDAR DATOS
-   ========================================= */
-
-function guardarDatos(usuarios, presenciaPorId) {
-
-    try {
-
-        localStorage.setItem(
-
-            DATOS_KEY,
-
-            JSON.stringify({
-
-                usuarios:
-                    usuarios,
-
-                presencia:
-                    presenciaPorId
-
-            })
-
-        );
-
-    }
-
-    catch (error) {
-
-        console.warn(
-            "No se pudieron guardar los datos:",
-            error
-        );
+        overlay.classList.add("oculto");
 
     }
 
@@ -180,40 +130,16 @@ function guardarDatos(usuarios, presenciaPorId) {
 
 
 /* =========================================
-   RECUPERAR DATOS
+   ESPERAR
    ========================================= */
 
-function recuperarDatos() {
+function esperar(ms) {
 
-    try {
+    return new Promise(resolve => {
 
-        const datos =
-            localStorage.getItem(
-                DATOS_KEY
-            );
+        setTimeout(resolve, ms);
 
-
-        if (!datos) {
-
-            return null;
-
-        }
-
-
-        return JSON.parse(datos);
-
-    }
-
-    catch (error) {
-
-        console.warn(
-            "No se pudieron recuperar los datos:",
-            error
-        );
-
-        return null;
-
-    }
+    });
 
 }
 
@@ -229,7 +155,7 @@ async function obtenerToken() {
 
 
     /* -----------------------------------------
-       PRIMERA VEZ
+       SI NO EXISTE SESIÓN
        ----------------------------------------- */
 
     if (!cuenta) {
@@ -239,28 +165,31 @@ async function obtenerToken() {
         );
 
 
-        const loginResponse =
-            await msalInstance.loginPopup({
+        try {
 
-                scopes:
-                    scopes
+            const loginResponse =
+                await msalInstance.loginPopup({
+                    scopes: scopes
+                });
 
-            });
 
+            cuenta =
+                loginResponse.account;
 
-        cuenta =
-            loginResponse.account;
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error durante el inicio de sesión:",
+                error
+            );
+
+            throw error;
+
+        }
 
     }
-
-
-    /* -----------------------------------------
-       CUENTA ACTIVA
-       ----------------------------------------- */
-
-    msalInstance.setActiveAccount(
-        cuenta
-    );
 
 
     /* -----------------------------------------
@@ -269,19 +198,22 @@ async function obtenerToken() {
 
     try {
 
-        const respuesta =
+        cambiarMensaje(
+            "Verificando permisos..."
+        );
+
+
+        const response =
             await msalInstance.acquireTokenSilent({
 
-                scopes:
-                    scopes,
+                scopes: scopes,
 
-                account:
-                    cuenta
+                account: cuenta
 
             });
 
 
-        return respuesta.accessToken;
+        return response.accessToken;
 
     }
 
@@ -295,20 +227,22 @@ async function obtenerToken() {
 
 
         /*
-         * Solo Microsoft decide si necesita
-         * volver a pedir interacción.
+         * Solo en caso de que Microsoft
+         * necesite interacción nuevamente.
          */
 
-        const respuesta =
+        cambiarMensaje(
+            "Actualizando sesión..."
+        );
+
+
+        const response =
             await msalInstance.acquireTokenPopup({
-
-                scopes:
-                    scopes
-
+                scopes: scopes
             });
 
 
-        return respuesta.accessToken;
+        return response.accessToken;
 
     }
 
@@ -316,39 +250,29 @@ async function obtenerToken() {
 
 
 /* =========================================
-   OBTENER USUARIOS
+   OBTENER USUARIOS DESDE GRAPH
    ========================================= */
 
 async function obtenerUsuarios(TOKEN) {
 
     const respuesta =
         await fetch(
-
             "https://graph.microsoft.com/v1.0/users?$top=999",
-
             {
-
-                method:
-                    "GET",
+                method: "GET",
 
                 headers: {
-
                     Authorization:
                         `Bearer ${TOKEN}`
-
                 }
-
             }
-
         );
 
 
     if (!respuesta.ok) {
 
         throw new Error(
-
             `Microsoft Graph Users: HTTP ${respuesta.status}`
-
         );
 
     }
@@ -368,11 +292,12 @@ async function obtenerPresencia(
     idsUsuarios
 ) {
 
-    const presenciaPorId = {};
+    let presenciaPorId = {};
 
 
     /*
-     * Hasta 650 usuarios por petición.
+     * Microsoft Graph permite hasta
+     * 650 usuarios por solicitud.
      */
 
     for (
@@ -383,53 +308,37 @@ async function obtenerPresencia(
 
         const bloque =
             idsUsuarios.slice(
-
                 i,
-
                 i + 650
-
             );
 
 
         const respuesta =
             await fetch(
-
                 "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
-
                 {
-
-                    method:
-                        "POST",
+                    method: "POST",
 
                     headers: {
-
                         Authorization:
                             `Bearer ${TOKEN}`,
 
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body:
                         JSON.stringify({
-
-                            ids:
-                                bloque
-
+                            ids: bloque
                         })
-
                 }
-
             );
 
 
         if (!respuesta.ok) {
 
             throw new Error(
-
                 `Microsoft Graph Presence: HTTP ${respuesta.status}`
-
             );
 
         }
@@ -445,8 +354,7 @@ async function obtenerPresencia(
 
             presenciaPorId[
                 presencia.id
-            ] =
-                presencia;
+            ] = presencia;
 
         });
 
@@ -468,33 +376,19 @@ function renderizarUsuarios(
 ) {
 
     const contenedor =
-        document.getElementById(
-            "officeGrid"
-        );
+        document.getElementById("officeGrid");
 
 
-    if (!contenedor) {
+    let disponibles = 0;
 
-        return;
+    let ocupados = 0;
 
-    }
+    let ausentes = 0;
 
-
-    let disponibles =
-        0;
-
-    let ocupados =
-        0;
-
-    let ausentes =
-        0;
-
-    let offline =
-        0;
+    let offline = 0;
 
 
-    let html =
-        "";
+    let html = "";
 
 
     usuarios.forEach(usuario => {
@@ -503,10 +397,7 @@ function renderizarUsuarios(
             presenciaPorId[
                 usuario.id
             ] || {
-
-                availability:
-                    "Offline"
-
+                availability: "Offline"
             };
 
 
@@ -601,89 +492,54 @@ function renderizarUsuarios(
         html;
 
 
-    const disp =
-        document.getElementById(
-            "disp"
-        );
+    document.getElementById("disp")
+        .innerText =
+        disponibles;
 
 
-    const busy =
-        document.getElementById(
-            "busy"
-        );
+    document.getElementById("busy")
+        .innerText =
+        ocupados;
 
 
-    const away =
-        document.getElementById(
-            "away"
-        );
+    document.getElementById("away")
+        .innerText =
+        ausentes;
 
 
-    const offlineElement =
-        document.getElementById(
-            "offline"
-        );
-
-
-    if (disp) {
-
-        disp.innerText =
-            disponibles;
-
-    }
-
-
-    if (busy) {
-
-        busy.innerText =
-            ocupados;
-
-    }
-
-
-    if (away) {
-
-        away.innerText =
-            ausentes;
-
-    }
-
-
-    if (offlineElement) {
-
-        offlineElement.innerText =
-            offline;
-
-    }
+    document.getElementById("offline")
+        .innerText =
+        offline;
 
 }
 
 
 /* =========================================
-   CARGAR DATOS DE INTERNET
+   CARGAR INFORMACIÓN
    ========================================= */
 
-async function actualizarDesdeMicrosoft(
-    mostrarPantalla
+async function cargarUsuarios(
+    mostrarPantalla = true
 ) {
+
+    /*
+     * La pantalla azul solo se muestra
+     * cuando realmente corresponde.
+     */
+
+    if (mostrarPantalla) {
+
+        mostrarCarga(
+            "Verificando acceso..."
+        );
+
+    }
+
 
     try {
 
         /* -----------------------------------------
-           SOLO PRIMERA VEZ
-           ----------------------------------------- */
-
-        if (mostrarPantalla) {
-
-            mostrarCarga(
-                "Verificando acceso..."
-            );
-
-        }
-
-
-        /* -----------------------------------------
-           TOKEN
+           AUTENTICACIÓN
            ----------------------------------------- */
 
         const TOKEN =
@@ -694,13 +550,9 @@ async function actualizarDesdeMicrosoft(
            USUARIOS
            ----------------------------------------- */
 
-        if (mostrarPantalla) {
-
-            cambiarMensaje(
-                "Consultando personal..."
-            );
-
-        }
+        cambiarMensaje(
+            "Consultando personal..."
+        );
 
 
         const data =
@@ -710,18 +562,12 @@ async function actualizarDesdeMicrosoft(
 
 
         const usuarios =
-            (data.value || []).filter(
-
+            data.value.filter(
                 usuario =>
-
                     usuario.mail &&
-
                     usuario.mail
                         .toLowerCase()
-                        .endsWith(
-                            "@alferza.pe"
-                        )
-
+                        .endsWith("@alferza.pe")
             );
 
 
@@ -729,65 +575,50 @@ async function actualizarDesdeMicrosoft(
            PRESENCIA
            ----------------------------------------- */
 
-        if (mostrarPantalla) {
-
-            cambiarMensaje(
-                "Consultando estados..."
-            );
-
-        }
+        cambiarMensaje(
+            "Consultando estados..."
+        );
 
 
         const idsUsuarios =
             usuarios.map(
-
                 usuario =>
                     usuario.id
-
             );
 
 
         const presenciaPorId =
             await obtenerPresencia(
-
                 TOKEN,
-
                 idsUsuarios
-
             );
 
 
         /* -----------------------------------------
-           RENDERIZAR
+           MOSTRAR INFORMACIÓN
            ----------------------------------------- */
 
         renderizarUsuarios(
-
             usuarios,
-
             presenciaPorId
-
         );
 
 
         /* -----------------------------------------
-           GUARDAR DATOS
+           MARCAR SESIÓN COMO VALIDADA
            ----------------------------------------- */
 
-        guardarDatos(
+        /*
+         * IMPORTANTE:
+         * Solo se guarda después de que:
+         *
+         * 1. Microsoft autenticó
+         * 2. Se obtuvieron los usuarios
+         * 3. Se obtuvieron los estados
+         * 4. Se renderizó correctamente
+         */
 
-            usuarios,
-
-            presenciaPorId
-
-        );
-
-
-        /* -----------------------------------------
-           MARCAR VALIDACIÓN
-           ----------------------------------------- */
-
-        guardarValidacion();
+        marcarSesionValidada();
 
 
         /* -----------------------------------------
@@ -801,34 +632,162 @@ async function actualizarDesdeMicrosoft(
             );
 
 
+            await esperar(250);
+
+
             ocultarCarga();
 
         }
 
 
         console.log(
-            "Información de Microsoft actualizada."
+            "ALFERZA LIVE OFFICE actualizado correctamente."
         );
 
-
     }
+
 
     catch (error) {
 
         console.error(
-            "Error actualizando información:",
+            "Error cargando ALFERZA LIVE OFFICE:",
             error
         );
 
 
         /*
-         * SI ES LA PRIMERA VEZ:
-         *
-         * No podemos mostrar información
-         * que todavía no tenemos.
+         * Si es una actualización silenciosa,
+         * no molestamos al usuario con la pantalla.
          */
 
-        if (mostrarPantalla) {
+        if (!mostrarPantalla) {
+
+            return;
+
+        }
+
+
+        /* -----------------------------------------
+           REINTENTO AUTOMÁTICO
+           ----------------------------------------- */
+
+        cambiarMensaje(
+            "Conectando con Microsoft..."
+        );
+
+
+        await esperar(1500);
+
+
+        try {
+
+            /* -----------------------------------------
+               AUTENTICACIÓN
+               ----------------------------------------- */
+
+            const TOKEN =
+                await obtenerToken();
+
+
+            /* -----------------------------------------
+               USUARIOS
+               ----------------------------------------- */
+
+            cambiarMensaje(
+                "Consultando personal..."
+            );
+
+
+            const data =
+                await obtenerUsuarios(
+                    TOKEN
+                );
+
+
+            const usuarios =
+                data.value.filter(
+                    usuario =>
+                        usuario.mail &&
+                        usuario.mail
+                            .toLowerCase()
+                            .endsWith(
+                                "@alferza.pe"
+                            )
+                );
+
+
+            /* -----------------------------------------
+               PRESENCIA
+               ----------------------------------------- */
+
+            cambiarMensaje(
+                "Consultando estados..."
+            );
+
+
+            const idsUsuarios =
+                usuarios.map(
+                    usuario =>
+                        usuario.id
+                );
+
+
+            const presenciaPorId =
+                await obtenerPresencia(
+                    TOKEN,
+                    idsUsuarios
+                );
+
+
+            /* -----------------------------------------
+               MOSTRAR INFORMACIÓN
+               ----------------------------------------- */
+
+            renderizarUsuarios(
+                usuarios,
+                presenciaPorId
+            );
+
+
+            /* -----------------------------------------
+               MARCAR SESIÓN VALIDADA
+               ----------------------------------------- */
+
+            marcarSesionValidada();
+
+
+            /* -----------------------------------------
+               FINALIZAR CARGA
+               ----------------------------------------- */
+
+            cambiarMensaje(
+                "Información actualizada"
+            );
+
+
+            await esperar(250);
+
+
+            ocultarCarga();
+
+
+            console.log(
+                "Conexión recuperada automáticamente."
+            );
+
+
+            return;
+
+        }
+
+
+        catch (errorSegundoIntento) {
+
+            console.error(
+                "Segundo intento fallido:",
+                errorSegundoIntento
+            );
+
 
             cambiarMensaje(
                 "No se pudo conectar con Microsoft"
@@ -836,27 +795,17 @@ async function actualizarDesdeMicrosoft(
 
 
             /*
-             * Quitamos la pantalla.
-             * NO dejamos el Index bloqueado.
+             * IMPORTANTE:
+             * No marcamos la sesión como validada
+             * si la carga falló.
+             *
+             * Así, al volver a intentar entrar
+             * podremos volver a validar.
              */
 
-            setTimeout(() => {
-
-                ocultarCarga();
-
-            }, 1500);
+            return;
 
         }
-
-
-        /*
-         * SI NO ES LA PRIMERA VEZ:
-         *
-         * NO HACEMOS NADA.
-         *
-         * Los datos anteriores permanecen
-         * visibles.
-         */
 
     }
 
@@ -864,118 +813,69 @@ async function actualizarDesdeMicrosoft(
 
 
 /* =========================================
-   INICIO DEL INDEX
+   INICIO
    ========================================= */
 
-const datosGuardados =
-    recuperarDatos();
-
-
 /*
- * =========================================
- * CASO 1:
- * YA FUE VALIDADO ANTERIORMENTE
- * =========================================
+ * PRIMERA ENTRADA:
+ *
+ * Si nunca se validó la sesión:
+ * -> aparece pantalla azul
+ * -> autentica
+ * -> carga información
+ * -> guarda la validación
+ *
+ *
+ * SI YA SE VALIDÓ:
+ *
+ * -> NO aparece pantalla azul
+ * -> carga directamente la información
+ *
+ *
+ * Esto permite navegar:
+ *
+ * Index
+ *   ↓
+ * Personal
+ *   ↓
+ * Reservas
+ *   ↓
+ * Salas
+ *   ↓
+ * Comunicados
+ *   ↓
+ * Index
+ *
+ * sin volver a mostrar
+ * "Verificando acceso..."
  */
 
-if (
-    yaEstaValidado() &&
-    datosGuardados
-) {
+if (sesionYaValidada()) {
 
-    /*
-     * MOSTRAR INMEDIATAMENTE
-     *
-     * No esperamos a Microsoft.
-     * No mostramos overlay.
-     * No bloqueamos Index.
-     */
-
-    renderizarUsuarios(
-
-        datosGuardados.usuarios,
-
-        datosGuardados.presencia
-
-    );
-
-
-    /*
-     * Actualizamos Microsoft
-     * EN SEGUNDO PLANO.
-     *
-     * El usuario ni siquiera verá
-     * una pantalla de carga.
-     */
-
-    actualizarDesdeMicrosoft(
-        false
-    );
+    cargarUsuarios(false);
 
 }
-
-
-/*
- * =========================================
- * CASO 2:
- * YA FUE VALIDADO PERO NO HAY DATOS
- * =========================================
- */
-
-else if (
-    yaEstaValidado()
-) {
-
-    /*
-     * No mostramos pantalla azul.
-     *
-     * Intentamos recuperar información
-     * silenciosamente.
-     */
-
-    actualizarDesdeMicrosoft(
-        false
-    );
-
-}
-
-
-/*
- * =========================================
- * CASO 3:
- * PRIMERA VEZ
- * =========================================
- */
-
 else {
 
-    /*
-     * ESTA es la única situación
-     * donde aparece la pantalla azul.
-     */
-
-    actualizarDesdeMicrosoft(
-        true
-    );
+    cargarUsuarios(true);
 
 }
 
 
 /* =========================================
-   ACTUALIZACIÓN AUTOMÁTICA
+   ACTUALIZACIÓN CADA 5 MINUTOS
    ========================================= */
 
 setInterval(() => {
 
     /*
-     * SIEMPRE silencioso.
+     * false = NO mostrar pantalla azul.
      *
-     * Nunca muestra overlay.
+     * Los usuarios siguen viendo
+     * la aplicación mientras se actualiza.
      */
 
-    actualizarDesdeMicrosoft(
-        false
-    );
+    cargarUsuarios(false);
 
 }, 300000);
 
@@ -984,18 +884,10 @@ setInterval(() => {
    BUSCADOR
    ========================================= */
 
-const buscador =
-    document.getElementById(
-        "buscador"
-    );
-
-
-if (buscador) {
-
-    buscador.addEventListener(
-
+document
+    .getElementById("buscador")
+    .addEventListener(
         "keyup",
-
         function () {
 
             const texto =
@@ -1003,9 +895,7 @@ if (buscador) {
 
 
             document
-                .querySelectorAll(
-                    ".card"
-                )
+                .querySelectorAll(".card")
                 .forEach(card => {
 
                     const contenido =
@@ -1014,19 +904,14 @@ if (buscador) {
 
 
                     card.style.display =
-                        contenido.includes(
-                            texto
-                        )
+                        contenido.includes(texto)
                             ? ""
                             : "none";
 
                 });
 
         }
-
     );
-
-}
 
 
 /* =========================================
@@ -1036,9 +921,7 @@ if (buscador) {
 function filtrarEstado(tipo) {
 
     document
-        .querySelectorAll(
-            ".card"
-        )
+        .querySelectorAll(".card")
         .forEach(card => {
 
             const estado =
@@ -1054,8 +937,7 @@ function filtrarEstado(tipo) {
                 case "Available":
 
                     mostrar =
-                        estado ===
-                        "Available";
+                        estado === "Available";
 
                     break;
 
@@ -1064,12 +946,8 @@ function filtrarEstado(tipo) {
 
                     mostrar =
                         estado === "Busy" ||
-
-                        estado ===
-                        "InAMeeting" ||
-
-                        estado ===
-                        "OnACall";
+                        estado === "InAMeeting" ||
+                        estado === "OnACall";
 
                     break;
 
@@ -1078,9 +956,7 @@ function filtrarEstado(tipo) {
 
                     mostrar =
                         estado === "Away" ||
-
-                        estado ===
-                        "BeRightBack";
+                        estado === "BeRightBack";
 
                     break;
 
@@ -1088,8 +964,7 @@ function filtrarEstado(tipo) {
                 case "Offline":
 
                     mostrar =
-                        estado ===
-                        "Offline";
+                        estado === "Offline";
 
                     break;
 
@@ -1119,9 +994,7 @@ function filtrarEstado(tipo) {
 function mostrarTodos() {
 
     document
-        .querySelectorAll(
-            ".card"
-        )
+        .querySelectorAll(".card")
         .forEach(card => {
 
             card.style.display =

@@ -721,14 +721,6 @@ cargarUsuarios(true);
 
 setInterval(() => {
 
-    /*
-     * IMPORTANTE:
-     * false = NO mostrar pantalla azul.
-     *
-     * Los usuarios siguen viendo
-     * la aplicación mientras se actualiza.
-     */
-
     cargarUsuarios(false);
 
 }, 300000);

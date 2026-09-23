@@ -2,34 +2,75 @@
 
 <html lang="es">
 
-<script>
-    // Si no se ha iniciado sesión, ir primero al login
-    if (sessionStorage.getItem("alferza_login") !== "true") {
-        window.location.replace("login.html");
-    }
-</script>
-
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>ALFERZA LIVE OFFICE</title>
 
+    <!-- ==========================================
+         COMPROBAR ACCESO
+         ========================================== -->
+
+    <script>
+
+        /*
+         * Si todavía no se ha iniciado sesión,
+         * primero vamos al login.
+         *
+         * Si ya inició sesión, el dashboard
+         * continúa normalmente.
+         */
+
+        if (
+            sessionStorage.getItem("alferza_login") !== "true"
+        ) {
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }
+
+    </script>
+
+
     <!-- Estilos -->
-    <link rel="stylesheet" href="styles.css">
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
 
 </head>
 
+
 <body>
 
-<!-- PANTALLA DE CARGA -->
-<div id="loadingOverlay" class="loading-overlay">
+
+<!-- ==========================================
+     PANTALLA DE CARGA
+     ========================================== -->
+
+<div
+    id="loadingOverlay"
+    class="loading-overlay"
+>
 
     <div class="loading-content">
 
-        <div class="gear-spinner">⚙️</div>
+        <div class="gear-spinner">
+            ⚙️
+        </div>
 
-        <p id="loadingMessage">Verificando acceso...</p>
+        <p id="loadingMessage">
+            Cargando información...
+        </p>
 
         <span class="loading-subtitle">
             ALFERZA LIVE OFFICE
@@ -40,29 +81,41 @@
 </div>
 
 
-<!-- BARRA SUPERIOR -->
+<!-- ==========================================
+     BARRA SUPERIOR
+     ========================================== -->
+
 <header class="topbar">
 
     <div class="logo">
 
-        <h1>ALFERZA LIVE OFFICE</h1>
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
 
-        <span>Monitoreo en tiempo real</span>
+        <span>
+            Monitoreo en tiempo real
+        </span>
 
     </div>
+
 
     <div class="live-status">
 
         <span class="live-status-dot"></span>
 
-        <span>EN VIVO</span>
+        <span>
+            EN VIVO
+        </span>
 
     </div>
 
 </header>
 
 
-<!-- BUSCADOR DE PERSONAL -->
+<!-- ==========================================
+     BUSCADOR DE PERSONAL
+     ========================================== -->
 
 <div class="search-container">
 
@@ -76,14 +129,23 @@
 </div>
 
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- ==========================================
+     CONTENIDO PRINCIPAL
+     ========================================== -->
+
 <div class="container">
 
 
-    <!-- MENÚ LATERAL -->
+    <!-- ======================================
+         MENÚ LATERAL
+         ====================================== -->
+
     <aside class="sidebar">
 
-        <h2>MENÚ</h2>
+        <h2>
+            MENÚ
+        </h2>
+
 
         <ul>
 
@@ -92,23 +154,30 @@
             </li>
 
 
-            <li onclick="window.location.href='personal.html'">
+            <li
+                onclick="window.location.href='personal.html'"
+            >
                 👥 Personal
             </li>
 
 
-            <!-- NUEVO -->
-            <li onclick="window.location.href='reserva.html'">
+            <li
+                onclick="window.location.href='reserva.html'"
+            >
                 📝 Reservas
             </li>
 
 
-            <li onclick="window.location.href='salas/salas.html'">
+            <li
+                onclick="window.location.href='salas/salas.html'"
+            >
                 📅 Salas
             </li>
 
 
-            <li onclick="window.location.href='comunicados.html'">
+            <li
+                onclick="window.location.href='comunicados.html'"
+            >
                 📢 Comunicados
             </li>
 
@@ -122,11 +191,17 @@
     </aside>
 
 
-    <!-- CONTENIDO -->
+    <!-- ======================================
+         CONTENIDO
+         ====================================== -->
+
     <main class="content">
 
 
-        <!-- ESTADÍSTICAS -->
+        <!-- ==================================
+             ESTADÍSTICAS
+             ================================== -->
+
         <section class="stats">
 
 
@@ -135,9 +210,13 @@
                 onclick="filtrarEstado('Available')"
             >
 
-                <span id="disp">0</span>
+                <span id="disp">
+                    0
+                </span>
 
-                <small>Disponibles</small>
+                <small>
+                    Disponibles
+                </small>
 
             </div>
 
@@ -147,9 +226,13 @@
                 onclick="filtrarEstado('Busy')"
             >
 
-                <span id="busy">0</span>
+                <span id="busy">
+                    0
+                </span>
 
-                <small>Ocupados</small>
+                <small>
+                    Ocupados
+                </small>
 
             </div>
 
@@ -159,9 +242,13 @@
                 onclick="filtrarEstado('Away')"
             >
 
-                <span id="away">0</span>
+                <span id="away">
+                    0
+                </span>
 
-                <small>Ausentes</small>
+                <small>
+                    Ausentes
+                </small>
 
             </div>
 
@@ -171,16 +258,23 @@
                 onclick="filtrarEstado('Offline')"
             >
 
-                <span id="offline">0</span>
+                <span id="offline">
+                    0
+                </span>
 
-                <small>Offline</small>
+                <small>
+                    Offline
+                </small>
 
             </div>
 
         </section>
 
 
-        <!-- PERSONAL -->
+        <!-- ==================================
+             PERSONAL
+             ================================== -->
+
         <section>
 
             <h2 class="section-title">
@@ -204,7 +298,10 @@
 </div>
 
 
-<!-- PIE DE PÁGINA -->
+<!-- ==========================================
+     PIE DE PÁGINA
+     ========================================== -->
+
 <footer>
 
     ALFERZA LIVE OFFICE · Teams Presence Dashboard
@@ -212,10 +309,21 @@
 </footer>
 
 
-<!-- Microsoft Authentication Library (MSAL) -->
-<script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+<!-- ==========================================
+     MICROSOFT AUTHENTICATION LIBRARY
+     ========================================== -->
+
+<script
+    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+></script>
+
+
+<!-- ==========================================
+     APP
+     ========================================== -->
 
 <script src="app.js"></script>
+
 
 </body>
 

@@ -5,31 +5,46 @@
 const msalConfig = {
 
     auth: {
-        clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
+
+        clientId:
+            "5d98417c-74a7-4fab-8f2c-41ac127be696",
 
         authority:
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
             "https://alvaroalferza.github.io/live-office/blank.html"
+
     },
 
     cache: {
-        cacheLocation: "sessionStorage"
+
+        cacheLocation:
+            "sessionStorage",
+
+        storeAuthStateInCookie:
+            false
+
     }
 
 };
 
 
 const scopes = [
+
     "User.Read",
+
     "Presence.Read.All",
+
     "Sites.Read.All"
+
 ];
 
 
 const msalInstance =
-    new msal.PublicClientApplication(msalConfig);
+    new msal.PublicClientApplication(
+        msalConfig
+    );
 
 
 /* =========================================
@@ -37,17 +52,24 @@ const msalInstance =
    ========================================= */
 
 const overlay =
-    document.getElementById("loadingOverlay");
+    document.getElementById(
+        "loadingOverlay"
+    );
+
 
 const loadingMessage =
-    document.getElementById("loadingMessage");
+    document.getElementById(
+        "loadingMessage"
+    );
 
 
 /* =========================================
    MENSAJE DE CARGA
    ========================================= */
 
-function cambiarMensaje(mensaje) {
+function cambiarMensaje(
+    mensaje
+) {
 
     if (loadingMessage) {
 
@@ -63,11 +85,22 @@ function cambiarMensaje(mensaje) {
    MOSTRAR CARGA
    ========================================= */
 
-function mostrarCarga(mensaje) {
+function mostrarCarga(
+    mensaje
+) {
 
-    cambiarMensaje(mensaje);
+    cambiarMensaje(
+        mensaje
+    );
 
-    overlay.classList.remove("oculto");
+
+    if (overlay) {
+
+        overlay.classList.remove(
+            "oculto"
+        );
+
+    }
 
 }
 
@@ -78,7 +111,13 @@ function mostrarCarga(mensaje) {
 
 function ocultarCarga() {
 
-    overlay.classList.add("oculto");
+    if (overlay) {
+
+        overlay.classList.add(
+            "oculto"
+        );
+
+    }
 
 }
 
@@ -87,13 +126,20 @@ function ocultarCarga() {
    ESPERAR
    ========================================= */
 
-function esperar(ms) {
+function esperar(
+    ms
+) {
 
-    return new Promise(resolve => {
+    return new Promise(
+        resolve => {
 
-        setTimeout(resolve, ms);
+            setTimeout(
+                resolve,
+                ms
+            );
 
-    });
+        }
+    );
 
 }
 
@@ -104,51 +150,47 @@ function esperar(ms) {
 
 async function obtenerToken() {
 
-    let cuenta =
-        msalInstance.getAllAccounts()[0];
+    /*
+     * IMPORTANTE:
+     *
+     * Aquí YA NO hacemos loginPopup().
+     *
+     * El login se realiza únicamente
+     * desde login.html.
+     */
 
 
-    /* -----------------------------------------
-       SI NO EXISTE SESIÓN
-       ----------------------------------------- */
+    const cuentas =
+        msalInstance.getAllAccounts();
+
+
+    const cuenta =
+        cuentas[0];
+
+
+    /*
+     * Si no existe cuenta significa que
+     * el usuario no tiene una sesión MSAL
+     * disponible en esta pestaña.
+     */
 
     if (!cuenta) {
 
-        cambiarMensaje(
-            "Autenticando con Microsoft..."
+        throw new Error(
+            "No existe una sesión de Microsoft."
         );
-
-
-        try {
-
-            const loginResponse =
-                await msalInstance.loginPopup({
-                    scopes: scopes
-                });
-
-
-            cuenta =
-                loginResponse.account;
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Error durante el inicio de sesión:",
-                error
-            );
-
-            throw error;
-
-        }
 
     }
 
 
-    /* -----------------------------------------
-       TOKEN SILENCIOSO
-       ----------------------------------------- */
+    /*
+     * Establecemos la cuenta activa.
+     */
+
+    msalInstance.setActiveAccount(
+        cuenta
+    );
+
 
     try {
 
@@ -157,12 +199,18 @@ async function obtenerToken() {
         );
 
 
+        /*
+         * Obtener token silenciosamente.
+         */
+
         const response =
             await msalInstance.acquireTokenSilent({
 
-                scopes: scopes,
+                scopes:
+                    scopes,
 
-                account: cuenta
+                account:
+                    cuenta
 
             });
 
@@ -174,29 +222,23 @@ async function obtenerToken() {
 
     catch (error) {
 
-        console.warn(
-            "Token silencioso no disponible:",
+        console.error(
+            "No se pudo obtener el token silenciosamente:",
             error
         );
 
 
         /*
-         * Solo en caso de que Microsoft
-         * necesite interacción nuevamente.
+         * IMPORTANTE:
+         *
+         * NO hacemos loginPopup().
+         *
+         * Si el token silencioso falla,
+         * dejamos que la carga falle y
+         * mostramos el error.
          */
 
-        cambiarMensaje(
-            "Actualizando sesión..."
-        );
-
-
-        const response =
-            await msalInstance.acquireTokenPopup({
-                scopes: scopes
-            });
-
-
-        return response.accessToken;
+        throw error;
 
     }
 
@@ -207,26 +249,37 @@ async function obtenerToken() {
    OBTENER USUARIOS DESDE GRAPH
    ========================================= */
 
-async function obtenerUsuarios(TOKEN) {
+async function obtenerUsuarios(
+    TOKEN
+) {
 
     const respuesta =
         await fetch(
+
             "https://graph.microsoft.com/v1.0/users?$top=999",
+
             {
+
                 method: "GET",
 
                 headers: {
+
                     Authorization:
                         `Bearer ${TOKEN}`
+
                 }
+
             }
+
         );
 
 
     if (!respuesta.ok) {
 
         throw new Error(
+
             `Microsoft Graph Users: HTTP ${respuesta.status}`
+
         );
 
     }
@@ -255,44 +308,63 @@ async function obtenerPresencia(
      */
 
     for (
+
         let i = 0;
+
         i < idsUsuarios.length;
+
         i += 650
+
     ) {
 
         const bloque =
             idsUsuarios.slice(
+
                 i,
+
                 i + 650
+
             );
 
 
         const respuesta =
             await fetch(
+
                 "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
+
                 {
+
                     method: "POST",
 
                     headers: {
+
                         Authorization:
                             `Bearer ${TOKEN}`,
 
                         "Content-Type":
                             "application/json"
+
                     },
 
                     body:
                         JSON.stringify({
-                            ids: bloque
+
+                            ids:
+                                bloque
+
                         })
+
                 }
+
             );
 
 
         if (!respuesta.ok) {
 
             throw new Error(
+
                 `Microsoft Graph Presence: HTTP ${respuesta.status}`
+
             );
 
         }
@@ -304,13 +376,17 @@ async function obtenerPresencia(
 
         (
             data.value || []
-        ).forEach(presencia => {
+        ).forEach(
 
-            presenciaPorId[
-                presencia.id
-            ] = presencia;
+            presencia => {
 
-        });
+                presenciaPorId[
+                    presencia.id
+                ] = presencia;
+
+            }
+
+        );
 
     }
 
@@ -330,7 +406,9 @@ function renderizarUsuarios(
 ) {
 
     const contenedor =
-        document.getElementById("officeGrid");
+        document.getElementById(
+            "officeGrid"
+        );
 
 
     let disponibles = 0;
@@ -345,125 +423,232 @@ function renderizarUsuarios(
     let html = "";
 
 
-    usuarios.forEach(usuario => {
+    usuarios.forEach(
 
-        const presencia =
-            presenciaPorId[
-                usuario.id
-            ] || {
-                availability: "Offline"
-            };
+        usuario => {
 
+            const presencia =
+                presenciaPorId[
+                    usuario.id
+                ] || {
 
-        const estado =
-            presencia.availability ||
-            "Offline";
+                    availability:
+                        "Offline"
 
-
-        let clase =
-            "offline";
+                };
 
 
-        switch (estado) {
-
-            case "Available":
-
-                clase =
-                    "disponible";
-
-                disponibles++;
-
-                break;
+            const estado =
+                presencia.availability ||
+                "Offline";
 
 
-            case "Busy":
-
-            case "InAMeeting":
-
-            case "OnACall":
-
-                clase =
-                    "ocupado";
-
-                ocupados++;
-
-                break;
+            let clase =
+                "offline";
 
 
-            case "Away":
-
-            case "BeRightBack":
-
-                clase =
-                    "ausente";
-
-                ausentes++;
-
-                break;
+            switch (estado) {
 
 
-            default:
+                case "Available":
 
-                clase =
-                    "offline";
+                    clase =
+                        "disponible";
 
-                offline++;
+                    disponibles++;
 
-                break;
+                    break;
+
+
+                case "Busy":
+
+
+                case "InAMeeting":
+
+
+                case "OnACall":
+
+                    clase =
+                        "ocupado";
+
+                    ocupados++;
+
+                    break;
+
+
+                case "Away":
+
+
+                case "BeRightBack":
+
+                    clase =
+                        "ausente";
+
+                    ausentes++;
+
+                    break;
+
+
+                default:
+
+                    clase =
+                        "offline";
+
+                    offline++;
+
+                    break;
+
+            }
+
+
+            html += `
+
+                <div
+                    class="card"
+                    data-estado="${estado}"
+                >
+
+                    <h3>
+                        ${usuario.displayName}
+                    </h3>
+
+                    <p>
+                        ${usuario.mail}
+                    </p>
+
+                    <div
+                        class="status ${clase}"
+                    >
+                        ${estado}
+                    </div>
+
+                </div>
+
+            `;
 
         }
 
-
-        html += `
-
-            <div
-                class="card"
-                data-estado="${estado}"
-            >
-
-                <h3>
-                    ${usuario.displayName}
-                </h3>
-
-                <p>
-                    ${usuario.mail}
-                </p>
-
-                <div
-                    class="status ${clase}"
-                >
-                    ${estado}
-                </div>
-
-            </div>
-
-        `;
-
-    });
+    );
 
 
     contenedor.innerHTML =
         html;
 
 
-    document.getElementById("disp")
-        .innerText =
+    document.getElementById(
+        "disp"
+    ).innerText =
         disponibles;
 
 
-    document.getElementById("busy")
-        .innerText =
+    document.getElementById(
+        "busy"
+    ).innerText =
         ocupados;
 
 
-    document.getElementById("away")
-        .innerText =
+    document.getElementById(
+        "away"
+    ).innerText =
         ausentes;
 
 
-    document.getElementById("offline")
-        .innerText =
+    document.getElementById(
+        "offline"
+    ).innerText =
         offline;
+
+}
+
+
+/* =========================================
+   OBTENER INFORMACIÓN DE GRAPH
+   ========================================= */
+
+async function consultarInformacion() {
+
+    /*
+     * TOKEN
+     */
+
+    const TOKEN =
+        await obtenerToken();
+
+
+    /*
+     * USUARIOS
+     */
+
+    cambiarMensaje(
+        "Consultando personal..."
+    );
+
+
+    const data =
+        await obtenerUsuarios(
+            TOKEN
+        );
+
+
+    /*
+     * SOLO PERSONAL ALFERZA
+     */
+
+    const usuarios =
+        data.value.filter(
+
+            usuario =>
+
+                usuario.mail &&
+
+                usuario.mail
+                    .toLowerCase()
+                    .endsWith(
+                        "@alferza.pe"
+                    )
+
+        );
+
+
+    /*
+     * PRESENCIA
+     */
+
+    cambiarMensaje(
+        "Consultando estados..."
+    );
+
+
+    const idsUsuarios =
+        usuarios.map(
+
+            usuario =>
+                usuario.id
+
+        );
+
+
+    const presenciaPorId =
+        await obtenerPresencia(
+
+            TOKEN,
+
+            idsUsuarios
+
+        );
+
+
+    /*
+     * MOSTRAR INFORMACIÓN
+     */
+
+    renderizarUsuarios(
+
+        usuarios,
+
+        presenciaPorId
+
+    );
 
 }
 
@@ -477,14 +662,14 @@ async function cargarUsuarios(
 ) {
 
     /*
-     * Solo mostramos el overlay durante
-     * la carga inicial.
+     * Solo mostramos el overlay
+     * durante la carga inicial.
      */
 
     if (mostrarPantalla) {
 
         mostrarCarga(
-            "Verificando acceso..."
+            "Cargando información..."
         );
 
     }
@@ -492,75 +677,12 @@ async function cargarUsuarios(
 
     try {
 
-        /* -----------------------------------------
-           AUTENTICACIÓN
-           ----------------------------------------- */
-
-        const TOKEN =
-            await obtenerToken();
+        await consultarInformacion();
 
 
-        /* -----------------------------------------
-           USUARIOS
-           ----------------------------------------- */
-
-        cambiarMensaje(
-            "Consultando personal..."
-        );
-
-
-        const data =
-            await obtenerUsuarios(
-                TOKEN
-            );
-
-
-        const usuarios =
-            data.value.filter(
-                usuario =>
-                    usuario.mail &&
-                    usuario.mail
-                        .toLowerCase()
-                        .endsWith("@alferza.pe")
-            );
-
-
-        /* -----------------------------------------
-           PRESENCIA
-           ----------------------------------------- */
-
-        cambiarMensaje(
-            "Consultando estados..."
-        );
-
-
-        const idsUsuarios =
-            usuarios.map(
-                usuario =>
-                    usuario.id
-            );
-
-
-        const presenciaPorId =
-            await obtenerPresencia(
-                TOKEN,
-                idsUsuarios
-            );
-
-
-        /* -----------------------------------------
-           MOSTRAR INFORMACIÓN
-           ----------------------------------------- */
-
-        renderizarUsuarios(
-            usuarios,
-            presenciaPorId
-        );
-
-
-        /* -----------------------------------------
-           OCULTAR PANTALLA
-           ----------------------------------------- */
+        /*
+         * OCULTAR PANTALLA
+         */
 
         if (mostrarPantalla) {
 
@@ -569,7 +691,9 @@ async function cargarUsuarios(
             );
 
 
-            await esperar(250);
+            await esperar(
+                250
+            );
 
 
             ocultarCarga();
@@ -592,114 +716,25 @@ async function cargarUsuarios(
         );
 
 
-        /*
-         * Si es la carga inicial,
-         * NO mostramos información parcial.
-         */
-
         if (mostrarPantalla) {
 
             cambiarMensaje(
-                "Conectando con Microsoft..."
+                "No se pudo conectar con Microsoft"
             );
 
 
             /*
-             * Reintentar automáticamente.
-             *
-             * Esto evita que el usuario tenga
-             * que hacer Ctrl + Shift + R.
+             * Ocultamos la pantalla
+             * para evitar que quede
+             * bloqueada eternamente.
              */
 
-            await esperar(1500);
+            await esperar(
+                1200
+            );
 
 
-            try {
-
-                const TOKEN =
-                    await obtenerToken();
-
-
-                const data =
-                    await obtenerUsuarios(
-                        TOKEN
-                    );
-
-
-                const usuarios =
-                    data.value.filter(
-                        usuario =>
-                            usuario.mail &&
-                            usuario.mail
-                                .toLowerCase()
-                                .endsWith(
-                                    "@alferza.pe"
-                                )
-                    );
-
-
-                cambiarMensaje(
-                    "Consultando estados..."
-                );
-
-
-                const idsUsuarios =
-                    usuarios.map(
-                        usuario =>
-                            usuario.id
-                    );
-
-
-                const presenciaPorId =
-                    await obtenerPresencia(
-                        TOKEN,
-                        idsUsuarios
-                    );
-
-
-                renderizarUsuarios(
-                    usuarios,
-                    presenciaPorId
-                );
-
-
-                cambiarMensaje(
-                    "Información actualizada"
-                );
-
-
-                await esperar(250);
-
-
-                ocultarCarga();
-
-
-                console.log(
-                    "Conexión recuperada automáticamente."
-                );
-
-
-                return;
-
-            }
-
-
-            catch (errorSegundoIntento) {
-
-                console.error(
-                    "Segundo intento fallido:",
-                    errorSegundoIntento
-                );
-
-
-                cambiarMensaje(
-                    "No se pudo conectar con Microsoft"
-                );
-
-
-                return;
-
-            }
+            ocultarCarga();
 
         }
 
@@ -712,26 +747,36 @@ async function cargarUsuarios(
    INICIO
    ========================================= */
 
-cargarUsuarios(true);
+cargarUsuarios(
+    true
+);
 
 
 /* =========================================
    ACTUALIZACIÓN CADA 5 MINUTOS
    ========================================= */
 
-setInterval(() => {
+setInterval(
 
-    /*
-     * IMPORTANTE:
-     * false = NO mostrar pantalla azul.
-     *
-     * Los usuarios siguen viendo
-     * la aplicación mientras se actualiza.
-     */
+    () => {
 
-    cargarUsuarios(false);
+        /*
+         * false =
+         * no mostrar pantalla azul.
+         *
+         * El usuario continúa utilizando
+         * la aplicación mientras se actualiza.
+         */
 
-}, 300000);
+        cargarUsuarios(
+            false
+        );
+
+    },
+
+    300000
+
+);
 
 
 /* =========================================
@@ -739,9 +784,13 @@ setInterval(() => {
    ========================================= */
 
 document
-    .getElementById("buscador")
+    .getElementById(
+        "buscador"
+    )
     .addEventListener(
+
         "keyup",
+
         function () {
 
             const texto =
@@ -749,22 +798,34 @@ document
 
 
             document
-                .querySelectorAll(".card")
-                .forEach(card => {
+                .querySelectorAll(
+                    ".card"
+                )
+                .forEach(
 
-                    const contenido =
-                        card.innerText
-                            .toLowerCase();
+                    card => {
+
+                        const contenido =
+                            card.innerText
+                                .toLowerCase();
 
 
-                    card.style.display =
-                        contenido.includes(texto)
-                            ? ""
-                            : "none";
+                        card.style.display =
 
-                });
+                            contenido.includes(
+                                texto
+                            )
+
+                                ? ""
+
+                                : "none";
+
+                    }
+
+                );
 
         }
+
     );
 
 
@@ -772,71 +833,85 @@ document
    FILTROS
    ========================================= */
 
-function filtrarEstado(tipo) {
+function filtrarEstado(
+    tipo
+) {
 
     document
-        .querySelectorAll(".card")
-        .forEach(card => {
+        .querySelectorAll(
+            ".card"
+        )
+        .forEach(
 
-            const estado =
-                card.dataset.estado;
+            card => {
 
-
-            let mostrar =
-                false;
-
-
-            switch (tipo) {
-
-                case "Available":
-
-                    mostrar =
-                        estado === "Available";
-
-                    break;
+                const estado =
+                    card.dataset.estado;
 
 
-                case "Busy":
-
-                    mostrar =
-                        estado === "Busy" ||
-                        estado === "InAMeeting" ||
-                        estado === "OnACall";
-
-                    break;
+                let mostrar =
+                    false;
 
 
-                case "Away":
-
-                    mostrar =
-                        estado === "Away" ||
-                        estado === "BeRightBack";
-
-                    break;
+                switch (tipo) {
 
 
-                case "Offline":
+                    case "Available":
 
-                    mostrar =
-                        estado === "Offline";
+                        mostrar =
+                            estado ===
+                            "Available";
 
-                    break;
+                        break;
 
 
-                default:
+                    case "Busy":
 
-                    mostrar =
-                        true;
+                        mostrar =
+                            estado === "Busy" ||
+
+                            estado === "InAMeeting" ||
+
+                            estado === "OnACall";
+
+                        break;
+
+
+                    case "Away":
+
+                        mostrar =
+                            estado === "Away" ||
+
+                            estado === "BeRightBack";
+
+                        break;
+
+
+                    case "Offline":
+
+                        mostrar =
+                            estado === "Offline";
+
+                        break;
+
+
+                    default:
+
+                        mostrar =
+                            true;
+
+                }
+
+
+                card.style.display =
+
+                    mostrar
+                        ? ""
+                        : "none";
 
             }
 
-
-            card.style.display =
-                mostrar
-                    ? ""
-                    : "none";
-
-        });
+        );
 
 }
 
@@ -848,12 +923,18 @@ function filtrarEstado(tipo) {
 function mostrarTodos() {
 
     document
-        .querySelectorAll(".card")
-        .forEach(card => {
+        .querySelectorAll(
+            ".card"
+        )
+        .forEach(
 
-            card.style.display =
-                "";
+            card => {
 
-        });
+                card.style.display =
+                    "";
+
+            }
+
+        );
 
 }

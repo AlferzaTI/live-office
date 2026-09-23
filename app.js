@@ -44,36 +44,44 @@ const loadingMessage =
 
 
 /* =========================================
-   CONTROL DE SESIÓN
+   CONFIGURACIÓN DE SESIÓN
    ========================================= */
 
 /*
- * Esta marca se guarda en sessionStorage.
+ * IMPORTANTE:
  *
- * Mientras la pestaña siga abierta:
+ * Usamos localStorage y NO sessionStorage.
  *
- * Index → Personal → Reservas → Salas → Index
+ * De esta manera la validación se conserva:
  *
- * NO vuelve a aparecer la pantalla azul.
+ * - al actualizar Index
+ * - al salir a Personal
+ * - al volver a Index
+ * - al entrar a Reservas
+ * - al volver a Index
+ * - al cerrar y abrir nuevamente el navegador
+ *
+ * Mientras no borremos esta marca,
+ * no vuelve a mostrar la validación.
  */
 
-const SESION_KEY =
+const VALIDACION_KEY =
     "alferza_live_office_validado";
 
 
-function sesionValidada() {
+function estaValidado() {
 
-    return sessionStorage.getItem(
-        SESION_KEY
+    return localStorage.getItem(
+        VALIDACION_KEY
     ) === "true";
 
 }
 
 
-function guardarSesionValidada() {
+function guardarValidacion() {
 
-    sessionStorage.setItem(
-        SESION_KEY,
+    localStorage.setItem(
+        VALIDACION_KEY,
         "true"
     );
 
@@ -129,6 +137,94 @@ function ocultarCarga() {
 
 
 /* =========================================
+   ESPERAR
+   ========================================= */
+
+function esperar(ms) {
+
+    return new Promise(resolve => {
+
+        setTimeout(resolve, ms);
+
+    });
+
+}
+
+
+/* =========================================
+   FETCH CON TIEMPO MÁXIMO
+   ========================================= */
+
+/*
+ * Evita que Microsoft Graph deje la página
+ * cargando eternamente.
+ */
+
+async function fetchConTimeout(
+    url,
+    opciones = {},
+    tiempo = 20000
+) {
+
+    const controller =
+        new AbortController();
+
+
+    const timeout =
+        setTimeout(() => {
+
+            controller.abort();
+
+        }, tiempo);
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                url,
+                {
+                    ...opciones,
+                    signal:
+                        controller.signal
+                }
+            );
+
+
+        return respuesta;
+
+    }
+
+
+    catch (error) {
+
+        if (
+            error.name ===
+            "AbortError"
+        ) {
+
+            throw new Error(
+                "La conexión con Microsoft tardó demasiado."
+            );
+
+        }
+
+
+        throw error;
+
+    }
+
+
+    finally {
+
+        clearTimeout(timeout);
+
+    }
+
+}
+
+
+/* =========================================
    OBTENER TOKEN
    ========================================= */
 
@@ -138,10 +234,9 @@ async function obtenerToken() {
         msalInstance.getAllAccounts()[0];
 
 
-    /*
-     * Si no existe una cuenta,
-     * abrimos Microsoft UNA SOLA VEZ.
-     */
+    /* -----------------------------------------
+       SI NO HAY CUENTA
+       ----------------------------------------- */
 
     if (!cuenta) {
 
@@ -150,22 +245,68 @@ async function obtenerToken() {
         );
 
 
+        /*
+         * Primera vez solamente.
+         */
+
         const loginResponse =
-            await msalInstance.loginPopup({
-                scopes: scopes
-            });
+            await Promise.race([
+
+                msalInstance.loginPopup({
+                    scopes: scopes
+                }),
+
+                new Promise(
+                    (_, reject) => {
+
+                        setTimeout(() => {
+
+                            reject(
+                                new Error(
+                                    "La autenticación de Microsoft tardó demasiado."
+                                )
+                            );
+
+                        }, 60000);
+
+                    }
+                )
+
+            ]);
 
 
         cuenta =
             loginResponse.account;
 
+
+        /*
+         * Guardamos la cuenta activa.
+         */
+
+        msalInstance.setActiveAccount(
+            cuenta
+        );
+
     }
 
 
-    /*
-     * Intentamos obtener el token
-     * silenciosamente.
-     */
+    else {
+
+        /*
+         * Nos aseguramos de tener
+         * una cuenta activa.
+         */
+
+        msalInstance.setActiveAccount(
+            cuenta
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       TOKEN SILENCIOSO
+       ----------------------------------------- */
 
     try {
 
@@ -175,13 +316,33 @@ async function obtenerToken() {
 
 
         const respuesta =
-            await msalInstance.acquireTokenSilent({
+            await Promise.race([
 
-                scopes: scopes,
+                msalInstance.acquireTokenSilent({
 
-                account: cuenta
+                    scopes: scopes,
 
-            });
+                    account: cuenta
+
+                }),
+
+                new Promise(
+                    (_, reject) => {
+
+                        setTimeout(() => {
+
+                            reject(
+                                new Error(
+                                    "La validación de Microsoft tardó demasiado."
+                                )
+                            );
+
+                        }, 30000);
+
+                    }
+                )
+
+            ]);
 
 
         return respuesta.accessToken;
@@ -192,22 +353,45 @@ async function obtenerToken() {
     catch (error) {
 
         console.warn(
-            "Token silencioso no disponible. Se solicitará nuevamente.",
+            "No se pudo obtener el token silenciosamente:",
             error
         );
 
 
+        /*
+         * Solo intentamos popup si realmente
+         * Microsoft necesita interacción.
+         */
+
         cambiarMensaje(
-            "Actualizando sesión..."
+            "Actualizando sesión de Microsoft..."
         );
 
 
         const respuesta =
-            await msalInstance.acquireTokenPopup({
+            await Promise.race([
 
-                scopes: scopes
+                msalInstance.acquireTokenPopup({
+                    scopes: scopes
+                }),
 
-            });
+                new Promise(
+                    (_, reject) => {
+
+                        setTimeout(() => {
+
+                            reject(
+                                new Error(
+                                    "Microsoft no respondió a tiempo."
+                                )
+                            );
+
+                        }, 60000);
+
+                    }
+                )
+
+            ]);
 
 
         return respuesta.accessToken;
@@ -224,16 +408,24 @@ async function obtenerToken() {
 async function obtenerUsuarios(TOKEN) {
 
     const respuesta =
-        await fetch(
+        await fetchConTimeout(
+
             "https://graph.microsoft.com/v1.0/users?$top=999",
+
             {
                 method: "GET",
 
                 headers: {
+
                     Authorization:
                         `Bearer ${TOKEN}`
+
                 }
-            }
+
+            },
+
+            20000
+
         );
 
 
@@ -265,7 +457,7 @@ async function obtenerPresencia(
 
     /*
      * Microsoft Graph permite hasta
-     * 650 IDs por solicitud.
+     * 650 usuarios por solicitud.
      */
 
     for (
@@ -282,8 +474,10 @@ async function obtenerPresencia(
 
 
         const respuesta =
-            await fetch(
+            await fetchConTimeout(
+
                 "https://graph.microsoft.com/v1.0/communications/getPresencesByUserId",
+
                 {
                     method: "POST",
 
@@ -302,7 +496,10 @@ async function obtenerPresencia(
                             ids: bloque
                         })
 
-                }
+                },
+
+                20000
+
             );
 
 
@@ -347,7 +544,9 @@ function renderizarUsuarios(
 ) {
 
     const contenedor =
-        document.getElementById("officeGrid");
+        document.getElementById(
+            "officeGrid"
+        );
 
 
     if (!contenedor) {
@@ -479,26 +678,34 @@ function renderizarUsuarios(
 
 
     if (disp) {
+
         disp.innerText =
             disponibles;
+
     }
 
 
     if (busy) {
+
         busy.innerText =
             ocupados;
+
     }
 
 
     if (away) {
+
         away.innerText =
             ausentes;
+
     }
 
 
     if (offlineElement) {
+
         offlineElement.innerText =
             offline;
+
     }
 
 }
@@ -513,8 +720,8 @@ async function cargarUsuarios(
 ) {
 
     /*
-     * SOLO mostramos la pantalla azul
-     * si realmente es la primera entrada.
+     * La pantalla azul SOLO se muestra
+     * si es la primera validación.
      */
 
     if (mostrarPantalla) {
@@ -599,10 +806,11 @@ async function cargarUsuarios(
         /*
          * TODO salió correctamente.
          *
-         * Guardamos la sesión.
+         * Desde este momento ya no se
+         * vuelve a mostrar la pantalla azul.
          */
 
-        guardarSesionValidada();
+        guardarValidacion();
 
 
         /* -----------------------------------------
@@ -616,16 +824,10 @@ async function cargarUsuarios(
             );
 
 
-            /*
-             * Una pausa MUY corta para
-             * que la transición sea visible.
-             */
+            await esperar(200);
 
-            setTimeout(() => {
 
-                ocultarCarga();
-
-            }, 200);
+            ocultarCarga();
 
         }
 
@@ -633,7 +835,6 @@ async function cargarUsuarios(
         console.log(
             "ALFERZA LIVE OFFICE actualizado correctamente."
         );
-
 
     }
 
@@ -647,13 +848,15 @@ async function cargarUsuarios(
 
 
         /*
-         * Si la carga NO era inicial,
-         * no mostramos ninguna pantalla.
-         *
-         * La aplicación continúa funcionando.
+         * Si era una actualización normal,
+         * NO bloqueamos la pantalla.
          */
 
         if (!mostrarPantalla) {
+
+            console.warn(
+                "Actualización silenciosa fallida."
+            );
 
             return;
 
@@ -661,7 +864,7 @@ async function cargarUsuarios(
 
 
         /*
-         * Si era la primera entrada,
+         * Si era la primera validación,
          * mostramos el error.
          */
 
@@ -671,9 +874,8 @@ async function cargarUsuarios(
 
 
         /*
-         * Quitamos el overlay después de unos
-         * segundos para evitar que quede
-         * bloqueado eternamente.
+         * Evita que el usuario quede
+         * atrapado eternamente en la pantalla.
          */
 
         setTimeout(() => {
@@ -692,23 +894,45 @@ async function cargarUsuarios(
    ========================================= */
 
 /*
- * AQUÍ ESTÁ EL CAMBIO PRINCIPAL.
+ * PRIMERA VEZ:
  *
- * Si la sesión ya fue validada:
+ *   mostrarPantalla = true
  *
- *     cargarUsuarios(false)
+ * Después de validar:
  *
- * No aparece la pantalla azul.
+ *   localStorage = true
  *
  *
- * Si es la primera entrada:
+ * SIGUIENTES VECES:
  *
- *     cargarUsuarios(true)
+ *   mostrarPantalla = false
  *
- * Aparece la pantalla azul.
+ *
+ * Por lo tanto:
+ *
+ * Index
+ * ↓
+ * Personal
+ * ↓
+ * Reservas
+ * ↓
+ * Salas
+ * ↓
+ * Comunicados
+ * ↓
+ * Index
+ *
+ * NO vuelve a aparecer la validación.
+ *
+ *
+ * Incluso si presionas:
+ *
+ * Ctrl + R
+ *
+ * tampoco vuelve a aparecer.
  */
 
-if (sesionValidada()) {
+if (estaValidado()) {
 
     cargarUsuarios(false);
 
@@ -729,7 +953,7 @@ setInterval(() => {
     /*
      * Siempre silencioso.
      *
-     * No aparece pantalla azul.
+     * No aparece la pantalla azul.
      */
 
     cargarUsuarios(false);
@@ -742,7 +966,9 @@ setInterval(() => {
    ========================================= */
 
 const buscador =
-    document.getElementById("buscador");
+    document.getElementById(
+        "buscador"
+    );
 
 
 if (buscador) {

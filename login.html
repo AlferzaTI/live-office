@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Acceso | ALFERZA LIVE OFFICE</title>
+
+    <link
+        rel="stylesheet"
+        href="login.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <main class="login-page">
+
+
+        <div class="login-card">
+
+
+            <!-- LOGO -->
+
+            <div class="login-brand">
+
+                <div class="brand-icon">
+                    A
+                </div>
+
+                <div class="brand-name">
+                    ALFERZA
+                </div>
+
+            </div>
+
+
+            <!-- ENCABEZADO -->
+
+            <div class="login-header">
+
+                <span class="login-label">
+                    ACCESO AL SISTEMA
+                </span>
+
+                <h1>
+                    Bienvenido
+                </h1>
+
+                <p>
+                    Ingresa con tu cuenta corporativa
+                    de Microsoft para acceder a
+                    ALFERZA LIVE OFFICE.
+                </p>
+
+            </div>
+
+
+            <!-- BOTÓN -->
+
+            <button
+                type="button"
+                id="loginButton"
+                class="login-button"
+            >
+
+                <span class="microsoft-icon">
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </span>
+
+                <span id="loginButtonText">
+                    Iniciar sesión con Microsoft
+                </span>
+
+            </button>
+
+
+            <!-- ESTADO -->
+
+            <div
+                id="loginStatus"
+                class="login-status"
+            ></div>
+
+
+            <!-- FOOTER -->
+
+            <div class="login-footer">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    Acceso seguro
+                </span>
+
+                <span class="separator">
+                    •
+                </span>
+
+                <span>
+                    ALFERZA LIVE OFFICE
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+    <!-- MSAL -->
+
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+    ></script>
+
+
+    <!-- LOGIN -->
+
+    <script src="login.js"></script>
+
+
+</body>
+
+</html>

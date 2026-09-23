@@ -2,6 +2,13 @@
 
 <html lang="es">
 
+<script>
+    // Si no se ha iniciado sesión, ir primero al login
+    if (sessionStorage.getItem("alferza_login") !== "true") {
+        window.location.replace("login.html");
+    }
+</script>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

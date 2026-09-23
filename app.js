@@ -829,6 +829,21 @@ document
     );
 
 
+
+/* =========================================
+   FILTRO ACTIVO
+   ========================================= */
+
+/*
+ * Guarda el filtro que está actualmente activo.
+ *
+ * null =
+ * no hay filtro y se muestran todos.
+ */
+
+let filtroActivo = null;
+
+
 /* =========================================
    FILTROS
    ========================================= */
@@ -836,6 +851,34 @@ document
 function filtrarEstado(
     tipo
 ) {
+
+    /*
+     * Si hacemos clic nuevamente
+     * sobre el mismo filtro que ya está activo,
+     * quitamos el filtro y mostramos todos.
+     */
+
+    if (filtroActivo === tipo) {
+
+        mostrarTodos();
+
+        filtroActivo = null;
+
+        return;
+
+    }
+
+
+    /*
+     * Guardamos el nuevo filtro.
+     */
+
+    filtroActivo = tipo;
+
+
+    /*
+     * Recorremos todas las tarjetas.
+     */
 
     document
         .querySelectorAll(
@@ -856,6 +899,10 @@ function filtrarEstado(
                 switch (tipo) {
 
 
+                    /* =================================
+                       DISPONIBLES
+                    ================================= */
+
                     case "Available":
 
                         mostrar =
@@ -865,27 +912,39 @@ function filtrarEstado(
                         break;
 
 
+
+                    /* =================================
+                       OCUPADOS
+                    ================================= */
+
                     case "Busy":
 
                         mostrar =
                             estado === "Busy" ||
-
                             estado === "InAMeeting" ||
-
                             estado === "OnACall";
 
                         break;
 
 
+
+                    /* =================================
+                       AUSENTES
+                    ================================= */
+
                     case "Away":
 
                         mostrar =
                             estado === "Away" ||
-
                             estado === "BeRightBack";
 
                         break;
 
+
+
+                    /* =================================
+                       OFFLINE
+                    ================================= */
 
                     case "Offline":
 
@@ -895,16 +954,26 @@ function filtrarEstado(
                         break;
 
 
+
+                    /* =================================
+                       TODOS
+                    ================================= */
+
                     default:
 
                         mostrar =
                             true;
 
+                        break;
+
                 }
 
 
-                card.style.display =
+                /*
+                 * Mostrar u ocultar tarjeta.
+                 */
 
+                card.style.display =
                     mostrar
                         ? ""
                         : "none";
@@ -938,3 +1007,4 @@ function mostrarTodos() {
         );
 
 }
+

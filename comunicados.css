@@ -4,7 +4,10 @@
    ========================================= */
 
 .content {
-    padding: 35px;
+    width: 100%;
+    margin: 0;
+    padding: 28px 38px 35px;
+    box-sizing: border-box;
 }
 
 
@@ -529,44 +532,42 @@
 /* =========================================
    ENCABEZADO PRINCIPAL — COMUNICADOS
    ========================================= */
-
 .comunicados-header {
-
     position: relative;
 
-    min-height: 180px;
+    min-height: 190px;
 
-    margin-bottom: 24px;
+    padding: 30px 34px;
 
-    padding: 30px 36px;
-
-    border-radius: 0 24px 24px 24px;
-
-    overflow: hidden;
+    box-sizing: border-box;
 
     display: flex;
 
-    align-items: center;
-
     justify-content: space-between;
 
-    gap: 24px;
+    align-items: center;
 
-    background:
-        linear-gradient(
-            115deg,
-            #062b72 0%,
-            #0a4fae 48%,
-            #1687ed 100%
-        );
+    gap: 25px;
+
+    overflow: hidden;
+
+    margin-bottom: 18px;
+
+    border-radius: 22px;
 
     color: white;
 
+    background:
+        linear-gradient(
+            135deg,
+            #00205c 0%,
+            #07377f 48%,
+            #0a84ff 100%
+        );
+
     box-shadow:
-        0 12px 30px rgba(15, 23, 42, 0.12);
-
+        0 18px 40px rgba(0, 32, 92, 0.20);
 }
-
 
 /* =========================================
    DECORACIÓN DEL FONDO
@@ -924,6 +925,93 @@
 
         height: 50px;
 
+    }
+
+}
+
+/* =========================================
+   ANIMACIONES — ENCABEZADO
+   ========================================= */
+
+@keyframes fadeDownComunicados {
+
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================
+   ANIMACIÓN — DECORACIÓN
+   ========================================= */
+
+.comunicados-header::before,
+.comunicados-header::after {
+
+    animation:
+        headerCircleFloat 8s ease-in-out infinite;
+}
+
+
+@keyframes headerCircleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.65;
+    }
+
+    50% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+
+}
+
+.comunicados-header-content {
+    animation:
+        headerContentIn 0.75s ease 0.12s both;
+}
+
+
+.comunicados-header-date {
+    animation:
+        headerDateIn 0.75s ease 0.2s both;
+}
+
+
+@keyframes headerContentIn {
+
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+
+@keyframes headerDateIn {
+
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 
 }

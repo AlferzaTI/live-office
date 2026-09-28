@@ -166,6 +166,48 @@ function esCuentaAlferza(account) {
 
 
 /* =========================================
+   OBTENER PÁGINA DE DESTINO
+========================================= */
+
+function obtenerPaginaDestino() {
+
+    const pagina =
+        sessionStorage.getItem(
+            "alferza_return_url"
+        );
+
+
+    /*
+     * Si existe una página guardada,
+     * regresamos a ella.
+     */
+
+    if (
+        pagina &&
+        pagina.startsWith("/live-office/")
+    ) {
+
+        sessionStorage.removeItem(
+            "alferza_return_url"
+        );
+
+
+        return pagina;
+
+    }
+
+
+    /*
+     * Si no existe ninguna página guardada,
+     * entramos normalmente al inicio.
+     */
+
+    return "/live-office/index.html";
+
+}
+
+
+/* =========================================
    RECHAZAR CUENTA NO AUTORIZADA
 ========================================= */
 
@@ -182,6 +224,11 @@ async function rechazarCuenta(account) {
     );
 
 
+    sessionStorage.removeItem(
+        "alferza_return_url"
+    );
+
+
     mostrarMensaje(
         "Esta cuenta no pertenece a ALFERZA.",
         "error"
@@ -192,7 +239,8 @@ async function rechazarCuenta(account) {
 
         await msalInstance.logoutPopup({
 
-            account: account
+            account:
+                account
 
         });
 
@@ -239,7 +287,7 @@ function obtenerCuenta() {
 
 
 /* =========================================
-   ENTRAR AL INDEX
+   ENTRAR AL SISTEMA
 ========================================= */
 
 function entrarAlSistema() {
@@ -250,8 +298,12 @@ function entrarAlSistema() {
     );
 
 
+    const paginaDestino =
+        obtenerPaginaDestino();
+
+
     window.location.replace(
-        "index.html"
+        paginaDestino
     );
 
 }
@@ -303,6 +355,11 @@ async function comprobarSesion() {
             "success"
         );
 
+
+        /*
+         * Comprobamos silenciosamente
+         * que el token siga disponible.
+         */
 
         await msalInstance.acquireTokenSilent({
 
@@ -364,8 +421,7 @@ async function iniciarSesion() {
                     scopes,
 
                 /*
-                 * Obliga a Microsoft a mostrar
-                 * selección de cuenta.
+                 * Muestra selección de cuenta.
                  */
 
                 prompt:
@@ -412,6 +468,11 @@ async function iniciarSesion() {
         );
 
 
+        /*
+         * Obtener token y comprobar
+         * los permisos necesarios.
+         */
+
         await msalInstance.acquireTokenSilent({
 
             scopes:
@@ -437,9 +498,7 @@ async function iniciarSesion() {
 
         setTimeout(() => {
 
-            window.location.replace(
-                "index.html"
-            );
+            entrarAlSistema();
 
         }, 400);
 

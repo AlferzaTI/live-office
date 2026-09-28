@@ -1,3 +1,4 @@
+
 /* =========================================
    CONFIGURACIÓN MSAL
 ========================================= */
@@ -13,7 +14,7 @@ const msalConfig = {
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
-            "https://AlferzaTI.github.io/live-office/blank.html"
+            "https://alferzati.github.io/live-office/blank.html"
 
     },
 
@@ -29,6 +30,18 @@ const msalConfig = {
 
 };
 
+
+/* =========================================
+   TENANT DE ALFERZA
+========================================= */
+
+const TENANT_ID =
+    "dbab984f-4bb1-4b60-9dff-da59f54acdf1";
+
+
+/* =========================================
+   PERMISOS
+========================================= */
 
 const scopes = [
 
@@ -125,6 +138,33 @@ function habilitarBoton() {
 
 
 /* =========================================
+   VALIDAR CUENTA ALFERZA
+========================================= */
+
+function validarCuentaAlferza(
+    cuenta
+) {
+
+    if (!cuenta) {
+
+        return false;
+
+    }
+
+
+    /*
+     * La cuenta debe pertenecer
+     * al Tenant de Alferza.
+     */
+
+    return (
+        cuenta.tenantId === TENANT_ID
+    );
+
+}
+
+
+/* =========================================
    CUENTA EXISTENTE
 ========================================= */
 
@@ -195,7 +235,51 @@ async function comprobarSesion() {
 
 
         /*
-         * Ya existe una cuenta MSAL.
+         * Comprobamos que la cuenta existente
+         * pertenezca al Tenant de Alferza.
+         */
+
+        if (
+            !validarCuentaAlferza(
+                cuenta
+            )
+        ) {
+
+            console.warn(
+                "La cuenta no pertenece al Tenant de Alferza."
+            );
+
+
+            try {
+
+                await msalInstance.logoutPopup({
+
+                    account:
+                        cuenta
+
+                });
+
+            }
+
+            catch (logoutError) {
+
+                console.warn(
+                    "No se pudo cerrar la sesión:",
+                    logoutError
+                );
+
+            }
+
+
+            habilitarBoton();
+
+            return;
+
+        }
+
+
+        /*
+         * La cuenta pertenece a Alferza.
          */
 
         msalInstance.setActiveAccount(
@@ -283,6 +367,59 @@ async function iniciarSesion() {
 
         }
 
+
+        /* =====================================
+           VALIDACIÓN DEL TENANT
+        ===================================== */
+
+        if (
+            !validarCuentaAlferza(
+                cuenta
+            )
+        ) {
+
+            mostrarMensaje(
+                "Esta cuenta no pertenece a Alferza.",
+                "error"
+            );
+
+
+            /*
+             * Cerramos la sesión de la cuenta
+             * que intentó ingresar.
+             */
+
+            try {
+
+                await msalInstance.logoutPopup({
+
+                    account:
+                        cuenta
+
+                });
+
+            }
+
+            catch (logoutError) {
+
+                console.warn(
+                    "No se pudo cerrar la sesión:",
+                    logoutError
+                );
+
+            }
+
+
+            habilitarBoton();
+
+            return;
+
+        }
+
+
+        /* =====================================
+           CUENTA ALFERZA AUTORIZADA
+        ===================================== */
 
         msalInstance.setActiveAccount(
             cuenta
@@ -374,3 +511,4 @@ loginButton.addEventListener(
 ========================================= */
 
 comprobarSesion();
+

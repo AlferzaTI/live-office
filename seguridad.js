@@ -122,11 +122,6 @@ async function iniciarSesion() {
 
     if (!accounts.length) {
 
-        /*
-         * Si el login de tu aplicación ya dejó
-         * una sesión activa, debería aparecer aquí.
-         */
-
         window.location.replace(
             "login.html"
         );
@@ -189,7 +184,8 @@ async function obtenerToken() {
     } catch (error) {
 
         console.warn(
-            "Silent token falló. Solicitando token nuevamente..."
+            "Silent token falló. Solicitando token nuevamente...",
+            error
         );
 
 
@@ -231,6 +227,12 @@ async function graph(
             : `${base}${endpoint}`;
 
 
+    console.log(
+        "GRAPH REQUEST:",
+        url
+    );
+
+
     const response =
         await fetch(
             url,
@@ -243,7 +245,7 @@ async function graph(
                     Authorization:
                         `Bearer ${token}`,
 
-                    "Content-Type":
+                    Accept:
                         "application/json"
 
                 }
@@ -252,26 +254,58 @@ async function graph(
         );
 
 
+    const text =
+        await response.text();
+
+
+    let data = {};
+
+
+    try {
+
+        data =
+            text
+                ? JSON.parse(text)
+                : {};
+
+    } catch {
+
+        data = {
+            raw: text
+        };
+    }
+
+
     if (!response.ok) {
 
-        const text =
-            await response.text();
-
-
         console.error(
-            "GRAPH ERROR",
+            "GRAPH ERROR:",
             response.status,
-            text
+            url,
+            data
         );
 
 
         throw new Error(
-            `Microsoft Graph respondió ${response.status}`
+            `Graph ${response.status}: ${
+                data?.error?.message
+                ||
+                data?.message
+                ||
+                "Error desconocido"
+            }`
         );
     }
 
 
-    return response.json();
+    console.log(
+        "GRAPH OK:",
+        response.status,
+        url
+    );
+
+
+    return data;
 }
 
 
@@ -286,23 +320,56 @@ async function cargarSeguridad() {
     );
 
 
-    await Promise.all([
+    /*
+     * Se utiliza Promise.allSettled()
+     * para que un endpoint que falle no
+     * detenga todos los demás.
+     */
 
-        cargarUsuarios(),
+    const resultados =
+        await Promise.allSettled([
 
-        cargarMFA(),
+            cargarUsuarios(),
 
-        cargarDispositivos(),
+            cargarMFA(),
 
-        cargarSignIns(),
+            cargarDispositivos(),
 
-        cargarAuditoria()
+            cargarSignIns(),
 
-    ]);
+            cargarAuditoria()
+
+        ]);
+
+
+    resultados.forEach(
+        (resultado, index) => {
+
+            if (
+                resultado.status ===
+                "rejected"
+            ) {
+
+                const nombres = [
+                    "Usuarios",
+                    "MFA",
+                    "Dispositivos",
+                    "Sign-ins",
+                    "Auditoría"
+                ];
+
+
+                console.error(
+                    `Error cargando ${nombres[index]}:`,
+                    resultado.reason
+                );
+            }
+        }
+    );
 
 
     console.log(
-        "Datos de seguridad cargados:",
+        "Datos de seguridad:",
         securityData
     );
 }
@@ -314,66 +381,91 @@ async function cargarSeguridad() {
 
 async function cargarUsuarios() {
 
-    let url =
-        "/users?$select=id,displayName,userPrincipalName,accountEnabled,department,signInActivity";
+    try {
+
+        let url =
+            "/users?$select=id,displayName,userPrincipalName,accountEnabled,department,signInActivity";
 
 
-    let usuarios = [];
+        let usuarios = [];
 
 
-    while (url) {
+        while (url) {
 
-        const data =
-            await graph(url, true);
+            const data =
+                await graph(
+                    url,
+                    true
+                );
 
 
-        usuarios.push(
-            ...(data.value || [])
+            usuarios.push(
+                ...(data.value || [])
+            );
+
+
+            url =
+                data["@odata.nextLink"]
+                || null;
+        }
+
+
+        securityData.users =
+            usuarios;
+
+
+        securityData.blockedUsers =
+            usuarios.filter(
+                user =>
+                    user.accountEnabled === false
+            );
+
+
+        securityData.inactiveUsers =
+            usuarios.filter(
+                user =>
+                    obtenerDiasInactividad(
+                        user.signInActivity
+                    ) >= 30
+            );
+
+
+        console.log(
+            "Usuarios:",
+            usuarios.length
         );
 
 
-        url =
-            data["@odata.nextLink"]
-            || null;
+        console.log(
+            "Bloqueados:",
+            securityData.blockedUsers.length
+        );
+
+
+        console.log(
+            "Inactivos:",
+            securityData.inactiveUsers.length
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando usuarios:",
+            error
+        );
+
+
+        securityData.users =
+            [];
+
+
+        securityData.blockedUsers =
+            [];
+
+
+        securityData.inactiveUsers =
+            [];
     }
-
-
-    securityData.users =
-        usuarios;
-
-
-    securityData.blockedUsers =
-        usuarios.filter(
-            user =>
-                user.accountEnabled === false
-        );
-
-
-    securityData.inactiveUsers =
-        usuarios.filter(
-            user =>
-                obtenerDiasInactividad(
-                    user.signInActivity
-                ) >= 30
-        );
-
-
-    console.log(
-        "Usuarios:",
-        usuarios.length
-    );
-
-
-    console.log(
-        "Bloqueados:",
-        securityData.blockedUsers.length
-    );
-
-
-    console.log(
-        "Inactivos:",
-        securityData.inactiveUsers.length
-    );
 }
 
 
@@ -428,38 +520,52 @@ function obtenerDiasInactividad(
 
 async function cargarMFA() {
 
-    let url =
-        "/reports/authenticationMethods/userRegistrationDetails";
+    try {
+
+        let url =
+            "/reports/authenticationMethods/userRegistrationDetails";
 
 
-    let registros = [];
+        let registros = [];
 
 
-    while (url) {
+        while (url) {
 
-        const data =
-            await graph(url);
+            const data =
+                await graph(url);
 
 
-        registros.push(
-            ...(data.value || [])
+            registros.push(
+                ...(data.value || [])
+            );
+
+
+            url =
+                data["@odata.nextLink"]
+                || null;
+        }
+
+
+        securityData.mfaUsers =
+            registros;
+
+
+        console.log(
+            "Usuarios MFA:",
+            registros.length
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando MFA:",
+            error
         );
 
 
-        url =
-            data["@odata.nextLink"]
-            || null;
+        securityData.mfaUsers =
+            [];
     }
-
-
-    securityData.mfaUsers =
-        registros;
-
-
-    console.log(
-        "Usuarios MFA:",
-        registros.length
-    );
 }
 
 
@@ -469,38 +575,52 @@ async function cargarMFA() {
 
 async function cargarDispositivos() {
 
-    let url =
-        "/deviceManagement/managedDevices";
+    try {
+
+        let url =
+            "/deviceManagement/managedDevices";
 
 
-    let dispositivos = [];
+        let dispositivos = [];
 
 
-    while (url) {
+        while (url) {
 
-        const data =
-            await graph(url);
+            const data =
+                await graph(url);
 
 
-        dispositivos.push(
-            ...(data.value || [])
+            dispositivos.push(
+                ...(data.value || [])
+            );
+
+
+            url =
+                data["@odata.nextLink"]
+                || null;
+        }
+
+
+        securityData.devices =
+            dispositivos;
+
+
+        console.log(
+            "Dispositivos Intune:",
+            dispositivos.length
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando dispositivos:",
+            error
         );
 
 
-        url =
-            data["@odata.nextLink"]
-            || null;
+        securityData.devices =
+            [];
     }
-
-
-    securityData.devices =
-        dispositivos;
-
-
-    console.log(
-        "Dispositivos Intune:",
-        dispositivos.length
-    );
 }
 
 
@@ -510,22 +630,36 @@ async function cargarDispositivos() {
 
 async function cargarSignIns() {
 
-    const url =
-        "/auditLogs/signIns?$top=100&$orderby=createdDateTime desc";
+    try {
+
+        const url =
+            "/auditLogs/signIns?$top=100&$orderby=createdDateTime desc";
 
 
-    const data =
-        await graph(url);
+        const data =
+            await graph(url);
 
 
-    securityData.signIns =
-        data.value || [];
+        securityData.signIns =
+            data.value || [];
 
 
-    console.log(
-        "Sign-ins:",
-        securityData.signIns.length
-    );
+        console.log(
+            "Sign-ins:",
+            securityData.signIns.length
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando sign-ins:",
+            error
+        );
+
+
+        securityData.signIns =
+            [];
+    }
 }
 
 
@@ -582,13 +716,14 @@ async function cargarAuditoria() {
 
     } catch (error) {
 
-        console.warn(
-            "No se pudieron cargar los audit logs:",
+        console.error(
+            "Error cargando audit logs:",
             error
         );
 
 
-        securityData.auditLogs = [];
+        securityData.auditLogs =
+            [];
     }
 }
 
@@ -951,9 +1086,10 @@ function actualizarInactivos() {
                     <td>
 
                         <span class="badge ${clase}">
-                            ${dias >= 9999
-                                ? "Sin acceso"
-                                : `${dias} días`
+                            ${
+                                dias >= 9999
+                                    ? "Sin acceso"
+                                    : `${dias} días`
                             }
                         </span>
 
@@ -1587,6 +1723,11 @@ function analizarEventos() {
 
                 /*
                  * UBICACIÓN
+                 *
+                 * No se inventa una ubicación
+                 * habitual. Solo se conserva
+                 * la información entregada
+                 * por Microsoft Graph.
                  */
 
                 if (
@@ -1596,15 +1737,10 @@ function analizarEventos() {
                     const pais =
                         signIn.location.countryOrRegion;
 
-
-                    /*
-                     * Aquí NO inventamos una
-                     * ubicación "habitual".
-                     *
-                     * Solo mostramos la
-                     * información entregada
-                     * por Graph.
-                     */
+                    console.log(
+                        "País del sign-in:",
+                        pais
+                    );
                 }
 
             }
@@ -1824,8 +1960,14 @@ function obtenerMensajeError(
     error
 ) {
 
+    const mensaje =
+        error?.message
+        ||
+        "Error desconocido.";
+
+
     if (
-        error?.message?.includes(
+        mensaje.includes(
             "403"
         )
     ) {
@@ -1839,7 +1981,7 @@ function obtenerMensajeError(
 
 
     if (
-        error?.message?.includes(
+        mensaje.includes(
             "401"
         )
     ) {
@@ -1851,11 +1993,21 @@ function obtenerMensajeError(
     }
 
 
-    return (
-        error?.message
-        ||
-        "Error desconocido."
-    );
+    if (
+        mensaje.includes(
+            "400"
+        )
+    ) {
+
+        return `
+            Microsoft Graph rechazó la solicitud (400).
+            Abre F12 → Console para ver el endpoint exacto
+            y el mensaje devuelto por Microsoft Graph.
+        `;
+    }
+
+
+    return mensaje;
 }
 
 
@@ -1983,6 +2135,7 @@ document.addEventListener(
         } catch (error) {
 
             console.error(
+                "ERROR AL ACTUALIZAR:",
                 error
             );
 

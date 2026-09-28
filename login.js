@@ -43,7 +43,9 @@ const scopes = [
 
     "Presence.Read.All",
 
-    "Sites.Read.All"
+    "Sites.Read.All",
+    "AuditLog.Read.All",
+    "DeviceManagementManagedDevices.Read.All"
 
 ];
 

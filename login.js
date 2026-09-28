@@ -177,11 +177,6 @@ function obtenerPaginaDestino() {
         );
 
 
-    /*
-     * Si existe una página guardada,
-     * regresamos a ella.
-     */
-
     if (
         pagina &&
         pagina.startsWith("/live-office/")
@@ -197,15 +192,9 @@ function obtenerPaginaDestino() {
     }
 
 
-    /*
-     * Si no existe ninguna página guardada,
-     * entramos normalmente al inicio.
-     */
-
     return "/live-office/index.html";
 
 }
-
 
 /* =========================================
    RECHAZAR CUENTA NO AUTORIZADA
@@ -221,11 +210,6 @@ async function rechazarCuenta(account) {
 
     sessionStorage.removeItem(
         "alferza_login"
-    );
-
-
-    sessionStorage.removeItem(
-        "alferza_return_url"
     );
 
 

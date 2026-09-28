@@ -9,8 +9,8 @@
 
 
     /*
-     * Si ya tiene una sesión válida,
-     * puede continuar normalmente.
+     * Si ya existe una sesión válida,
+     * dejamos continuar.
      */
 
     if (sesion === "true") {
@@ -21,8 +21,8 @@
 
 
     /*
-     * Guardamos la página exacta que el usuario
-     * estaba intentando abrir.
+     * Guardamos la página que el usuario
+     * intentaba abrir.
      */
 
     const paginaActual =
@@ -31,13 +31,9 @@
         window.location.hash;
 
 
-    /*
-     * No guardamos login.html como destino.
-     */
-
     if (
-        !paginaActual.endsWith("/login.html") &&
-        !paginaActual.endsWith("/login")
+        paginaActual !== "/live-office/login.html" &&
+        paginaActual !== "/live-office/"
     ) {
 
         sessionStorage.setItem(
@@ -49,7 +45,7 @@
 
 
     /*
-     * Redirigimos al login.
+     * Mandamos al login.
      */
 
     window.location.replace(

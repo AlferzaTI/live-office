@@ -2,6 +2,10 @@
    CONFIGURACIÓN MSAL
 ========================================= */
 
+const ALFERZA_TENANT_ID =
+    "dbab984f-4bb1-4b60-9dff-da59f54acdf1";
+
+
 const msalConfig = {
 
     auth: {
@@ -9,8 +13,11 @@ const msalConfig = {
         clientId:
             "5d98417c-74a7-4fab-8f2c-41ac127be696",
 
+        /*
+         * SOLO TENANT ALFERZA
+         */
         authority:
-            "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
+            `https://login.microsoftonline.com/${ALFERZA_TENANT_ID}`,
 
         redirectUri:
             "https://AlferzaTI.github.io/live-office/blank.html"
@@ -125,6 +132,88 @@ function habilitarBoton() {
 
 
 /* =========================================
+   VALIDAR CUENTA ALFERZA
+========================================= */
+
+function esCuentaAlferza(account) {
+
+    if (!account) {
+
+        return false;
+
+    }
+
+
+    /*
+     * tid = Tenant ID de Microsoft Entra
+     *
+     * Solo aceptamos cuentas pertenecientes
+     * al tenant oficial de ALFERZA.
+     */
+
+    const tenantId =
+        account.tenantId ||
+        account.idTokenClaims?.tid ||
+        "";
+
+
+    return (
+        tenantId.toLowerCase() ===
+        ALFERZA_TENANT_ID.toLowerCase()
+    );
+
+}
+
+
+/* =========================================
+   RECHAZAR CUENTA NO AUTORIZADA
+========================================= */
+
+async function rechazarCuenta(account) {
+
+    console.warn(
+        "Cuenta rechazada:",
+        account?.username
+    );
+
+
+    sessionStorage.removeItem(
+        "alferza_login"
+    );
+
+
+    mostrarMensaje(
+        "Esta cuenta no pertenece a ALFERZA.",
+        "error"
+    );
+
+
+    try {
+
+        await msalInstance.logoutPopup({
+
+            account: account
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            "No se pudo cerrar la sesión:",
+            error
+        );
+
+    }
+
+
+    habilitarBoton();
+
+}
+
+
+/* =========================================
    CUENTA EXISTENTE
 ========================================= */
 
@@ -154,11 +243,6 @@ function obtenerCuenta() {
 ========================================= */
 
 function entrarAlSistema() {
-
-    /*
-     * Indicamos que el usuario ya pasó
-     * correctamente por el login.
-     */
 
     sessionStorage.setItem(
         "alferza_login",
@@ -195,8 +279,19 @@ async function comprobarSesion() {
 
 
         /*
-         * Ya existe una cuenta MSAL.
+         * VALIDACIÓN DEL TENANT
          */
+
+        if (!esCuentaAlferza(cuenta)) {
+
+            await rechazarCuenta(
+                cuenta
+            );
+
+            return;
+
+        }
+
 
         msalInstance.setActiveAccount(
             cuenta
@@ -208,11 +303,6 @@ async function comprobarSesion() {
             "success"
         );
 
-
-        /*
-         * Comprobamos silenciosamente
-         * que el token siga disponible.
-         */
 
         await msalInstance.acquireTokenSilent({
 
@@ -234,6 +324,11 @@ async function comprobarSesion() {
         console.warn(
             "No se pudo recuperar la sesión:",
             error
+        );
+
+
+        sessionStorage.removeItem(
+            "alferza_login"
         );
 
 
@@ -266,7 +361,15 @@ async function iniciarSesion() {
             await msalInstance.loginPopup({
 
                 scopes:
-                    scopes
+                    scopes,
+
+                /*
+                 * Obliga a Microsoft a mostrar
+                 * selección de cuenta.
+                 */
+
+                prompt:
+                    "select_account"
 
             });
 
@@ -284,6 +387,21 @@ async function iniciarSesion() {
         }
 
 
+        /* =====================================
+           VALIDACIÓN ALFERZA
+        ===================================== */
+
+        if (!esCuentaAlferza(cuenta)) {
+
+            await rechazarCuenta(
+                cuenta
+            );
+
+            return;
+
+        }
+
+
         msalInstance.setActiveAccount(
             cuenta
         );
@@ -293,11 +411,6 @@ async function iniciarSesion() {
             "Validando acceso..."
         );
 
-
-        /*
-         * Obtener token para comprobar
-         * los permisos necesarios.
-         */
 
         await msalInstance.acquireTokenSilent({
 
@@ -315,12 +428,6 @@ async function iniciarSesion() {
             "success"
         );
 
-
-        /*
-         * Guardamos la sesión local
-         * para que index.html sepa que
-         * el usuario ya pasó por el login.
-         */
 
         sessionStorage.setItem(
             "alferza_login",
@@ -343,6 +450,11 @@ async function iniciarSesion() {
         console.error(
             "Error de autenticación:",
             error
+        );
+
+
+        sessionStorage.removeItem(
+            "alferza_login"
         );
 
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,6 +99,49 @@
             color: #475569;
         }
 
+        /* =========================================
+           CUADRADOS DE ESTADO
+           ========================================= */
+
+        .employee-status-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .employee-status-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .status-color-square {
+            width: 13px;
+            height: 13px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .status-green {
+            background: #22c55e;
+        }
+
+        .status-red {
+            background: #ef4444;
+        }
+
+        .status-yellow {
+            background: #f59e0b;
+        }
+
+        .status-gray {
+            background: #94a3b8;
+        }
+
         .employee-modal-large::-webkit-scrollbar {
             width: 7px;
         }
@@ -116,6 +160,7 @@
         }
 
         @media (max-width: 650px) {
+
             .employee-modal-header {
                 padding: 24px 20px;
             }
@@ -129,12 +174,14 @@
             }
         }
     </style>
+
 </head>
 
 <body>
 
     <!-- TOPBAR -->
     <header class="topbar">
+
         <div class="logo">
             <h1>ALFERZA LIVE OFFICE</h1>
             <span>Monitoreo en tiempo real</span>
@@ -144,7 +191,9 @@
             <span class="live-status-dot"></span>
             <span>EN VIVO</span>
         </div>
+
     </header>
+
 
     <div class="personal-layout">
 
@@ -185,6 +234,7 @@
             </ul>
 
         </aside>
+
 
         <!-- CONTENIDO -->
         <main class="personal-content">
@@ -353,7 +403,6 @@
 
                             <div class="desks">
 
-
                                 <div
                                     class="employee employee-available"
                                     data-name="Pamela Chuguirio"
@@ -461,7 +510,6 @@
                         <div class="room-cluster">
 
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-available"
@@ -589,7 +637,6 @@
 
                             <div class="desks">
 
-
                                 <div
                                     class="employee employee-available"
                                     data-name="Ana Navarro"
@@ -697,7 +744,6 @@
                         <div class="room-cluster">
 
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-available"
@@ -824,7 +870,6 @@
                         <div class="room-cluster">
 
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-vacant"
@@ -1124,7 +1169,6 @@
 
                             <div class="desks">
 
-
                                 <div
                                     class="employee employee-vacant"
                                     data-name="Puesto libre"
@@ -1331,7 +1375,6 @@
 
                             <div class="desks">
 
-
                                 <div
                                     class="employee employee-vacant"
                                     data-name="Puesto libre"
@@ -1537,9 +1580,7 @@
                                 Sr. Julio
                             </span>
 
-
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-vacant"
@@ -1615,9 +1656,7 @@
                                 Sala 3
                             </span>
 
-
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-vacant"
@@ -1708,7 +1747,6 @@
                         <div class="room-cluster">
 
                             <div class="desks">
-
 
                                 <div
                                     class="employee employee-available"
@@ -2154,34 +2192,59 @@
 
                     </div>
 
+                </div>
 
-                    <div class="employee-detail-item">
 
-                        <span class="employee-detail-label">
-                            Actividad
-                        </span>
+                <!-- CUADRADOS DE COLORES -->
+                <div class="employee-status-colors">
+
+                    <div class="employee-status-box">
 
                         <span
-                            class="employee-detail-value"
-                            id="modalActivity"
-                        >
-                            —
+                            class="status-color-square status-green"
+                        ></span>
+
+                        <span>
+                            Disponible
                         </span>
 
                     </div>
 
 
-                    <div class="employee-detail-item">
-
-                        <span class="employee-detail-label">
-                            Sincronización
-                        </span>
+                    <div class="employee-status-box">
 
                         <span
-                            class="employee-detail-value"
-                            id="modalSync"
-                        >
-                            Microsoft Graph
+                            class="status-color-square status-red"
+                        ></span>
+
+                        <span>
+                            Ocupado
+                        </span>
+
+                    </div>
+
+
+                    <div class="employee-status-box">
+
+                        <span
+                            class="status-color-square status-yellow"
+                        ></span>
+
+                        <span>
+                            Ausente
+                        </span>
+
+                    </div>
+
+
+                    <div class="employee-status-box">
+
+                        <span
+                            class="status-color-square status-gray"
+                        ></span>
+
+                        <span>
+                            Offline
                         </span>
 
                     </div>
@@ -2190,53 +2253,6 @@
 
             </div>
 
-
-            <!-- MICROSOFT 365 -->
-            <div class="employee-detail-section">
-
-                <div class="employee-detail-section-title">
-                    <span>🔐</span>
-                    Microsoft 365
-                </div>
-
-
-                <div class="employee-detail-grid">
-
-                    <div class="employee-detail-item">
-
-                        <span class="employee-detail-label">
-                            ID de usuario
-                        </span>
-
-                        <span
-                            class="employee-detail-value employee-detail-id"
-                            id="modalGraphId"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-
-                    <div class="employee-detail-item">
-
-                        <span class="employee-detail-label">
-                            Cuenta habilitada
-                        </span>
-
-                        <span
-                            class="employee-detail-value"
-                            id="modalAccountEnabled"
-                        >
-                            —
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-            
         </div>
 
     </div>
@@ -2245,16 +2261,7 @@
     <!-- MICROSOFT MSAL -->
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
-
-    <!-- =========================================================
-         JAVASCRIPT
-         ========================================================= -->
-
     <script>
-
-        /* =========================================================
-           CONFIGURACIÓN MICROSOFT GRAPH
-           ========================================================= */
 
         const msalConfig = {
 
@@ -2304,10 +2311,6 @@
 
         let presenceReady = false;
 
-
-        /* =========================================================
-           PISOS
-           ========================================================= */
 
         const floorData = {
 
@@ -2485,10 +2488,6 @@
         }
 
 
-        /* =========================================================
-           MAPEAR ESTADO GRAPH
-           ========================================================= */
-
         function mapearEstadoGraph(presence) {
 
             const availability = String(
@@ -2577,10 +2576,6 @@
         }
 
 
-        /* =========================================================
-           APLICAR ESTADO A TARJETA
-           ========================================================= */
-
         function aplicarEstadoTarjeta(
             card,
             estado
@@ -2626,10 +2621,6 @@
         }
 
 
-        /* =========================================================
-           OBTENER CUENTA MICROSOFT
-           ========================================================= */
-
         async function obtenerCuentaGraph() {
 
             const accounts =
@@ -2667,10 +2658,6 @@
 
         }
 
-
-        /* =========================================================
-           OBTENER TOKEN GRAPH
-           ========================================================= */
 
         async function obtenerTokenGraph() {
 
@@ -2727,10 +2714,6 @@
         }
 
 
-        /* =========================================================
-           GRAPH GET
-           ========================================================= */
-
         async function graphGet(
             url,
             accessToken
@@ -2784,10 +2767,6 @@
 
         }
 
-
-        /* =========================================================
-           OBTENER USUARIOS MICROSOFT 365
-           ========================================================= */
 
         async function obtenerTodosLosUsuarios(
             accessToken
@@ -2843,10 +2822,6 @@
 
         }
 
-
-        /* =========================================================
-           OBTENER PRESENCIAS
-           ========================================================= */
 
         async function obtenerPresencias(
             accessToken,
@@ -3259,62 +3234,6 @@
 
 
         /* =========================================================
-           TRADUCIR ACTIVITY
-           ========================================================= */
-
-        function traducirActivity(valor) {
-
-            const value =
-                String(valor || "")
-                    .toLowerCase()
-                    .trim();
-
-
-            const traducciones = {
-
-                available:
-                    "Disponible",
-
-                busy:
-                    "Ocupado",
-
-                donotdisturb:
-                    "No molestar",
-
-                inameeting:
-                    "En una reunión",
-
-                inaconferencecall:
-                    "En una conferencia",
-
-                presenting:
-                    "Presentando",
-
-                incall:
-                    "En una llamada",
-
-                inacall:
-                    "En una llamada",
-
-                away:
-                    "Ausente",
-
-                berightback:
-                    "Vuelvo enseguida"
-
-            };
-
-
-            return (
-                traducciones[value] ||
-                valor ||
-                "Sin actividad registrada"
-            );
-
-        }
-
-
-        /* =========================================================
            SINCRONIZAR PRESENCIA
            ========================================================= */
 
@@ -3438,15 +3357,6 @@
                             );
 
 
-                            /*
-                             * GUARDAMOS EL OBJETO COMPLETO
-                             * DE MICROSOFT GRAPH EN LA TARJETA.
-                             *
-                             * Esto permite que el modal
-                             * muestre mail, UPN, accountEnabled,
-                             * displayName, id, etc.
-                             */
-
                             card._graphUser =
                                 usuario;
 
@@ -3516,11 +3426,6 @@
                         }
 
 
-                        /*
-                         * Guardamos nuevamente el usuario
-                         * completo por seguridad.
-                         */
-
                         card._graphUser =
                             usuario;
 
@@ -3536,12 +3441,6 @@
                             console.warn(
                                 `[ALFERZA] Sin presencia Graph para: ${nombre} (${usuario.id})`
                             );
-
-
-                            /*
-                             * No modificamos el estado
-                             * visual existente.
-                             */
 
                             return;
 
@@ -3578,10 +3477,6 @@
 
                         );
 
-
-                        /*
-                         * Guardamos datos de presencia.
-                         */
 
                         card.dataset.graphId =
                             usuario.id;
@@ -3856,30 +3751,6 @@
             );
 
 
-        const modalActivity =
-            document.getElementById(
-                "modalActivity"
-            );
-
-
-        const modalSync =
-            document.getElementById(
-                "modalSync"
-            );
-
-
-        const modalGraphId =
-            document.getElementById(
-                "modalGraphId"
-            );
-
-
-        const modalAccountEnabled =
-            document.getElementById(
-                "modalAccountEnabled"
-            );
-
-
         /* =========================================================
            ABRIR MODAL
            ========================================================= */
@@ -3908,18 +3779,11 @@
                 "—";
 
 
-            /*
-             * Usuario de Microsoft Graph asociado
-             * a esta tarjeta.
-             */
-
             const graphUser =
                 card._graphUser || null;
 
 
-            /*
-             * Sala.
-             */
+            /* Sala */
 
             const sala =
 
@@ -3943,9 +3807,7 @@
                 "—";
 
 
-            /*
-             * Departamento / área.
-             */
+            /* Departamento / área */
 
             const departamento =
 
@@ -3969,9 +3831,7 @@
                 "—";
 
 
-            /*
-             * Piso.
-             */
+            /* Piso */
 
             const pisoKey =
 
@@ -3981,9 +3841,7 @@
                     .floorView;
 
 
-            /*
-             * Información básica.
-             */
+            /* Información básica */
 
             modalName.innerText =
 
@@ -4025,12 +3883,7 @@
                     : cargo;
 
 
-            /*
-             * Correo corporativo.
-             *
-             * Graph puede devolver mail vacío
-             * y UPN con la cuenta.
-             */
+            /* Correo corporativo */
 
             modalEmail.innerText =
 
@@ -4057,9 +3910,7 @@
                     );
 
 
-            /*
-             * Ubicación.
-             */
+            /* Ubicación */
 
             modalFloor.innerText =
                 floorLabels[pisoKey] ||
@@ -4083,17 +3934,10 @@
                     : "Asignado";
 
 
-            /*
-             * Información Microsoft Teams.
-             */
+            /* Información Microsoft Teams */
 
             const availability =
                 card.dataset.presenceAvailability ||
-                "";
-
-
-            const activity =
-                card.dataset.presenceActivity ||
                 "";
 
 
@@ -4125,69 +3969,7 @@
                     );
 
 
-            modalActivity.innerText =
-
-                esVacante
-
-                    ? "—"
-
-                    : traducirActivity(
-                        activity
-                    );
-
-
-            modalSync.innerText =
-
-                esVacante
-
-                    ? "—"
-
-                    : graphUser
-
-                        ? "Microsoft Graph · Sincronizado"
-
-                        : "Microsoft Graph · Sin datos";
-
-
-            /*
-             * Información Microsoft 365.
-             */
-
-            modalGraphId.innerText =
-
-                esVacante
-
-                    ? "—"
-
-                    : (
-                        graphUser?.id ||
-                        card.dataset.graphId ||
-                        "No disponible"
-                    );
-
-
-            modalAccountEnabled.innerText =
-
-                esVacante
-
-                    ? "—"
-
-                    : graphUser
-
-                        ? (
-                            graphUser.accountEnabled === true
-                                ? "Sí"
-                                : graphUser.accountEnabled === false
-                                    ? "No"
-                                    : "No disponible"
-                        )
-
-                        : "No disponible";
-
-
-            /*
-             * Avatar.
-             */
+            /* Avatar */
 
             modalAvatar.classList.toggle(
 
@@ -4207,9 +3989,7 @@
                     : "👤";
 
 
-            /*
-             * Estado visual.
-             */
+            /* Estado visual */
 
             if (esVacante) {
 
@@ -4239,11 +4019,6 @@
                     card.dataset.presenceStatus ||
                     null;
 
-
-                /*
-                 * Si no existe data attribute,
-                 * lo obtenemos desde las clases.
-                 */
 
                 if (!estadoActual) {
 
@@ -4276,10 +4051,6 @@
                 }
 
 
-                /*
-                 * Validar estado.
-                 */
-
                 if (
                     !statusMeta[estadoActual]
                 ) {
@@ -4305,9 +4076,7 @@
             }
 
 
-            /*
-             * Abrir modal.
-             */
+            /* Abrir modal */
 
             modalOverlay.classList.add(
                 "open"
@@ -4434,4 +4203,5 @@
     <script src="auth.js"></script>
 
 </body>
+
 </html>

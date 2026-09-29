@@ -206,7 +206,9 @@
         <section class="stats">
 
 
-            <!-- USUARIOS -->
+            <!-- ==================================
+                 USUARIOS
+            ================================== -->
 
             <div
                 class="stat blue filter-card"
@@ -226,7 +228,10 @@
             </div>
 
 
-            <!-- CUENTAS BLOQUEADAS -->
+
+            <!-- ==================================
+                 CUENTAS BLOQUEADAS
+            ================================== -->
 
             <div
                 class="stat red filter-card"
@@ -246,7 +251,10 @@
             </div>
 
 
-            <!-- AUDITORÍA -->
+
+            <!-- ==================================
+                 AUDITORÍA
+            ================================== -->
 
             <div
                 class="stat purple filter-card"
@@ -266,7 +274,10 @@
             </div>
 
 
-            <!-- DEPARTAMENTOS -->
+
+            <!-- ==================================
+                 DEPARTAMENTOS
+            ================================== -->
 
             <div
                 class="stat green filter-card"
@@ -298,15 +309,61 @@
 
 
             <!-- ==================================
-                 DISTRIBUCIÓN POR DEPARTAMENTO
-                 
-                 Esta sección se muestra al
-                 seleccionar Usuarios o Departamentos
+                 USUARIOS REGISTRADOS
             ================================== -->
 
             <div
                 class="dashboard-card filter-section"
-                data-section="usuarios departamentos"
+                data-section="usuarios"
+            >
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            DIRECTORIO
+                        </span>
+
+                        <h3>
+                            Usuarios registrados
+                        </h3>
+
+                    </div>
+
+
+                    <span
+                        class="counter"
+                        id="usersCounter"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="users-list"
+                    id="usersList"
+                >
+
+                    <div class="loading">
+                        Cargando información...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================
+                 DEPARTAMENTOS
+            ================================== -->
+
+            <div
+                class="dashboard-card filter-section"
+                data-section="departamentos"
             >
 
                 <div class="card-header">
@@ -322,6 +379,14 @@
                         </h3>
 
                     </div>
+
+
+                    <span
+                        class="counter"
+                        id="departmentsCounter"
+                    >
+                        —
+                    </span>
 
                 </div>
 
@@ -433,9 +498,6 @@
 
             <!-- ==================================
                  INFORMACIÓN DEL DIRECTORIO
-                 
-                 ESTA SECCIÓN SIEMPRE SE MUESTRA
-                 porque es un resumen general.
             ================================== -->
 
             <div class="dashboard-card">
@@ -460,6 +522,8 @@
                 <div class="directory-summary">
 
 
+                    <!-- USUARIOS -->
+
                     <div class="summary-row">
 
                         <div class="summary-icon blue-icon">
@@ -480,6 +544,9 @@
 
                     </div>
 
+
+
+                    <!-- BLOQUEADAS -->
 
                     <div class="summary-row">
 
@@ -502,6 +569,9 @@
                     </div>
 
 
+
+                    <!-- AUDITORÍA -->
+
                     <div class="summary-row">
 
                         <div class="summary-icon purple-icon">
@@ -522,6 +592,9 @@
 
                     </div>
 
+
+
+                    <!-- DEPARTAMENTOS -->
 
                     <div class="summary-row">
 
@@ -638,8 +711,6 @@
 
             <!-- ==================================
                  INFORMACIÓN
-                 
-                 ESTA SECCIÓN SIEMPRE SE MUESTRA
             ================================== -->
 
             <div class="dashboard-card wide-card">
@@ -700,7 +771,7 @@
 ></script>
 
 <script
-    src="seguridad.js?v=3"
+    src="seguridad.js?v=4"
 ></script>
 
 

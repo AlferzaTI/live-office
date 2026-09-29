@@ -1,4 +1,3 @@
-
 /* ============================================================
    ALFERZA LIVE OFFICE
    SEGURIDAD - MICROSOFT GRAPH
@@ -17,15 +16,12 @@
    ✗ Sign-ins
    ✗ signInActivity
    ✗ Intune
-
-   Estos servicios no están disponibles actualmente
-   para el tenant de ALFERZA.
    ============================================================ */
 
 
 /* ============================================================
    CONFIGURACIÓN MSAL
-   ============================================================ */
+============================================================ */
 
 const msalConfig = {
 
@@ -57,7 +53,7 @@ const msalConfig = {
 
 /* ============================================================
    PERMISOS
-   ============================================================ */
+============================================================ */
 
 const scopes = [
 
@@ -72,7 +68,7 @@ const scopes = [
 
 /* ============================================================
    MSAL
-   ============================================================ */
+============================================================ */
 
 const msalInstance =
     new msal.PublicClientApplication(
@@ -82,7 +78,7 @@ const msalInstance =
 
 /* ============================================================
    DATOS
-   ============================================================ */
+============================================================ */
 
 const securityData = {
 
@@ -111,7 +107,7 @@ const securityData = {
 
 /* ============================================================
    CARGA INICIAL
-   ============================================================ */
+============================================================ */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -146,7 +142,7 @@ document.addEventListener(
 
 /* ============================================================
    AUTENTICACIÓN
-   ============================================================ */
+============================================================ */
 
 async function iniciarSesion() {
 
@@ -605,12 +601,14 @@ function calcularDepartamentos(
         user => {
 
             const departamento =
-                (
+                String(
                     user.department
                     ||
-                    "Sin departamento"
+                    ""
                 )
-                .trim();
+                .trim()
+                ||
+                "Sin departamento";
 
 
             const actual =
@@ -671,11 +669,6 @@ async function cargarAuditoria() {
         const fecha =
             new Date();
 
-
-        /*
-         * Microsoft Graph actualmente permite
-         * consultar este período para este tenant.
-         */
 
         fecha.setDate(
             fecha.getDate() - 30
@@ -860,13 +853,9 @@ function clasificarEvento(
 
 
     if (
-        texto.includes(
-            "user"
-        )
+        texto.includes("user")
         ||
-        texto.includes(
-            "usuario"
-        )
+        texto.includes("usuario")
     ) {
 
         return "Usuarios";
@@ -875,13 +864,9 @@ function clasificarEvento(
 
 
     if (
-        texto.includes(
-            "group"
-        )
+        texto.includes("group")
         ||
-        texto.includes(
-            "grupo"
-        )
+        texto.includes("grupo")
     ) {
 
         return "Grupos";
@@ -890,13 +875,9 @@ function clasificarEvento(
 
 
     if (
-        texto.includes(
-            "application"
-        )
+        texto.includes("application")
         ||
-        texto.includes(
-            "app"
-        )
+        texto.includes("app")
     ) {
 
         return "Aplicaciones";
@@ -905,13 +886,9 @@ function clasificarEvento(
 
 
     if (
-        texto.includes(
-            "role"
-        )
+        texto.includes("role")
         ||
-        texto.includes(
-            "rol"
-        )
+        texto.includes("rol")
     ) {
 
         return "Roles";
@@ -920,13 +897,9 @@ function clasificarEvento(
 
 
     if (
-        texto.includes(
-            "policy"
-        )
+        texto.includes("policy")
         ||
-        texto.includes(
-            "polic"
-        )
+        texto.includes("polic")
     ) {
 
         return "Políticas";
@@ -946,6 +919,8 @@ function clasificarEvento(
 function actualizarDashboard() {
 
     actualizarContadores();
+
+    actualizarUsuarios();
 
     actualizarDepartamentos();
 
@@ -991,6 +966,18 @@ function actualizarContadores() {
 
 
     ponerTexto(
+        "usersCounter",
+        securityData.users.length
+    );
+
+
+    ponerTexto(
+        "departmentsCounter",
+        securityData.departments.length
+    );
+
+
+    ponerTexto(
         "blockedCounter",
         securityData.blockedUsers.length
     );
@@ -1000,6 +987,172 @@ function actualizarContadores() {
         "auditCounter",
         `${securityData.auditLogs.length} eventos`
     );
+
+}
+
+
+/* ============================================================
+   USUARIOS REGISTRADOS
+============================================================ */
+
+function actualizarUsuarios() {
+
+    const container =
+        document.getElementById(
+            "usersList"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !securityData.users.length
+    ) {
+
+        container.innerHTML = `
+
+            <div class="loading">
+
+                No hay usuarios disponibles.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    securityData.users
+        .forEach(
+            user => {
+
+                const nombre =
+                    user.displayName
+                    ||
+                    "Sin nombre";
+
+
+                const correo =
+                    user.userPrincipalName
+                    ||
+                    "Sin correo";
+
+
+                const departamento =
+                    String(
+                        user.department
+                        ||
+                        ""
+                    )
+                    .trim()
+                    ||
+                    "Sin departamento";
+
+
+                const iniciales =
+                    obtenerIniciales(
+                        nombre
+                    );
+
+
+                const activo =
+                    user.accountEnabled !== false;
+
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className =
+                    "directory-user";
+
+
+                div.innerHTML = `
+
+                    <div
+                        class="avatar ${
+                            activo
+                                ? "blue-avatar"
+                                : "red-avatar"
+                        }"
+                    >
+
+                        ${escapar(
+                            iniciales
+                        )}
+
+                    </div>
+
+
+                    <div class="directory-user-info">
+
+                        <strong>
+
+                            ${escapar(
+                                nombre
+                            )}
+
+                        </strong>
+
+
+                        <small>
+
+                            ${escapar(
+                                correo
+                            )}
+
+                        </small>
+
+
+                        <small>
+
+                            ${escapar(
+                                departamento
+                            )}
+
+                        </small>
+
+                    </div>
+
+
+                    <span
+                        class="directory-user-status ${
+                            activo
+                                ? "status-active"
+                                : "status-blocked"
+                        }"
+                    >
+
+                        ${
+                            activo
+                                ? "Activo"
+                                : "Bloqueado"
+                        }
+
+                    </span>
+
+                `;
+
+
+                container.appendChild(
+                    div
+                );
+
+            }
+        );
 
 }
 
@@ -1315,7 +1468,12 @@ function actualizarBloqueados() {
 
 
                 const area =
-                    user.department
+                    String(
+                        user.department
+                        ||
+                        ""
+                    )
+                    .trim()
                     ||
                     "Sin departamento";
 
@@ -2263,6 +2421,7 @@ document.addEventListener(
     }
 );
 
+
 /* ============================================================
    FILTROS DEL DASHBOARD
 ============================================================ */
@@ -2294,12 +2453,6 @@ document.addEventListener(
         const filtro =
             card.dataset.filter;
 
-
-        /*
-         * Si se vuelve a pulsar
-         * el mismo botón activo,
-         * se restaura todo.
-         */
 
         if (
             filtroActivo === filtro
@@ -2394,11 +2547,6 @@ function aplicarFiltro(
     filtro
 ) {
 
-    /*
-     * Ocultar TODO el contenido
-     * que pueda ser filtrado.
-     */
-
     document
         .querySelectorAll(
             ".filter-section"
@@ -2413,11 +2561,6 @@ function aplicarFiltro(
             }
         );
 
-
-    /*
-     * Mostrar únicamente
-     * las secciones correspondientes.
-     */
 
     document
         .querySelectorAll(
@@ -2454,13 +2597,6 @@ function aplicarFiltro(
         );
 
 
-    /*
-     * Ocultar las tarjetas generales.
-     *
-     * Estas son las que NO tienen
-     * .filter-section.
-     */
-
     document
         .querySelectorAll(
             ".dashboard-card:not(.filter-section)"
@@ -2475,10 +2611,6 @@ function aplicarFiltro(
             }
         );
 
-
-    /*
-     * Marcar el botón seleccionado.
-     */
 
     document
         .querySelectorAll(
@@ -2524,11 +2656,6 @@ function mostrarTodoDashboard() {
         null;
 
 
-    /*
-     * Mostrar todas las secciones
-     * filtrables.
-     */
-
     document
         .querySelectorAll(
             ".filter-section"
@@ -2544,11 +2671,6 @@ function mostrarTodoDashboard() {
         );
 
 
-    /*
-     * Mostrar nuevamente
-     * las tarjetas generales.
-     */
-
     document
         .querySelectorAll(
             ".dashboard-card:not(.filter-section)"
@@ -2563,10 +2685,6 @@ function mostrarTodoDashboard() {
             }
         );
 
-
-    /*
-     * Quitar estado activo.
-     */
 
     document
         .querySelectorAll(

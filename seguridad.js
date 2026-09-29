@@ -2,6 +2,24 @@
 /* ============================================================
    ALFERZA LIVE OFFICE
    SEGURIDAD - MICROSOFT GRAPH
+
+   DATOS UTILIZADOS:
+
+   ✓ Usuarios
+   ✓ Cuentas bloqueadas
+   ✓ Departamentos
+   ✓ Auditoría de directorio
+   ✓ Actividad administrativa
+
+   NO SE CONSULTA:
+
+   ✗ MFA
+   ✗ Sign-ins
+   ✗ signInActivity
+   ✗ Intune
+
+   Estos servicios no están disponibles actualmente
+   para el tenant de ALFERZA.
    ============================================================ */
 
 
@@ -47,13 +65,7 @@ const scopes = [
 
     "User.Read.All",
 
-    "Presence.Read.All",
-
-    "Sites.Read.All",
-
-    "AuditLog.Read.All",
-
-    "DeviceManagementManagedDevices.Read.All"
+    "AuditLog.Read.All"
 
 ];
 
@@ -76,30 +88,17 @@ const securityData = {
 
     users: [],
 
-    inactiveUsers: [],
-
     blockedUsers: [],
 
-    mfaUsers: [],
-
-    devices: [],
-
-    signIns: [],
-
     auditLogs: [],
+
+    departments: [],
+
+    auditTypes: [],
 
     status: {
 
         users:
-            "loading",
-
-        mfa:
-            "loading",
-
-        devices:
-            "loading",
-
-        signIns:
             "loading",
 
         audit:
@@ -111,7 +110,7 @@ const securityData = {
 
 
 /* ============================================================
-   CUANDO CARGA LA PÁGINA
+   CARGA INICIAL
    ============================================================ */
 
 document.addEventListener(
@@ -206,7 +205,7 @@ async function iniciarSesion() {
 
 /* ============================================================
    TOKEN
-   ============================================================ */
+============================================================ */
 
 async function obtenerToken() {
 
@@ -251,7 +250,10 @@ async function obtenerToken() {
             await msalInstance.acquireTokenPopup({
 
                 scopes:
-                    scopes
+                    scopes,
+
+                account:
+                    account
 
             });
 
@@ -265,11 +267,10 @@ async function obtenerToken() {
 
 /* ============================================================
    PETICIÓN GRAPH
-   ============================================================ */
+============================================================ */
 
 async function graph(
-    endpoint,
-    beta = false
+    endpoint
 ) {
 
     const token =
@@ -277,9 +278,7 @@ async function graph(
 
 
     const base =
-        beta
-            ? "https://graph.microsoft.com/beta"
-            : "https://graph.microsoft.com/v1.0";
+        "https://graph.microsoft.com/v1.0";
 
 
     const url =
@@ -395,8 +394,8 @@ async function graph(
 
 
 /* ============================================================
-   CARGAR TODO
-   ============================================================ */
+   CARGAR SEGURIDAD
+============================================================ */
 
 async function cargarSeguridad() {
 
@@ -404,38 +403,38 @@ async function cargarSeguridad() {
         "Consultando Microsoft 365..."
     );
 
-    console.log("========================================");
-    console.log("INICIANDO CARGA DE SEGURIDAD");
-    console.log("========================================");
+
+    console.log(
+        "========================================"
+    );
+
+    console.log(
+        "INICIANDO CARGA DE SEGURIDAD"
+    );
+
+    console.log(
+        "========================================"
+    );
+
 
     const resultados =
         await Promise.allSettled([
 
             cargarUsuarios(),
 
-            cargarMFA(),
-
-            cargarDispositivos(),
-
-            cargarSignIns(),
-
             cargarAuditoria()
 
         ]);
+
 
     const nombres = [
 
         "Usuarios",
 
-        "MFA",
-
-        "Dispositivos",
-
-        "Sign-ins",
-
         "Auditoría"
 
     ];
+
 
     resultados.forEach(
         (
@@ -447,6 +446,7 @@ async function cargarSeguridad() {
                 `${nombres[index]}:`,
                 resultado.status
             );
+
 
             if (
                 resultado.status ===
@@ -463,10 +463,12 @@ async function cargarSeguridad() {
         }
     );
 
+
     console.log(
         "ESTADO FINAL:",
         securityData.status
     );
+
 
     console.log(
         "Datos de seguridad:",
@@ -475,19 +477,10 @@ async function cargarSeguridad() {
 
 }
 
+
 /* ============================================================
    USUARIOS
-   ============================================================
-
-   IMPORTANTE:
-
-   Primero obtenemos los usuarios básicos con v1.0.
-
-   Esto permite que cuentas bloqueadas funcionen aunque
-   signInActivity requiera Premium.
-
-   Después intentamos obtener signInActivity por separado.
-   ============================================================ */
+============================================================ */
 
 async function cargarUsuarios() {
 
@@ -496,10 +489,6 @@ async function cargarUsuarios() {
         securityData.status.users =
             "loading";
 
-
-        /* ----------------------------------------------------
-           1. USUARIOS BÁSICOS
-           ---------------------------------------------------- */
 
         let url =
             "/users?$select=id,displayName,userPrincipalName,accountEnabled,department&$top=999";
@@ -513,8 +502,7 @@ async function cargarUsuarios() {
 
             const data =
                 await graph(
-                    url,
-                    false
+                    url
                 );
 
 
@@ -542,149 +530,32 @@ async function cargarUsuarios() {
             );
 
 
-        /*
-         * Inicialmente no tenemos inactividad.
-         * Se intentará cargar abajo.
-         */
+        securityData.departments =
+            calcularDepartamentos(
+                usuarios
+            );
 
-        securityData.inactiveUsers =
-            [];
+
+        securityData.status.users =
+            "ok";
 
 
         console.log(
-            "Usuarios básicos:",
+            "Usuarios:",
             usuarios.length
         );
 
 
         console.log(
-            "Bloqueados:",
+            "Cuentas bloqueadas:",
             securityData.blockedUsers.length
         );
 
 
-        /* ----------------------------------------------------
-           2. SIGN-IN ACTIVITY
-           ---------------------------------------------------- */
-
-        try {
-
-            let activityUrl =
-                "/users?$select=id,displayName,userPrincipalName,department,signInActivity&$top=999";
-
-
-            const usuariosActividad =
-                [];
-
-
-            while (activityUrl) {
-
-                const data =
-                    await graph(
-                        activityUrl,
-                        true
-                    );
-
-
-                usuariosActividad.push(
-                    ...(data.value || [])
-                );
-
-
-                activityUrl =
-                    data["@odata.nextLink"]
-                    ||
-                    null;
-
-            }
-
-
-            /*
-             * Mapeamos la actividad por ID.
-             */
-
-            const actividadPorId =
-                new Map();
-
-
-            usuariosActividad.forEach(
-                user => {
-
-                    actividadPorId.set(
-                        user.id,
-                        user.signInActivity
-                    );
-
-                }
-            );
-
-
-            /*
-             * Agregamos signInActivity a los
-             * usuarios básicos.
-             */
-
-            securityData.users =
-                securityData.users.map(
-                    user => ({
-
-                        ...user,
-
-                        signInActivity:
-                            actividadPorId.get(
-                                user.id
-                            )
-
-                    })
-                );
-
-
-            securityData.inactiveUsers =
-                securityData.users.filter(
-                    user =>
-                        obtenerDiasInactividad(
-                            user.signInActivity
-                        ) >= 30
-                );
-
-
-            securityData.status.users =
-                "ok";
-
-
-            console.log(
-                "Actividad de usuarios:",
-                usuariosActividad.length
-            );
-
-
-            console.log(
-                "Inactivos:",
-                securityData.inactiveUsers.length
-            );
-
-
-        } catch (activityError) {
-
-            /*
-             * Si Premium no está disponible,
-             * NO destruimos los usuarios básicos.
-             */
-
-            securityData.status.users =
-                "partial";
-
-
-            securityData.inactiveUsers =
-                [];
-
-
-            console.warn(
-                "signInActivity no disponible:",
-                activityError
-            );
-
-        }
+        console.log(
+            "Departamentos:",
+            securityData.departments
+        );
 
 
     } catch (error) {
@@ -692,17 +563,6 @@ async function cargarUsuarios() {
         securityData.status.users =
             "error";
 
-
-        console.error(
-            "Error cargando usuarios básicos:",
-            error
-        );
-
-
-        /*
-         * Solo vaciamos usuarios si realmente
-         * falló la consulta principal.
-         */
 
         securityData.users =
             [];
@@ -712,8 +572,17 @@ async function cargarUsuarios() {
             [];
 
 
-        securityData.inactiveUsers =
+        securityData.departments =
             [];
+
+
+        console.error(
+            "Error cargando usuarios:",
+            error
+        );
+
+
+        throw error;
 
     }
 
@@ -721,354 +590,75 @@ async function cargarUsuarios() {
 
 
 /* ============================================================
-   INACTIVIDAD
-   ============================================================ */
+   CALCULAR DEPARTAMENTOS
+============================================================ */
 
-function obtenerDiasInactividad(
-    signInActivity
+function calcularDepartamentos(
+    usuarios
 ) {
 
-    if (
-        !signInActivity ||
-        !signInActivity.lastSignInDateTime
-    ) {
-
-        return 9999;
-
-    }
+    const mapa =
+        new Map();
 
 
-    const ultimoAcceso =
-        new Date(
-            signInActivity.lastSignInDateTime
-        );
+    usuarios.forEach(
+        user => {
+
+            const departamento =
+                (
+                    user.department
+                    ||
+                    "Sin departamento"
+                )
+                .trim();
 
 
-    const ahora =
-        new Date();
+            const actual =
+                mapa.get(
+                    departamento
+                )
+                ||
+                0;
 
 
-    const diferencia =
-        ahora.getTime()
-        -
-        ultimoAcceso.getTime();
+            mapa.set(
+                departamento,
+                actual + 1
+            );
 
-
-    return Math.floor(
-
-        diferencia
-        /
-        (
-            1000 *
-            60 *
-            60 *
-            24
-        )
-
+        }
     );
 
-}
 
+    return Array
+        .from(
+            mapa.entries()
+        )
+        .map(
+            ([nombre, cantidad]) => ({
 
-/* ============================================================
-   MFA
-   ============================================================ */
+                nombre,
 
-async function cargarMFA() {
+                cantidad
 
-    try {
-
-        securityData.status.mfa =
-            "loading";
-
-
-        let url =
-            "/reports/authenticationMethods/userRegistrationDetails";
-
-
-        const registros =
-            [];
-
-
-        while (url) {
-
-            const data =
-                await graph(
-                    url
-                );
-
-
-            registros.push(
-                ...(data.value || [])
-            );
-
-
-            url =
-                data["@odata.nextLink"]
-                ||
-                null;
-
-        }
-
-
-        securityData.mfaUsers =
-            registros;
-
-
-        securityData.status.mfa =
-            "ok";
-
-
-        console.log(
-            "Usuarios MFA:",
-            registros.length
+            })
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                b.cantidad
+                -
+                a.cantidad
         );
-
-
-    } catch (error) {
-
-        securityData.status.mfa =
-            "unavailable";
-
-
-        securityData.mfaUsers =
-            [];
-
-
-        console.warn(
-            "MFA no disponible:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   DISPOSITIVOS INTUNE
-   ============================================================ */
-
-/* ============================================================
-   DISPOSITIVOS INTUNE
-   ============================================================ */
-
-async function cargarDispositivos() {
-
-    console.log("========================================");
-    console.log("INICIANDO CARGA DE DISPOSITIVOS INTUNE");
-    console.log("========================================");
-
-    try {
-
-        securityData.status.devices =
-            "loading";
-
-        securityData.devices =
-            [];
-
-        const url =
-            "/deviceManagement/managedDevices?$select=id,deviceName,operatingSystem,complianceState,userPrincipalName,lastSyncDateTime&$top=100";
-
-        console.log(
-            "Consultando endpoint de dispositivos:"
-        );
-
-        console.log(
-            url
-        );
-
-        const dispositivos =
-            [];
-
-        let nextUrl =
-            url;
-
-        while (nextUrl) {
-
-            console.log(
-                "Solicitando dispositivos a Graph:",
-                nextUrl
-            );
-
-            const data =
-                await graph(
-                    nextUrl
-                );
-
-            console.log(
-                "Respuesta Intune:",
-                data
-            );
-
-            const encontrados =
-                data.value || [];
-
-            console.log(
-                "Dispositivos recibidos:",
-                encontrados.length
-            );
-
-            dispositivos.push(
-                ...encontrados
-            );
-
-            nextUrl =
-                data["@odata.nextLink"]
-                ||
-                null;
-
-        }
-
-        securityData.devices =
-            dispositivos;
-
-        securityData.status.devices =
-            "ok";
-
-        console.log(
-            "========================================"
-        );
-
-        console.log(
-            "INTUNE OK"
-        );
-
-        console.log(
-            "Total dispositivos:",
-            dispositivos.length
-        );
-
-        console.log(
-            "Dispositivos:",
-            dispositivos
-        );
-
-        console.log(
-            "========================================"
-        );
-
-    } catch (error) {
-
-        securityData.status.devices =
-            "unavailable";
-
-        securityData.devices =
-            [];
-
-        console.error(
-            "========================================"
-        );
-
-        console.error(
-            "ERROR CARGANDO INTUNE"
-        );
-
-        console.error(
-            "Mensaje:",
-            error?.message
-        );
-
-        console.error(
-            "Status:",
-            error?.status
-        );
-
-        console.error(
-            "URL:",
-            error?.url
-        );
-
-        console.error(
-            "Graph data:",
-            error?.graphData
-        );
-
-        console.error(
-            "Error completo:",
-            error
-        );
-
-        console.error(
-            "========================================"
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   SIGN INS
-   ============================================================ */
-
-async function cargarSignIns() {
-
-    try {
-
-        securityData.status.signIns =
-            "loading";
-
-
-        const url =
-            "/auditLogs/signIns?$top=100&$orderby=createdDateTime desc";
-
-
-        const data =
-            await graph(
-                url
-            );
-
-
-        securityData.signIns =
-            data.value
-            ||
-            [];
-
-
-        securityData.status.signIns =
-            "ok";
-
-
-        console.log(
-            "Sign-ins:",
-            securityData.signIns.length
-        );
-
-
-    } catch (error) {
-
-        securityData.status.signIns =
-            "unavailable";
-
-
-        securityData.signIns =
-            [];
-
-
-        console.warn(
-            "Sign-ins no disponibles:",
-            error
-        );
-
-    }
 
 }
 
 
 /* ============================================================
    AUDITORÍA
-   ============================================================
-
-   Microsoft limita el período disponible.
-
-   En lugar de consultar 180 días, consultamos los
-   últimos 30 días.
-
-   Esto evita el error:
-
-   "Minimum allowed time for activityDateTime..."
-   ============================================================ */
+============================================================ */
 
 async function cargarAuditoria() {
 
@@ -1083,7 +673,8 @@ async function cargarAuditoria() {
 
 
         /*
-         * Últimos 30 días.
+         * Microsoft Graph actualmente permite
+         * consultar este período para este tenant.
          */
 
         fecha.setDate(
@@ -1101,20 +692,43 @@ async function cargarAuditoria() {
             );
 
 
-        const url =
+        let url =
             `/auditLogs/directoryAudits?$filter=${filter}&$top=1000`;
 
 
-        const data =
-            await graph(
-                url
+        const eventos =
+            [];
+
+
+        while (url) {
+
+            const data =
+                await graph(
+                    url
+                );
+
+
+            eventos.push(
+                ...(data.value || [])
             );
 
 
+            url =
+                data["@odata.nextLink"]
+                ||
+                null;
+
+        }
+
+
         securityData.auditLogs =
-            data.value
-            ||
-            [];
+            eventos;
+
+
+        securityData.auditTypes =
+            calcularTiposAuditoria(
+                eventos
+            );
 
 
         securityData.status.audit =
@@ -1123,404 +737,307 @@ async function cargarAuditoria() {
 
         console.log(
             "Eventos de auditoría:",
-            securityData.auditLogs.length
+            eventos.length
+        );
+
+
+        console.log(
+            "Tipos de auditoría:",
+            securityData.auditTypes
         );
 
 
     } catch (error) {
 
         securityData.status.audit =
-            "unavailable";
+            "error";
 
 
         securityData.auditLogs =
             [];
 
 
-        console.warn(
-            "Auditoría no disponible:",
+        securityData.auditTypes =
+            [];
+
+
+        console.error(
+            "Error cargando auditoría:",
             error
         );
 
+
+        throw error;
+
     }
+
+}
+
+
+/* ============================================================
+   TIPOS DE AUDITORÍA
+============================================================ */
+
+function calcularTiposAuditoria(
+    eventos
+) {
+
+    const mapa =
+        new Map();
+
+
+    eventos.forEach(
+        evento => {
+
+            const nombre =
+                clasificarEvento(
+                    evento.activityDisplayName
+                );
+
+
+            const actual =
+                mapa.get(
+                    nombre
+                )
+                ||
+                0;
+
+
+            mapa.set(
+                nombre,
+                actual + 1
+            );
+
+        }
+    );
+
+
+    return Array
+        .from(
+            mapa.entries()
+        )
+        .map(
+            ([nombre, cantidad]) => ({
+
+                nombre,
+
+                cantidad
+
+            })
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                b.cantidad
+                -
+                a.cantidad
+        )
+        .slice(
+            0,
+            6
+        );
+
+}
+
+
+/* ============================================================
+   CLASIFICAR EVENTO
+============================================================ */
+
+function clasificarEvento(
+    actividad
+) {
+
+    const texto =
+        (
+            actividad
+            ||
+            "Otra actividad"
+        )
+        .toLowerCase();
+
+
+    if (
+        texto.includes(
+            "user"
+        )
+        ||
+        texto.includes(
+            "usuario"
+        )
+    ) {
+
+        return "Usuarios";
+
+    }
+
+
+    if (
+        texto.includes(
+            "group"
+        )
+        ||
+        texto.includes(
+            "grupo"
+        )
+    ) {
+
+        return "Grupos";
+
+    }
+
+
+    if (
+        texto.includes(
+            "application"
+        )
+        ||
+        texto.includes(
+            "app"
+        )
+    ) {
+
+        return "Aplicaciones";
+
+    }
+
+
+    if (
+        texto.includes(
+            "role"
+        )
+        ||
+        texto.includes(
+            "rol"
+        )
+    ) {
+
+        return "Roles";
+
+    }
+
+
+    if (
+        texto.includes(
+            "policy"
+        )
+        ||
+        texto.includes(
+            "polic"
+        )
+    ) {
+
+        return "Políticas";
+
+    }
+
+
+    return "Otras acciones";
 
 }
 
 
 /* ============================================================
    ACTUALIZAR DASHBOARD
-   ============================================================ */
+============================================================ */
 
 function actualizarDashboard() {
 
     actualizarContadores();
 
-    actualizarMFA();
+    actualizarDepartamentos();
 
-    actualizarInactivos();
+    actualizarResumenAuditoria();
 
     actualizarBloqueados();
 
-    actualizarDispositivos();
+    actualizarResumenDirectorio();
 
-    actualizarEventos();
+    actualizarTablaAuditoria();
 
 }
 
 
 /* ============================================================
    CONTADORES
-   ============================================================ */
+============================================================ */
 
 function actualizarContadores() {
 
-
-    /* --------------------------------------------------------
-       MFA
-       -------------------------------------------------------- */
-
-    let mfaPendiente =
-        0;
-
-
-    if (
-        securityData.status.mfa ===
-        "ok"
-    ) {
-
-        mfaPendiente =
-            securityData.mfaUsers.filter(
-                user =>
-                    user.isMfaRegistered === false
-            ).length;
-
-    }
-
-
-    /* --------------------------------------------------------
-       INACTIVOS
-       -------------------------------------------------------- */
-
-    const inactivos =
-        securityData.inactiveUsers.length;
-
-
-    /* --------------------------------------------------------
-       BLOQUEADOS
-       -------------------------------------------------------- */
-
-    const bloqueados =
-        securityData.blockedUsers.length;
-
-
-    /* --------------------------------------------------------
-       DISPOSITIVOS
-       -------------------------------------------------------- */
-
-    let riesgo =
-        0;
-
-
-    if (
-        securityData.status.devices ===
-        "ok"
-    ) {
-
-        riesgo =
-            securityData.devices.filter(
-                device =>
-                    !esDispositivoSeguro(
-                        device
-                    )
-            ).length;
-
-    }
-
-
     ponerTexto(
-        "mfaPendiente",
-        securityData.status.mfa === "ok"
-            ? mfaPendiente
-            : "—"
-    );
-
-
-    ponerTexto(
-        "usuariosInactivos",
-        securityData.status.users === "ok"
-            ? inactivos
-            : "—"
+        "totalUsuarios",
+        securityData.users.length
     );
 
 
     ponerTexto(
         "cuentasBloqueadas",
-        bloqueados
+        securityData.blockedUsers.length
     );
 
 
     ponerTexto(
-        "equiposRiesgo",
-        securityData.status.devices === "ok"
-            ? riesgo
-            : "—"
+        "eventosAuditoria",
+        securityData.auditLogs.length
     );
 
 
-    /* --------------------------------------------------------
-       CONTADOR DE CUENTAS BLOQUEADAS
-       -------------------------------------------------------- */
-
-    const counter =
-        document.querySelector(
-            ".blocked-list"
-        )
-        ?.parentElement
-        ?.querySelector(
-            ".counter"
-        );
+    ponerTexto(
+        "totalDepartamentos",
+        securityData.departments.length
+    );
 
 
-    if (counter) {
+    ponerTexto(
+        "blockedCounter",
+        securityData.blockedUsers.length
+    );
 
-        counter.textContent =
-            bloqueados;
 
-    }
+    ponerTexto(
+        "auditCounter",
+        `${securityData.auditLogs.length} eventos`
+    );
 
 }
 
 
 /* ============================================================
-   MFA
-   ============================================================ */
+   DEPARTAMENTOS
+============================================================ */
 
-function actualizarMFA() {
+function actualizarDepartamentos() {
 
-    const circle =
-        document.querySelector(
-            ".mfa-circle"
-        );
-
-
-    const number =
-        document.querySelector(
-            ".mfa-number"
-        );
-
-
-    const textos =
-        document.querySelectorAll(
-            ".mfa-info .legend-item small"
-        );
-
-
-    /*
-     * MFA no disponible.
-     */
-
-    if (
-        securityData.status.mfa !==
-        "ok"
-    ) {
-
-        if (number) {
-
-            number.textContent =
-                "N/D";
-
-        }
-
-
-        if (textos.length >= 2) {
-
-            textos[0].textContent =
-                "Licencia Premium requerida";
-
-            textos[1].textContent =
-                "Datos no disponibles";
-
-        }
-
-
-        return;
-
-    }
-
-
-    const total =
-        securityData.mfaUsers.length;
-
-
-    if (!total) {
-
-        return;
-
-    }
-
-
-    const registrados =
-        securityData.mfaUsers.filter(
-            user =>
-                user.isMfaRegistered === true
-        ).length;
-
-
-    const porcentaje =
-        Math.round(
-            (
-                registrados /
-                total
-            ) * 100
-        );
-
-
-    if (circle) {
-
-        circle.style.background =
-            `conic-gradient(
-                #16a34a ${porcentaje}%,
-                #ef4444 ${porcentaje}% 100%
-            )`;
-
-    }
-
-
-    if (number) {
-
-        number.textContent =
-            `${porcentaje}%`;
-
-    }
-
-
-    if (textos.length >= 2) {
-
-        textos[0].textContent =
-            `${porcentaje}% de usuarios`;
-
-
-        textos[1].textContent =
-            `${100 - porcentaje}% de usuarios`;
-
-    }
-
-}
-
-
-/* ============================================================
-   USUARIOS INACTIVOS
-   ============================================================ */
-
-function actualizarInactivos() {
-
-    const tbody =
+    const container =
         document.getElementById(
-            "inactiveUsersTable"
+            "departmentList"
         );
 
 
-    if (!tbody) {
+    if (!container) {
 
         return;
 
     }
 
 
-    const filtro =
-        parseInt(
-            document.getElementById(
-                "inactiveFilter"
-            )?.value
-            ||
-            "30"
-        );
-
-
-    /*
-     * Premium no disponible.
-     */
-
-    if (
-        securityData.status.users ===
-        "partial"
-    ) {
-
-        tbody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="4"
-                    style="
-                        text-align:center;
-                        padding:25px;
-                        color:#64748b;
-                    "
-                >
-
-                    La información de actividad de inicio
-                    de sesión requiere Microsoft Entra ID
-                    Premium.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
-    const usuarios =
-        securityData.inactiveUsers
-            .filter(
-                user =>
-                    obtenerDiasInactividad(
-                        user.signInActivity
-                    ) >= filtro
-            )
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    obtenerDiasInactividad(
-                        b.signInActivity
-                    )
-                    -
-                    obtenerDiasInactividad(
-                        a.signInActivity
-                    )
-            );
-
-
-    tbody.innerHTML =
+    container.innerHTML =
         "";
 
 
-    if (!usuarios.length) {
+    if (
+        !securityData.departments.length
+    ) {
 
-        tbody.innerHTML = `
+        container.innerHTML = `
 
-            <tr>
+            <div class="loading">
 
-                <td
-                    colspan="4"
-                    style="
-                        text-align:center;
-                        padding:25px
-                    "
-                >
+                No hay información disponible.
 
-                    No hay usuarios con más de
-                    ${filtro} días de inactividad.
-
-                </td>
-
-            </tr>
+            </div>
 
         `;
 
@@ -1529,122 +1046,76 @@ function actualizarInactivos() {
     }
 
 
-    usuarios
+    const max =
+        securityData.departments[0]
+            .cantidad;
+
+
+    securityData.departments
         .slice(
             0,
-            50
+            8
         )
         .forEach(
-            user => {
+            departamento => {
 
-                const dias =
-                    obtenerDiasInactividad(
-                        user.signInActivity
+                const porcentaje =
+                    Math.max(
+                        3,
+                        (
+                            departamento.cantidad /
+                            max
+                        ) * 100
                     );
 
 
-                const nombre =
-                    user.displayName
-                    ||
-                    "Sin nombre";
-
-
-                const correo =
-                    user.userPrincipalName
-                    ||
-                    "";
-
-
-                const iniciales =
-                    obtenerIniciales(
-                        nombre
-                    );
-
-
-                const area =
-                    user.department
-                    ||
-                    "Sin área";
-
-
-                const ultimoAcceso =
-                    user.signInActivity
-                    ?.lastSignInDateTime;
-
-
-                const fecha =
-                    ultimoAcceso
-                        ? formatearFecha(
-                            ultimoAcceso
-                        )
-                        : "Nunca registrado";
-
-
-                const clase =
-                    dias >= 90
-                        ? "danger"
-                        : "warning";
-
-
-                const tr =
+                const row =
                     document.createElement(
-                        "tr"
+                        "div"
                     );
 
 
-                tr.innerHTML = `
+                row.className =
+                    "department-row";
 
-                    <td>
 
-                        <div class="user-cell">
+                row.innerHTML = `
 
-                            <div class="avatar">
-                                ${escapar(iniciales)}
-                            </div>
+                    <div
+                        class="department-name"
+                        title="${escapar(
+                            departamento.nombre
+                        )}"
+                    >
 
-                            <div>
+                        ${escapar(
+                            departamento.nombre
+                        )}
 
-                                <strong>
-                                    ${escapar(nombre)}
-                                </strong>
+                    </div>
 
-                                <small>
-                                    ${escapar(correo)}
-                                </small>
 
-                            </div>
+                    <div class="department-bar">
 
-                        </div>
+                        <div
+                            class="department-fill"
+                            style="width:${porcentaje}%"
+                        ></div>
 
-                    </td>
+                    </div>
 
-                    <td>
-                        ${escapar(area)}
-                    </td>
 
-                    <td>
-                        ${fecha}
-                    </td>
+                    <div class="department-count">
 
-                    <td>
+                        ${departamento.cantidad}
 
-                        <span class="badge ${clase}">
-
-                            ${
-                                dias >= 9999
-                                    ? "Sin acceso"
-                                    : `${dias} días`
-                            }
-
-                        </span>
-
-                    </td>
+                    </div>
 
                 `;
 
 
-                tbody.appendChild(
-                    tr
+                container.appendChild(
+                    row
                 );
 
             }
@@ -1654,35 +1125,142 @@ function actualizarInactivos() {
 
 
 /* ============================================================
-   SELECT DE INACTIVOS
-   ============================================================ */
+   RESUMEN DE AUDITORÍA
+============================================================ */
 
-document.addEventListener(
-    "change",
-    event => {
+function actualizarResumenAuditoria() {
 
-        if (
-            event.target.id ===
-            "inactiveFilter"
-        ) {
+    const container =
+        document.getElementById(
+            "auditSummary"
+        );
 
-            actualizarInactivos();
 
-        }
+    if (!container) {
+
+        return;
 
     }
-);
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !securityData.auditTypes.length
+    ) {
+
+        container.innerHTML = `
+
+            <div class="loading">
+
+                No hay eventos disponibles.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const iconos = {
+
+        "Usuarios":
+            "👤",
+
+        "Grupos":
+            "👥",
+
+        "Aplicaciones":
+            "▣",
+
+        "Roles":
+            "🔑",
+
+        "Políticas":
+            "⚙",
+
+        "Otras acciones":
+            "📋"
+
+    };
+
+
+    securityData.auditTypes
+        .forEach(
+            tipo => {
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "audit-type-row";
+
+
+                row.innerHTML = `
+
+                    <div class="audit-type-icon">
+
+                        ${
+                            iconos[
+                                tipo.nombre
+                            ]
+                            ||
+                            "📋"
+                        }
+
+                    </div>
+
+
+                    <div class="audit-type-info">
+
+                        <strong>
+                            ${escapar(
+                                tipo.nombre
+                            )}
+                        </strong>
+
+                        <small>
+                            Actividades registradas
+                        </small>
+
+                    </div>
+
+
+                    <div class="audit-type-count">
+
+                        ${tipo.cantidad}
+
+                    </div>
+
+                `;
+
+
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
+
+}
 
 
 /* ============================================================
    CUENTAS BLOQUEADAS
-   ============================================================ */
+============================================================ */
 
 function actualizarBloqueados() {
 
     const container =
-        document.querySelector(
-            ".blocked-list"
+        document.getElementById(
+            "blockedList"
         );
 
 
@@ -1703,13 +1281,7 @@ function actualizarBloqueados() {
 
         container.innerHTML = `
 
-            <div
-                style="
-                    padding:20px;
-                    text-align:center;
-                    color:#64748b;
-                "
-            >
+            <div class="loading">
 
                 No hay cuentas bloqueadas.
 
@@ -1725,7 +1297,7 @@ function actualizarBloqueados() {
     securityData.blockedUsers
         .slice(
             0,
-            20
+            10
         )
         .forEach(
             user => {
@@ -1736,21 +1308,21 @@ function actualizarBloqueados() {
                     "Sin nombre";
 
 
+                const correo =
+                    user.userPrincipalName
+                    ||
+                    "Sin correo";
+
+
                 const area =
                     user.department
                     ||
-                    "Sin área";
+                    "Sin departamento";
 
 
                 const iniciales =
                     obtenerIniciales(
                         nombre
-                    );
-
-
-                const fechaBloqueo =
-                    obtenerFechaBloqueo(
-                        user
                     );
 
 
@@ -1767,24 +1339,44 @@ function actualizarBloqueados() {
                 div.innerHTML = `
 
                     <div class="avatar red-avatar">
-                        ${escapar(iniciales)}
+
+                        ${escapar(
+                            iniciales
+                        )}
+
                     </div>
+
 
                     <div class="blocked-info">
 
                         <strong>
-                            ${escapar(nombre)}
+
+                            ${escapar(
+                                nombre
+                            )}
+
                         </strong>
 
-                        <small>
-                            ${escapar(area)}
-                        </small>
 
                         <small>
-                            ${fechaBloqueo}
+
+                            ${escapar(
+                                area
+                            )}
+
+                        </small>
+
+
+                        <small>
+
+                            ${escapar(
+                                correo
+                            )}
+
                         </small>
 
                     </div>
+
 
                     <span>
                         Bloqueada
@@ -1804,447 +1396,79 @@ function actualizarBloqueados() {
 
 
 /* ============================================================
-   FECHA DE BLOQUEO
-   ============================================================ */
+   RESUMEN DEL DIRECTORIO
+============================================================ */
 
-function obtenerFechaBloqueo(
-    user
-) {
+function actualizarResumenDirectorio() {
 
-    const nombre =
-        (
-            user.displayName
-            ||
-            ""
-        )
-        .toLowerCase();
+    ponerTexto(
+        "summaryUsers",
+        securityData.users.length
+    );
 
 
-    const correo =
-        (
-            user.userPrincipalName
-            ||
-            ""
-        )
-        .toLowerCase();
+    ponerTexto(
+        "summaryBlocked",
+        securityData.blockedUsers.length
+    );
 
 
-    const eventos =
-        securityData.auditLogs
-            .filter(
-                event => {
+    ponerTexto(
+        "summaryAudit",
+        securityData.auditLogs.length
+    );
 
-                    const activity =
-                        (
-                            event.activityDisplayName
-                            ||
-                            ""
-                        )
-                        .toLowerCase();
 
-
-                    const targets =
-                        event.targetResources
-                        ||
-                        [];
-
-
-                    const coincideUsuario =
-                        targets.some(
-                            target => {
-
-                                const targetName =
-                                    (
-                                        target.userPrincipalName
-                                        ||
-                                        target.displayName
-                                        ||
-                                        ""
-                                    )
-                                    .toLowerCase();
-
-
-                                return (
-
-                                    targetName ===
-                                    correo
-
-                                    ||
-
-                                    targetName ===
-                                    nombre
-
-                                );
-
-                            }
-                        );
-
-
-                    const esRelacionado =
-                        activity.includes(
-                            "disable"
-                        )
-                        ||
-                        activity.includes(
-                            "account"
-                        );
-
-
-                    return (
-
-                        coincideUsuario
-
-                        &&
-
-                        esRelacionado
-
-                    );
-
-                }
-            )
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    new Date(
-                        b.activityDateTime
-                    )
-                    -
-                    new Date(
-                        a.activityDateTime
-                    )
-            );
-
-
-    if (
-        !eventos.length
-    ) {
-
-        return "Fecha no disponible";
-
-    }
-
-
-    return `
-
-        Bloqueada:
-        ${formatearFecha(
-            eventos[0].activityDateTime
-        )}
-
-    `;
-
-}
-
-
-/* ============================================================
-   DISPOSITIVOS
-   ============================================================ */
-
-function actualizarDispositivos() {
-
-    const container =
-        document.querySelector(
-            ".device-list"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        "";
-
-
-    if (
-        securityData.status.devices !==
-        "ok"
-    ) {
-
-        container.innerHTML = `
-
-            <div
-                style="
-                    padding:20px;
-                    text-align:center;
-                    color:#64748b;
-                "
-            >
-
-                Datos de Intune no disponibles.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    if (
-        !securityData.devices.length
-    ) {
-
-        container.innerHTML = `
-
-            <div
-                style="
-                    padding:20px;
-                    text-align:center;
-                    color:#64748b;
-                "
-            >
-
-                No hay dispositivos administrados
-                por Intune.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    securityData.devices
-        .slice(
-            0,
-            30
-        )
-        .forEach(
-            device => {
-
-                const seguro =
-                    esDispositivoSeguro(
-                        device
-                    );
-
-
-                const nombre =
-                    device.deviceName
-                    ||
-                    "Sin nombre";
-
-
-                const sistema =
-                    device.operatingSystem
-                    ||
-                    "Sistema desconocido";
-
-
-                const div =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                div.className =
-                    "device-row";
-
-
-                div.innerHTML = `
-
-                    <div class="device-left">
-
-                        <div class="device-icon">
-
-                            ${
-                                sistema
-                                    .toLowerCase()
-                                    .includes(
-                                        "windows"
-                                    )
-                                    ? "PC"
-                                    : "DV"
-                            }
-
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                ${escapar(nombre)}
-                            </strong>
-
-                            <small>
-                                ${escapar(sistema)}
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="device-status ${
-                            seguro
-                                ? "good"
-                                : "danger"
-                        }"
-                    >
-
-                        ${
-                            seguro
-                                ? "Protegido"
-                                : "Riesgo"
-                        }
-
-                    </span>
-
-                `;
-
-
-                container.appendChild(
-                    div
-                );
-
-            }
-        );
-
-}
-
-
-/* ============================================================
-   ESTADO DEL DISPOSITIVO
-   ============================================================ */
-
-function esDispositivoSeguro(
-    device
-) {
-
-    const estado =
-        (
-            device.complianceState
-            ||
-            ""
-        )
-        .toLowerCase();
-
-
-    return (
-        estado ===
-        "compliant"
+    ponerTexto(
+        "summaryDepartments",
+        securityData.departments.length
     );
 
 }
 
 
 /* ============================================================
-   EVENTOS DE SEGURIDAD
-   ============================================================ */
+   TABLA DE AUDITORÍA
+============================================================ */
 
-function actualizarEventos() {
+function actualizarTablaAuditoria() {
 
-    const container =
-        document.querySelector(
-            ".security-events"
+    const tbody =
+        document.getElementById(
+            "auditTable"
         );
 
 
-    if (!container) {
+    if (!tbody) {
 
         return;
 
     }
 
 
-    container.innerHTML =
+    tbody.innerHTML =
         "";
 
 
-    /*
-     * Sign-ins no disponibles.
-     */
-
     if (
-        securityData.status.signIns !==
-        "ok"
+        !securityData.auditLogs.length
     ) {
 
-        container.innerHTML = `
+        tbody.innerHTML = `
 
-            <div
-                style="
-                    padding:20px;
-                    text-align:center;
-                    color:#64748b;
-                "
-            >
+            <tr>
 
-                Los registros de inicio de sesión
-                no están disponibles.
+                <td
+                    colspan="4"
+                    class="loading-cell"
+                >
 
-                <br><br>
+                    No hay eventos de auditoría
+                    registrados en los últimos 30 días.
 
-                Microsoft Entra ID Premium puede ser
-                necesario para consultar estos datos.
+                </td>
 
-            </div>
-
-        `;
-
-
-        const contador =
-            document.querySelector(
-                ".alert-counter"
-            );
-
-
-        if (contador) {
-
-            contador.textContent =
-                "N/D alertas";
-
-        }
-
-
-        return;
-
-    }
-
-
-    const eventos =
-        analizarEventos();
-
-
-    const contador =
-        document.querySelector(
-            ".alert-counter"
-        );
-
-
-    if (contador) {
-
-        contador.textContent =
-            `${eventos.alertas} alertas`;
-
-    }
-
-
-    if (
-        !eventos.lista.length
-    ) {
-
-        container.innerHTML = `
-
-            <div
-                style="
-                    padding:20px;
-                    text-align:center;
-                    color:#64748b;
-                "
-            >
-
-                No se detectaron eventos sospechosos
-                recientes.
-
-            </div>
+            </tr>
 
         `;
 
@@ -2253,60 +1477,162 @@ function actualizarEventos() {
     }
 
 
-    eventos.lista
+    securityData.auditLogs
         .slice(
             0,
-            20
+            50
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                new Date(
+                    b.activityDateTime
+                )
+                -
+                new Date(
+                    a.activityDateTime
+                )
         )
         .forEach(
             evento => {
 
-                const div =
-                    document.createElement(
-                        "div"
+                const accion =
+                    evento.activityDisplayName
+                    ||
+                    "Actividad desconocida";
+
+
+                const iniciador =
+                    obtenerIniciador(
+                        evento
                     );
 
 
-                div.className =
-                    `security-event ${
-                        evento.nivel ===
-                        "danger"
-                            ? "danger-event"
-                            : "warning-event"
-                    }`;
+                const recurso =
+                    obtenerRecurso(
+                        evento
+                    );
 
 
-                div.innerHTML = `
+                const fecha =
+                    formatearFecha(
+                        evento.activityDateTime
+                    );
 
-                    <div class="event-icon">
-                        !
-                    </div>
 
-                    <div>
+                const icono =
+                    obtenerIconoEvento(
+                        accion
+                    );
 
-                        <strong>
+
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                tr.innerHTML = `
+
+                    <td>
+
+                        <div class="audit-action">
+
+                            <div class="audit-icon">
+
+                                ${icono}
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>
+
+                                    ${escapar(
+                                        accion
+                                    )}
+
+                                </strong>
+
+                                <small>
+
+                                    ${escapar(
+                                        obtenerCategoriaEvento(
+                                            accion
+                                        )
+                                    )}
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="audit-user">
+
+                            <strong>
+
+                                ${escapar(
+                                    iniciador.nombre
+                                )}
+
+                            </strong>
+
+
+                            <small>
+
+                                ${escapar(
+                                    iniciador.correo
+                                )}
+
+                            </small>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <div
+                            class="target-name"
+                            title="${escapar(
+                                recurso
+                            )}"
+                        >
+
                             ${escapar(
-                                evento.titulo
+                                recurso
                             )}
-                        </strong>
 
-                        <small>
-                            ${escapar(
-                                evento.descripcion
-                            )}
-                        </small>
+                        </div>
 
-                    </div>
+                    </td>
 
-                    <span>
-                        ${evento.tiempo}
-                    </span>
+
+                    <td>
+
+                        <div class="audit-date">
+
+                            ${fecha}
+
+                        </div>
+
+                    </td>
 
                 `;
 
 
-                container.appendChild(
-                    div
+                tbody.appendChild(
+                    tr
                 );
 
             }
@@ -2316,152 +1642,68 @@ function actualizarEventos() {
 
 
 /* ============================================================
-   ANALIZAR SIGN-INS
-   ============================================================ */
+   OBTENER INICIADOR
+============================================================ */
 
-function analizarEventos() {
+function obtenerIniciador(
+    evento
+) {
 
-    const lista =
-        [];
-
-
-    securityData.signIns
-        .forEach(
-            signIn => {
-
-                const errorCode =
-                    signIn.status
-                    ?.errorCode;
+    const user =
+        evento.initiatedBy
+        ?.user;
 
 
-                /*
-                 * LOGIN FALLIDO
-                 */
-
-                if (
-                    errorCode
-                    &&
-                    errorCode !== 0
-                ) {
-
-                    lista.push({
-
-                        nivel:
-                            "danger",
-
-                        titulo:
-                            "Inicio de sesión fallido",
-
-                        descripcion:
-                            `${
-                                signIn.userDisplayName
-                                ||
-                                signIn.userPrincipalName
-                                ||
-                                "Usuario desconocido"
-                            } · IP ${
-                                signIn.ipAddress
-                                ||
-                                "desconocida"
-                            }`,
-
-                        fecha:
-                            signIn.createdDateTime,
-
-                        tiempo:
-                            tiempoRelativo(
-                                signIn.createdDateTime
-                            )
-
-                    });
-
-                }
+    const app =
+        evento.initiatedBy
+        ?.app;
 
 
-                /*
-                 * RIESGO DETECTADO
-                 */
+    if (user) {
 
-                if (
-                    signIn.riskDetail
-                    &&
-                    signIn.riskDetail !==
-                    "none"
-                ) {
+        return {
 
-                    lista.push({
+            nombre:
+                user.displayName
+                ||
+                "Usuario",
 
-                        nivel:
-                            "danger",
+            correo:
+                user.userPrincipalName
+                ||
+                "Cuenta Microsoft"
 
-                        titulo:
-                            "Inicio de sesión con riesgo",
+        };
 
-                        descripcion:
-                            `${
-                                signIn.userDisplayName
-                                ||
-                                signIn.userPrincipalName
-                                ||
-                                "Usuario"
-                            } · ${
-                                signIn.riskDetail
-                            }`,
-
-                        fecha:
-                            signIn.createdDateTime,
-
-                        tiempo:
-                            tiempoRelativo(
-                                signIn.createdDateTime
-                            )
-
-                    });
-
-                }
+    }
 
 
-                /*
-                 * UBICACIÓN
-                 */
+    if (app) {
 
-                if (
-                    signIn.location
-                    ?.countryOrRegion
-                ) {
+        return {
 
-                    console.log(
-                        "País del sign-in:",
-                        signIn.location.countryOrRegion
-                    );
+            nombre:
+                app.displayName
+                ||
+                "Aplicación",
 
-                }
+            correo:
+                app.servicePrincipalName
+                ||
+                "Aplicación"
 
-            }
-        );
+        };
 
-
-    lista.sort(
-        (
-            a,
-            b
-        ) =>
-            new Date(
-                b.fecha
-            )
-            -
-            new Date(
-                a.fecha
-            )
-    );
+    }
 
 
     return {
 
-        lista,
+        nombre:
+            "No identificado",
 
-        alertas:
-            lista.length
+        correo:
+            "Sin información"
 
     };
 
@@ -2469,33 +1711,192 @@ function analizarEventos() {
 
 
 /* ============================================================
-   UTILIDADES
-   ============================================================ */
+   OBTENER RECURSO
+============================================================ */
 
-function ponerTexto(
-    id,
-    valor
+function obtenerRecurso(
+    evento
 ) {
 
-    const elemento =
-        document.getElementById(
-            id
+    const recursos =
+        evento.targetResources
+        ||
+        [];
+
+
+    if (!recursos.length) {
+
+        return "Sin recurso especificado";
+
+    }
+
+
+    const nombres =
+        recursos
+            .map(
+                recurso => {
+
+                    return (
+                        recurso.userPrincipalName
+                        ||
+                        recurso.displayName
+                        ||
+                        recurso.groupName
+                        ||
+                        recurso.id
+                        ||
+                        "Recurso"
+                    );
+
+                }
+            )
+            .filter(
+                Boolean
+            );
+
+
+    if (!nombres.length) {
+
+        return "Recurso no identificado";
+
+    }
+
+
+    return nombres.join(
+        ", "
+    );
+
+}
+
+
+/* ============================================================
+   CATEGORÍA DEL EVENTO
+============================================================ */
+
+function obtenerCategoriaEvento(
+    actividad
+) {
+
+    const texto =
+        (
+            actividad
+            ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if (
+        texto.includes("user")
+        ||
+        texto.includes("usuario")
+    ) {
+
+        return "Usuarios";
+
+    }
+
+
+    if (
+        texto.includes("group")
+        ||
+        texto.includes("grupo")
+    ) {
+
+        return "Grupos";
+
+    }
+
+
+    if (
+        texto.includes("application")
+        ||
+        texto.includes("app")
+    ) {
+
+        return "Aplicaciones";
+
+    }
+
+
+    if (
+        texto.includes("role")
+        ||
+        texto.includes("rol")
+    ) {
+
+        return "Roles";
+
+    }
+
+
+    if (
+        texto.includes("policy")
+        ||
+        texto.includes("polic")
+    ) {
+
+        return "Políticas";
+
+    }
+
+
+    return "Otras acciones";
+
+}
+
+
+/* ============================================================
+   ICONO DEL EVENTO
+============================================================ */
+
+function obtenerIconoEvento(
+    actividad
+) {
+
+    const categoria =
+        obtenerCategoriaEvento(
+            actividad
         );
 
 
-    if (elemento) {
+    const iconos = {
 
-        elemento.textContent =
-            valor;
+        "Usuarios":
+            "👤",
 
-    }
+        "Grupos":
+            "👥",
+
+        "Aplicaciones":
+            "▣",
+
+        "Roles":
+            "🔑",
+
+        "Políticas":
+            "⚙",
+
+        "Otras acciones":
+            "📋"
+
+    };
+
+
+    return (
+        iconos[
+            categoria
+        ]
+        ||
+        "📋"
+    );
 
 }
 
 
 /* ============================================================
    INICIALES
-   ============================================================ */
+============================================================ */
 
 function obtenerIniciales(
     nombre
@@ -2529,7 +1930,7 @@ function obtenerIniciales(
 
 /* ============================================================
    FECHA
-   ============================================================ */
+============================================================ */
 
 function formatearFecha(
     fecha
@@ -2542,9 +1943,24 @@ function formatearFecha(
     }
 
 
-    return new Date(
-        fecha
-    ).toLocaleString(
+    const fechaObjeto =
+        new Date(
+            fecha
+        );
+
+
+    if (
+        Number.isNaN(
+            fechaObjeto.getTime()
+        )
+    ) {
+
+        return "Fecha no válida";
+
+    }
+
+
+    return fechaObjeto.toLocaleString(
         "es-PE",
         {
 
@@ -2561,91 +1977,33 @@ function formatearFecha(
 
 
 /* ============================================================
-   TIEMPO RELATIVO
-   ============================================================ */
+   PONER TEXTO
+============================================================ */
 
-function tiempoRelativo(
-    fecha
+function ponerTexto(
+    id,
+    valor
 ) {
 
-    if (!fecha) {
-
-        return "";
-
-    }
-
-
-    const ahora =
-        new Date();
-
-
-    const fechaEvento =
-        new Date(
-            fecha
+    const elemento =
+        document.getElementById(
+            id
         );
 
 
-    const minutos =
-        Math.floor(
+    if (elemento) {
 
-            (
-                ahora
-                -
-                fechaEvento
-            )
-            /
-            60000
-
-        );
-
-
-    if (
-        minutos < 1
-    ) {
-
-        return "Ahora";
+        elemento.textContent =
+            valor;
 
     }
-
-
-    if (
-        minutos < 60
-    ) {
-
-        return `Hace ${minutos} min`;
-
-    }
-
-
-    const horas =
-        Math.floor(
-            minutos / 60
-        );
-
-
-    if (
-        horas < 24
-    ) {
-
-        return `Hace ${horas} h`;
-
-    }
-
-
-    const dias =
-        Math.floor(
-            horas / 24
-        );
-
-
-    return `Hace ${dias} días`;
 
 }
 
 
 /* ============================================================
    ESCAPAR HTML
-   ============================================================ */
+============================================================ */
 
 function escapar(
     valor
@@ -2695,8 +2053,8 @@ function escapar(
 
 
 /* ============================================================
-   ERRORES
-   ============================================================ */
+   ERROR
+============================================================ */
 
 function obtenerMensajeError(
     error
@@ -2716,7 +2074,7 @@ function obtenerMensajeError(
 
         return `
             Microsoft Graph rechazó la solicitud (403).
-            Verifica permisos, roles y licencias del tenant.
+            Verifica los permisos de Microsoft Graph.
         `;
 
     }
@@ -2756,8 +2114,8 @@ function obtenerMensajeError(
 
 
 /* ============================================================
-   MENSAJE DE ERROR
-   ============================================================ */
+   MOSTRAR ERROR
+============================================================ */
 
 function mostrarError(
     mensaje
@@ -2799,34 +2157,17 @@ function mostrarError(
         "security-error";
 
 
-    div.style.cssText = `
-
-        margin-bottom:20px;
-
-        padding:15px 18px;
-
-        border-radius:10px;
-
-        background:#fee2e2;
-
-        border:1px solid #fecaca;
-
-        color:#991b1b;
-
-        font-size:14px;
-
-    `;
-
-
     div.innerHTML = `
 
         <strong>
             Error de seguridad
         </strong>
 
-        <br>
+        <br><br>
 
-        ${escapar(mensaje)}
+        ${escapar(
+            mensaje
+        )}
 
     `;
 
@@ -2840,7 +2181,7 @@ function mostrarError(
 
 /* ============================================================
    ESTADO DE CARGA
-   ============================================================ */
+============================================================ */
 
 function mostrarEstadoCarga(
     mensaje
@@ -2855,7 +2196,7 @@ function mostrarEstadoCarga(
 
 /* ============================================================
    BOTÓN ACTUALIZAR
-   ============================================================ */
+============================================================ */
 
 document.addEventListener(
     "click",
@@ -2908,7 +2249,6 @@ document.addEventListener(
                 )
             );
 
-
         } finally {
 
             button.disabled =
@@ -2922,4 +2262,3 @@ document.addEventListener(
 
     }
 );
-

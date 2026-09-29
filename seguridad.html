@@ -53,7 +53,7 @@
 
 <!-- ==========================================
      BARRA SUPERIOR
-     ========================================== -->
+========================================== -->
 
 <header class="topbar">
 
@@ -86,14 +86,14 @@
 
 <!-- ==========================================
      CONTENEDOR
-     ========================================== -->
+========================================== -->
 
 <div class="container">
 
 
     <!-- ======================================
          MENÚ LATERAL
-         ====================================== -->
+    ====================================== -->
 
     <aside class="sidebar">
 
@@ -161,14 +161,14 @@
 
     <!-- ======================================
          CONTENIDO
-         ====================================== -->
+    ====================================== -->
 
     <main class="content">
 
 
         <!-- ==================================
              ENCABEZADO
-             ================================== -->
+        ================================== -->
 
         <div class="page-header">
 
@@ -179,7 +179,7 @@
                 </h2>
 
                 <p>
-                    Monitoreo y cumplimiento de seguridad de Microsoft 365
+                    Directorio y actividad administrativa de Microsoft 365
                 </p>
 
             </div>
@@ -202,32 +202,19 @@
 
         <!-- ==================================
              ESTADÍSTICAS
-             ================================== -->
+        ================================== -->
 
         <section class="stats">
 
 
             <div class="stat blue">
 
-                <span id="mfaPendiente">
-                    12
+                <span id="totalUsuarios">
+                    —
                 </span>
 
                 <small>
-                    MFA pendiente
-                </small>
-
-            </div>
-
-
-            <div class="stat yellow">
-
-                <span id="usuariosInactivos">
-                    18
-                </span>
-
-                <small>
-                    Usuarios inactivos
+                    Usuarios registrados
                 </small>
 
             </div>
@@ -236,7 +223,7 @@
             <div class="stat red">
 
                 <span id="cuentasBloqueadas">
-                    5
+                    —
                 </span>
 
                 <small>
@@ -246,14 +233,27 @@
             </div>
 
 
-            <div class="stat orange">
+            <div class="stat purple">
 
-                <span id="equiposRiesgo">
-                    4
+                <span id="eventosAuditoria">
+                    —
                 </span>
 
                 <small>
-                    Dispositivos en riesgo
+                    Eventos de auditoría
+                </small>
+
+            </div>
+
+
+            <div class="stat green">
+
+                <span id="totalDepartamentos">
+                    —
+                </span>
+
+                <small>
+                    Departamentos
                 </small>
 
             </div>
@@ -265,14 +265,14 @@
 
         <!-- ==================================
              GRID PRINCIPAL
-             ================================== -->
+        ================================== -->
 
         <section class="dashboard-grid">
 
 
             <!-- ==================================
-                 MFA
-                 ================================== -->
+                 DISTRIBUCIÓN POR DEPARTAMENTO
+            ================================== -->
 
             <div class="dashboard-card">
 
@@ -281,11 +281,11 @@
                     <div>
 
                         <span class="card-label">
-                            AUTENTICACIÓN
+                            DIRECTORIO
                         </span>
 
                         <h3>
-                            Estado de MFA
+                            Usuarios por departamento
                         </h3>
 
                     </div>
@@ -293,61 +293,13 @@
                 </div>
 
 
-                <div class="mfa-container">
+                <div
+                    class="department-list"
+                    id="departmentList"
+                >
 
-
-                    <div class="mfa-circle">
-
-                        <div class="mfa-number">
-                            85%
-                        </div>
-
-                        <div class="mfa-text">
-                            Registrados
-                        </div>
-
-                    </div>
-
-
-                    <div class="mfa-info">
-
-                        <div class="legend-item">
-
-                            <span class="legend green"></span>
-
-                            <div>
-
-                                <strong>
-                                    MFA registrado
-                                </strong>
-
-                                <small>
-                                    85% de usuarios
-                                </small>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="legend-item">
-
-                            <span class="legend red"></span>
-
-                            <div>
-
-                                <strong>
-                                    MFA pendiente
-                                </strong>
-
-                                <small>
-                                    15% de usuarios
-                                </small>
-
-                            </div>
-
-                        </div>
-
+                    <div class="loading">
+                        Cargando información...
                     </div>
 
                 </div>
@@ -357,229 +309,36 @@
 
 
             <!-- ==================================
-                 USUARIOS INACTIVOS
-                 ================================== -->
+                 TIPOS DE AUDITORÍA
+            ================================== -->
 
-            <div class="dashboard-card wide-card">
+            <div class="dashboard-card">
 
                 <div class="card-header">
 
                     <div>
 
                         <span class="card-label">
-                            ACTIVIDAD
+                            AUDITORÍA
                         </span>
 
                         <h3>
-                            Usuarios inactivos
+                            Actividad registrada
                         </h3>
 
                     </div>
 
-
-                    <select
-                        id="inactiveFilter"
-                        class="filter-select"
-                    >
-
-                        <option value="30">
-                            +30 días
-                        </option>
-
-                        <option value="60">
-                            +60 días
-                        </option>
-
-                        <option value="90">
-                            +90 días
-                        </option>
-
-                    </select>
-
                 </div>
 
 
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Usuario
-                                </th>
-
-                                <th>
-                                    Área
-                                </th>
-
-                                <th>
-                                    Último acceso
-                                </th>
-
-                                <th>
-                                    Inactividad
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="inactiveUsersTable">
-
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="user-cell">
-
-                                        <div class="avatar">
-                                            JP
-                                        </div>
-
-                                        <div>
-
-                                            <strong>
-                                                Juan Pérez
-                                            </strong>
-
-                                            <small>
-                                                juan.perez
-                                            </small>
-
-                                        </div>
-
-                                    </div>
-
-                                </td>
-
-
-                                <td>
-                                    Sistemas
-                                </td>
-
-
-                                <td>
-                                    01/09/2026
-                                </td>
-
-
-                                <td>
-
-                                    <span class="badge warning">
-                                        27 días
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="user-cell">
-
-                                        <div class="avatar">
-                                            PL
-                                        </div>
-
-                                        <div>
-
-                                            <strong>
-                                                Pedro López
-                                            </strong>
-
-                                            <small>
-                                                pedro.lopez
-                                            </small>
-
-                                        </div>
-
-                                    </div>
-
-                                </td>
-
-
-                                <td>
-                                    Administración
-                                </td>
-
-
-                                <td>
-                                    15/07/2026
-                                </td>
-
-
-                                <td>
-
-                                    <span class="badge danger">
-                                        75 días
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="user-cell">
-
-                                        <div class="avatar">
-                                            MR
-                                        </div>
-
-                                        <div>
-
-                                            <strong>
-                                                María Ramos
-                                            </strong>
-
-                                            <small>
-                                                maria.ramos
-                                            </small>
-
-                                        </div>
-
-                                    </div>
-
-                                </td>
-
-
-                                <td>
-                                    Finanzas
-                                </td>
-
-
-                                <td>
-                                    03/06/2026
-                                </td>
-
-
-                                <td>
-
-                                    <span class="badge danger">
-                                        117 días
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-
-                        </tbody>
-
-                    </table>
+                <div
+                    class="audit-summary"
+                    id="auditSummary"
+                >
+
+                    <div class="loading">
+                        Cargando información...
+                    </div>
 
                 </div>
 
@@ -589,7 +348,7 @@
 
             <!-- ==================================
                  CUENTAS BLOQUEADAS
-                 ================================== -->
+            ================================== -->
 
             <div class="dashboard-card">
 
@@ -607,92 +366,25 @@
 
                     </div>
 
-                    <span class="counter">
-                        5
+
+                    <span
+                        class="counter"
+                        id="blockedCounter"
+                    >
+                        —
                     </span>
 
                 </div>
 
 
-                <div class="blocked-list">
+                <div
+                    class="blocked-list"
+                    id="blockedList"
+                >
 
-
-                    <div class="blocked-user">
-
-                        <div class="avatar red-avatar">
-                            AC
-                        </div>
-
-                        <div class="blocked-info">
-
-                            <strong>
-                                Ana Castillo
-                            </strong>
-
-                            <small>
-                                Administración
-                            </small>
-
-                        </div>
-
-                        <span>
-                            Bloqueada
-                        </span>
-
+                    <div class="loading">
+                        Cargando información...
                     </div>
-
-
-
-                    <div class="blocked-user">
-
-                        <div class="avatar red-avatar">
-                            RM
-                        </div>
-
-                        <div class="blocked-info">
-
-                            <strong>
-                                Roberto Medina
-                            </strong>
-
-                            <small>
-                                Operaciones
-                            </small>
-
-                        </div>
-
-                        <span>
-                            Bloqueada
-                        </span>
-
-                    </div>
-
-
-
-                    <div class="blocked-user">
-
-                        <div class="avatar red-avatar">
-                            LC
-                        </div>
-
-                        <div class="blocked-info">
-
-                            <strong>
-                                Luis Chávez
-                            </strong>
-
-                            <small>
-                                TI
-                            </small>
-
-                        </div>
-
-                        <span>
-                            Bloqueada
-                        </span>
-
-                    </div>
-
 
                 </div>
 
@@ -701,8 +393,8 @@
 
 
             <!-- ==================================
-                 EQUIPOS
-                 ================================== -->
+                 INFORMACIÓN DEL DIRECTORIO
+            ================================== -->
 
             <div class="dashboard-card">
 
@@ -711,11 +403,11 @@
                     <div>
 
                         <span class="card-label">
-                            DISPOSITIVOS
+                            DIRECTORIO
                         </span>
 
                         <h3>
-                            Estado de equipos
+                            Resumen de usuarios
                         </h3>
 
                     </div>
@@ -723,97 +415,89 @@
                 </div>
 
 
-                <div class="device-list">
+                <div class="directory-summary">
 
 
-                    <div class="device-row">
+                    <div class="summary-row">
 
-                        <div class="device-left">
-
-                            <div class="device-icon">
-                                PC
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    PC001
-                                </strong>
-
-                                <small>
-                                    Windows 11
-                                </small>
-
-                            </div>
-
+                        <div class="summary-icon blue-icon">
+                            👥
                         </div>
 
+                        <div>
 
-                        <span class="device-status good">
-                            Protegido
-                        </span>
+                            <strong id="summaryUsers">
+                                —
+                            </strong>
+
+                            <small>
+                                Usuarios registrados
+                            </small>
+
+                        </div>
 
                     </div>
 
 
+                    <div class="summary-row">
 
-                    <div class="device-row">
-
-                        <div class="device-left">
-
-                            <div class="device-icon">
-                                PC
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    PC002
-                                </strong>
-
-                                <small>
-                                    Windows 11
-                                </small>
-
-                            </div>
-
+                        <div class="summary-icon red-icon">
+                            🔒
                         </div>
 
+                        <div>
 
-                        <span class="device-status warning">
-                            Actualización pendiente
-                        </span>
+                            <strong id="summaryBlocked">
+                                —
+                            </strong>
+
+                            <small>
+                                Cuentas deshabilitadas
+                            </small>
+
+                        </div>
 
                     </div>
 
 
+                    <div class="summary-row">
 
-                    <div class="device-row">
+                        <div class="summary-icon purple-icon">
+                            📋
+                        </div>
 
-                        <div class="device-left">
+                        <div>
 
-                            <div class="device-icon">
-                                LT
-                            </div>
+                            <strong id="summaryAudit">
+                                —
+                            </strong>
 
-                            <div>
-
-                                <strong>
-                                    LAPTOP-07
-                                </strong>
-
-                                <small>
-                                    Windows 10
-                                </small>
-
-                            </div>
+                            <small>
+                                Eventos últimos 30 días
+                            </small>
 
                         </div>
 
+                    </div>
 
-                        <span class="device-status danger">
-                            Riesgo
-                        </span>
+
+                    <div class="summary-row">
+
+                        <div class="summary-icon green-icon">
+                            🏢
+                        </div>
+
+                        <div>
+
+                            <strong id="summaryDepartments">
+                                —
+                            </strong>
+
+                            <small>
+                                Departamentos identificados
+                            </small>
+
+                        </div>
 
                     </div>
 
@@ -825,8 +509,8 @@
 
 
             <!-- ==================================
-                 ALERTAS
-                 ================================== -->
+                 ACTIVIDAD DE AUDITORÍA
+            ================================== -->
 
             <div class="dashboard-card wide-card">
 
@@ -839,72 +523,101 @@
                         </span>
 
                         <h3>
-                            Eventos de seguridad
+                            Actividad reciente
                         </h3>
 
                     </div>
 
 
-                    <span class="counter alert-counter">
-                        2 alertas
+                    <span
+                        class="counter audit-counter"
+                        id="auditCounter"
+                    >
+                        —
                     </span>
 
                 </div>
 
 
-                <div class="security-events">
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                                <th>
+                                    Realizado por
+                                </th>
+
+                                <th>
+                                    Recurso afectado
+                                </th>
+
+                                <th>
+                                    Fecha
+                                </th>
+
+                            </tr>
+
+                        </thead>
 
 
-                    <div class="security-event danger-event">
+                        <tbody id="auditTable">
 
-                        <div class="event-icon">
-                            !
-                        </div>
+                            <tr>
 
-                        <div>
+                                <td
+                                    colspan="4"
+                                    class="loading-cell"
+                                >
+                                    Cargando eventos...
+                                </td>
 
-                            <strong>
-                                Inicio de sesión inusual
-                            </strong>
+                            </tr>
 
-                            <small>
-                                Usuario: administrador · Ubicación no habitual
-                            </small>
+                        </tbody>
 
-                        </div>
+                    </table>
 
-                        <span>
-                            Hace 8 min
-                        </span>
+                </div>
 
+            </div>
+
+
+
+            <!-- ==================================
+                 INFORMACIÓN
+            ================================== -->
+
+            <div class="dashboard-card wide-card">
+
+                <div class="information-box">
+
+                    <div class="information-icon">
+                        ✓
                     </div>
 
 
+                    <div>
 
-                    <div class="security-event warning-event">
+                        <strong>
+                            Datos disponibles
+                        </strong>
 
-                        <div class="event-icon">
-                            !
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Múltiples intentos fallidos
-                            </strong>
-
-                            <small>
-                                25 intentos detectados en 2 minutos
-                            </small>
-
-                        </div>
-
-                        <span>
-                            Hace 21 min
-                        </span>
+                        <p>
+                            Este panel utiliza información disponible
+                            directamente desde Microsoft Graph. La
+                            auditoría muestra actividad del directorio
+                            registrada durante los últimos 30 días.
+                        </p>
 
                     </div>
-
 
                 </div>
 
@@ -931,8 +644,17 @@
 
 
 
-<script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-<script src="seguridad.js"></script>
+<!-- ==========================================
+     SCRIPTS
+========================================== -->
+
+<script
+    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+></script>
+
+<script
+    src="seguridad.js"
+></script>
 
 
 </body>

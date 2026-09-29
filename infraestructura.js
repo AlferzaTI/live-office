@@ -18,7 +18,7 @@ const msalConfigInfraestructura = {
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
-            "https://alferzati.github.io/live-office/blank.html"
+            "https://AlferzaTI.github.io/live-office/blank.html"
 
     },
 
@@ -38,6 +38,23 @@ const msalConfigInfraestructura = {
 /* =========================================
    INSTANCIA MSAL
 ========================================= */
+
+if (
+    typeof msal === "undefined"
+) {
+
+    console.error(
+        "❌ MSAL no está disponible."
+    );
+
+} else {
+
+    console.log(
+        "✅ MSAL disponible en Infraestructura."
+    );
+
+}
+
 
 const msalInstanceInfraestructura =
     new msal.PublicClientApplication(
@@ -60,17 +77,115 @@ const SHAREPOINT_LIST =
 
 
 /* =========================================
+   ELEMENTOS
+========================================= */
+
+const loadingOverlay =
+    document.getElementById(
+        "loadingOverlay"
+    );
+
+
+const loadingMessage =
+    document.getElementById(
+        "loadingMessage"
+    );
+
+
+/* =========================================
+   MENSAJE DE CARGA
+========================================= */
+
+function cambiarMensaje(
+    mensaje
+) {
+
+    if (
+        loadingMessage
+    ) {
+
+        loadingMessage.textContent =
+            mensaje;
+
+    }
+
+}
+
+
+/* =========================================
+   MOSTRAR CARGA
+========================================= */
+
+function mostrarCarga(
+    mensaje
+) {
+
+    cambiarMensaje(
+        mensaje
+    );
+
+
+    if (
+        loadingOverlay
+    ) {
+
+        loadingOverlay.classList.remove(
+            "hidden"
+        );
+
+        loadingOverlay.classList.remove(
+            "oculto"
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   OCULTAR CARGA
+========================================= */
+
+function ocultarCarga() {
+
+    if (
+        loadingOverlay
+    ) {
+
+        loadingOverlay.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================
    OBTENER TOKEN
 ========================================= */
 
 async function obtenerTokenInfraestructura() {
+
+    console.log(
+        "🔐 Buscando sesión Microsoft..."
+    );
+
 
     const cuentas =
         msalInstanceInfraestructura
             .getAllAccounts();
 
 
-    if (!cuentas.length) {
+    console.log(
+        "Cuentas encontradas:",
+        cuentas.length
+    );
+
+
+    if (
+        !cuentas.length
+    ) {
 
         throw new Error(
             "No se encontró una cuenta Microsoft activa."
@@ -84,10 +199,23 @@ async function obtenerTokenInfraestructura() {
 
 
     msalInstanceInfraestructura
-        .setActiveAccount(cuenta);
+        .setActiveAccount(
+            cuenta
+        );
+
+
+    console.log(
+        "👤 Cuenta activa:",
+        cuenta.username
+    );
 
 
     try {
+
+        cambiarMensaje(
+            "Verificando permisos..."
+        );
+
 
         const respuesta =
             await msalInstanceInfraestructura
@@ -101,13 +229,14 @@ async function obtenerTokenInfraestructura() {
 
                     ],
 
-                    account: cuenta
+                    account:
+                        cuenta
 
                 });
 
 
         console.log(
-            "✅ Token obtenido correctamente"
+            "✅ Token obtenido correctamente."
         );
 
 
@@ -115,10 +244,12 @@ async function obtenerTokenInfraestructura() {
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
-            "❌ Error obteniendo token:",
+            "❌ Error obteniendo token silenciosamente:",
             error
         );
 
@@ -137,6 +268,11 @@ async function obtenerSitioSharePoint(
     TOKEN
 ) {
 
+    console.log(
+        "🔎 Buscando sitio SharePoint..."
+    );
+
+
     const respuesta =
         await fetch(
 
@@ -144,7 +280,8 @@ async function obtenerSitioSharePoint(
 
             {
 
-                method: "GET",
+                method:
+                    "GET",
 
                 headers: {
 
@@ -158,7 +295,9 @@ async function obtenerSitioSharePoint(
         );
 
 
-    if (!respuesta.ok) {
+    if (
+        !respuesta.ok
+    ) {
 
         const error =
             await respuesta.text();
@@ -201,21 +340,39 @@ async function obtenerMonitoreoTI() {
     try {
 
         console.log(
-            "🔄 Conectando con Microsoft Graph..."
+            "===================================="
+        );
+
+        console.log(
+            "🚀 INICIANDO MONITOREO TI"
+        );
+
+        console.log(
+            "===================================="
         );
 
 
-        /*
-         * TOKEN
-         */
+        cambiarMensaje(
+            "Conectando con Microsoft..."
+        );
+
+
+        /* ================================
+           TOKEN
+        ================================= */
 
         const TOKEN =
             await obtenerTokenInfraestructura();
 
 
-        /*
-         * SITIO
-         */
+        /* ================================
+           SITIO
+        ================================= */
+
+        cambiarMensaje(
+            "Conectando con SharePoint..."
+        );
+
 
         const sitio =
             await obtenerSitioSharePoint(
@@ -223,9 +380,14 @@ async function obtenerMonitoreoTI() {
             );
 
 
-        /*
-         * LISTA
-         */
+        /* ================================
+           LISTA
+        ================================= */
+
+        cambiarMensaje(
+            "Consultando Monitoreo TI..."
+        );
+
 
         const respuesta =
             await fetch(
@@ -234,7 +396,8 @@ async function obtenerMonitoreoTI() {
 
                 {
 
-                    method: "GET",
+                    method:
+                        "GET",
 
                     headers: {
 
@@ -248,7 +411,9 @@ async function obtenerMonitoreoTI() {
             );
 
 
-        if (!respuesta.ok) {
+        if (
+            !respuesta.ok
+        ) {
 
             const error =
                 await respuesta.text();
@@ -289,11 +454,13 @@ async function obtenerMonitoreoTI() {
         );
 
 
-        return data.value;
+        return data.value || [];
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "❌ Error obteniendo Monitoreo TI:",
@@ -301,7 +468,7 @@ async function obtenerMonitoreoTI() {
         );
 
 
-        return [];
+        throw error;
 
     }
 
@@ -309,26 +476,686 @@ async function obtenerMonitoreoTI() {
 
 
 /* =========================================
-   INICIAR MONITOREO
+   OBTENER CAMPOS
 ========================================= */
 
-async function iniciarMonitoreo() {
+function obtenerCampos(
+    item
+) {
 
-    console.log(
-        "🚀 Iniciando Centro de Monitoreo TI..."
-    );
-
-
-    const datos =
-        await obtenerMonitoreoTI();
-
-
-    console.log(
-        "Monitoreo TI cargado:",
-        datos
+    return (
+        item.fields || {}
     );
 
 }
 
 
-iniciarMonitoreo();
+/* =========================================
+   NORMALIZAR ESTADO
+========================================= */
+
+function normalizarEstado(
+    estado
+) {
+
+    if (
+        !estado
+    ) {
+
+        return "No configurado";
+
+    }
+
+
+    return String(
+        estado
+    ).trim();
+
+}
+
+
+/* =========================================
+   CLASIFICAR ESTADO
+========================================= */
+
+function clasificarEstado(
+    estado
+) {
+
+    const valor =
+        normalizarEstado(
+            estado
+        ).toLowerCase();
+
+
+    if (
+        valor.includes("operativo") ||
+        valor.includes("vigente") ||
+        valor.includes("activo") ||
+        valor.includes("responde")
+    ) {
+
+        return "online";
+
+    }
+
+
+    if (
+        valor.includes("advertencia") ||
+        valor.includes("warning") ||
+        valor.includes("pendiente")
+    ) {
+
+        return "warning";
+
+    }
+
+
+    if (
+        valor.includes("incidencia") ||
+        valor.includes("error") ||
+        valor.includes("caído") ||
+        valor.includes("caido")
+    ) {
+
+        return "offline";
+
+    }
+
+
+    return "neutral";
+
+}
+
+
+/* =========================================
+   ICONO DEL SERVICIO
+========================================= */
+
+function obtenerIconoServicio(
+    servicio
+) {
+
+    const nombre =
+        String(
+            servicio
+        ).toLowerCase();
+
+
+    if (
+        nombre.includes("internet")
+    ) {
+
+        return "🌐";
+
+    }
+
+
+    if (
+        nombre.includes("microsoft")
+    ) {
+
+        return "☁️";
+
+    }
+
+
+    if (
+        nombre.includes("certificado")
+    ) {
+
+        return "🔒";
+
+    }
+
+
+    if (
+        nombre.includes("servidor")
+    ) {
+
+        return "🖥️";
+
+    }
+
+
+    if (
+        nombre.includes("dns")
+    ) {
+
+        return "🔎";
+
+    }
+
+
+    return "⚙️";
+
+}
+
+
+/* =========================================
+   RENDERIZAR SERVICIOS PRINCIPALES
+========================================= */
+
+function renderizarServicios(
+    datos
+) {
+
+    const contenedor =
+        document.getElementById(
+            "serviciosGrid"
+        );
+
+
+    if (
+        !contenedor
+    ) return;
+
+
+    contenedor.innerHTML = "";
+
+
+    if (
+        !datos.length
+    ) {
+
+        contenedor.innerHTML = `
+
+            <div class="service-card">
+
+                <div class="service-top">
+
+                    <div class="service-icon">
+                        ⚙️
+                    </div>
+
+                    <span class="status-badge">
+                        Sin datos
+                    </span>
+
+                </div>
+
+                <h4>
+                    Monitoreo TI
+                </h4>
+
+                <p>
+                    No existen registros configurados en SharePoint.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    datos.forEach(
+        item => {
+
+            const fields =
+                obtenerCampos(
+                    item
+                );
+
+
+            const servicio =
+                fields.Servicio ||
+                fields.Title ||
+                "Servicio";
+
+
+            const estado =
+                normalizarEstado(
+                    fields.Estado
+                );
+
+
+            const detalle =
+                fields.Detalle ||
+                "Sin detalle disponible";
+
+
+            const latencia =
+                fields.Latencia;
+
+
+            const clase =
+                clasificarEstado(
+                    estado
+                );
+
+
+            let datoTexto =
+                "Sin dato";
+
+
+            if (
+                latencia !== undefined &&
+                latencia !== null &&
+                latencia !== ""
+            ) {
+
+                datoTexto =
+                    `${latencia} ms`;
+
+            }
+
+
+            contenedor.innerHTML += `
+
+                <div class="service-card">
+
+                    <div class="service-top">
+
+                        <div class="service-icon">
+                            ${obtenerIconoServicio(servicio)}
+                        </div>
+
+                        <span class="status-badge ${clase}">
+                            ${estado}
+                        </span>
+
+                    </div>
+
+                    <h4>
+                        ${servicio}
+                    </h4>
+
+                    <p>
+                        ${detalle}
+                    </p>
+
+                    <div class="service-data">
+
+                        <span>
+                            Latencia
+                        </span>
+
+                        <strong>
+                            ${datoTexto}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ACTUALIZAR RESUMEN
+========================================= */
+
+function actualizarResumen(
+    datos
+) {
+
+    let activos =
+        0;
+
+    let advertencias =
+        0;
+
+    let incidencias =
+        0;
+
+
+    datos.forEach(
+        item => {
+
+            const fields =
+                obtenerCampos(
+                    item
+                );
+
+
+            const estado =
+                clasificarEstado(
+                    fields.Estado
+                );
+
+
+            if (
+                estado === "online"
+            ) {
+
+                activos++;
+
+            }
+
+            else if (
+                estado === "warning"
+            ) {
+
+                advertencias++;
+
+            }
+
+            else if (
+                estado === "offline"
+            ) {
+
+                incidencias++;
+
+            }
+
+        }
+    );
+
+
+    const activosElemento =
+        document.getElementById(
+            "serviciosActivos"
+        );
+
+
+    const advertenciasElemento =
+        document.getElementById(
+            "advertencias"
+        );
+
+
+    const incidenciasElemento =
+        document.getElementById(
+            "incidencias"
+        );
+
+
+    if (
+        activosElemento
+    ) {
+
+        activosElemento.textContent =
+            activos;
+
+    }
+
+
+    if (
+        advertenciasElemento
+    ) {
+
+        advertenciasElemento.textContent =
+            advertencias;
+
+    }
+
+
+    if (
+        incidenciasElemento
+    ) {
+
+        incidenciasElemento.textContent =
+            incidencias;
+
+    }
+
+}
+
+
+/* =========================================
+   ACTUALIZAR ESTADO GENERAL
+========================================= */
+
+function actualizarEstadoGeneral(
+    datos
+) {
+
+    const elemento =
+        document.getElementById(
+            "estadoGeneral"
+        );
+
+
+    if (
+        !elemento
+    ) return;
+
+
+    const tieneIncidencias =
+        datos.some(
+            item =>
+                clasificarEstado(
+                    obtenerCampos(item).Estado
+                ) === "offline"
+        );
+
+
+    const tieneAdvertencias =
+        datos.some(
+            item =>
+                clasificarEstado(
+                    obtenerCampos(item).Estado
+                ) === "warning"
+        );
+
+
+    if (
+        tieneIncidencias
+    ) {
+
+        elemento.textContent =
+            "● INCIDENCIA";
+
+        elemento.className =
+            "section-status offline";
+
+    }
+
+    else if (
+        tieneAdvertencias
+    ) {
+
+        elemento.textContent =
+            "● ADVERTENCIA";
+
+        elemento.className =
+            "section-status warning";
+
+    }
+
+    else if (
+        datos.length
+    ) {
+
+        elemento.textContent =
+            "● OPERATIVO";
+
+        elemento.className =
+            "section-status online";
+
+    }
+
+    else {
+
+        elemento.textContent =
+            "● SIN DATOS";
+
+        elemento.className =
+            "section-status";
+
+    }
+
+}
+
+
+/* =========================================
+   ACTUALIZAR HORA
+========================================= */
+
+function actualizarHora() {
+
+    const elemento =
+        document.getElementById(
+            "lastUpdate"
+        );
+
+
+    if (
+        !elemento
+    ) return;
+
+
+    const ahora =
+        new Date();
+
+
+    elemento.textContent =
+        ahora.toLocaleTimeString(
+            "es-PE",
+            {
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit"
+
+            }
+        );
+
+}
+
+
+/* =========================================
+   CARGAR MONITOREO
+========================================= */
+
+async function cargarMonitoreo() {
+
+    try {
+
+        mostrarCarga(
+            "Cargando monitoreo..."
+        );
+
+
+        const datos =
+            await obtenerMonitoreoTI();
+
+
+        renderizarServicios(
+            datos
+        );
+
+
+        actualizarResumen(
+            datos
+        );
+
+
+        actualizarEstadoGeneral(
+            datos
+        );
+
+
+        actualizarHora();
+
+
+        console.log(
+            "✅ Centro de Monitoreo TI actualizado."
+        );
+
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ No se pudo cargar el monitoreo:",
+            error
+        );
+
+
+        const elemento =
+            document.getElementById(
+                "estadoGeneral"
+            );
+
+
+        if (
+            elemento
+        ) {
+
+            elemento.textContent =
+                "● ERROR DE CONEXIÓN";
+
+            elemento.className =
+                "section-status offline";
+
+        }
+
+
+        const estadoMonitoreo =
+            document.getElementById(
+                "estadoMonitoreo"
+            );
+
+
+        if (
+            estadoMonitoreo
+        ) {
+
+            estadoMonitoreo.textContent =
+                "Error";
+
+        }
+
+    }
+
+    finally {
+
+        setTimeout(
+            ocultarCarga,
+            500
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   INICIO
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        console.log(
+            "🚀 Iniciando Centro de Monitoreo TI..."
+        );
+
+
+        cargarMonitoreo();
+
+    }
+);
+
+
+/* =========================================
+   ACTUALIZACIÓN
+   CADA 5 MINUTOS
+========================================= */
+
+setInterval(
+    function () {
+
+        cargarMonitoreo();
+
+    },
+    300000
+);

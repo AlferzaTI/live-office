@@ -63,7 +63,7 @@
             ⚙️
         </div>
 
-        <p>
+        <p id="loadingMessage">
             Cargando monitoreo...
         </p>
 
@@ -163,9 +163,7 @@
             </li>
 
 
-            <li
-                class="active"
-            >
+            <li class="active">
                 🖥️ Monitoreo TI
             </li>
 
@@ -229,7 +227,7 @@
                     </small>
 
                     <strong id="lastUpdate">
-                        Hace unos segundos
+                        --
                     </strong>
 
                 </div>
@@ -258,8 +256,8 @@
                         Servicios activos
                     </span>
 
-                    <strong>
-                        8
+                    <strong id="serviciosActivos">
+                        0
                     </strong>
 
                 </div>
@@ -279,8 +277,8 @@
                         Advertencias
                     </span>
 
-                    <strong>
-                        1
+                    <strong id="advertencias">
+                        0
                     </strong>
 
                 </div>
@@ -300,7 +298,7 @@
                         Incidencias
                     </span>
 
-                    <strong>
+                    <strong id="incidencias">
                         0
                     </strong>
 
@@ -321,7 +319,7 @@
                         Monitoreo
                     </span>
 
-                    <strong>
+                    <strong id="estadoMonitoreo">
                         Activo
                     </strong>
 
@@ -333,7 +331,7 @@
 
 
         <!-- ==================================
-             CONECTIVIDAD
+             SERVICIOS MONITOREADOS
              ================================== -->
 
         <section class="monitor-section">
@@ -343,187 +341,34 @@
                 <div>
 
                     <span class="section-label">
-                        CONECTIVIDAD
+                        SERVICIOS
                     </span>
 
                     <h3>
-                        Internet y servicios externos
+                        Estado de infraestructura
                     </h3>
 
                 </div>
 
-                <span class="section-status online">
-                    ● OPERATIVO
+                <span
+                    id="estadoGeneral"
+                    class="section-status online"
+                >
+                    ● CONSULTANDO
                 </span>
 
             </div>
 
 
-            <div class="service-grid">
-
-
-                <!-- INTERNET PRINCIPAL -->
-
-                <div class="service-card">
-
-                    <div class="service-top">
-
-                        <div class="service-icon">
-                            🌐
-                        </div>
-
-                        <span class="status-badge online">
-                            Activo
-                        </span>
-
-                    </div>
-
-
-                    <h4>
-                        Internet Principal
-                    </h4>
-
-                    <p>
-                        Conectividad principal de la oficina
-                    </p>
-
-
-                    <div class="service-data">
-
-                        <span>
-                            Latencia
-                        </span>
-
-                        <strong>
-                            12 ms
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <!-- INTERNET RESPALDO -->
-
-                <div class="service-card">
-
-                    <div class="service-top">
-
-                        <div class="service-icon">
-                            📡
-                        </div>
-
-                        <span class="status-badge online">
-                            Activo
-                        </span>
-
-                    </div>
-
-
-                    <h4>
-                        Internet Respaldo
-                    </h4>
-
-                    <p>
-                        Conexión secundaria de emergencia
-                    </p>
-
-
-                    <div class="service-data">
-
-                        <span>
-                            Latencia
-                        </span>
-
-                        <strong>
-                            18 ms
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <!-- GOOGLE DNS -->
-
-                <div class="service-card">
-
-                    <div class="service-top">
-
-                        <div class="service-icon">
-                            🔎
-                        </div>
-
-                        <span class="status-badge online">
-                            Responde
-                        </span>
-
-                    </div>
-
-
-                    <h4>
-                        Google DNS
-                    </h4>
-
-                    <p>
-                        Resolución DNS externa
-                    </p>
-
-
-                    <div class="service-data">
-
-                        <span>
-                            Respuesta
-                        </span>
-
-                        <strong>
-                            8 ms
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <!-- MICROSOFT -->
-
-                <div class="service-card">
-
-                    <div class="service-top">
-
-                        <div class="service-icon">
-                            Microsoft
-                        </div>
-
-                        <span class="status-badge online">
-                            Responde
-                        </span>
-
-                    </div>
-
-
-                    <h4>
-                        Microsoft 365
-                    </h4>
-
-                    <p>
-                        Conectividad con servicios Microsoft
-                    </p>
-
-
-                    <div class="service-data">
-
-                        <span>
-                            Estado
-                        </span>
-
-                        <strong>
-                            Operativo
-                        </strong>
-
-                    </div>
-
-                </div>
+            <div
+                id="serviciosGrid"
+                class="service-grid"
+            >
+
+                <!--
+                    Los servicios se generan
+                    dinámicamente desde SharePoint.
+                -->
 
             </div>
 
@@ -550,134 +395,25 @@
 
                 </div>
 
-                <span class="section-status online">
-                    ● OPERATIVO
+                <span
+                    id="microsoftEstado"
+                    class="section-status online"
+                >
+                    ● CONSULTANDO
                 </span>
 
             </div>
 
 
-            <div class="service-list">
+            <div
+                id="microsoftServicios"
+                class="service-list"
+            >
 
-
-                <div class="service-row">
-
-                    <div class="service-name">
-
-                        <div class="mini-icon teams">
-                            T
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Microsoft Teams
-                            </strong>
-
-                            <span>
-                                Comunicación y presencia
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <span class="row-status online">
-                        ● Operativo
-                    </span>
-
-                </div>
-
-
-                <div class="service-row">
-
-                    <div class="service-name">
-
-                        <div class="mini-icon exchange">
-                            E
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                Exchange Online
-                            </strong>
-
-                            <span>
-                                Correo electrónico
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <span class="row-status online">
-                        ● Operativo
-                    </span>
-
-                </div>
-
-
-                <div class="service-row">
-
-                    <div class="service-name">
-
-                        <div class="mini-icon sharepoint">
-                            S
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                SharePoint
-                            </strong>
-
-                            <span>
-                                Documentos y sitios
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <span class="row-status online">
-                        ● Operativo
-                    </span>
-
-                </div>
-
-
-                <div class="service-row">
-
-                    <div class="service-name">
-
-                        <div class="mini-icon onedrive">
-                            O
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                OneDrive
-                            </strong>
-
-                            <span>
-                                Almacenamiento empresarial
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <span class="row-status online">
-                        ● Operativo
-                    </span>
-
-                </div>
+                <!--
+                    Se genera desde los datos
+                    almacenados en SharePoint.
+                -->
 
             </div>
 
@@ -704,99 +440,23 @@
 
                 </div>
 
-                <span class="section-status warning">
-                    ● 1 ADVERTENCIA
+                <span
+                    id="certificadosEstado"
+                    class="section-status online"
+                >
+                    ● CONSULTANDO
                 </span>
 
             </div>
 
 
-            <div class="certificate-card">
+            <div
+                id="certificadosContainer"
+            >
 
-                <div class="certificate-info">
-
-                    <div class="certificate-icon">
-                        🔒
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            portal.alferza.com
-                        </strong>
-
-                        <span>
-                            Certificado SSL / TLS
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="certificate-date">
-
-                    <span>
-                        Vencimiento
-                    </span>
-
-                    <strong>
-                        15 días
-                    </strong>
-
-                </div>
-
-
-                <div class="certificate-status warning">
-
-                    ⚠️ Advertencia
-
-                </div>
-
-            </div>
-
-
-            <div class="certificate-card">
-
-                <div class="certificate-info">
-
-                    <div class="certificate-icon">
-                        🔒
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            www.alferza.com
-                        </strong>
-
-                        <span>
-                            Certificado SSL / TLS
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="certificate-date">
-
-                    <span>
-                        Vencimiento
-                    </span>
-
-                    <strong>
-                        142 días
-                    </strong>
-
-                </div>
-
-
-                <div class="certificate-status online">
-
-                    ✓ Vigente
-
-                </div>
+                <!--
+                    Se genera desde SharePoint.
+                -->
 
             </div>
 
@@ -823,204 +483,25 @@
 
                 </div>
 
-                <span class="section-status online">
-                    ● 2 OPERATIVOS
+                <span
+                    id="servidoresEstado"
+                    class="section-status"
+                >
+                    ● NO CONFIGURADO
                 </span>
 
             </div>
 
 
-            <div class="server-grid">
-
-
-                <div class="server-card">
-
-                    <div class="server-header">
-
-                        <div>
-
-                            <span class="server-type">
-                                WINDOWS SERVER
-                            </span>
-
-                            <h4>
-                                SERVIDOR ERP
-                            </h4>
-
-                        </div>
-
-                        <span class="status-badge online">
-                            Operativo
-                        </span>
-
-                    </div>
-
-
-                    <div class="server-metrics">
-
-                        <div>
-
-                            <span>
-                                CPU
-                            </span>
-
-                            <strong>
-                                25%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:25%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                RAM
-                            </span>
-
-                            <strong>
-                                68%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:68%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                DISCO
-                            </span>
-
-                            <strong>
-                                54%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:54%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="server-card">
-
-                    <div class="server-header">
-
-                        <div>
-
-                            <span class="server-type">
-                                WINDOWS SERVER
-                            </span>
-
-                            <h4>
-                                SERVIDOR BD
-                            </h4>
-
-                        </div>
-
-                        <span class="status-badge online">
-                            Operativo
-                        </span>
-
-                    </div>
-
-
-                    <div class="server-metrics">
-
-                        <div>
-
-                            <span>
-                                CPU
-                            </span>
-
-                            <strong>
-                                31%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:31%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                RAM
-                            </span>
-
-                            <strong>
-                                72%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:72%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                DISCO
-                            </span>
-
-                            <strong>
-                                61%
-                            </strong>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:61%"
-                                ></div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+            <div
+                id="servidoresContainer"
+                class="server-grid"
+            >
+
+                <!--
+                    Se generará cuando existan
+                    servidores registrados.
+                -->
 
             </div>
 
@@ -1044,96 +525,24 @@
 
 
 <!-- ==========================================
-     SCRIPT DE LA PÁGINA
-     ========================================== -->
-
-<script>
-
-    /*
-     * Ocultar pantalla de carga
-     */
-
-    window.addEventListener(
-        "load",
-        function () {
-
-            setTimeout(
-                function () {
-
-                    const overlay =
-                        document.getElementById(
-                            "loadingOverlay"
-                        );
-
-                    if (overlay) {
-
-                        overlay.classList.add(
-                            "hidden"
-                        );
-
-                    }
-
-                },
-                700
-            );
-
-        }
-    );
-
-
-    /*
-     * Actualizar hora
-     */
-
-    function actualizarHora() {
-
-        const elemento =
-            document.getElementById(
-                "lastUpdate"
-            );
-
-        if (!elemento) return;
-
-
-        const ahora =
-            new Date();
-
-
-        elemento.textContent =
-            ahora.toLocaleTimeString(
-                "es-PE",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                }
-            );
-
-    }
-
-
-    actualizarHora();
-
-
-    setInterval(
-        actualizarHora,
-        60000
-    );
-
-</script>
-
-
-<!-- ==========================================
      MICROSOFT MSAL
+     MISMA VERSIÓN QUE LOGIN.HTML
      ========================================== -->
 
 <script
-    src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"
+    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
 ></script>
+
+
+<!-- ==========================================
+     COMPROBAR MSAL
+     ========================================== -->
 
 <script>
 
-    if (typeof msal === "undefined") {
+    if (
+        typeof msal === "undefined"
+    ) {
 
         console.error(
             "❌ Microsoft MSAL no pudo cargarse."
@@ -1148,6 +557,11 @@
     }
 
 </script>
+
+
+<!-- ==========================================
+     JAVASCRIPT INFRAESTRUCTURA
+     ========================================== -->
 
 <script
     src="infraestructura.js"

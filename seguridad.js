@@ -1,23 +1,39 @@
+
 /* ============================================================
    ALFERZA LIVE OFFICE
    SEGURIDAD - MICROSOFT GRAPH
    ============================================================ */
 
+
+/* ============================================================
+   CONFIGURACIÓN MSAL
+   ============================================================ */
+
 const msalConfig = {
+
     auth: {
-        clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
+
+        clientId:
+            "5d98417c-74a7-4fab-8f2c-41ac127be696",
 
         authority:
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
             "https://alferzati.github.io/live-office/blank.html"
+
     },
 
     cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false
+
+        cacheLocation:
+            "sessionStorage",
+
+        storeAuthStateInCookie:
+            false
+
     }
+
 };
 
 
@@ -26,12 +42,19 @@ const msalConfig = {
    ============================================================ */
 
 const scopes = [
+
     "User.Read",
+
     "User.Read.All",
+
     "Presence.Read.All",
+
     "Sites.Read.All",
+
     "AuditLog.Read.All",
+
     "DeviceManagementManagedDevices.Read.All"
+
 ];
 
 
@@ -40,7 +63,9 @@ const scopes = [
    ============================================================ */
 
 const msalInstance =
-    new msal.PublicClientApplication(msalConfig);
+    new msal.PublicClientApplication(
+        msalConfig
+    );
 
 
 /* ============================================================
@@ -61,7 +86,26 @@ const securityData = {
 
     signIns: [],
 
-    auditLogs: []
+    auditLogs: [],
+
+    status: {
+
+        users:
+            "loading",
+
+        mfa:
+            "loading",
+
+        devices:
+            "loading",
+
+        signIns:
+            "loading",
+
+        audit:
+            "loading"
+
+    }
 
 };
 
@@ -90,8 +134,11 @@ document.addEventListener(
             );
 
             mostrarError(
-                obtenerMensajeError(error)
+                obtenerMensajeError(
+                    error
+                )
             );
+
         }
 
     }
@@ -108,19 +155,24 @@ async function iniciarSesion() {
         await msalInstance.handleRedirectPromise();
 
 
-    if (redirectResponse?.account) {
+    if (
+        redirectResponse?.account
+    ) {
 
         msalInstance.setActiveAccount(
             redirectResponse.account
         );
+
     }
 
 
-    let accounts =
+    const accounts =
         msalInstance.getAllAccounts();
 
 
-    if (!accounts.length) {
+    if (
+        !accounts.length
+    ) {
 
         window.location.replace(
             "login.html"
@@ -129,12 +181,14 @@ async function iniciarSesion() {
         throw new Error(
             "No existe una sesión de Microsoft 365."
         );
+
     }
 
 
     const account =
         msalInstance.getActiveAccount()
-        || accounts[0];
+        ||
+        accounts[0];
 
 
     msalInstance.setActiveAccount(
@@ -146,6 +200,7 @@ async function iniciarSesion() {
         "Usuario autenticado:",
         account.username
     );
+
 }
 
 
@@ -164,6 +219,7 @@ async function obtenerToken() {
         throw new Error(
             "No hay una cuenta Microsoft autenticada."
         );
+
     }
 
 
@@ -172,9 +228,11 @@ async function obtenerToken() {
         const response =
             await msalInstance.acquireTokenSilent({
 
-                scopes: scopes,
+                scopes:
+                    scopes,
 
-                account: account
+                account:
+                    account
 
             });
 
@@ -192,13 +250,16 @@ async function obtenerToken() {
         const response =
             await msalInstance.acquireTokenPopup({
 
-                scopes: scopes
+                scopes:
+                    scopes
 
             });
 
 
         return response.accessToken;
+
     }
+
 }
 
 
@@ -238,7 +299,8 @@ async function graph(
             url,
             {
 
-                method: "GET",
+                method:
+                    "GET",
 
                 headers: {
 
@@ -258,7 +320,8 @@ async function graph(
         await response.text();
 
 
-    let data = {};
+    let data =
+        {};
 
 
     try {
@@ -271,8 +334,12 @@ async function graph(
     } catch {
 
         data = {
-            raw: text
+
+            raw:
+                text
+
         };
+
     }
 
 
@@ -286,15 +353,32 @@ async function graph(
         );
 
 
-        throw new Error(
-            `Graph ${response.status}: ${
-                data?.error?.message
-                ||
-                data?.message
-                ||
-                "Error desconocido"
-            }`
-        );
+        const error =
+            new Error(
+                `Graph ${response.status}: ${
+                    data?.error?.message
+                    ||
+                    data?.message
+                    ||
+                    "Error desconocido"
+                }`
+            );
+
+
+        error.status =
+            response.status;
+
+
+        error.graphData =
+            data;
+
+
+        error.url =
+            url;
+
+
+        throw error;
+
     }
 
 
@@ -306,6 +390,7 @@ async function graph(
 
 
     return data;
+
 }
 
 
@@ -321,9 +406,9 @@ async function cargarSeguridad() {
 
 
     /*
-     * Se utiliza Promise.allSettled()
-     * para que un endpoint que falle no
-     * detenga todos los demás.
+     * Cada módulo funciona de manera independiente.
+     *
+     * Si uno falla, los demás continúan.
      */
 
     const resultados =
@@ -342,28 +427,42 @@ async function cargarSeguridad() {
         ]);
 
 
+    const nombres = [
+
+        "Usuarios",
+
+        "MFA",
+
+        "Dispositivos",
+
+        "Sign-ins",
+
+        "Auditoría"
+
+    ];
+
+
     resultados.forEach(
-        (resultado, index) => {
+        (
+            resultado,
+            index
+        ) => {
 
             if (
                 resultado.status ===
                 "rejected"
             ) {
 
-                const nombres = [
-                    "Usuarios",
-                    "MFA",
-                    "Dispositivos",
-                    "Sign-ins",
-                    "Auditoría"
-                ];
-
-
                 console.error(
+
                     `Error cargando ${nombres[index]}:`,
+
                     resultado.reason
+
                 );
+
             }
+
         }
     );
 
@@ -372,22 +471,42 @@ async function cargarSeguridad() {
         "Datos de seguridad:",
         securityData
     );
+
 }
 
 
 /* ============================================================
    USUARIOS
+   ============================================================
+
+   IMPORTANTE:
+
+   Primero obtenemos los usuarios básicos con v1.0.
+
+   Esto permite que cuentas bloqueadas funcionen aunque
+   signInActivity requiera Premium.
+
+   Después intentamos obtener signInActivity por separado.
    ============================================================ */
 
 async function cargarUsuarios() {
 
     try {
 
+        securityData.status.users =
+            "loading";
+
+
+        /* ----------------------------------------------------
+           1. USUARIOS BÁSICOS
+           ---------------------------------------------------- */
+
         let url =
-            "/users?$select=id,displayName,userPrincipalName,accountEnabled,department,signInActivity";
+            "/users?$select=id,displayName,userPrincipalName,accountEnabled,department&$top=999";
 
 
-        let usuarios = [];
+        const usuarios =
+            [];
 
 
         while (url) {
@@ -395,7 +514,7 @@ async function cargarUsuarios() {
             const data =
                 await graph(
                     url,
-                    true
+                    false
                 );
 
 
@@ -406,7 +525,9 @@ async function cargarUsuarios() {
 
             url =
                 data["@odata.nextLink"]
-                || null;
+                ||
+                null;
+
         }
 
 
@@ -421,17 +542,17 @@ async function cargarUsuarios() {
             );
 
 
+        /*
+         * Inicialmente no tenemos inactividad.
+         * Se intentará cargar abajo.
+         */
+
         securityData.inactiveUsers =
-            usuarios.filter(
-                user =>
-                    obtenerDiasInactividad(
-                        user.signInActivity
-                    ) >= 30
-            );
+            [];
 
 
         console.log(
-            "Usuarios:",
+            "Usuarios básicos:",
             usuarios.length
         );
 
@@ -442,18 +563,146 @@ async function cargarUsuarios() {
         );
 
 
-        console.log(
-            "Inactivos:",
-            securityData.inactiveUsers.length
-        );
+        /* ----------------------------------------------------
+           2. SIGN-IN ACTIVITY
+           ---------------------------------------------------- */
+
+        try {
+
+            let activityUrl =
+                "/users?$select=id,displayName,userPrincipalName,department,signInActivity&$top=999";
+
+
+            const usuariosActividad =
+                [];
+
+
+            while (activityUrl) {
+
+                const data =
+                    await graph(
+                        activityUrl,
+                        true
+                    );
+
+
+                usuariosActividad.push(
+                    ...(data.value || [])
+                );
+
+
+                activityUrl =
+                    data["@odata.nextLink"]
+                    ||
+                    null;
+
+            }
+
+
+            /*
+             * Mapeamos la actividad por ID.
+             */
+
+            const actividadPorId =
+                new Map();
+
+
+            usuariosActividad.forEach(
+                user => {
+
+                    actividadPorId.set(
+                        user.id,
+                        user.signInActivity
+                    );
+
+                }
+            );
+
+
+            /*
+             * Agregamos signInActivity a los
+             * usuarios básicos.
+             */
+
+            securityData.users =
+                securityData.users.map(
+                    user => ({
+
+                        ...user,
+
+                        signInActivity:
+                            actividadPorId.get(
+                                user.id
+                            )
+
+                    })
+                );
+
+
+            securityData.inactiveUsers =
+                securityData.users.filter(
+                    user =>
+                        obtenerDiasInactividad(
+                            user.signInActivity
+                        ) >= 30
+                );
+
+
+            securityData.status.users =
+                "ok";
+
+
+            console.log(
+                "Actividad de usuarios:",
+                usuariosActividad.length
+            );
+
+
+            console.log(
+                "Inactivos:",
+                securityData.inactiveUsers.length
+            );
+
+
+        } catch (activityError) {
+
+            /*
+             * Si Premium no está disponible,
+             * NO destruimos los usuarios básicos.
+             */
+
+            securityData.status.users =
+                "partial";
+
+
+            securityData.inactiveUsers =
+                [];
+
+
+            console.warn(
+                "signInActivity no disponible:",
+                activityError
+            );
+
+        }
+
 
     } catch (error) {
 
+        securityData.status.users =
+            "error";
+
+
         console.error(
-            "Error cargando usuarios:",
+            "Error cargando usuarios básicos:",
             error
         );
 
+
+        /*
+         * Solo vaciamos usuarios si realmente
+         * falló la consulta principal.
+         */
 
         securityData.users =
             [];
@@ -465,7 +714,9 @@ async function cargarUsuarios() {
 
         securityData.inactiveUsers =
             [];
+
     }
+
 }
 
 
@@ -483,6 +734,7 @@ function obtenerDiasInactividad(
     ) {
 
         return 9999;
+
     }
 
 
@@ -503,14 +755,18 @@ function obtenerDiasInactividad(
 
 
     return Math.floor(
-        diferencia /
+
+        diferencia
+        /
         (
             1000 *
             60 *
             60 *
             24
         )
+
     );
+
 }
 
 
@@ -522,17 +778,24 @@ async function cargarMFA() {
 
     try {
 
+        securityData.status.mfa =
+            "loading";
+
+
         let url =
             "/reports/authenticationMethods/userRegistrationDetails";
 
 
-        let registros = [];
+        const registros =
+            [];
 
 
         while (url) {
 
             const data =
-                await graph(url);
+                await graph(
+                    url
+                );
 
 
             registros.push(
@@ -542,7 +805,9 @@ async function cargarMFA() {
 
             url =
                 data["@odata.nextLink"]
-                || null;
+                ||
+                null;
+
         }
 
 
@@ -550,22 +815,33 @@ async function cargarMFA() {
             registros;
 
 
+        securityData.status.mfa =
+            "ok";
+
+
         console.log(
             "Usuarios MFA:",
             registros.length
         );
 
+
     } catch (error) {
 
-        console.error(
-            "Error cargando MFA:",
-            error
-        );
+        securityData.status.mfa =
+            "unavailable";
 
 
         securityData.mfaUsers =
             [];
+
+
+        console.warn(
+            "MFA no disponible:",
+            error
+        );
+
     }
+
 }
 
 
@@ -577,17 +853,24 @@ async function cargarDispositivos() {
 
     try {
 
+        securityData.status.devices =
+            "loading";
+
+
         let url =
             "/deviceManagement/managedDevices";
 
 
-        let dispositivos = [];
+        const dispositivos =
+            [];
 
 
         while (url) {
 
             const data =
-                await graph(url);
+                await graph(
+                    url
+                );
 
 
             dispositivos.push(
@@ -597,7 +880,9 @@ async function cargarDispositivos() {
 
             url =
                 data["@odata.nextLink"]
-                || null;
+                ||
+                null;
+
         }
 
 
@@ -605,22 +890,33 @@ async function cargarDispositivos() {
             dispositivos;
 
 
+        securityData.status.devices =
+            "ok";
+
+
         console.log(
             "Dispositivos Intune:",
             dispositivos.length
         );
 
+
     } catch (error) {
 
-        console.error(
-            "Error cargando dispositivos:",
-            error
-        );
+        securityData.status.devices =
+            "unavailable";
 
 
         securityData.devices =
             [];
+
+
+        console.warn(
+            "Dispositivos Intune no disponibles:",
+            error
+        );
+
     }
+
 }
 
 
@@ -632,16 +928,28 @@ async function cargarSignIns() {
 
     try {
 
+        securityData.status.signIns =
+            "loading";
+
+
         const url =
             "/auditLogs/signIns?$top=100&$orderby=createdDateTime desc";
 
 
         const data =
-            await graph(url);
+            await graph(
+                url
+            );
 
 
         securityData.signIns =
-            data.value || [];
+            data.value
+            ||
+            [];
+
+
+        securityData.status.signIns =
+            "ok";
 
 
         console.log(
@@ -649,17 +957,24 @@ async function cargarSignIns() {
             securityData.signIns.length
         );
 
+
     } catch (error) {
 
-        console.error(
-            "Error cargando sign-ins:",
-            error
-        );
+        securityData.status.signIns =
+            "unavailable";
 
 
         securityData.signIns =
             [];
+
+
+        console.warn(
+            "Sign-ins no disponibles:",
+            error
+        );
+
     }
+
 }
 
 
@@ -667,23 +982,34 @@ async function cargarSignIns() {
    AUDITORÍA
    ============================================================
 
-   Buscamos eventos relacionados con:
-   - Disable account
-   - Update user
-   - Account
-   - User
+   Microsoft limita el período disponible.
+
+   En lugar de consultar 180 días, consultamos los
+   últimos 30 días.
+
+   Esto evita el error:
+
+   "Minimum allowed time for activityDateTime..."
    ============================================================ */
 
 async function cargarAuditoria() {
 
     try {
 
+        securityData.status.audit =
+            "loading";
+
+
         const fecha =
             new Date();
 
 
+        /*
+         * Últimos 30 días.
+         */
+
         fecha.setDate(
-            fecha.getDate() - 180
+            fecha.getDate() - 30
         );
 
 
@@ -702,11 +1028,19 @@ async function cargarAuditoria() {
 
 
         const data =
-            await graph(url);
+            await graph(
+                url
+            );
 
 
         securityData.auditLogs =
-            data.value || [];
+            data.value
+            ||
+            [];
+
+
+        securityData.status.audit =
+            "ok";
 
 
         console.log(
@@ -714,17 +1048,24 @@ async function cargarAuditoria() {
             securityData.auditLogs.length
         );
 
+
     } catch (error) {
 
-        console.error(
-            "Error cargando audit logs:",
-            error
-        );
+        securityData.status.audit =
+            "unavailable";
 
 
         securityData.auditLogs =
             [];
+
+
+        console.warn(
+            "Auditoría no disponible:",
+            error
+        );
+
     }
+
 }
 
 
@@ -756,47 +1097,81 @@ function actualizarDashboard() {
 function actualizarContadores() {
 
 
-    /* MFA */
+    /* --------------------------------------------------------
+       MFA
+       -------------------------------------------------------- */
 
-    const mfaPendiente =
-        securityData.mfaUsers.filter(
-            user =>
-                user.isMfaRegistered === false
-        ).length;
+    let mfaPendiente =
+        0;
 
 
-    /* Inactivos */
+    if (
+        securityData.status.mfa ===
+        "ok"
+    ) {
+
+        mfaPendiente =
+            securityData.mfaUsers.filter(
+                user =>
+                    user.isMfaRegistered === false
+            ).length;
+
+    }
+
+
+    /* --------------------------------------------------------
+       INACTIVOS
+       -------------------------------------------------------- */
 
     const inactivos =
         securityData.inactiveUsers.length;
 
 
-    /* Bloqueados */
+    /* --------------------------------------------------------
+       BLOQUEADOS
+       -------------------------------------------------------- */
 
     const bloqueados =
         securityData.blockedUsers.length;
 
 
-    /* Dispositivos */
+    /* --------------------------------------------------------
+       DISPOSITIVOS
+       -------------------------------------------------------- */
 
-    const riesgo =
-        securityData.devices.filter(
-            device =>
-                !esDispositivoSeguro(
-                    device
-                )
-        ).length;
+    let riesgo =
+        0;
+
+
+    if (
+        securityData.status.devices ===
+        "ok"
+    ) {
+
+        riesgo =
+            securityData.devices.filter(
+                device =>
+                    !esDispositivoSeguro(
+                        device
+                    )
+            ).length;
+
+    }
 
 
     ponerTexto(
         "mfaPendiente",
-        mfaPendiente
+        securityData.status.mfa === "ok"
+            ? mfaPendiente
+            : "—"
     );
 
 
     ponerTexto(
         "usuariosInactivos",
-        inactivos
+        securityData.status.users === "ok"
+            ? inactivos
+            : "—"
     );
 
 
@@ -808,11 +1183,15 @@ function actualizarContadores() {
 
     ponerTexto(
         "equiposRiesgo",
-        riesgo
+        securityData.status.devices === "ok"
+            ? riesgo
+            : "—"
     );
 
 
-    /* Contador de cuentas bloqueadas */
+    /* --------------------------------------------------------
+       CONTADOR DE CUENTAS BLOQUEADAS
+       -------------------------------------------------------- */
 
     const counter =
         document.querySelector(
@@ -828,7 +1207,9 @@ function actualizarContadores() {
 
         counter.textContent =
             bloqueados;
+
     }
+
 }
 
 
@@ -838,6 +1219,57 @@ function actualizarContadores() {
 
 function actualizarMFA() {
 
+    const circle =
+        document.querySelector(
+            ".mfa-circle"
+        );
+
+
+    const number =
+        document.querySelector(
+            ".mfa-number"
+        );
+
+
+    const textos =
+        document.querySelectorAll(
+            ".mfa-info .legend-item small"
+        );
+
+
+    /*
+     * MFA no disponible.
+     */
+
+    if (
+        securityData.status.mfa !==
+        "ok"
+    ) {
+
+        if (number) {
+
+            number.textContent =
+                "N/D";
+
+        }
+
+
+        if (textos.length >= 2) {
+
+            textos[0].textContent =
+                "Licencia Premium requerida";
+
+            textos[1].textContent =
+                "Datos no disponibles";
+
+        }
+
+
+        return;
+
+    }
+
+
     const total =
         securityData.mfaUsers.length;
 
@@ -845,6 +1277,7 @@ function actualizarMFA() {
     if (!total) {
 
         return;
+
     }
 
 
@@ -853,10 +1286,6 @@ function actualizarMFA() {
             user =>
                 user.isMfaRegistered === true
         ).length;
-
-
-    const pendientes =
-        total - registrados;
 
 
     const porcentaje =
@@ -868,12 +1297,6 @@ function actualizarMFA() {
         );
 
 
-    const circle =
-        document.querySelector(
-            ".mfa-circle"
-        );
-
-
     if (circle) {
 
         circle.style.background =
@@ -881,26 +1304,16 @@ function actualizarMFA() {
                 #16a34a ${porcentaje}%,
                 #ef4444 ${porcentaje}% 100%
             )`;
+
     }
-
-
-    const number =
-        document.querySelector(
-            ".mfa-number"
-        );
 
 
     if (number) {
 
         number.textContent =
             `${porcentaje}%`;
+
     }
-
-
-    const textos =
-        document.querySelectorAll(
-            ".mfa-info .legend-item small"
-        );
 
 
     if (textos.length >= 2) {
@@ -911,7 +1324,9 @@ function actualizarMFA() {
 
         textos[1].textContent =
             `${100 - porcentaje}% de usuarios`;
+
     }
+
 }
 
 
@@ -930,6 +1345,7 @@ function actualizarInactivos() {
     if (!tbody) {
 
         return;
+
     }
 
 
@@ -937,8 +1353,47 @@ function actualizarInactivos() {
         parseInt(
             document.getElementById(
                 "inactiveFilter"
-            )?.value || "30"
+            )?.value
+            ||
+            "30"
         );
+
+
+    /*
+     * Premium no disponible.
+     */
+
+    if (
+        securityData.status.users ===
+        "partial"
+    ) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="4"
+                    style="
+                        text-align:center;
+                        padding:25px;
+                        color:#64748b;
+                    "
+                >
+
+                    La información de actividad de inicio
+                    de sesión requiere Microsoft Entra ID
+                    Premium.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
 
 
     const usuarios =
@@ -964,7 +1419,8 @@ function actualizarInactivos() {
             );
 
 
-    tbody.innerHTML = "";
+    tbody.innerHTML =
+        "";
 
 
     if (!usuarios.length) {
@@ -975,10 +1431,15 @@ function actualizarInactivos() {
 
                 <td
                     colspan="4"
-                    style="text-align:center;padding:25px"
+                    style="
+                        text-align:center;
+                        padding:25px
+                    "
                 >
+
                     No hay usuarios con más de
                     ${filtro} días de inactividad.
+
                 </td>
 
             </tr>
@@ -986,11 +1447,15 @@ function actualizarInactivos() {
         `;
 
         return;
+
     }
 
 
     usuarios
-        .slice(0, 50)
+        .slice(
+            0,
+            50
+        )
         .forEach(
             user => {
 
@@ -1086,22 +1551,27 @@ function actualizarInactivos() {
                     <td>
 
                         <span class="badge ${clase}">
+
                             ${
                                 dias >= 9999
                                     ? "Sin acceso"
                                     : `${dias} días`
                             }
+
                         </span>
 
                     </td>
+
                 `;
 
 
                 tbody.appendChild(
                     tr
                 );
+
             }
         );
+
 }
 
 
@@ -1119,6 +1589,7 @@ document.addEventListener(
         ) {
 
             actualizarInactivos();
+
         }
 
     }
@@ -1140,10 +1611,12 @@ function actualizarBloqueados() {
     if (!container) {
 
         return;
+
     }
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     if (
@@ -1159,17 +1632,23 @@ function actualizarBloqueados() {
                     color:#64748b;
                 "
             >
+
                 No hay cuentas bloqueadas.
+
             </div>
 
         `;
 
         return;
+
     }
 
 
     securityData.blockedUsers
-        .slice(0, 20)
+        .slice(
+            0,
+            20
+        )
         .forEach(
             user => {
 
@@ -1232,14 +1711,17 @@ function actualizarBloqueados() {
                     <span>
                         Bloqueada
                     </span>
+
                 `;
 
 
                 container.appendChild(
                     div
                 );
+
             }
         );
+
 }
 
 
@@ -1305,10 +1787,17 @@ function obtenerFechaBloqueo(
 
 
                                 return (
-                                    targetName === correo
+
+                                    targetName ===
+                                    correo
+
                                     ||
-                                    targetName === nombre
+
+                                    targetName ===
+                                    nombre
+
                                 );
+
                             }
                         );
 
@@ -1324,10 +1813,15 @@ function obtenerFechaBloqueo(
 
 
                     return (
+
                         coincideUsuario
+
                         &&
+
                         esRelacionado
+
                     );
+
                 }
             )
             .sort(
@@ -1345,18 +1839,24 @@ function obtenerFechaBloqueo(
             );
 
 
-    if (!eventos.length) {
+    if (
+        !eventos.length
+    ) {
 
         return "Fecha no disponible";
+
     }
 
 
     return `
+
         Bloqueada:
         ${formatearFecha(
             eventos[0].activityDateTime
         )}
+
     `;
+
 }
 
 
@@ -1375,13 +1875,18 @@ function actualizarDispositivos() {
     if (!container) {
 
         return;
+
     }
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
-    if (!securityData.devices.length) {
+    if (
+        securityData.status.devices !==
+        "ok"
+    ) {
 
         container.innerHTML = `
 
@@ -1392,17 +1897,49 @@ function actualizarDispositivos() {
                     color:#64748b;
                 "
             >
-                No hay dispositivos administrados por Intune.
+
+                Datos de Intune no disponibles.
+
             </div>
 
         `;
 
         return;
+
+    }
+
+
+    if (
+        !securityData.devices.length
+    ) {
+
+        container.innerHTML = `
+
+            <div
+                style="
+                    padding:20px;
+                    text-align:center;
+                    color:#64748b;
+                "
+            >
+
+                No hay dispositivos administrados
+                por Intune.
+
+            </div>
+
+        `;
+
+        return;
+
     }
 
 
     securityData.devices
-        .slice(0, 30)
+        .slice(
+            0,
+            30
+        )
         .forEach(
             device => {
 
@@ -1424,12 +1961,6 @@ function actualizarDispositivos() {
                     "Sistema desconocido";
 
 
-                const estado =
-                    device.complianceState
-                    ||
-                    "unknown";
-
-
                 const div =
                     document.createElement(
                         "div"
@@ -1445,13 +1976,17 @@ function actualizarDispositivos() {
                     <div class="device-left">
 
                         <div class="device-icon">
+
                             ${
                                 sistema
                                     .toLowerCase()
-                                    .includes("windows")
+                                    .includes(
+                                        "windows"
+                                    )
                                     ? "PC"
                                     : "DV"
                             }
+
                         </div>
 
                         <div>
@@ -1475,11 +2010,13 @@ function actualizarDispositivos() {
                                 : "danger"
                         }"
                     >
+
                         ${
                             seguro
                                 ? "Protegido"
                                 : "Riesgo"
                         }
+
                     </span>
 
                 `;
@@ -1488,8 +2025,10 @@ function actualizarDispositivos() {
                 container.appendChild(
                     div
                 );
+
             }
         );
+
 }
 
 
@@ -1510,16 +2049,11 @@ function esDispositivoSeguro(
         .toLowerCase();
 
 
-    if (
+    return (
         estado ===
         "compliant"
-    ) {
+    );
 
-        return true;
-    }
-
-
-    return false;
 }
 
 
@@ -1538,10 +2072,63 @@ function actualizarEventos() {
     if (!container) {
 
         return;
+
     }
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
+
+
+    /*
+     * Sign-ins no disponibles.
+     */
+
+    if (
+        securityData.status.signIns !==
+        "ok"
+    ) {
+
+        container.innerHTML = `
+
+            <div
+                style="
+                    padding:20px;
+                    text-align:center;
+                    color:#64748b;
+                "
+            >
+
+                Los registros de inicio de sesión
+                no están disponibles.
+
+                <br><br>
+
+                Microsoft Entra ID Premium puede ser
+                necesario para consultar estos datos.
+
+            </div>
+
+        `;
+
+
+        const contador =
+            document.querySelector(
+                ".alert-counter"
+            );
+
+
+        if (contador) {
+
+            contador.textContent =
+                "N/D alertas";
+
+        }
+
+
+        return;
+
+    }
 
 
     const eventos =
@@ -1558,10 +2145,13 @@ function actualizarEventos() {
 
         contador.textContent =
             `${eventos.alertas} alertas`;
+
     }
 
 
-    if (!eventos.lista.length) {
+    if (
+        !eventos.lista.length
+    ) {
 
         container.innerHTML = `
 
@@ -1572,18 +2162,24 @@ function actualizarEventos() {
                     color:#64748b;
                 "
             >
+
                 No se detectaron eventos sospechosos
                 recientes.
+
             </div>
 
         `;
 
         return;
+
     }
 
 
     eventos.lista
-        .slice(0, 20)
+        .slice(
+            0,
+            20
+        )
         .forEach(
             evento => {
 
@@ -1595,7 +2191,8 @@ function actualizarEventos() {
 
                 div.className =
                     `security-event ${
-                        evento.nivel === "danger"
+                        evento.nivel ===
+                        "danger"
                             ? "danger-event"
                             : "warning-event"
                     }`;
@@ -1633,8 +2230,10 @@ function actualizarEventos() {
                 container.appendChild(
                     div
                 );
+
             }
         );
+
 }
 
 
@@ -1644,7 +2243,8 @@ function actualizarEventos() {
 
 function analizarEventos() {
 
-    const lista = [];
+    const lista =
+        [];
 
 
     securityData.signIns
@@ -1661,7 +2261,8 @@ function analizarEventos() {
                  */
 
                 if (
-                    errorCode &&
+                    errorCode
+                    &&
                     errorCode !== 0
                 ) {
 
@@ -1674,7 +2275,17 @@ function analizarEventos() {
                             "Inicio de sesión fallido",
 
                         descripcion:
-                            `${signIn.userDisplayName || signIn.userPrincipalName || "Usuario desconocido"} · IP ${signIn.ipAddress || "desconocida"}`,
+                            `${
+                                signIn.userDisplayName
+                                ||
+                                signIn.userPrincipalName
+                                ||
+                                "Usuario desconocido"
+                            } · IP ${
+                                signIn.ipAddress
+                                ||
+                                "desconocida"
+                            }`,
 
                         fecha:
                             signIn.createdDateTime,
@@ -1685,6 +2296,7 @@ function analizarEventos() {
                             )
 
                     });
+
                 }
 
 
@@ -1693,7 +2305,8 @@ function analizarEventos() {
                  */
 
                 if (
-                    signIn.riskDetail &&
+                    signIn.riskDetail
+                    &&
                     signIn.riskDetail !==
                     "none"
                 ) {
@@ -1707,7 +2320,15 @@ function analizarEventos() {
                             "Inicio de sesión con riesgo",
 
                         descripcion:
-                            `${signIn.userDisplayName || signIn.userPrincipalName || "Usuario"} · ${signIn.riskDetail}`,
+                            `${
+                                signIn.userDisplayName
+                                ||
+                                signIn.userPrincipalName
+                                ||
+                                "Usuario"
+                            } · ${
+                                signIn.riskDetail
+                            }`,
 
                         fecha:
                             signIn.createdDateTime,
@@ -1718,29 +2339,24 @@ function analizarEventos() {
                             )
 
                     });
+
                 }
 
 
                 /*
                  * UBICACIÓN
-                 *
-                 * No se inventa una ubicación
-                 * habitual. Solo se conserva
-                 * la información entregada
-                 * por Microsoft Graph.
                  */
 
                 if (
-                    signIn.location?.countryOrRegion
+                    signIn.location
+                    ?.countryOrRegion
                 ) {
-
-                    const pais =
-                        signIn.location.countryOrRegion;
 
                     console.log(
                         "País del sign-in:",
-                        pais
+                        signIn.location.countryOrRegion
                     );
+
                 }
 
             }
@@ -1752,9 +2368,13 @@ function analizarEventos() {
             a,
             b
         ) =>
-            new Date(b.fecha)
+            new Date(
+                b.fecha
+            )
             -
-            new Date(a.fecha)
+            new Date(
+                a.fecha
+            )
     );
 
 
@@ -1766,6 +2386,7 @@ function analizarEventos() {
             lista.length
 
     };
+
 }
 
 
@@ -1788,7 +2409,9 @@ function ponerTexto(
 
         elemento.textContent =
             valor;
+
     }
+
 }
 
 
@@ -1801,18 +2424,28 @@ function obtenerIniciales(
 ) {
 
     return nombre
+
         .split(" ")
+
         .filter(
             parte =>
                 parte.trim()
         )
-        .slice(0, 2)
+
+        .slice(
+            0,
+            2
+        )
+
         .map(
             parte =>
                 parte[0]
         )
+
         .join("")
+
         .toUpperCase();
+
 }
 
 
@@ -1827,6 +2460,7 @@ function formatearFecha(
     if (!fecha) {
 
         return "Sin fecha";
+
     }
 
 
@@ -1835,10 +2469,16 @@ function formatearFecha(
     ).toLocaleString(
         "es-PE",
         {
-            dateStyle: "short",
-            timeStyle: "short"
+
+            dateStyle:
+                "short",
+
+            timeStyle:
+                "short"
+
         }
     );
+
 }
 
 
@@ -1853,6 +2493,7 @@ function tiempoRelativo(
     if (!fecha) {
 
         return "";
+
     }
 
 
@@ -1868,24 +2509,33 @@ function tiempoRelativo(
 
     const minutos =
         Math.floor(
+
             (
-                ahora -
+                ahora
+                -
                 fechaEvento
             )
             /
             60000
+
         );
 
 
-    if (minutos < 1) {
+    if (
+        minutos < 1
+    ) {
 
         return "Ahora";
+
     }
 
 
-    if (minutos < 60) {
+    if (
+        minutos < 60
+    ) {
 
         return `Hace ${minutos} min`;
+
     }
 
 
@@ -1895,9 +2545,12 @@ function tiempoRelativo(
         );
 
 
-    if (horas < 24) {
+    if (
+        horas < 24
+    ) {
 
         return `Hace ${horas} h`;
+
     }
 
 
@@ -1908,6 +2561,7 @@ function tiempoRelativo(
 
 
     return `Hace ${dias} días`;
+
 }
 
 
@@ -1920,35 +2574,45 @@ function escapar(
 ) {
 
     if (
-        valor === null ||
+        valor === null
+        ||
         valor === undefined
     ) {
 
         return "";
+
     }
 
 
-    return String(valor)
+    return String(
+        valor
+    )
+
         .replaceAll(
             "&",
             "&amp;"
         )
+
         .replaceAll(
             "<",
             "&lt;"
         )
+
         .replaceAll(
             ">",
             "&gt;"
         )
+
         .replaceAll(
             '"',
             "&quot;"
         )
+
         .replaceAll(
             "'",
             "&#039;"
         );
+
 }
 
 
@@ -1974,9 +2638,9 @@ function obtenerMensajeError(
 
         return `
             Microsoft Graph rechazó la solicitud (403).
-            Verifica que la aplicación tenga los permisos
-            necesarios y que se haya otorgado Admin Consent.
+            Verifica permisos, roles y licencias del tenant.
         `;
+
     }
 
 
@@ -1990,6 +2654,7 @@ function obtenerMensajeError(
             La sesión de Microsoft 365 ya no es válida.
             Vuelve a iniciar sesión.
         `;
+
     }
 
 
@@ -2001,13 +2666,14 @@ function obtenerMensajeError(
 
         return `
             Microsoft Graph rechazó la solicitud (400).
-            Abre F12 → Console para ver el endpoint exacto
-            y el mensaje devuelto por Microsoft Graph.
+            Revisa el endpoint y los parámetros enviados.
         `;
+
     }
 
 
     return mensaje;
+
 }
 
 
@@ -2028,6 +2694,7 @@ function mostrarError(
     if (!content) {
 
         return;
+
     }
 
 
@@ -2040,6 +2707,7 @@ function mostrarError(
     if (anterior) {
 
         anterior.remove();
+
     }
 
 
@@ -2054,28 +2722,41 @@ function mostrarError(
 
 
     div.style.cssText = `
+
         margin-bottom:20px;
+
         padding:15px 18px;
+
         border-radius:10px;
+
         background:#fee2e2;
+
         border:1px solid #fecaca;
+
         color:#991b1b;
+
         font-size:14px;
+
     `;
 
 
     div.innerHTML = `
+
         <strong>
             Error de seguridad
         </strong>
+
         <br>
+
         ${escapar(mensaje)}
+
     `;
 
 
     content.prepend(
         div
     );
+
 }
 
 
@@ -2090,6 +2771,7 @@ function mostrarEstadoCarga(
     console.log(
         mensaje
     );
+
 }
 
 
@@ -2110,6 +2792,7 @@ document.addEventListener(
         if (!button) {
 
             return;
+
         }
 
 
@@ -2132,6 +2815,7 @@ document.addEventListener(
 
             actualizarDashboard();
 
+
         } catch (error) {
 
             console.error(
@@ -2146,6 +2830,7 @@ document.addEventListener(
                 )
             );
 
+
         } finally {
 
             button.disabled =
@@ -2154,7 +2839,9 @@ document.addEventListener(
 
             button.innerHTML =
                 textoOriginal;
+
         }
 
     }
 );
+

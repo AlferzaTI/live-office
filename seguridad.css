@@ -1627,3 +1627,73 @@ footer {
 
 }
 
+/* =========================================================
+   FILTROS DEL DASHBOARD
+========================================================= */
+
+.filter-card {
+
+    cursor: pointer;
+
+    user-select: none;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        opacity .2s ease;
+
+}
+
+
+.filter-card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, .18);
+
+}
+
+
+.filter-card:focus {
+
+    outline: none;
+
+}
+
+
+.filter-card:focus-visible {
+
+    outline:
+        3px solid rgba(59, 130, 246, .45);
+
+    outline-offset: 3px;
+
+}
+
+
+.filter-card.filter-active {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, .25),
+        0 10px 24px rgba(15, 23, 42, .18);
+
+}
+
+
+.filter-section {
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease;
+
+}
+
+
+.filter-section.filter-hidden {
+
+    display: none;
+
+}

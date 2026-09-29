@@ -1,0 +1,1117 @@
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Monitoreo TI | ALFERZA LIVE OFFICE</title>
+
+
+    <!-- ==========================================
+         COMPROBAR ACCESO
+         ========================================== -->
+
+    <script>
+
+        if (
+            sessionStorage.getItem("alferza_login") !== "true"
+        ) {
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }
+
+    </script>
+
+
+    <!-- ==========================================
+         ESTILOS
+         ========================================== -->
+
+    <link
+        rel="stylesheet"
+        href="infraestructura.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================
+     PANTALLA DE CARGA
+     ========================================== -->
+
+<div
+    id="loadingOverlay"
+    class="loading-overlay"
+>
+
+    <div class="loading-content">
+
+        <div class="gear-spinner">
+            ⚙️
+        </div>
+
+        <p>
+            Cargando monitoreo...
+        </p>
+
+        <span>
+            ALFERZA LIVE OFFICE
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     BARRA SUPERIOR
+     ========================================== -->
+
+<header class="topbar">
+
+    <div class="logo">
+
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
+
+        <span>
+            Monitoreo en tiempo real
+        </span>
+
+    </div>
+
+
+    <div class="live-status">
+
+        <span class="live-status-dot"></span>
+
+        <span>
+            EN VIVO
+        </span>
+
+    </div>
+
+</header>
+
+
+<!-- ==========================================
+     CONTENEDOR PRINCIPAL
+     ========================================== -->
+
+<div class="container">
+
+
+    <!-- ======================================
+         MENÚ LATERAL
+         ====================================== -->
+
+    <aside class="sidebar">
+
+        <h2>
+            MENÚ
+        </h2>
+
+
+        <ul>
+
+            <li
+                onclick="window.location.href='index.html'"
+            >
+                🏢 Oficina
+            </li>
+
+
+            <li
+                onclick="window.location.href='personal.html'"
+            >
+                👥 Personal
+            </li>
+
+
+            <li
+                onclick="window.location.href='reserva.html'"
+            >
+                📝 Reservas
+            </li>
+
+
+            <li
+                onclick="window.location.href='salas/salas.html'"
+            >
+                📅 Salas
+            </li>
+
+
+            <li
+                onclick="window.location.href='comunicados.html'"
+            >
+                📢 Comunicados
+            </li>
+
+
+            <li
+                class="active"
+            >
+                🖥️ Monitoreo TI
+            </li>
+
+
+            <li
+                onclick="window.location.href='seguridad.html'"
+            >
+                🔐 Seguridad
+            </li>
+
+
+            <li
+                onclick="window.location.href='configuracion.html'"
+            >
+                ⚙️ Configuración
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <!-- ======================================
+         CONTENIDO
+         ====================================== -->
+
+    <main class="content">
+
+
+        <!-- ==================================
+             ENCABEZADO
+             ================================== -->
+
+        <section class="page-header">
+
+            <div>
+
+                <span class="page-label">
+                    INFRAESTRUCTURA
+                </span>
+
+                <h2>
+                    Centro de Monitoreo TI
+                </h2>
+
+                <p>
+                    Estado general de los servicios e infraestructura tecnológica.
+                </p>
+
+            </div>
+
+
+            <div class="last-update">
+
+                <span class="update-dot"></span>
+
+                <div>
+
+                    <small>
+                        ÚLTIMA ACTUALIZACIÓN
+                    </small>
+
+                    <strong id="lastUpdate">
+                        Hace unos segundos
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             RESUMEN GENERAL
+             ================================== -->
+
+        <section class="monitor-summary">
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon green">
+                    ✓
+                </div>
+
+                <div>
+
+                    <span>
+                        Servicios activos
+                    </span>
+
+                    <strong>
+                        8
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon yellow">
+                    !
+                </div>
+
+                <div>
+
+                    <span>
+                        Advertencias
+                    </span>
+
+                    <strong>
+                        1
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon red">
+                    ×
+                </div>
+
+                <div>
+
+                    <span>
+                        Incidencias
+                    </span>
+
+                    <strong>
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-icon blue">
+                    ↻
+                </div>
+
+                <div>
+
+                    <span>
+                        Monitoreo
+                    </span>
+
+                    <strong>
+                        Activo
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             CONECTIVIDAD
+             ================================== -->
+
+        <section class="monitor-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        CONECTIVIDAD
+                    </span>
+
+                    <h3>
+                        Internet y servicios externos
+                    </h3>
+
+                </div>
+
+                <span class="section-status online">
+                    ● OPERATIVO
+                </span>
+
+            </div>
+
+
+            <div class="service-grid">
+
+
+                <!-- INTERNET PRINCIPAL -->
+
+                <div class="service-card">
+
+                    <div class="service-top">
+
+                        <div class="service-icon">
+                            🌐
+                        </div>
+
+                        <span class="status-badge online">
+                            Activo
+                        </span>
+
+                    </div>
+
+
+                    <h4>
+                        Internet Principal
+                    </h4>
+
+                    <p>
+                        Conectividad principal de la oficina
+                    </p>
+
+
+                    <div class="service-data">
+
+                        <span>
+                            Latencia
+                        </span>
+
+                        <strong>
+                            12 ms
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- INTERNET RESPALDO -->
+
+                <div class="service-card">
+
+                    <div class="service-top">
+
+                        <div class="service-icon">
+                            📡
+                        </div>
+
+                        <span class="status-badge online">
+                            Activo
+                        </span>
+
+                    </div>
+
+
+                    <h4>
+                        Internet Respaldo
+                    </h4>
+
+                    <p>
+                        Conexión secundaria de emergencia
+                    </p>
+
+
+                    <div class="service-data">
+
+                        <span>
+                            Latencia
+                        </span>
+
+                        <strong>
+                            18 ms
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- GOOGLE DNS -->
+
+                <div class="service-card">
+
+                    <div class="service-top">
+
+                        <div class="service-icon">
+                            🔎
+                        </div>
+
+                        <span class="status-badge online">
+                            Responde
+                        </span>
+
+                    </div>
+
+
+                    <h4>
+                        Google DNS
+                    </h4>
+
+                    <p>
+                        Resolución DNS externa
+                    </p>
+
+
+                    <div class="service-data">
+
+                        <span>
+                            Respuesta
+                        </span>
+
+                        <strong>
+                            8 ms
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MICROSOFT -->
+
+                <div class="service-card">
+
+                    <div class="service-top">
+
+                        <div class="service-icon">
+                            Microsoft
+                        </div>
+
+                        <span class="status-badge online">
+                            Responde
+                        </span>
+
+                    </div>
+
+
+                    <h4>
+                        Microsoft 365
+                    </h4>
+
+                    <p>
+                        Conectividad con servicios Microsoft
+                    </p>
+
+
+                    <div class="service-data">
+
+                        <span>
+                            Estado
+                        </span>
+
+                        <strong>
+                            Operativo
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             MICROSOFT 365
+             ================================== -->
+
+        <section class="monitor-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        MICROSOFT 365
+                    </span>
+
+                    <h3>
+                        Servicios Microsoft
+                    </h3>
+
+                </div>
+
+                <span class="section-status online">
+                    ● OPERATIVO
+                </span>
+
+            </div>
+
+
+            <div class="service-list">
+
+
+                <div class="service-row">
+
+                    <div class="service-name">
+
+                        <div class="mini-icon teams">
+                            T
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Microsoft Teams
+                            </strong>
+
+                            <span>
+                                Comunicación y presencia
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="row-status online">
+                        ● Operativo
+                    </span>
+
+                </div>
+
+
+                <div class="service-row">
+
+                    <div class="service-name">
+
+                        <div class="mini-icon exchange">
+                            E
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Exchange Online
+                            </strong>
+
+                            <span>
+                                Correo electrónico
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="row-status online">
+                        ● Operativo
+                    </span>
+
+                </div>
+
+
+                <div class="service-row">
+
+                    <div class="service-name">
+
+                        <div class="mini-icon sharepoint">
+                            S
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                SharePoint
+                            </strong>
+
+                            <span>
+                                Documentos y sitios
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="row-status online">
+                        ● Operativo
+                    </span>
+
+                </div>
+
+
+                <div class="service-row">
+
+                    <div class="service-name">
+
+                        <div class="mini-icon onedrive">
+                            O
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                OneDrive
+                            </strong>
+
+                            <span>
+                                Almacenamiento empresarial
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="row-status online">
+                        ● Operativo
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             CERTIFICADOS
+             ================================== -->
+
+        <section class="monitor-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        SEGURIDAD
+                    </span>
+
+                    <h3>
+                        Certificados SSL
+                    </h3>
+
+                </div>
+
+                <span class="section-status warning">
+                    ● 1 ADVERTENCIA
+                </span>
+
+            </div>
+
+
+            <div class="certificate-card">
+
+                <div class="certificate-info">
+
+                    <div class="certificate-icon">
+                        🔒
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            portal.alferza.com
+                        </strong>
+
+                        <span>
+                            Certificado SSL / TLS
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="certificate-date">
+
+                    <span>
+                        Vencimiento
+                    </span>
+
+                    <strong>
+                        15 días
+                    </strong>
+
+                </div>
+
+
+                <div class="certificate-status warning">
+
+                    ⚠️ Advertencia
+
+                </div>
+
+            </div>
+
+
+            <div class="certificate-card">
+
+                <div class="certificate-info">
+
+                    <div class="certificate-icon">
+                        🔒
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            www.alferza.com
+                        </strong>
+
+                        <span>
+                            Certificado SSL / TLS
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="certificate-date">
+
+                    <span>
+                        Vencimiento
+                    </span>
+
+                    <strong>
+                        142 días
+                    </strong>
+
+                </div>
+
+
+                <div class="certificate-status online">
+
+                    ✓ Vigente
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             SERVIDORES
+             ================================== -->
+
+        <section class="monitor-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        INFRAESTRUCTURA
+                    </span>
+
+                    <h3>
+                        Servidores
+                    </h3>
+
+                </div>
+
+                <span class="section-status online">
+                    ● 2 OPERATIVOS
+                </span>
+
+            </div>
+
+
+            <div class="server-grid">
+
+
+                <div class="server-card">
+
+                    <div class="server-header">
+
+                        <div>
+
+                            <span class="server-type">
+                                WINDOWS SERVER
+                            </span>
+
+                            <h4>
+                                SERVIDOR ERP
+                            </h4>
+
+                        </div>
+
+                        <span class="status-badge online">
+                            Operativo
+                        </span>
+
+                    </div>
+
+
+                    <div class="server-metrics">
+
+                        <div>
+
+                            <span>
+                                CPU
+                            </span>
+
+                            <strong>
+                                25%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:25%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                RAM
+                            </span>
+
+                            <strong>
+                                68%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:68%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                DISCO
+                            </span>
+
+                            <strong>
+                                54%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:54%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="server-card">
+
+                    <div class="server-header">
+
+                        <div>
+
+                            <span class="server-type">
+                                WINDOWS SERVER
+                            </span>
+
+                            <h4>
+                                SERVIDOR BD
+                            </h4>
+
+                        </div>
+
+                        <span class="status-badge online">
+                            Operativo
+                        </span>
+
+                    </div>
+
+
+                    <div class="server-metrics">
+
+                        <div>
+
+                            <span>
+                                CPU
+                            </span>
+
+                            <strong>
+                                31%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:31%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                RAM
+                            </span>
+
+                            <strong>
+                                72%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:72%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                DISCO
+                            </span>
+
+                            <strong>
+                                61%
+                            </strong>
+
+                            <div class="progress">
+                                <div
+                                    class="progress-bar"
+                                    style="width:61%"
+                                ></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     PIE DE PÁGINA
+     ========================================== -->
+
+<footer>
+
+    ALFERZA LIVE OFFICE · Centro de Monitoreo TI
+
+</footer>
+
+
+<!-- ==========================================
+     SCRIPT
+     ========================================== -->
+
+<script>
+
+    /*
+     * Simulación de actualización.
+     * Posteriormente aquí conectaremos
+     * el backend real.
+     */
+
+    window.addEventListener(
+        "load",
+        function () {
+
+            setTimeout(
+                function () {
+
+                    const overlay =
+                        document.getElementById(
+                            "loadingOverlay"
+                        );
+
+                    if (overlay) {
+
+                        overlay.classList.add(
+                            "hidden"
+                        );
+
+                    }
+
+                },
+                700
+            );
+
+        }
+    );
+
+
+    /*
+     * Actualizar hora
+     */
+
+    function actualizarHora() {
+
+        const elemento =
+            document.getElementById(
+                "lastUpdate"
+            );
+
+        if (!elemento) return;
+
+        const ahora =
+            new Date();
+
+        elemento.textContent =
+            ahora.toLocaleTimeString(
+                "es-PE",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+
+    }
+
+
+    actualizarHora();
+
+    setInterval(
+        actualizarHora,
+        60000
+    );
+
+</script>
+
+
+</body>
+
+</html>
+

@@ -35,7 +35,11 @@ const msalConfigInfraestructura = {
 };
 
 
-const msalInstance =
+/* =========================================
+   INSTANCIA MSAL
+========================================= */
+
+const msalInstanceInfraestructura =
     new msal.PublicClientApplication(
         msalConfigInfraestructura
     );
@@ -62,7 +66,8 @@ const SHAREPOINT_LIST =
 async function obtenerTokenInfraestructura() {
 
     const cuentas =
-        msalInstance.getAllAccounts();
+        msalInstanceInfraestructura
+            .getAllAccounts();
 
 
     if (!cuentas.length) {
@@ -78,26 +83,48 @@ async function obtenerTokenInfraestructura() {
         cuentas[0];
 
 
-    msalInstance.setActiveAccount(
-        cuenta
-    );
+    msalInstanceInfraestructura
+        .setActiveAccount(cuenta);
 
 
-    const respuesta =
-        await msalInstance.acquireTokenSilent({
+    try {
 
-            scopes: [
-                "User.Read",
-                "Sites.Read.All"
-            ],
+        const respuesta =
+            await msalInstanceInfraestructura
+                .acquireTokenSilent({
 
-            account:
-                cuenta
+                    scopes: [
 
-        });
+                        "User.Read",
+
+                        "Sites.Read.All"
+
+                    ],
+
+                    account: cuenta
+
+                });
 
 
-    return respuesta.accessToken;
+        console.log(
+            "✅ Token obtenido correctamente"
+        );
+
+
+        return respuesta.accessToken;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ Error obteniendo token:",
+            error
+        );
+
+        throw error;
+
+    }
 
 }
 
@@ -136,10 +163,12 @@ async function obtenerSitioSharePoint(
         const error =
             await respuesta.text();
 
+
         console.error(
-            "Error SharePoint Site:",
+            "❌ Error obteniendo sitio SharePoint:",
             error
         );
+
 
         throw new Error(
             `SharePoint Site: HTTP ${respuesta.status}`
@@ -148,7 +177,17 @@ async function obtenerSitioSharePoint(
     }
 
 
-    return await respuesta.json();
+    const sitio =
+        await respuesta.json();
+
+
+    console.log(
+        "✅ Sitio SharePoint encontrado:",
+        sitio
+    );
+
+
+    return sitio;
 
 }
 
@@ -162,18 +201,21 @@ async function obtenerMonitoreoTI() {
     try {
 
         console.log(
-            "🔄 Conectando con Microsoft..."
+            "🔄 Conectando con Microsoft Graph..."
         );
 
+
+        /*
+         * TOKEN
+         */
 
         const TOKEN =
             await obtenerTokenInfraestructura();
 
 
-        console.log(
-            "✅ Token obtenido"
-        );
-
+        /*
+         * SITIO
+         */
 
         const sitio =
             await obtenerSitioSharePoint(
@@ -181,11 +223,9 @@ async function obtenerMonitoreoTI() {
             );
 
 
-        console.log(
-            "✅ Sitio SharePoint encontrado:",
-            sitio
-        );
-
+        /*
+         * LISTA
+         */
 
         const respuesta =
             await fetch(
@@ -213,10 +253,12 @@ async function obtenerMonitoreoTI() {
             const error =
                 await respuesta.text();
 
+
             console.error(
-                "Error obteniendo lista:",
+                "❌ Error obteniendo lista MonitoreoTI:",
                 error
             );
+
 
             throw new Error(
                 `MonitoreoTI: HTTP ${respuesta.status}`
@@ -230,16 +272,17 @@ async function obtenerMonitoreoTI() {
 
 
         console.log(
-            "================================="
+            "===================================="
         );
 
         console.log(
-            "✅ MONITOREO TI"
+            "✅ DATOS DE MONITOREO TI"
         );
 
         console.log(
-            "================================="
+            "===================================="
         );
+
 
         console.table(
             data.value
@@ -253,9 +296,10 @@ async function obtenerMonitoreoTI() {
     catch (error) {
 
         console.error(
-            "❌ Error Monitoreo TI:",
+            "❌ Error obteniendo Monitoreo TI:",
             error
         );
+
 
         return [];
 
@@ -265,7 +309,7 @@ async function obtenerMonitoreoTI() {
 
 
 /* =========================================
-   INICIAR
+   INICIAR MONITOREO
 ========================================= */
 
 async function iniciarMonitoreo() {
@@ -280,7 +324,7 @@ async function iniciarMonitoreo() {
 
 
     console.log(
-        "Datos recibidos:",
+        "Monitoreo TI cargado:",
         datos
     );
 

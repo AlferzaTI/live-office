@@ -635,120 +635,213 @@ function obtenerIconoServicio(
 /* =========================================
    RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
-
 function renderizarServicios(datos) {
-  const grid = document.getElementById("serviciosGrid");
-  const estadoInfraestructura = document.querySelector(
-    ".service-section .section-status"
-  );
+    const grid = document.getElementById("serviciosGrid");
+    const estadoGeneral = document.getElementById("estadoGeneral");
 
-  if (!grid) return;
+    if (!grid) return;
 
-  grid.innerHTML = "";
+    grid.innerHTML = "";
 
-  if (!datos || datos.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        No hay servicios registrados.
-      </div>
-    `;
+    // ==========================================
+    // SIN DATOS
+    // ==========================================
 
-    if (estadoInfraestructura) {
-      estadoInfraestructura.textContent = "NO CONFIGURADO";
+    if (!datos || datos.length === 0) {
+
+        grid.innerHTML = `
+            <div class="empty-state">
+                No hay servicios registrados.
+            </div>
+        `;
+
+        if (estadoGeneral) {
+            estadoGeneral.textContent = "● NO CONFIGURADO";
+            estadoGeneral.className = "section-status";
+        }
+
+        return;
     }
 
-    return;
-  }
+    // ==========================================
+    // ESTADOS
+    // ==========================================
 
-  const estados = [];
+    const estados = [];
 
-  datos.forEach(item => {
-    const campos = obtenerCampos(item);
+    datos.forEach(item => {
 
-    const servicio = campos.Servicio || "Servicio";
-    const estado = campos.Estado || "No configurado";
-    const detalle = campos.Detalle || "Sin información disponible";
-    const latencia = campos.Latencia;
+        const campos = obtenerCampos(item);
 
-    const estadoNormalizado = normalizarEstado(estado);
-    estados.push(estadoNormalizado);
+        const servicio =
+            campos.Servicio || "Servicio";
 
-    const tipoEstado = clasificarEstado(estado);
-    const icono = obtenerIconoServicio(servicio);
+        const estado =
+            campos.Estado || "No configurado";
 
-    const latenciaTexto =
-      latencia !== undefined &&
-      latencia !== null &&
-      latencia !== ""
-        ? `${latencia} ms`
-        : "—";
+        const detalle =
+            campos.Detalle ||
+            "Sin información disponible";
 
-    const card = document.createElement("div");
+        const latencia =
+            campos.Latencia;
 
-    card.className = `service-card ${tipoEstado}`;
+        const estadoNormalizado =
+            normalizarEstado(estado);
 
-    card.innerHTML = `
-      <div class="service-icon">
-        ${icono}
-      </div>
+        estados.push(estadoNormalizado);
 
-      <div class="service-content">
-        <div class="service-status ${tipoEstado}">
-          <span class="status-dot"></span>
-          ${estado}
-        </div>
+        const tipoEstado =
+            clasificarEstado(estado);
 
-        <h3>${servicio}</h3>
+        const icono =
+            obtenerIconoServicio(servicio);
 
-        <p>${detalle}</p>
+        const latenciaTexto =
+            latencia !== undefined &&
+            latencia !== null &&
+            latencia !== ""
+                ? `${latencia} ms`
+                : "—";
 
-        <div class="service-latency">
-          <span>Latencia</span>
-          <strong>${latenciaTexto}</strong>
-        </div>
-      </div>
-    `;
+        // ======================================
+        // CREAR TARJETA
+        // ======================================
 
-    grid.appendChild(card);
-  });
+        const card =
+            document.createElement("div");
 
-  // ==========================================
-  // ACTUALIZAR ESTADO DE INFRAESTRUCTURA
-  // ==========================================
+        card.className =
+            `service-card ${tipoEstado}`;
 
-  if (estadoInfraestructura) {
-    const hayIncidencia = estados.some(estado =>
-      ["incidencia", "error", "caido"].includes(estado)
-    );
+        card.innerHTML = `
+            <div class="service-icon">
+                ${icono}
+            </div>
 
-    const hayAdvertencia = estados.some(estado =>
-      ["advertencia", "warning", "pendiente"].includes(estado)
-    );
+            <div class="service-content">
 
-    const todosNoConfigurados =
-      estados.length > 0 &&
-      estados.every(estado =>
-        estado === "no configurado" || estado === ""
-      );
+                <div class="service-status ${tipoEstado}">
+                    <span class="status-dot"></span>
+                    ${estado}
+                </div>
 
-    const todosOperativos =
-      estados.length > 0 &&
-      estados.every(estado =>
-        ["operativo", "vigente", "activo", "responde"].includes(estado)
-      );
+                <h3>
+                    ${servicio}
+                </h3>
 
-    if (hayIncidencia) {
-      estadoInfraestructura.textContent = "INCIDENCIA";
-    } else if (hayAdvertencia) {
-      estadoInfraestructura.textContent = "ADVERTENCIA";
-    } else if (todosNoConfigurados) {
-      estadoInfraestructura.textContent = "NO CONFIGURADO";
-    } else if (todosOperativos) {
-      estadoInfraestructura.textContent = "OPERATIVO";
-    } else {
-      estadoInfraestructura.textContent = "NO CONFIGURADO";
+                <p>
+                    ${detalle}
+                </p>
+
+                <div class="service-latency">
+
+                    <span>
+                        Latencia
+                    </span>
+
+                    <strong>
+                        ${latenciaTexto}
+                    </strong>
+
+                </div>
+
+            </div>
+        `;
+
+        grid.appendChild(card);
+
+    });
+
+    // ==========================================
+    // ESTADO GENERAL DE INFRAESTRUCTURA
+    // ==========================================
+
+    if (estadoGeneral) {
+
+        const hayIncidencia =
+            estados.some(estado =>
+                [
+                    "incidencia",
+                    "error",
+                    "caido"
+                ].includes(estado)
+            );
+
+        const hayAdvertencia =
+            estados.some(estado =>
+                [
+                    "advertencia",
+                    "warning",
+                    "pendiente"
+                ].includes(estado)
+            );
+
+        const todosNoConfigurados =
+            estados.length > 0 &&
+            estados.every(estado =>
+                estado === "no configurado" ||
+                estado === ""
+            );
+
+        const todosOperativos =
+            estados.length > 0 &&
+            estados.every(estado =>
+                [
+                    "operativo",
+                    "vigente",
+                    "activo",
+                    "responde"
+                ].includes(estado)
+            );
+
+        // ======================================
+        // DETERMINAR ESTADO
+        // ======================================
+
+        if (hayIncidencia) {
+
+            estadoGeneral.textContent =
+                "● INCIDENCIA";
+
+            estadoGeneral.className =
+                "section-status offline";
+
+        } else if (hayAdvertencia) {
+
+            estadoGeneral.textContent =
+                "● ADVERTENCIA";
+
+            estadoGeneral.className =
+                "section-status warning";
+
+        } else if (todosNoConfigurados) {
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        } else if (todosOperativos) {
+
+            estadoGeneral.textContent =
+                "● OPERATIVO";
+
+            estadoGeneral.className =
+                "section-status online";
+
+        } else {
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        }
+
     }
-  }
 }
 
 /* =========================================

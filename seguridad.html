@@ -40,7 +40,7 @@
 
     <link
         rel="stylesheet"
-        href="seguridad.css?v=6"
+        href="seguridad.css?v=7"
     >
 
 </head>
@@ -293,72 +293,57 @@
 
 
         <!-- ==================================
-             GRID PRINCIPAL
+             BUSCADOR DE TRABAJADORES
         ================================== -->
 
         <div class="worker-search">
-
-    <div class="worker-search-header">
-
-        <div>
-
-            <span class="card-label">
-                DIRECTORIO
-            </span>
 
             <h3>
                 Buscar trabajador
             </h3>
 
+
+            <div class="search-box">
+
+                <span class="search-icon">
+                    🔎
+                </span>
+
+
+                <input
+                    type="text"
+                    id="workerSearch"
+                    placeholder="Buscar por nombre, usuario, correo o departamento..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="button"
+                    id="clearWorkerSearch"
+                    class="clear-search"
+                    title="Limpiar búsqueda"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="workerSearchResult"
+                class="worker-search-result"
+            ></div>
+
         </div>
 
-    </div>
+
+
+        <!-- ==================================
+             GRID PRINCIPAL
+        ================================== -->
+
         <section class="dashboard-grid">
-
-            <!-- =====================================================
-     BUSCADOR DE TRABAJADORES
-====================================================== -->
-
-
-
-        <div class="worker-search">
-
-        <h3>
-            Buscar trabajador
-        </h3>
-
-        <div class="search-box">
-
-            <span class="search-icon">
-                🔎
-            </span>
-
-            <input
-                type="text"
-                id="workerSearch"
-                placeholder="Buscar por nombre, usuario, correo o departamento..."
-                autocomplete="off"
-            >
-
-            <button
-                type="button"
-                id="clearWorkerSearch"
-                class="clear-search"
-                title="Limpiar búsqueda"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <div
-            id="workerSearchResult"
-            class="worker-search-result"
-        ></div>
-
-    </div>
-
 
 
             <!-- ==================================
@@ -920,6 +905,7 @@
 
         </section>
 
+
     </main>
 
 </div>
@@ -947,7 +933,7 @@
 ></script>
 
 <script
-    src="seguridad.js?v=5"
+    src="seguridad.js?v=6"
 ></script>
 
 

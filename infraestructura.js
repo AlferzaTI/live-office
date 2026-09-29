@@ -635,19 +635,37 @@ function obtenerIconoServicio(
 /* =========================================
    RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
+/* =========================================
+   RENDERIZAR SERVICIOS PRINCIPALES
+========================================= */
+
 function renderizarServicios(datos) {
-    const grid = document.getElementById("serviciosGrid");
-    const estadoGeneral = document.getElementById("estadoGeneral");
+
+    const grid =
+        document.getElementById(
+            "serviciosGrid"
+        );
+
+    const estadoGeneral =
+        document.getElementById(
+            "estadoGeneral"
+        );
+
 
     if (!grid) return;
 
+
     grid.innerHTML = "";
+
 
     // ==========================================
     // SIN DATOS
     // ==========================================
 
-    if (!datos || datos.length === 0) {
+    if (
+        !datos ||
+        datos.length === 0
+    ) {
 
         grid.innerHTML = `
             <div class="empty-state">
@@ -655,13 +673,22 @@ function renderizarServicios(datos) {
             </div>
         `;
 
+
         if (estadoGeneral) {
-            estadoGeneral.textContent = "● NO CONFIGURADO";
-            estadoGeneral.className = "section-status";
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
         }
 
+
         return;
+
     }
+
 
     // ==========================================
     // ESTADOS
@@ -669,89 +696,123 @@ function renderizarServicios(datos) {
 
     const estados = [];
 
-    datos.forEach(item => {
 
-        const campos = obtenerCampos(item);
+    datos.forEach(
+        item => {
 
-        const servicio =
-            campos.Servicio || "Servicio";
+            const campos =
+                obtenerCampos(
+                    item
+                );
 
-        const estado =
-            campos.Estado || "No configurado";
 
-        const detalle =
-            campos.Detalle ||
-            "Sin información disponible";
+            const servicio =
+                campos.Servicio ||
+                "Servicio";
 
-        const latencia =
-            campos.Latencia;
 
-        const estadoNormalizado =
-            normalizarEstado(estado);
+            const estado =
+                campos.Estado ||
+                "No configurado";
 
-        estados.push(estadoNormalizado);
 
-        const tipoEstado =
-            clasificarEstado(estado);
+            const detalle =
+                campos.Detalle ||
+                "Sin información disponible";
 
-        const icono =
-            obtenerIconoServicio(servicio);
 
-        const latenciaTexto =
-            latencia !== undefined &&
-            latencia !== null &&
-            latencia !== ""
-                ? `${latencia} ms`
-                : "—";
+            const latencia =
+                campos.Latencia;
 
-        // ======================================
-        // CREAR TARJETA
-        // ======================================
 
-        const card =
-            document.createElement("div");
+            const estadoNormalizado =
+                normalizarEstado(
+                    estado
+                );
 
-        card.className =
-            `service-card ${tipoEstado}`;
 
-        card.innerHTML = `
-            <div class="service-icon">
-                ${icono}
-            </div>
+            estados.push(
+                estadoNormalizado
+            );
 
-            <div class="service-content">
 
-                <div class="service-status ${tipoEstado}">
-                    <span class="status-dot"></span>
-                    ${estado}
+            const tipoEstado =
+                clasificarEstado(
+                    estado
+                );
+
+
+            const icono =
+                obtenerIconoServicio(
+                    servicio
+                );
+
+
+            const latenciaTexto =
+                latencia !== undefined &&
+                latencia !== null &&
+                latencia !== ""
+                    ? `${latencia} ms`
+                    : "—";
+
+
+            // ======================================
+            // CREAR TARJETA
+            // ======================================
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                `service-card ${tipoEstado}`;
+
+
+            card.innerHTML = `
+                <div class="service-icon">
+                    ${icono}
                 </div>
 
-                <h3>
-                    ${servicio}
-                </h3>
+                <div class="service-content">
 
-                <p>
-                    ${detalle}
-                </p>
+                    <div class="service-status ${tipoEstado}">
+                        <span class="status-dot"></span>
+                        ${estado}
+                    </div>
 
-                <div class="service-latency">
+                    <h3>
+                        ${servicio}
+                    </h3>
 
-                    <span>
-                        Latencia
-                    </span>
+                    <p>
+                        ${detalle}
+                    </p>
 
-                    <strong>
-                        ${latenciaTexto}
-                    </strong>
+                    <div class="service-latency">
+
+                        <span>
+                            Latencia
+                        </span>
+
+                        <strong>
+                            ${latenciaTexto}
+                        </strong>
+
+                    </div>
 
                 </div>
+            `;
 
-            </div>
-        `;
 
-        grid.appendChild(card);
+            grid.appendChild(
+                card
+            );
 
-    });
+        }
+    );
+
 
     // ==========================================
     // ESTADO GENERAL DE INFRAESTRUCTURA
@@ -759,44 +820,94 @@ function renderizarServicios(datos) {
 
     if (estadoGeneral) {
 
-        const hayIncidencia =
-            estados.some(estado =>
-                [
-                    "incidencia",
-                    "error",
-                    "caido"
-                ].includes(estado)
+        /*
+         * Normalizamos todos los estados
+         * a minúsculas para evitar problemas
+         * como:
+         *
+         * "Operativo" !== "operativo"
+         */
+
+        const estadosNormalizados =
+            estados.map(
+                estado =>
+                    String(
+                        estado
+                    )
+                    .trim()
+                    .toLowerCase()
             );
 
-        const hayAdvertencia =
-            estados.some(estado =>
-                [
-                    "advertencia",
-                    "warning",
-                    "pendiente"
-                ].includes(estado)
-            );
-
-        const todosNoConfigurados =
-            estados.length > 0 &&
-            estados.every(estado =>
-                estado === "no configurado" ||
-                estado === ""
-            );
-
-        const todosOperativos =
-            estados.length > 0 &&
-            estados.every(estado =>
-                [
-                    "operativo",
-                    "vigente",
-                    "activo",
-                    "responde"
-                ].includes(estado)
-            );
 
         // ======================================
-        // DETERMINAR ESTADO
+        // BUSCAR INCIDENCIAS
+        // ======================================
+
+        const hayIncidencia =
+            estadosNormalizados.some(
+                estado =>
+                    [
+                        "incidencia",
+                        "error",
+                        "caido",
+                        "caído"
+                    ].includes(
+                        estado
+                    )
+            );
+
+
+        // ======================================
+        // BUSCAR ADVERTENCIAS
+        // ======================================
+
+        const hayAdvertencia =
+            estadosNormalizados.some(
+                estado =>
+                    [
+                        "advertencia",
+                        "warning",
+                        "pendiente"
+                    ].includes(
+                        estado
+                    )
+            );
+
+
+        // ======================================
+        // VERIFICAR NO CONFIGURADOS
+        // ======================================
+
+        const todosNoConfigurados =
+            estadosNormalizados.length > 0 &&
+            estadosNormalizados.every(
+                estado =>
+                    estado === "no configurado" ||
+                    estado === ""
+            );
+
+
+        // ======================================
+        // VERIFICAR OPERATIVOS
+        // ======================================
+
+        const todosOperativos =
+            estadosNormalizados.length > 0 &&
+            estadosNormalizados.every(
+                estado =>
+                    [
+                        "operativo",
+                        "vigente",
+                        "activo",
+                        "responde"
+                    ].includes(
+                        estado
+                    )
+            );
+
+
+        // ======================================
+        // DETERMINAR ESTADO FINAL
         // ======================================
 
         if (hayIncidencia) {
@@ -807,7 +918,9 @@ function renderizarServicios(datos) {
             estadoGeneral.className =
                 "section-status offline";
 
-        } else if (hayAdvertencia) {
+        }
+
+        else if (hayAdvertencia) {
 
             estadoGeneral.textContent =
                 "● ADVERTENCIA";
@@ -815,15 +928,9 @@ function renderizarServicios(datos) {
             estadoGeneral.className =
                 "section-status warning";
 
-        } else if (todosNoConfigurados) {
+        }
 
-            estadoGeneral.textContent =
-                "● NO CONFIGURADO";
-
-            estadoGeneral.className =
-                "section-status";
-
-        } else if (todosOperativos) {
+        else if (todosOperativos) {
 
             estadoGeneral.textContent =
                 "● OPERATIVO";
@@ -831,7 +938,19 @@ function renderizarServicios(datos) {
             estadoGeneral.className =
                 "section-status online";
 
-        } else {
+        }
+
+        else if (todosNoConfigurados) {
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        }
+
+        else {
 
             estadoGeneral.textContent =
                 "● NO CONFIGURADO";
@@ -842,8 +961,8 @@ function renderizarServicios(datos) {
         }
 
     }
-}
 
+}
 /* =========================================
    ACTUALIZAR RESUMEN
 ========================================= */

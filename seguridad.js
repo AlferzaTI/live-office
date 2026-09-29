@@ -404,12 +404,9 @@ async function cargarSeguridad() {
         "Consultando Microsoft 365..."
     );
 
-
-    /*
-     * Cada módulo funciona de manera independiente.
-     *
-     * Si uno falla, los demás continúan.
-     */
+    console.log("========================================");
+    console.log("INICIANDO CARGA DE SEGURIDAD");
+    console.log("========================================");
 
     const resultados =
         await Promise.allSettled([
@@ -426,7 +423,6 @@ async function cargarSeguridad() {
 
         ]);
 
-
     const nombres = [
 
         "Usuarios",
@@ -441,12 +437,16 @@ async function cargarSeguridad() {
 
     ];
 
-
     resultados.forEach(
         (
             resultado,
             index
         ) => {
+
+            console.log(
+                `${nombres[index]}:`,
+                resultado.status
+            );
 
             if (
                 resultado.status ===
@@ -454,11 +454,8 @@ async function cargarSeguridad() {
             ) {
 
                 console.error(
-
                     `Error cargando ${nombres[index]}:`,
-
                     resultado.reason
-
                 );
 
             }
@@ -466,6 +463,10 @@ async function cargarSeguridad() {
         }
     );
 
+    console.log(
+        "ESTADO FINAL:",
+        securityData.status
+    );
 
     console.log(
         "Datos de seguridad:",
@@ -473,7 +474,6 @@ async function cargarSeguridad() {
     );
 
 }
-
 
 /* ============================================================
    USUARIOS

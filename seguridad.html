@@ -321,36 +321,44 @@
 
 
 
-    <div class="search-box">
+        <div class="worker-search">
 
-        <span class="search-icon">
-            🔎
-        </span>
+        <h3>
+            Buscar trabajador
+        </h3>
 
-        <input
-            type="text"
-            id="workerSearch"
-            placeholder="Buscar por nombre, correo o departamento..."
-            autocomplete="off"
-        >
+        <div class="search-box">
 
-        <button
-            type="button"
-            id="clearWorkerSearch"
-            class="clear-search"
-            title="Limpiar búsqueda"
-        >
-            ×
-        </button>
+            <span class="search-icon">
+                🔎
+            </span>
+
+            <input
+                type="text"
+                id="workerSearch"
+                placeholder="Buscar por nombre, usuario, correo o departamento..."
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                id="clearWorkerSearch"
+                class="clear-search"
+                title="Limpiar búsqueda"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="workerSearchResult"
+            class="worker-search-result"
+        ></div>
 
     </div>
 
-    <div
-        id="workerSearchResult"
-        class="worker-search-result"
-    ></div>
-
-</div>
 
 
             <!-- ==================================

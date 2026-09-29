@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="es">
@@ -870,10 +869,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:25%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -890,10 +891,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:68%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -910,10 +913,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:54%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -959,10 +964,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:31%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -979,10 +986,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:72%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -999,10 +1008,12 @@
                             </strong>
 
                             <div class="progress">
+
                                 <div
                                     class="progress-bar"
                                     style="width:61%"
                                 ></div>
+
                             </div>
 
                         </div>
@@ -1033,15 +1044,13 @@
 
 
 <!-- ==========================================
-     SCRIPT
+     SCRIPT DE LA PÁGINA
      ========================================== -->
 
 <script>
 
     /*
-     * Simulación de actualización.
-     * Posteriormente aquí conectaremos
-     * el backend real.
+     * Ocultar pantalla de carga
      */
 
     window.addEventListener(
@@ -1085,8 +1094,10 @@
 
         if (!elemento) return;
 
+
         const ahora =
             new Date();
+
 
         elemento.textContent =
             ahora.toLocaleTimeString(
@@ -1103,6 +1114,7 @@
 
     actualizarHora();
 
+
     setInterval(
         actualizarHora,
         60000
@@ -1111,7 +1123,24 @@
 </script>
 
 
+<!-- ==========================================
+     MICROSOFT MSAL
+     ========================================== -->
+
+<script
+    src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"
+></script>
+
+
+<!-- ==========================================
+     MONITOREO TI
+     ========================================== -->
+
+<script
+    src="infraestructura.js"
+></script>
+
+
 </body>
 
 </html>
-

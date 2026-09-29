@@ -65,6 +65,7 @@ body {
 }
 
 @keyframes logoTitleAnimation {
+
     0% {
         opacity: .75;
         transform: translateY(2px);
@@ -82,9 +83,11 @@ body {
         transform: translateY(2px);
         text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
+
 }
 
 @keyframes logoSubtitleAnimation {
+
     0%,
     100% {
         opacity: .55;
@@ -93,6 +96,7 @@ body {
     50% {
         opacity: 1;
     }
+
 }
 
 
@@ -127,6 +131,7 @@ body {
 }
 
 @keyframes pulseLive {
+
     0%,
     100% {
         opacity: 1;
@@ -135,6 +140,7 @@ body {
     50% {
         opacity: .45;
     }
+
 }
 
 
@@ -344,6 +350,319 @@ body {
 
 
 /* =========================================================
+   BUSCADOR DE TRABAJADORES
+========================================================= */
+
+.worker-search {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+
+    background: #b8860b;
+
+    border: 1px solid #9a7208;
+    border-radius: 12px;
+
+    padding: 12px 14px;
+    margin: 0 0 18px 0;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+}
+
+.worker-search h3 {
+    margin: 0 0 9px 0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CAJA DE BÚSQUEDA
+========================================================= */
+
+.search-box {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-box input {
+    display: block;
+
+    width: 100%;
+    height: 38px;
+
+    box-sizing: border-box;
+
+    padding: 0 42px 0 38px;
+
+    border: 1px solid #d6dbe3;
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #ffffff;
+    color: #0f172a;
+
+    font-size: 12px;
+}
+
+.search-box input::placeholder {
+    color: #94a3b8;
+}
+
+.search-box input:focus {
+    border-color: #64748b;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .25);
+}
+
+.search-icon {
+    position: absolute;
+
+    left: 13px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 14px;
+
+    pointer-events: none;
+    z-index: 2;
+}
+
+.clear-search {
+    position: absolute;
+
+    right: 7px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 27px;
+    height: 27px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: transparent;
+    color: #64748b;
+
+    font-size: 19px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.clear-search:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   RESULTADOS DEL BUSCADOR
+========================================================= */
+
+.worker-search-result {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+.search-results-header {
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 7px 2px;
+}
+
+.search-results-header strong {
+    color: #ffffff;
+    font-size: 11px;
+}
+
+.search-results-header span {
+    min-width: 23px;
+    height: 23px;
+
+    padding: 0 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 20px;
+
+    background: #ffffff;
+    color: #8a6500;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.search-results-list {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.search-user {
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    transition: .15s ease;
+}
+
+.search-user:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.search-user-main {
+    width: 280px;
+    min-width: 280px;
+}
+
+.search-user-main strong {
+    display: block;
+
+    color: #0f172a;
+    font-size: 11px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-user-main span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #64748b;
+    font-size: 9px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-user-data {
+    flex: 1;
+    min-width: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        110px
+        1.5fr;
+
+    gap: 15px;
+}
+
+.search-user-data small {
+    display: block;
+
+    color: #94a3b8;
+    font-size: 8px;
+
+    margin-bottom: 2px;
+}
+
+.search-user-data strong {
+    display: block;
+
+    color: #475569;
+    font-size: 10px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-active {
+    color: #15803d !important;
+}
+
+.search-blocked {
+    color: #dc2626 !important;
+}
+
+.search-no-results {
+    width: 100%;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+}
+
+.search-no-results > span {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 7px;
+
+    background: #f1f5f9;
+
+    font-size: 14px;
+}
+
+.search-no-results strong {
+    display: block;
+
+    color: #475569;
+    font-size: 11px;
+}
+
+.search-no-results small {
+    display: block;
+
+    color: #94a3b8;
+    font-size: 9px;
+
+    margin-top: 2px;
+}
+
+
+/* =========================================================
    GRID PRINCIPAL
 ========================================================= */
 
@@ -374,49 +693,36 @@ body {
    POSICIONES EXACTAS
 ========================================================= */
 
-/* 1 - Usuarios registrados */
 .dashboard-grid > .dashboard-card:nth-child(1) {
     grid-column: 1;
     grid-row: 1;
 }
 
-
-/* 2 - Usuarios por departamento */
 .dashboard-grid > .dashboard-card:nth-child(2) {
     grid-column: 2;
     grid-row: 1;
 }
 
-
-/* 3 - Resumen de actividad */
 .dashboard-grid > .dashboard-card:nth-child(3) {
     grid-column: 2;
     grid-row: 2;
 }
 
-
-/* 4 - Cuentas bloqueadas */
 .dashboard-grid > .dashboard-card:nth-child(4) {
     grid-column: 1;
     grid-row: 2;
 }
 
-
-/* 5 - Resumen de usuarios */
 .dashboard-grid > .dashboard-card:nth-child(5) {
     grid-column: 2;
     grid-row: 3;
 }
 
-
-/* 6 - Monitoreo */
 .dashboard-grid > .dashboard-card:nth-child(6) {
     grid-column: 1;
     grid-row: 3;
 }
 
-
-/* 7 - Información */
 .dashboard-grid > .dashboard-card:nth-child(7) {
     grid-column: 1 / -1;
     grid-row: 4;
@@ -466,10 +772,15 @@ body {
 
 .dashboard-card {
     background: white;
+
     border-radius: 16px;
+
     padding: 22px;
+
     box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+
     min-width: 0;
+
     border: 1px solid rgba(226, 232, 240, .7);
 }
 
@@ -479,7 +790,7 @@ body {
 
 
 /* =========================================================
-   CARDS COMPACTOS SOLO EN PRINCIPAL
+   CARDS COMPACTOS
 ========================================================= */
 
 .content:not(.filter-mode) .dashboard-card {
@@ -524,21 +835,28 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     margin-bottom: 20px;
 }
 
 .card-label {
     display: block;
+
     color: #3b82f6;
+
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 1px;
+
     margin-bottom: 5px;
 }
 
 .card-header h3 {
     color: #0f172a;
+
     font-size: 19px;
+
     font-weight: 800;
 }
 
@@ -549,14 +867,19 @@ body {
 
 .loading {
     padding: 25px 10px;
+
     text-align: center;
+
     color: #94a3b8;
+
     font-size: 12px;
 }
 
 .loading-cell {
     text-align: center;
+
     padding: 35px !important;
+
     color: #94a3b8 !important;
 }
 
@@ -567,9 +890,13 @@ body {
 
 .counter {
     padding: 6px 10px;
+
     border-radius: 20px;
+
     font-size: 11px;
+
     font-weight: 700;
+
     white-space: nowrap;
 }
 
@@ -600,15 +927,21 @@ body {
 
 .table-container {
     width: 100%;
+
     overflow-x: auto;
+
     border: 1px solid #e2e8f0;
+
     border-radius: 12px;
+
     background: white;
 }
 
 table {
     width: 100%;
+
     border-collapse: separate;
+
     border-spacing: 0;
 }
 
@@ -618,22 +951,35 @@ thead {
 
 th {
     padding: 14px 16px;
+
     text-align: left;
+
     color: #64748b;
+
     font-size: 10px;
+
     font-weight: 800;
+
     text-transform: uppercase;
+
     letter-spacing: .45px;
+
     white-space: nowrap;
+
     border-bottom: 1px solid #e2e8f0;
 }
 
 td {
     padding: 14px 16px;
+
     border-bottom: 1px solid #eef2f7;
+
     color: #475569;
+
     font-size: 12px;
+
     vertical-align: middle;
+
     background: white;
 }
 
@@ -678,7 +1024,9 @@ tbody tr:hover td {
 .user-cell {
     display: flex;
     align-items: center;
+
     gap: 11px;
+
     min-width: 220px;
 }
 
@@ -688,34 +1036,51 @@ tbody tr:hover td {
 
 .user-cell-info strong {
     display: block;
+
     color: #0f172a;
+
     font-size: 12px;
+
     font-weight: 700;
+
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
 .user-cell-info small {
     display: block;
+
     color: #94a3b8;
+
     font-size: 10px;
+
     margin-top: 2px;
 }
 
 .email-cell {
     color: #475569;
+
     max-width: 400px;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
 }
 
 .department-cell {
     color: #475569;
+
     max-width: 320px;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
 }
 
@@ -727,12 +1092,18 @@ tbody tr:hover td {
 .avatar {
     width: 36px;
     height: 36px;
+
     border-radius: 50%;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     font-size: 10px;
+
     font-weight: 800;
+
     flex-shrink: 0;
 }
 
@@ -753,19 +1124,28 @@ tbody tr:hover td {
 
 .status-badge {
     display: inline-flex;
+
     align-items: center;
+
     gap: 6px;
+
     padding: 5px 9px;
+
     border-radius: 999px;
+
     font-size: 10px;
+
     font-weight: 800;
+
     white-space: nowrap;
 }
 
 .status-badge::before {
     content: "";
+
     width: 6px;
     height: 6px;
+
     border-radius: 50%;
 }
 
@@ -821,31 +1201,45 @@ tbody tr:hover td {
 
 .department-progress {
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 }
 
 .department-bar {
     height: 8px;
+
     flex: 1;
+
     min-width: 100px;
+
     background: #e2e8f0;
+
     border-radius: 20px;
+
     overflow: hidden;
 }
 
 .department-fill {
     height: 100%;
+
     background: #3b82f6;
+
     border-radius: 20px;
+
     transition: width .5s ease;
 }
 
 .department-percent {
     width: 45px;
+
     text-align: right;
+
     font-size: 10px;
+
     font-weight: 800;
+
     color: #64748b;
 }
 
@@ -856,16 +1250,23 @@ tbody tr:hover td {
 
 .audit-summary {
     display: flex;
+
     flex-direction: column;
+
     gap: 8px;
 }
 
 .audit-type-row {
     display: flex;
+
     align-items: center;
+
     gap: 12px;
+
     padding: 9px 8px;
+
     border-radius: 10px;
+
     transition: background .15s ease;
 }
 
@@ -876,36 +1277,50 @@ tbody tr:hover td {
 .audit-type-icon {
     width: 34px;
     height: 34px;
+
     border-radius: 9px;
+
     background: #f1f5f9;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     font-size: 14px;
+
     flex-shrink: 0;
 }
 
 .audit-type-info {
     flex: 1;
+
     min-width: 0;
 }
 
 .audit-type-info strong {
     display: block;
+
     font-size: 12px;
+
     color: #0f172a;
 }
 
 .audit-type-info small {
     display: block;
+
     color: #94a3b8;
+
     font-size: 10px;
+
     margin-top: 2px;
 }
 
 .audit-type-count {
     font-size: 15px;
+
     font-weight: 800;
+
     color: #334155;
 }
 
@@ -937,32 +1352,45 @@ tbody tr:hover td {
 
 .audit-action {
     display: flex;
+
     align-items: center;
+
     gap: 9px;
+
     min-width: 250px;
 }
 
 .audit-icon {
     width: 30px;
     height: 30px;
+
     border-radius: 8px;
+
     background: #f1f5f9;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     flex-shrink: 0;
 }
 
 .audit-action strong {
     display: block;
+
     color: #0f172a;
+
     font-size: 12px;
 }
 
 .audit-action small {
     display: block;
+
     color: #94a3b8;
+
     font-size: 9px;
+
     margin-top: 2px;
 }
 
@@ -972,28 +1400,39 @@ tbody tr:hover td {
 
 .audit-user strong {
     display: block;
+
     color: #334155;
+
     font-size: 11px;
 }
 
 .audit-user small {
     display: block;
+
     color: #94a3b8;
+
     font-size: 9px;
+
     margin-top: 2px;
 }
 
 .target-name {
     max-width: 350px;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
+
     color: #475569;
 }
 
 .audit-date {
     white-space: nowrap;
+
     color: #64748b;
+
     font-size: 10px;
 }
 
@@ -1004,60 +1443,86 @@ tbody tr:hover td {
 
 .pagination {
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     gap: 12px;
+
     margin-top: 17px;
+
     min-height: 38px;
 }
 
 .pagination-info {
     color: #64748b;
+
     font-size: 11px;
+
     white-space: nowrap;
 }
 
 .pagination-controls {
     display: flex;
+
     align-items: center;
+
     gap: 5px;
 }
 
 .pagination-button {
     min-width: 32px;
     height: 32px;
+
     padding: 0 9px;
+
     border: 1px solid #e2e8f0;
+
     border-radius: 8px;
+
     background: white;
+
     color: #475569;
+
     font-size: 11px;
+
     font-weight: 700;
+
     cursor: pointer;
+
     transition: .15s ease;
 }
 
 .pagination-button:hover:not(:disabled) {
     border-color: #3b82f6;
+
     color: #2563eb;
+
     background: #eff6ff;
 }
 
 .pagination-button.active {
     background: #3b82f6;
+
     border-color: #3b82f6;
+
     color: white;
 }
 
 .pagination-button:disabled {
     opacity: .45;
+
     cursor: not-allowed;
 }
 
 .pagination-ellipsis {
     min-width: 25px;
+
     text-align: center;
+
     color: #94a3b8;
+
     font-size: 12px;
 }
 
@@ -1093,20 +1558,26 @@ tbody tr:hover td {
 
 
 /* =========================================================
-   DIRECTORY SUMMARY
+   DIRECTORIO SUMMARY
 ========================================================= */
 
 .directory-summary {
     display: flex;
+
     flex-direction: column;
+
     gap: 4px;
 }
 
 .summary-row {
     display: flex;
+
     align-items: center;
+
     gap: 13px;
+
     padding: 12px 0;
+
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -1117,11 +1588,16 @@ tbody tr:hover td {
 .summary-icon {
     width: 38px;
     height: 38px;
+
     border-radius: 10px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     font-size: 16px;
+
     flex-shrink: 0;
 }
 
@@ -1143,14 +1619,19 @@ tbody tr:hover td {
 
 .summary-row strong {
     display: block;
+
     font-size: 15px;
+
     color: #0f172a;
 }
 
 .summary-row small {
     display: block;
+
     margin-top: 2px;
+
     color: #94a3b8;
+
     font-size: 10px;
 }
 
@@ -1161,37 +1642,55 @@ tbody tr:hover td {
 
 .information-box {
     display: flex;
+
     align-items: flex-start;
+
     gap: 14px;
+
     padding: 15px;
+
     border-radius: 12px;
+
     background: #f8fafc;
+
     border: 1px solid #e2e8f0;
 }
 
 .information-icon {
     width: 32px;
     height: 32px;
+
     border-radius: 50%;
+
     background: #dcfce7;
+
     color: #15803d;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     font-weight: 800;
+
     flex-shrink: 0;
 }
 
 .information-box strong {
     display: block;
+
     font-size: 13px;
+
     color: #0f172a;
+
     margin-bottom: 4px;
 }
 
 .information-box p {
     color: #64748b;
+
     font-size: 11px;
+
     line-height: 1.6;
 }
 
@@ -1202,11 +1701,17 @@ tbody tr:hover td {
 
 footer {
     height: 50px;
+
     background: #0f172a;
+
     color: white;
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
+
     font-size: 13px;
 }
 
@@ -1217,11 +1722,17 @@ footer {
 
 .security-error {
     margin-bottom: 20px;
+
     padding: 15px 18px;
+
     border-radius: 10px;
+
     background: #fee2e2;
+
     border: 1px solid #fecaca;
+
     color: #991b1b;
+
     font-size: 14px;
 }
 
@@ -1246,6 +1757,7 @@ footer {
         width: 100%;
         max-width: none;
     }
+
 }
 
 
@@ -1263,6 +1775,28 @@ footer {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    .search-user {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .search-user-main {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-user-data {
+        width: 100%;
+        flex-basis: 100%;
+
+        grid-template-columns:
+            1fr
+            1fr;
+
+        gap: 10px;
+    }
+
 }
 
 
@@ -1280,6 +1814,7 @@ footer {
     .department-progress {
         min-width: 150px;
     }
+
 }
 
 
@@ -1373,6 +1908,15 @@ footer {
     .audit-table {
         min-width: 900px;
     }
+
+    .worker-search {
+        padding: 11px;
+    }
+
+    .search-user-data {
+        grid-template-columns: 1fr;
+    }
+
 }
 
 
@@ -1391,350 +1935,6 @@ footer {
         padding: 6px 8px;
         gap: 6px;
         font-size: 9px;
-    }
-}
-
-
-/* ==========================================
-   BUSCADOR DE TRABAJADORES
-========================================== */
-
-.worker-search {
-    width: 100%;
-    max-width: none;
-    box-sizing: border-box;
-    background: #b8860b;
-    border: 1px solid #9a7208;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin: 0 0 18px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
-}
-
-.worker-search h3 {
-    margin: 0 0 9px 0;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.search-box {
-    position: relative;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.search-box input {
-    display: block;
-    width: 100%;
-    height: 38px;
-    box-sizing: border-box;
-
-    padding: 0 42px 0 38px;
-
-    border: 1px solid #d6dbe3;
-    border-radius: 8px;
-
-    outline: none;
-
-    background: #ffffff;
-    color: #0f172a;
-
-    font-size: 12px;
-}
-
-.search-box input::placeholder {
-    color: #94a3b8;
-}
-
-.search-box input:focus {
-    border-color: #64748b;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, .25);
-}
-
-.search-icon {
-    position: absolute;
-    left: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.clear-search {
-    position: absolute;
-    right: 7px;
-    top: 50%;
-    transform: translateY(-50%);
-
-    width: 27px;
-    height: 27px;
-
-    border: none;
-    border-radius: 6px;
-
-    background: transparent;
-    color: #64748b;
-
-    font-size: 19px;
-    line-height: 1;
-
-    cursor: pointer;
-}
-
-.clear-search:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-}
-
-
-/* ==========================================
-   RESULTADOS
-========================================== */
-
-.worker-search-result {
-    width: 100%;
-    box-sizing: border-box;
-    margin-top: 10px;
-}
-
-.search-results-header {
-    width: 100%;
-    box-sizing: border-box;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 7px 2px;
-}
-
-.search-results-header strong {
-    color: #ffffff;
-    font-size: 11px;
-}
-
-.search-results-header span {
-    min-width: 23px;
-    height: 23px;
-
-    padding: 0 6px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 20px;
-
-    background: #ffffff;
-    color: #8a6500;
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-
-/* ==========================================
-   CADA TRABAJADOR
-========================================== */
-
-.search-results-list {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.search-user {
-    width: 100%;
-    box-sizing: border-box;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 10px 12px;
-
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-
-    background: #ffffff;
-
-    cursor: pointer;
-    transition: .15s ease;
-}
-
-.search-user:hover {
-    border-color: #94a3b8;
-    background: #f8fafc;
-    transform: translateY(-1px);
-}
-
-
-/* Nombre + correo */
-
-.search-user-main {
-    width: 280px;
-    min-width: 280px;
-}
-
-.search-user-main strong {
-    display: block;
-
-    color: #0f172a;
-    font-size: 11px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.search-user-main span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #64748b;
-    font-size: 9px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-
-/* Datos */
-
-.search-user-data {
-    flex: 1;
-    min-width: 0;
-
-    display: grid;
-    grid-template-columns: 1fr 110px 1.5fr;
-
-    gap: 15px;
-}
-
-.search-user-data small {
-    display: block;
-
-    color: #94a3b8;
-    font-size: 8px;
-
-    margin-bottom: 2px;
-}
-
-.search-user-data strong {
-    display: block;
-
-    color: #475569;
-    font-size: 10px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.search-active {
-    color: #15803d !important;
-}
-
-.search-blocked {
-    color: #dc2626 !important;
-}
-
-
-/* ==========================================
-   SIN RESULTADOS
-========================================== */
-
-.search-no-results {
-    width: 100%;
-    box-sizing: border-box;
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 12px;
-
-    border-radius: 8px;
-
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-}
-
-.search-no-results > span {
-    width: 32px;
-    height: 32px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 7px;
-
-    background: #f1f5f9;
-
-    font-size: 14px;
-}
-
-.search-no-results strong {
-    display: block;
-
-    color: #475569;
-    font-size: 11px;
-}
-
-.search-no-results small {
-    display: block;
-
-    color: #94a3b8;
-    font-size: 9px;
-
-    margin-top: 2px;
-}
-
-
-/* ==========================================
-   RESPONSIVE
-========================================== */
-
-@media (max-width: 900px) {
-
-    .search-user {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .search-user-main {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .search-user-data {
-        width: 100%;
-        flex-basis: 100%;
-
-        grid-template-columns:
-            1fr
-            1fr;
-
-        gap: 10px;
-    }
-
-}
-
-
-@media (max-width: 600px) {
-
-    .worker-search {
-        padding: 11px;
-    }
-
-    .search-user-data {
-        grid-template-columns: 1fr;
     }
 
 }

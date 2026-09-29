@@ -139,6 +139,15 @@ const ITEMS_PER_PAGE = 20;
 
 
 /* ============================================================
+   FILTROS Y TRABAJADOR SELECCIONADO
+============================================================ */
+
+let filtroActivo = null;
+
+let trabajadorSeleccionado = null;
+
+
+/* ============================================================
    CARGA INICIAL
 ============================================================ */
 
@@ -973,6 +982,233 @@ function clasificarEvento(
 
 
 /* ============================================================
+   DATOS ACTUALES DEL DASHBOARD
+============================================================ */
+
+function obtenerUsuariosDashboard() {
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        return [
+            trabajadorSeleccionado
+        ];
+
+    }
+
+
+    return securityData.users;
+
+}
+
+
+function obtenerBloqueadosDashboard() {
+
+    const usuarios =
+        obtenerUsuariosDashboard();
+
+
+    return usuarios.filter(
+        user =>
+            user.accountEnabled === false
+    );
+
+}
+
+
+function obtenerDepartamentosDashboard() {
+
+    const usuarios =
+        obtenerUsuariosDashboard();
+
+
+    return calcularDepartamentos(
+        usuarios
+    );
+
+}
+
+
+/* ============================================================
+   AUDITORÍA DEL TRABAJADOR
+============================================================ */
+
+function eventoPerteneceATrabajador(
+    evento,
+    user
+) {
+
+    if (!user) {
+
+        return false;
+
+    }
+
+
+    const userId =
+        String(
+            user.id || ""
+        ).toLowerCase();
+
+
+    const correo =
+        String(
+            user.userPrincipalName || ""
+        ).toLowerCase();
+
+
+    const nombre =
+        String(
+            user.displayName || ""
+        ).toLowerCase();
+
+
+    /*
+       --------------------------------------------------------
+       1. INICIADOR DEL EVENTO
+       --------------------------------------------------------
+    */
+
+    const iniciador =
+        evento.initiatedBy?.user;
+
+
+    if (iniciador) {
+
+        const iniciadorId =
+            String(
+                iniciador.id || ""
+            ).toLowerCase();
+
+
+        const iniciadorCorreo =
+            String(
+                iniciador.userPrincipalName || ""
+            ).toLowerCase();
+
+
+        const iniciadorNombre =
+            String(
+                iniciador.displayName || ""
+            ).toLowerCase();
+
+
+        if (
+            userId &&
+            iniciadorId === userId
+        ) {
+
+            return true;
+
+        }
+
+
+        if (
+            correo &&
+            iniciadorCorreo === correo
+        ) {
+
+            return true;
+
+        }
+
+
+        if (
+            nombre &&
+            iniciadorNombre === nombre
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    /*
+       --------------------------------------------------------
+       2. RECURSOS AFECTADOS
+       --------------------------------------------------------
+    */
+
+    const recursos =
+        evento.targetResources || [];
+
+
+    return recursos.some(
+        recurso => {
+
+            const recursoId =
+                String(
+                    recurso.id || ""
+                ).toLowerCase();
+
+
+            const recursoCorreo =
+                String(
+                    recurso.userPrincipalName || ""
+                ).toLowerCase();
+
+
+            const recursoNombre =
+                String(
+                    recurso.displayName || ""
+                ).toLowerCase();
+
+
+            return (
+
+                (
+                    userId &&
+                    recursoId === userId
+                )
+
+                ||
+
+                (
+                    correo &&
+                    recursoCorreo === correo
+                )
+
+                ||
+
+                (
+                    nombre &&
+                    recursoNombre === nombre
+                )
+
+            );
+
+        }
+    );
+
+}
+
+
+function obtenerAuditoriaDashboard() {
+
+    if (
+        !trabajadorSeleccionado
+    ) {
+
+        return securityData.auditLogs;
+
+    }
+
+
+    return securityData.auditLogs.filter(
+        evento =>
+            eventoPerteneceATrabajador(
+                evento,
+                trabajadorSeleccionado
+            )
+    );
+
+}
+
+
+/* ============================================================
    ACTUALIZAR DASHBOARD
 ============================================================ */
 
@@ -1001,51 +1237,67 @@ function actualizarDashboard() {
 
 function actualizarContadores() {
 
+    const usuarios =
+        obtenerUsuariosDashboard();
+
+
+    const bloqueados =
+        obtenerBloqueadosDashboard();
+
+
+    const departamentos =
+        obtenerDepartamentosDashboard();
+
+
+    const auditoria =
+        obtenerAuditoriaDashboard();
+
+
     ponerTexto(
         "totalUsuarios",
-        securityData.users.length
+        usuarios.length
     );
 
 
     ponerTexto(
         "cuentasBloqueadas",
-        securityData.blockedUsers.length
+        bloqueados.length
     );
 
 
     ponerTexto(
         "eventosAuditoria",
-        securityData.auditLogs.length
+        auditoria.length
     );
 
 
     ponerTexto(
         "totalDepartamentos",
-        securityData.departments.length
+        departamentos.length
     );
 
 
     ponerTexto(
         "usersCounter",
-        securityData.users.length
+        usuarios.length
     );
 
 
     ponerTexto(
         "departmentsCounter",
-        securityData.departments.length
+        departamentos.length
     );
 
 
     ponerTexto(
         "blockedCounter",
-        securityData.blockedUsers.length
+        bloqueados.length
     );
 
 
     ponerTexto(
         "auditCounter",
-        `${securityData.auditLogs.length} eventos`
+        `${auditoria.length} eventos`
     );
 
 }
@@ -1074,8 +1326,12 @@ function actualizarUsuarios() {
         "";
 
 
+    const usuariosDashboard =
+        obtenerUsuariosDashboard();
+
+
     if (
-        !securityData.users.length
+        !usuariosDashboard.length
     ) {
 
         tbody.innerHTML = `
@@ -1111,9 +1367,37 @@ function actualizarUsuarios() {
 
     /*
        ========================================================
+       TRABAJADOR SELECCIONADO
+       ========================================================
+    */
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        renderUsuarioTabla(
+            tbody,
+            trabajadorSeleccionado
+        );
+
+
+        actualizarPaginacion(
+            "usersPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
        DASHBOARD PRINCIPAL
        ========================================================
-       Solo muestra los primeros 10 usuarios.
     */
 
     if (
@@ -1121,7 +1405,7 @@ function actualizarUsuarios() {
     ) {
 
         const usuarios =
-            securityData.users.slice(
+            usuariosDashboard.slice(
                 0,
                 DASHBOARD_ITEMS
             );
@@ -1156,11 +1440,10 @@ function actualizarUsuarios() {
        ========================================================
        FILTRO ACTIVO
        ========================================================
-       Mantiene 20 registros por página.
     */
 
     const total =
-        securityData.users.length;
+        usuariosDashboard.length;
 
 
     const totalPaginas =
@@ -1202,7 +1485,7 @@ function actualizarUsuarios() {
 
 
     const usuarios =
-        securityData.users.slice(
+        usuariosDashboard.slice(
             inicio,
             fin
         );
@@ -1421,8 +1704,12 @@ function actualizarDepartamentos() {
         "";
 
 
+    const departamentosDashboard =
+        obtenerDepartamentosDashboard();
+
+
     if (
-        !securityData.departments.length
+        !departamentosDashboard.length
     ) {
 
         tbody.innerHTML = `
@@ -1456,14 +1743,42 @@ function actualizarDepartamentos() {
     }
 
 
+    /*
+       ========================================================
+       TRABAJADOR SELECCIONADO
+       ========================================================
+    */
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        renderDepartamentos(
+            tbody,
+            departamentosDashboard
+        );
+
+
+        actualizarPaginacion(
+            "departmentsPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
     const total =
-        securityData.departments.length;
+        departamentosDashboard.length;
 
 
     /*
        ========================================================
        DASHBOARD PRINCIPAL
-       Solo muestra los primeros 10 departamentos.
        ========================================================
     */
 
@@ -1472,7 +1787,7 @@ function actualizarDepartamentos() {
     ) {
 
         const departamentos =
-            securityData.departments.slice(
+            departamentosDashboard.slice(
                 0,
                 DASHBOARD_ITEMS
             );
@@ -1501,7 +1816,6 @@ function actualizarDepartamentos() {
        ========================================================
        FILTRO ACTIVO
        ========================================================
-       Mantiene 20 registros por página.
     */
 
     const totalPaginas =
@@ -1543,7 +1857,7 @@ function actualizarDepartamentos() {
 
 
     const departamentos =
-        securityData.departments.slice(
+        departamentosDashboard.slice(
             inicio,
             fin
         );
@@ -1581,12 +1895,16 @@ function renderDepartamentos(
     departamentos
 ) {
 
+    const usuariosDashboard =
+        obtenerUsuariosDashboard();
+
+
     const totalUsuarios =
-        securityData.users.length;
+        usuariosDashboard.length;
 
 
     const max =
-        securityData.departments[0]
+        departamentos[0]
             ?.cantidad
             ||
             1;
@@ -1711,15 +2029,27 @@ function actualizarResumenAuditoria() {
         "";
 
 
-    if (
-        !securityData.auditTypes.length
-    ) {
+    const auditoria =
+        obtenerAuditoriaDashboard();
+
+
+    const tipos =
+        calcularTiposAuditoria(
+            auditoria
+        );
+
+
+    if (!tipos.length) {
 
         container.innerHTML = `
 
             <div class="loading">
 
-                No hay eventos disponibles.
+                ${
+                    trabajadorSeleccionado
+                        ? "No hay actividad de auditoría asociada a este trabajador."
+                        : "No hay eventos disponibles."
+                }
 
             </div>
 
@@ -1753,65 +2083,69 @@ function actualizarResumenAuditoria() {
     };
 
 
-    securityData.auditTypes
-        .forEach(
-            tipo => {
+    tipos.forEach(
+        tipo => {
 
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "audit-type-row";
-
-
-                row.innerHTML = `
-
-                    <div class="audit-type-icon">
-
-                        ${
-                            iconos[
-                                tipo.nombre
-                            ]
-                            ||
-                            "📋"
-                        }
-
-                    </div>
-
-
-                    <div class="audit-type-info">
-
-                        <strong>
-                            ${escapar(
-                                tipo.nombre
-                            )}
-                        </strong>
-
-                        <small>
-                            Actividades registradas
-                        </small>
-
-                    </div>
-
-
-                    <div class="audit-type-count">
-
-                        ${tipo.cantidad}
-
-                    </div>
-
-                `;
-
-
-                container.appendChild(
-                    row
+            const row =
+                document.createElement(
+                    "div"
                 );
 
-            }
-        );
+
+            row.className =
+                "audit-type-row";
+
+
+            row.innerHTML = `
+
+                <div class="audit-type-icon">
+
+                    ${
+                        iconos[
+                            tipo.nombre
+                        ]
+                        ||
+                        "📋"
+                    }
+
+                </div>
+
+
+                <div class="audit-type-info">
+
+                    <strong>
+
+                        ${escapar(
+                            tipo.nombre
+                        )}
+
+                    </strong>
+
+
+                    <small>
+
+                        Actividades registradas
+
+                    </small>
+
+                </div>
+
+
+                <div class="audit-type-count">
+
+                    ${tipo.cantidad}
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
 
 }
 
@@ -1839,8 +2173,12 @@ function actualizarBloqueados() {
         "";
 
 
+    const bloqueadosDashboard =
+        obtenerBloqueadosDashboard();
+
+
     if (
-        !securityData.blockedUsers.length
+        !bloqueadosDashboard.length
     ) {
 
         tbody.innerHTML = `
@@ -1876,8 +2214,36 @@ function actualizarBloqueados() {
 
     /*
        ========================================================
+       TRABAJADOR SELECCIONADO
+       ========================================================
+    */
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        renderBloqueados(
+            tbody,
+            bloqueadosDashboard
+        );
+
+
+        actualizarPaginacion(
+            "blockedPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
        DASHBOARD PRINCIPAL
-       Solo muestra las primeras 10 cuentas.
        ========================================================
     */
 
@@ -1886,7 +2252,7 @@ function actualizarBloqueados() {
     ) {
 
         const usuarios =
-            securityData.blockedUsers.slice(
+            bloqueadosDashboard.slice(
                 0,
                 DASHBOARD_ITEMS
             );
@@ -1915,11 +2281,10 @@ function actualizarBloqueados() {
        ========================================================
        FILTRO ACTIVO
        ========================================================
-       Mantiene 20 registros por página.
     */
 
     const total =
-        securityData.blockedUsers.length;
+        bloqueadosDashboard.length;
 
 
     const totalPaginas =
@@ -1961,7 +2326,7 @@ function actualizarBloqueados() {
 
 
     const usuarios =
-        securityData.blockedUsers.slice(
+        bloqueadosDashboard.slice(
             inicio,
             fin
         );
@@ -2141,27 +2506,43 @@ function renderBloqueados(
 
 function actualizarResumenDirectorio() {
 
+    const usuarios =
+        obtenerUsuariosDashboard();
+
+
+    const bloqueados =
+        obtenerBloqueadosDashboard();
+
+
+    const departamentos =
+        obtenerDepartamentosDashboard();
+
+
+    const auditoria =
+        obtenerAuditoriaDashboard();
+
+
     ponerTexto(
         "summaryUsers",
-        securityData.users.length
+        usuarios.length
     );
 
 
     ponerTexto(
         "summaryBlocked",
-        securityData.blockedUsers.length
+        bloqueados.length
     );
 
 
     ponerTexto(
         "summaryAudit",
-        securityData.auditLogs.length
+        auditoria.length
     );
 
 
     ponerTexto(
         "summaryDepartments",
-        securityData.departments.length
+        departamentos.length
     );
 
 }
@@ -2190,8 +2571,12 @@ function actualizarTablaAuditoria() {
         "";
 
 
+    const auditoriaDashboard =
+        obtenerAuditoriaDashboard();
+
+
     if (
-        !securityData.auditLogs.length
+        !auditoriaDashboard.length
     ) {
 
         tbody.innerHTML = `
@@ -2203,8 +2588,11 @@ function actualizarTablaAuditoria() {
                     class="loading-cell"
                 >
 
-                    No hay eventos de auditoría
-                    registrados en los últimos 30 días.
+                    ${
+                        trabajadorSeleccionado
+                            ? "No hay eventos de auditoría asociados a este trabajador."
+                            : "No hay eventos de auditoría registrados en los últimos 30 días."
+                    }
 
                 </td>
 
@@ -2228,8 +2616,43 @@ function actualizarTablaAuditoria() {
 
     /*
        ========================================================
+       TRABAJADOR SELECCIONADO
+       ========================================================
+    */
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        const eventos =
+            auditoriaDashboard.slice(
+                0,
+                DASHBOARD_ITEMS
+            );
+
+
+        renderEventosAuditoria(
+            tbody,
+            eventos
+        );
+
+
+        actualizarPaginacion(
+            "auditPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
        DASHBOARD PRINCIPAL
-       Solo muestra los 10 eventos más recientes.
        ========================================================
     */
 
@@ -2238,7 +2661,7 @@ function actualizarTablaAuditoria() {
     ) {
 
         const eventos =
-            securityData.auditLogs.slice(
+            auditoriaDashboard.slice(
                 0,
                 DASHBOARD_ITEMS
             );
@@ -2267,11 +2690,10 @@ function actualizarTablaAuditoria() {
        ========================================================
        FILTRO ACTIVO
        ========================================================
-       Mantiene 20 registros por página.
     */
 
     const total =
-        securityData.auditLogs.length;
+        auditoriaDashboard.length;
 
 
     const totalPaginas =
@@ -2313,7 +2735,7 @@ function actualizarTablaAuditoria() {
 
 
     const eventos =
-        securityData.auditLogs.slice(
+        auditoriaDashboard.slice(
             inicio,
             fin
         );
@@ -3472,14 +3894,6 @@ document.addEventListener(
    FILTROS DEL DASHBOARD
 ============================================================ */
 
-let filtroActivo =
-    null;
-
-
-/* ============================================================
-   CLICK EN TARJETAS
-============================================================ */
-
 document.addEventListener(
     "click",
     event => {
@@ -3706,11 +4120,6 @@ function aplicarFiltro(
     }
 
 
-    /*
-       Al entrar al filtro volvemos
-       siempre a la primera página.
-    */
-
     if (
         filtro === "usuarios"
     ) {
@@ -3750,10 +4159,6 @@ function aplicarFiltro(
 
     }
 
-
-    /*
-       Redibujar inmediatamente.
-    */
 
     actualizarDashboard();
 
@@ -3836,12 +4241,6 @@ function mostrarTodoDashboard() {
         );
 
 
-    /*
-       Volver a la primera página
-       para la siguiente vez que
-       se abra un filtro.
-    */
-
     paginationState.users =
         1;
 
@@ -3854,11 +4253,6 @@ function mostrarTodoDashboard() {
     paginationState.audit =
         1;
 
-
-    /*
-       Redibujar para volver
-       inmediatamente a los 10.
-    */
 
     actualizarDashboard();
 
@@ -4215,16 +4609,16 @@ function mostrarResultadosBusqueda(
 
 
             /*
-               Al hacer clic en un resultado,
-               lo mostramos también en la tabla
-               principal de usuarios.
+               Al hacer clic en el trabajador,
+               se convierte en el filtro global
+               del dashboard.
             */
 
             item.addEventListener(
                 "click",
                 () => {
 
-                    mostrarTrabajadorEnTabla(
+                    seleccionarTrabajador(
                         user
                     );
 
@@ -4248,68 +4642,189 @@ function mostrarResultadosBusqueda(
 
 
 /* ============================================================
-   MOSTRAR TRABAJADOR EN TABLA PRINCIPAL
+   SELECCIONAR TRABAJADOR
 ============================================================ */
 
-function mostrarTrabajadorEnTabla(
+function seleccionarTrabajador(
     user
 ) {
 
-    const tbody =
-        document.getElementById(
-            "usersTable"
-        );
+    trabajadorSeleccionado =
+        user;
 
 
-    if (!tbody) {
+    /*
+       Ocultar completamente
+       los resultados de búsqueda.
+    */
 
-        return;
+    if (workerSearchResult) {
+
+        workerSearchResult.innerHTML =
+            "";
 
     }
 
 
-    tbody.innerHTML =
-        "";
+    /*
+       Limpiar el campo.
+    */
 
+    if (workerSearch) {
 
-    renderUsuarioTabla(
-        tbody,
-        user
-    );
+        workerSearch.value =
+            "";
+
+    }
 
 
     /*
-       Ocultar paginación porque
-       estamos mostrando un resultado
-       específico.
+       Quitamos cualquier filtro
+       anterior del dashboard.
     */
 
-    actualizarPaginacion(
-        "usersPagination",
-        0,
-        1,
-        () => {}
-    );
+    filtroActivo =
+        null;
 
 
-    /*
-       Ir hacia la tabla de usuarios.
-    */
-
-    const tabla =
+    const content =
         document.querySelector(
-            '[data-section="usuarios"]'
+            ".content"
         );
 
 
-    if (tabla) {
+    if (content) {
 
-        tabla.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+        content.classList.remove(
+            "filter-mode"
+        );
 
     }
+
+
+    document
+        .querySelectorAll(
+            ".filter-section"
+        )
+        .forEach(
+            section => {
+
+                section.classList.remove(
+                    "filter-hidden"
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".dashboard-card:not(.filter-section)"
+        )
+        .forEach(
+            card => {
+
+                card.classList.remove(
+                    "filter-hidden"
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".filter-card"
+        )
+        .forEach(
+            card => {
+
+                card.classList.remove(
+                    "filter-active"
+                );
+
+            }
+        );
+
+
+    /*
+       Reiniciar paginación.
+    */
+
+    paginationState.users =
+        1;
+
+    paginationState.blocked =
+        1;
+
+    paginationState.departments =
+        1;
+
+    paginationState.audit =
+        1;
+
+
+    /*
+       Actualizar TODOS los cuadros
+       usando únicamente este trabajador.
+    */
+
+    actualizarDashboard();
+
+
+    /*
+       Volver arriba para que el usuario
+       vea el dashboard filtrado.
+    */
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* ============================================================
+   LIMPIAR TRABAJADOR SELECCIONADO
+============================================================ */
+
+function limpiarTrabajadorSeleccionado() {
+
+    trabajadorSeleccionado =
+        null;
+
+
+    if (workerSearch) {
+
+        workerSearch.value =
+            "";
+
+    }
+
+
+    if (workerSearchResult) {
+
+        workerSearchResult.innerHTML =
+            "";
+
+    }
+
+
+    paginationState.users =
+        1;
+
+    paginationState.blocked =
+        1;
+
+    paginationState.departments =
+        1;
+
+    paginationState.audit =
+        1;
+
+
+    actualizarDashboard();
 
 }
 
@@ -4329,9 +4844,21 @@ function limpiarBusquedaTrabajador() {
 
 
     /*
-       Volver a mostrar la tabla
-       normalmente.
+       Si había un trabajador seleccionado,
+       el botón X del buscador vuelve a dejar
+       el dashboard completo.
     */
+
+    if (
+        trabajadorSeleccionado
+    ) {
+
+        limpiarTrabajadorSeleccionado();
+
+        return;
+
+    }
+
 
     if (
         typeof actualizarUsuarios ===
@@ -4354,6 +4881,23 @@ if (workerSearch) {
     workerSearch.addEventListener(
         "input",
         event => {
+
+            /*
+               Si el usuario vuelve a escribir,
+               quitamos el trabajador seleccionado.
+            */
+
+            if (
+                trabajadorSeleccionado
+            ) {
+
+                trabajadorSeleccionado =
+                    null;
+
+                actualizarDashboard();
+
+            }
+
 
             buscarTrabajador(
                 event.target.value

@@ -65,7 +65,6 @@ body {
 }
 
 @keyframes logoTitleAnimation {
-
     0% {
         opacity: .75;
         transform: translateY(2px);
@@ -86,7 +85,6 @@ body {
 }
 
 @keyframes logoSubtitleAnimation {
-
     0%,
     100% {
         opacity: .55;
@@ -129,7 +127,6 @@ body {
 }
 
 @keyframes pulseLive {
-
     0%,
     100% {
         opacity: 1;
@@ -352,28 +349,50 @@ body {
 
 .dashboard-grid {
     width: 100%;
-    max-width: 1450px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     display: grid;
     grid-template-columns:
-        minmax(300px, 1fr)
-        minmax(400px, 1.5fr);
+        minmax(0, 1fr)
+        minmax(0, 1.5fr);
     gap: 20px;
-    transition: max-width .25s ease;
+    transition: all .25s ease;
 }
 
 
-/*
-   Cuando se selecciona un filtro,
-   el contenido se hace más compacto.
-*/
+/* =========================================================
+   MODO FILTRO
+   MISMO ANCHO QUE LOS BOTONES SUPERIORES
+========================================================= */
 
 .content.filter-mode .dashboard-grid {
-    max-width: 1120px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr);
 }
 
-.wide-card {
-    grid-column: span 2;
+.content.filter-mode .dashboard-card {
+    width: 100%;
+    max-width: none;
+}
+
+.content.filter-mode .wide-card {
+    grid-column: auto;
+    width: 100%;
+}
+
+.content.filter-mode .table-container {
+    width: 100%;
+    max-width: none;
+}
+
+.content.filter-mode .directory-table,
+.content.filter-mode .department-table,
+.content.filter-mode .blocked-table,
+.content.filter-mode .audit-table {
+    width: 100%;
+    min-width: 1000px;
 }
 
 
@@ -482,6 +501,7 @@ body {
     overflow-x: auto;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
+    background: white;
 }
 
 table {
@@ -495,7 +515,7 @@ thead {
 }
 
 th {
-    padding: 13px 14px;
+    padding: 14px 16px;
     text-align: left;
     color: #64748b;
     font-size: 10px;
@@ -507,7 +527,7 @@ th {
 }
 
 td {
-    padding: 13px 14px;
+    padding: 14px 16px;
     border-bottom: 1px solid #eef2f7;
     color: #475569;
     font-size: 12px;
@@ -532,27 +552,32 @@ tbody tr:hover td {
    TABLA DE USUARIOS
 ========================================================= */
 
+.directory-table {
+    width: 100%;
+    min-width: 900px;
+}
+
 .directory-table th:nth-child(1) {
-    width: 27%;
+    width: 28%;
 }
 
 .directory-table th:nth-child(2) {
-    width: 30%;
+    width: 32%;
 }
 
 .directory-table th:nth-child(3) {
-    width: 25%;
+    width: 24%;
 }
 
 .directory-table th:nth-child(4) {
-    width: 18%;
+    width: 16%;
 }
 
 .user-cell {
     display: flex;
     align-items: center;
     gap: 11px;
-    min-width: 190px;
+    min-width: 220px;
 }
 
 .user-cell-info {
@@ -578,7 +603,7 @@ tbody tr:hover td {
 
 .email-cell {
     color: #475569;
-    max-width: 280px;
+    max-width: 400px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -586,7 +611,7 @@ tbody tr:hover td {
 
 .department-cell {
     color: #475569;
-    max-width: 220px;
+    max-width: 320px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -665,6 +690,11 @@ tbody tr:hover td {
    DEPARTAMENTOS
 ========================================================= */
 
+.department-table {
+    width: 100%;
+    min-width: 850px;
+}
+
 .department-table th:nth-child(1) {
     width: 35%;
 }
@@ -696,7 +726,7 @@ tbody tr:hover td {
 .department-bar {
     height: 8px;
     flex: 1;
-    min-width: 80px;
+    min-width: 100px;
     background: #e2e8f0;
     border-radius: 20px;
     overflow: hidden;
@@ -782,6 +812,11 @@ tbody tr:hover td {
    AUDITORÍA
 ========================================================= */
 
+.audit-table {
+    width: 100%;
+    min-width: 1000px;
+}
+
 .audit-table th:nth-child(1) {
     width: 30%;
 }
@@ -802,7 +837,7 @@ tbody tr:hover td {
     display: flex;
     align-items: center;
     gap: 9px;
-    min-width: 220px;
+    min-width: 250px;
 }
 
 .audit-icon {
@@ -830,7 +865,7 @@ tbody tr:hover td {
 }
 
 .audit-user {
-    min-width: 160px;
+    min-width: 180px;
 }
 
 .audit-user strong {
@@ -847,7 +882,7 @@ tbody tr:hover td {
 }
 
 .target-name {
-    max-width: 250px;
+    max-width: 350px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -928,6 +963,27 @@ tbody tr:hover td {
 /* =========================================================
    CUENTAS BLOQUEADAS
 ========================================================= */
+
+.blocked-table {
+    width: 100%;
+    min-width: 900px;
+}
+
+.blocked-table th:nth-child(1) {
+    width: 28%;
+}
+
+.blocked-table th:nth-child(2) {
+    width: 32%;
+}
+
+.blocked-table th:nth-child(3) {
+    width: 24%;
+}
+
+.blocked-table th:nth-child(4) {
+    width: 16%;
+}
 
 .blocked-table .department-cell {
     color: #64748b;
@@ -1083,7 +1139,8 @@ footer {
     }
 
     .content.filter-mode .dashboard-grid {
-        max-width: 950px;
+        width: 100%;
+        max-width: none;
     }
 }
 
@@ -1201,8 +1258,9 @@ footer {
 
     .directory-table,
     .department-table,
+    .blocked-table,
     .audit-table {
-        min-width: 720px;
+        min-width: 900px;
     }
 }
 
@@ -1223,5 +1281,4 @@ footer {
         gap: 6px;
         font-size: 9px;
     }
-
 }

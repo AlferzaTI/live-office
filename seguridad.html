@@ -298,6 +298,59 @@
 
         <section class="dashboard-grid">
 
+            <!-- =====================================================
+     BUSCADOR DE TRABAJADORES
+====================================================== -->
+
+<div class="worker-search">
+
+    <div class="worker-search-header">
+
+        <div>
+
+            <span class="card-label">
+                DIRECTORIO
+            </span>
+
+            <h3>
+                Buscar trabajador
+            </h3>
+
+        </div>
+
+    </div>
+
+    <div class="search-box">
+
+        <span class="search-icon">
+            🔎
+        </span>
+
+        <input
+            type="text"
+            id="workerSearch"
+            placeholder="Buscar por nombre, correo o departamento..."
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            id="clearWorkerSearch"
+            class="clear-search"
+            title="Limpiar búsqueda"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div
+        id="workerSearchResult"
+        class="worker-search-result"
+    ></div>
+
+</div>
+
 
             <!-- ==================================
                  1. USUARIOS REGISTRADOS

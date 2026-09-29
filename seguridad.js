@@ -3863,3 +3863,531 @@ function mostrarTodoDashboard() {
     actualizarDashboard();
 
 }
+
+
+/* ============================================================
+   BUSCADOR DE TRABAJADORES
+============================================================ */
+
+const workerSearch =
+    document.getElementById(
+        "workerSearch"
+    );
+
+
+const clearWorkerSearch =
+    document.getElementById(
+        "clearWorkerSearch"
+    );
+
+
+const workerSearchResult =
+    document.getElementById(
+        "workerSearchResult"
+    );
+
+
+/* ============================================================
+   BUSCAR TRABAJADOR
+============================================================ */
+
+function buscarTrabajador(
+    texto
+) {
+
+    const busqueda =
+        String(
+            texto || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (!busqueda) {
+
+        limpiarBusquedaTrabajador();
+
+        return;
+
+    }
+
+
+    const resultados =
+        securityData.users.filter(
+            user => {
+
+                const nombre =
+                    String(
+                        user.displayName || ""
+                    )
+                    .toLowerCase();
+
+
+                const correo =
+                    String(
+                        user.userPrincipalName || ""
+                    )
+                    .toLowerCase();
+
+
+                const departamento =
+                    String(
+                        user.department || ""
+                    )
+                    .toLowerCase();
+
+
+                const estado =
+                    user.accountEnabled === false
+                        ? "bloqueado"
+                        : "activo";
+
+
+                return (
+
+                    nombre.includes(
+                        busqueda
+                    )
+
+                    ||
+
+                    correo.includes(
+                        busqueda
+                    )
+
+                    ||
+
+                    departamento.includes(
+                        busqueda
+                    )
+
+                    ||
+
+                    estado.includes(
+                        busqueda
+                    )
+
+                );
+
+            }
+        );
+
+
+    mostrarResultadosBusqueda(
+        resultados,
+        busqueda
+    );
+
+}
+
+
+/* ============================================================
+   MOSTRAR RESULTADOS
+============================================================ */
+
+function mostrarResultadosBusqueda(
+    resultados,
+    busqueda
+) {
+
+    if (!workerSearchResult) {
+
+        return;
+
+    }
+
+
+    workerSearchResult.innerHTML =
+        "";
+
+
+    if (!resultados.length) {
+
+        workerSearchResult.innerHTML = `
+
+            <div class="search-no-results">
+
+                <span>
+                    🔎
+                </span>
+
+                <div>
+
+                    <strong>
+                        No se encontraron trabajadores
+                    </strong>
+
+                    <small>
+                        No hay coincidencias para
+                        "${escapar(busqueda)}"
+                    </small>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const titulo =
+        resultados.length === 1
+            ? "Trabajador encontrado"
+            : `${resultados.length} trabajadores encontrados`;
+
+
+    const encabezado =
+        document.createElement(
+            "div"
+        );
+
+
+    encabezado.className =
+        "search-results-header";
+
+
+    encabezado.innerHTML = `
+
+        <strong>
+            ${titulo}
+        </strong>
+
+        <span>
+            ${resultados.length}
+        </span>
+
+    `;
+
+
+    workerSearchResult.appendChild(
+        encabezado
+    );
+
+
+    const lista =
+        document.createElement(
+            "div"
+        );
+
+
+    lista.className =
+        "search-results-list";
+
+
+    resultados.forEach(
+        user => {
+
+            const nombre =
+                user.displayName
+                ||
+                "Sin nombre";
+
+
+            const correo =
+                user.userPrincipalName
+                ||
+                "Sin correo";
+
+
+            const departamento =
+                String(
+                    user.department || ""
+                )
+                .trim()
+                ||
+                "Sin departamento";
+
+
+            const activo =
+                user.accountEnabled !== false;
+
+
+            const iniciales =
+                obtenerIniciales(
+                    nombre
+                );
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "search-user";
+
+
+            item.innerHTML = `
+
+                <div
+                    class="avatar ${
+                        activo
+                            ? "blue-avatar"
+                            : "red-avatar"
+                    }"
+                >
+
+                    ${escapar(
+                        iniciales
+                    )}
+
+                </div>
+
+
+                <div class="search-user-main">
+
+                    <strong>
+                        ${escapar(
+                            nombre
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapar(
+                            correo
+                        )}
+                    </span>
+
+                </div>
+
+
+                <div class="search-user-data">
+
+                    <div>
+
+                        <small>
+                            Departamento
+                        </small>
+
+                        <strong>
+                            ${escapar(
+                                departamento
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Estado
+                        </small>
+
+                        <strong class="${
+                            activo
+                                ? "search-active"
+                                : "search-blocked"
+                        }">
+
+                            ${
+                                activo
+                                    ? "Activo"
+                                    : "Bloqueado"
+                            }
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            ID
+                        </small>
+
+                        <strong>
+                            ${escapar(
+                                user.id || "—"
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            /*
+               Al hacer clic en un resultado,
+               lo mostramos también en la tabla
+               principal de usuarios.
+            */
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    mostrarTrabajadorEnTabla(
+                        user
+                    );
+
+                }
+            );
+
+
+            lista.appendChild(
+                item
+            );
+
+        }
+    );
+
+
+    workerSearchResult.appendChild(
+        lista
+    );
+
+}
+
+
+/* ============================================================
+   MOSTRAR TRABAJADOR EN TABLA PRINCIPAL
+============================================================ */
+
+function mostrarTrabajadorEnTabla(
+    user
+) {
+
+    const tbody =
+        document.getElementById(
+            "usersTable"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        "";
+
+
+    renderUsuarioTabla(
+        tbody,
+        user
+    );
+
+
+    /*
+       Ocultar paginación porque
+       estamos mostrando un resultado
+       específico.
+    */
+
+    actualizarPaginacion(
+        "usersPagination",
+        0,
+        1,
+        () => {}
+    );
+
+
+    /*
+       Ir hacia la tabla de usuarios.
+    */
+
+    const tabla =
+        document.querySelector(
+            '[data-section="usuarios"]'
+        );
+
+
+    if (tabla) {
+
+        tabla.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+}
+
+
+/* ============================================================
+   LIMPIAR BÚSQUEDA
+============================================================ */
+
+function limpiarBusquedaTrabajador() {
+
+    if (workerSearchResult) {
+
+        workerSearchResult.innerHTML =
+            "";
+
+    }
+
+
+    /*
+       Volver a mostrar la tabla
+       normalmente.
+    */
+
+    if (
+        typeof actualizarUsuarios ===
+        "function"
+    ) {
+
+        actualizarUsuarios();
+
+    }
+
+}
+
+
+/* ============================================================
+   EVENTO INPUT
+============================================================ */
+
+if (workerSearch) {
+
+    workerSearch.addEventListener(
+        "input",
+        event => {
+
+            buscarTrabajador(
+                event.target.value
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   BOTÓN LIMPIAR
+============================================================ */
+
+if (clearWorkerSearch) {
+
+    clearWorkerSearch.addEventListener(
+        "click",
+        () => {
+
+            if (workerSearch) {
+
+                workerSearch.value =
+                    "";
+
+                workerSearch.focus();
+
+            }
+
+
+            limpiarBusquedaTrabajador();
+
+        }
+    );
+
+}

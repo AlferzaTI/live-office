@@ -849,70 +849,148 @@ async function cargarMFA() {
    DISPOSITIVOS INTUNE
    ============================================================ */
 
+/* ============================================================
+   DISPOSITIVOS INTUNE
+   ============================================================ */
+
 async function cargarDispositivos() {
+
+    console.log("========================================");
+    console.log("INICIANDO CARGA DE DISPOSITIVOS INTUNE");
+    console.log("========================================");
 
     try {
 
         securityData.status.devices =
             "loading";
 
+        securityData.devices =
+            [];
 
-        let url =
-            "/deviceManagement/managedDevices";
+        const url =
+            "/deviceManagement/managedDevices?$select=id,deviceName,operatingSystem,complianceState,userPrincipalName,lastSyncDateTime&$top=100";
 
+        console.log(
+            "Consultando endpoint de dispositivos:"
+        );
+
+        console.log(
+            url
+        );
 
         const dispositivos =
             [];
 
+        let nextUrl =
+            url;
 
-        while (url) {
+        while (nextUrl) {
+
+            console.log(
+                "Solicitando dispositivos a Graph:",
+                nextUrl
+            );
 
             const data =
                 await graph(
-                    url
+                    nextUrl
                 );
 
-
-            dispositivos.push(
-                ...(data.value || [])
+            console.log(
+                "Respuesta Intune:",
+                data
             );
 
+            const encontrados =
+                data.value || [];
 
-            url =
+            console.log(
+                "Dispositivos recibidos:",
+                encontrados.length
+            );
+
+            dispositivos.push(
+                ...encontrados
+            );
+
+            nextUrl =
                 data["@odata.nextLink"]
                 ||
                 null;
 
         }
 
-
         securityData.devices =
             dispositivos;
-
 
         securityData.status.devices =
             "ok";
 
+        console.log(
+            "========================================"
+        );
 
         console.log(
-            "Dispositivos Intune:",
+            "INTUNE OK"
+        );
+
+        console.log(
+            "Total dispositivos:",
             dispositivos.length
         );
 
+        console.log(
+            "Dispositivos:",
+            dispositivos
+        );
+
+        console.log(
+            "========================================"
+        );
 
     } catch (error) {
 
         securityData.status.devices =
             "unavailable";
 
-
         securityData.devices =
             [];
 
+        console.error(
+            "========================================"
+        );
 
-        console.warn(
-            "Dispositivos Intune no disponibles:",
+        console.error(
+            "ERROR CARGANDO INTUNE"
+        );
+
+        console.error(
+            "Mensaje:",
+            error?.message
+        );
+
+        console.error(
+            "Status:",
+            error?.status
+        );
+
+        console.error(
+            "URL:",
+            error?.url
+        );
+
+        console.error(
+            "Graph data:",
+            error?.graphData
+        );
+
+        console.error(
+            "Error completo:",
             error
+        );
+
+        console.error(
+            "========================================"
         );
 
     }

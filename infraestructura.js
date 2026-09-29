@@ -904,87 +904,55 @@ function actualizarResumen(
    ACTUALIZAR ESTADO GENERAL
 ========================================= */
 
-function actualizarEstadoGeneral(
-    datos
-) {
+function actualizarEstadoGeneral(datos) {
+  const estadoGeneral = document.getElementById("estadoMonitoreo");
 
-    const elemento =
-        document.getElementById(
-            "estadoGeneral"
-        );
+  if (!estadoGeneral) return;
 
+  if (!datos || datos.length === 0) {
+    estadoGeneral.textContent = "No configurado";
+    estadoGeneral.className = "status-badge neutral";
+    return;
+  }
 
-    if (
-        !elemento
-    ) return;
+  const estados = datos.map(item => {
+    const campos = obtenerCampos(item);
+    return normalizarEstado(campos.Estado);
+  });
 
+  const tieneIncidencia = estados.some(estado =>
+    ["incidencia", "error", "caido"].includes(estado)
+  );
 
-    const tieneIncidencias =
-        datos.some(
-            item =>
-                clasificarEstado(
-                    obtenerCampos(item).Estado
-                ) === "offline"
-        );
+  const tieneAdvertencia = estados.some(estado =>
+    ["advertencia", "warning", "pendiente"].includes(estado)
+  );
 
+  const todosNoConfigurados = estados.every(estado =>
+    estado === "no configurado" || estado === ""
+  );
 
-    const tieneAdvertencias =
-        datos.some(
-            item =>
-                clasificarEstado(
-                    obtenerCampos(item).Estado
-                ) === "warning"
-        );
+  const todosOperativos = estados.every(estado =>
+    ["operativo", "vigente", "activo", "responde"].includes(estado)
+  );
 
-
-    if (
-        tieneIncidencias
-    ) {
-
-        elemento.textContent =
-            "● INCIDENCIA";
-
-        elemento.className =
-            "section-status offline";
-
-    }
-
-    else if (
-        tieneAdvertencias
-    ) {
-
-        elemento.textContent =
-            "● ADVERTENCIA";
-
-        elemento.className =
-            "section-status warning";
-
-    }
-
-    else if (
-        datos.length
-    ) {
-
-        elemento.textContent =
-            "● OPERATIVO";
-
-        elemento.className =
-            "section-status online";
-
-    }
-
-    else {
-
-        elemento.textContent =
-            "● SIN DATOS";
-
-        elemento.className =
-            "section-status";
-
-    }
-
+  if (tieneIncidencia) {
+    estadoGeneral.textContent = "Incidencia";
+    estadoGeneral.className = "status-badge offline";
+  } else if (tieneAdvertencia) {
+    estadoGeneral.textContent = "Advertencia";
+    estadoGeneral.className = "status-badge warning";
+  } else if (todosNoConfigurados) {
+    estadoGeneral.textContent = "No configurado";
+    estadoGeneral.className = "status-badge neutral";
+  } else if (todosOperativos) {
+    estadoGeneral.textContent = "Operativo";
+    estadoGeneral.className = "status-badge online";
+  } else {
+    estadoGeneral.textContent = "No configurado";
+    estadoGeneral.className = "status-badge neutral";
+  }
 }
-
 
 /* =========================================
    ACTUALIZAR HORA

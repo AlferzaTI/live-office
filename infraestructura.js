@@ -4,6 +4,44 @@
 
 
 /* =========================================
+   CONFIGURACIÓN MICROSOFT
+========================================= */
+
+const msalConfigInfraestructura = {
+
+    auth: {
+
+        clientId:
+            "5d98417c-74a7-4fab-8f2c-41ac127be696",
+
+        authority:
+            "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
+
+        redirectUri:
+            "https://alferzati.github.io/live-office/blank.html"
+
+    },
+
+    cache: {
+
+        cacheLocation:
+            "sessionStorage",
+
+        storeAuthStateInCookie:
+            false
+
+    }
+
+};
+
+
+const msalInstance =
+    new msal.PublicClientApplication(
+        msalConfigInfraestructura
+    );
+
+
+/* =========================================
    CONFIGURACIÓN SHAREPOINT
 ========================================= */
 
@@ -18,31 +56,26 @@ const SHAREPOINT_LIST =
 
 
 /* =========================================
-   OBTENER TOKEN MICROSOFT
+   OBTENER TOKEN
 ========================================= */
 
 async function obtenerTokenInfraestructura() {
-
-    /*
-     * Utilizamos la misma instancia MSAL
-     * que ya utiliza ALFERZA LIVE OFFICE.
-     */
 
     const cuentas =
         msalInstance.getAllAccounts();
 
 
-    const cuenta =
-        cuentas[0];
-
-
-    if (!cuenta) {
+    if (!cuentas.length) {
 
         throw new Error(
-            "No existe una sesión de Microsoft."
+            "No se encontró una cuenta Microsoft activa."
         );
 
     }
+
+
+    const cuenta =
+        cuentas[0];
 
 
     msalInstance.setActiveAccount(
@@ -50,40 +83,21 @@ async function obtenerTokenInfraestructura() {
     );
 
 
-    try {
+    const respuesta =
+        await msalInstance.acquireTokenSilent({
 
-        const response =
-            await msalInstance.acquireTokenSilent({
+            scopes: [
+                "User.Read",
+                "Sites.Read.All"
+            ],
 
-                scopes: [
+            account:
+                cuenta
 
-                    "User.Read",
-
-                    "Sites.Read.All"
-
-                ],
-
-                account:
-                    cuenta
-
-            });
+        });
 
 
-        return response.accessToken;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Error obteniendo token para Infraestructura:",
-            error
-        );
-
-
-        throw error;
-
-    }
+    return respuesta.accessToken;
 
 }
 
@@ -119,10 +133,16 @@ async function obtenerSitioSharePoint(
 
     if (!respuesta.ok) {
 
+        const error =
+            await respuesta.text();
+
+        console.error(
+            "Error SharePoint Site:",
+            error
+        );
+
         throw new Error(
-
             `SharePoint Site: HTTP ${respuesta.status}`
-
         );
 
     }
@@ -134,24 +154,26 @@ async function obtenerSitioSharePoint(
 
 
 /* =========================================
-   OBTENER MONITOREO TI
+   OBTENER LISTA MONITOREOTI
 ========================================= */
 
 async function obtenerMonitoreoTI() {
 
     try {
 
-        /*
-         * TOKEN
-         */
+        console.log(
+            "🔄 Conectando con Microsoft..."
+        );
+
 
         const TOKEN =
             await obtenerTokenInfraestructura();
 
 
-        /*
-         * SITIO
-         */
+        console.log(
+            "✅ Token obtenido"
+        );
+
 
         const sitio =
             await obtenerSitioSharePoint(
@@ -160,14 +182,10 @@ async function obtenerMonitoreoTI() {
 
 
         console.log(
-            "Sitio SharePoint:",
+            "✅ Sitio SharePoint encontrado:",
             sitio
         );
 
-
-        /*
-         * LISTA MONITOREOTI
-         */
 
         const respuesta =
             await fetch(
@@ -192,10 +210,16 @@ async function obtenerMonitoreoTI() {
 
         if (!respuesta.ok) {
 
+            const error =
+                await respuesta.text();
+
+            console.error(
+                "Error obteniendo lista:",
+                error
+            );
+
             throw new Error(
-
-                `SharePoint MonitoreoTI: HTTP ${respuesta.status}`
-
+                `MonitoreoTI: HTTP ${respuesta.status}`
             );
 
         }
@@ -206,7 +230,18 @@ async function obtenerMonitoreoTI() {
 
 
         console.log(
-            "DATOS MONITOREO TI:",
+            "================================="
+        );
+
+        console.log(
+            "✅ MONITOREO TI"
+        );
+
+        console.log(
+            "================================="
+        );
+
+        console.table(
             data.value
         );
 
@@ -218,10 +253,9 @@ async function obtenerMonitoreoTI() {
     catch (error) {
 
         console.error(
-            "Error obteniendo Monitoreo TI:",
+            "❌ Error Monitoreo TI:",
             error
         );
-
 
         return [];
 
@@ -231,13 +265,13 @@ async function obtenerMonitoreoTI() {
 
 
 /* =========================================
-   INICIAR MONITOREO
+   INICIAR
 ========================================= */
 
 async function iniciarMonitoreo() {
 
     console.log(
-        "Iniciando Centro de Monitoreo TI..."
+        "🚀 Iniciando Centro de Monitoreo TI..."
     );
 
 
@@ -246,15 +280,11 @@ async function iniciarMonitoreo() {
 
 
     console.log(
-        "Monitoreo TI cargado:",
+        "Datos recibidos:",
         datos
     );
 
 }
 
-
-/* =========================================
-   INICIO
-========================================= */
 
 iniciarMonitoreo();

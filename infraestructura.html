@@ -1131,10 +1131,23 @@
     src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"
 ></script>
 
+<script>
 
-<!-- ==========================================
-     MONITOREO TI
-     ========================================== -->
+    if (typeof msal === "undefined") {
+
+        console.error(
+            "❌ Microsoft MSAL no pudo cargarse."
+        );
+
+    } else {
+
+        console.log(
+            "✅ Microsoft MSAL cargado correctamente."
+        );
+
+    }
+
+</script>
 
 <script
     src="infraestructura.js"

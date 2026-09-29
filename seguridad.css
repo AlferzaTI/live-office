@@ -363,16 +363,13 @@ body {
 
 .dashboard-grid {
     width: 100%;
-    max-width: none;
-    margin: 0;
+    max-width: 1200px;
+    margin: 0 auto;
     display: grid;
-
     grid-template-columns:
-        minmax(0, 1.5fr)
-        minmax(0, 0.8fr);
-
+        minmax(0, 1.25fr)
+        minmax(0, 0.75fr);
     gap: 18px;
-
     transition: all .25s ease;
 }
 
@@ -1190,8 +1187,10 @@ footer {
     }
 
     .wide-card {
-        grid-column: span 1;
-    }
+    grid-column: span 1;
+    width: 100%;
+    max-width: 850px;
+}
 
     .content.filter-mode .dashboard-grid {
         width: 100%;

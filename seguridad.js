@@ -127,7 +127,7 @@ const paginationState = {
    en el dashboard principal.
 */
 
-const DASHBOARD_ITEMS = 10;
+const DASHBOARD_ITEMS = 5;
 
 
 /*

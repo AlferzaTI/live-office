@@ -1397,6 +1397,7 @@ function actualizarUsuarios() {
     /*
        ========================================================
        DASHBOARD PRINCIPAL
+       5 usuarios por página
        ========================================================
     */
 
@@ -1404,10 +1405,52 @@ function actualizarUsuarios() {
         filtroActivo === null
     ) {
 
+        const total =
+            usuariosDashboard.length;
+
+
+        const totalPaginas =
+            Math.ceil(
+                total /
+                DASHBOARD_ITEMS
+            );
+
+
+        if (
+            paginationState.users >
+            totalPaginas
+        ) {
+
+            paginationState.users =
+                totalPaginas;
+
+        }
+
+
+        const pagina =
+            paginationState.users;
+
+
+        const inicio =
+            (
+                pagina - 1
+            )
+            *
+            DASHBOARD_ITEMS;
+
+
+        const fin =
+            Math.min(
+                inicio +
+                DASHBOARD_ITEMS,
+                total
+            );
+
+
         const usuarios =
             usuariosDashboard.slice(
-                0,
-                DASHBOARD_ITEMS
+                inicio,
+                fin
             );
 
 
@@ -1425,9 +1468,18 @@ function actualizarUsuarios() {
 
         actualizarPaginacion(
             "usersPagination",
-            0,
-            1,
-            () => {}
+            total,
+            pagina,
+            nuevaPagina => {
+
+                paginationState.users =
+                    nuevaPagina;
+
+
+                actualizarUsuarios();
+
+            },
+            DASHBOARD_ITEMS
         );
 
 
@@ -1439,6 +1491,7 @@ function actualizarUsuarios() {
     /*
        ========================================================
        FILTRO ACTIVO
+       20 usuarios por página
        ========================================================
     */
 
@@ -1512,13 +1565,13 @@ function actualizarUsuarios() {
             paginationState.users =
                 nuevaPagina;
 
+
             actualizarUsuarios();
 
         }
     );
 
 }
-
 
 /* ============================================================
    RENDER USUARIO
@@ -1779,6 +1832,7 @@ function actualizarDepartamentos() {
     /*
        ========================================================
        DASHBOARD PRINCIPAL
+       5 departamentos por página
        ========================================================
     */
 
@@ -1786,10 +1840,48 @@ function actualizarDepartamentos() {
         filtroActivo === null
     ) {
 
+        const totalPaginas =
+            Math.ceil(
+                total /
+                DASHBOARD_ITEMS
+            );
+
+
+        if (
+            paginationState.departments >
+            totalPaginas
+        ) {
+
+            paginationState.departments =
+                totalPaginas;
+
+        }
+
+
+        const pagina =
+            paginationState.departments;
+
+
+        const inicio =
+            (
+                pagina - 1
+            )
+            *
+            DASHBOARD_ITEMS;
+
+
+        const fin =
+            Math.min(
+                inicio +
+                DASHBOARD_ITEMS,
+                total
+            );
+
+
         const departamentos =
             departamentosDashboard.slice(
-                0,
-                DASHBOARD_ITEMS
+                inicio,
+                fin
             );
 
 
@@ -1801,9 +1893,18 @@ function actualizarDepartamentos() {
 
         actualizarPaginacion(
             "departmentsPagination",
-            0,
-            1,
-            () => {}
+            total,
+            pagina,
+            nuevaPagina => {
+
+                paginationState.departments =
+                    nuevaPagina;
+
+
+                actualizarDepartamentos();
+
+            },
+            DASHBOARD_ITEMS
         );
 
 
@@ -1815,6 +1916,7 @@ function actualizarDepartamentos() {
     /*
        ========================================================
        FILTRO ACTIVO
+       20 departamentos por página
        ========================================================
     */
 
@@ -1877,6 +1979,7 @@ function actualizarDepartamentos() {
 
             paginationState.departments =
                 nuevaPagina;
+
 
             actualizarDepartamentos();
 
@@ -2244,6 +2347,7 @@ function actualizarBloqueados() {
     /*
        ========================================================
        DASHBOARD PRINCIPAL
+       5 cuentas bloqueadas por página
        ========================================================
     */
 
@@ -2251,10 +2355,52 @@ function actualizarBloqueados() {
         filtroActivo === null
     ) {
 
+        const total =
+            bloqueadosDashboard.length;
+
+
+        const totalPaginas =
+            Math.ceil(
+                total /
+                DASHBOARD_ITEMS
+            );
+
+
+        if (
+            paginationState.blocked >
+            totalPaginas
+        ) {
+
+            paginationState.blocked =
+                totalPaginas;
+
+        }
+
+
+        const pagina =
+            paginationState.blocked;
+
+
+        const inicio =
+            (
+                pagina - 1
+            )
+            *
+            DASHBOARD_ITEMS;
+
+
+        const fin =
+            Math.min(
+                inicio +
+                DASHBOARD_ITEMS,
+                total
+            );
+
+
         const usuarios =
             bloqueadosDashboard.slice(
-                0,
-                DASHBOARD_ITEMS
+                inicio,
+                fin
             );
 
 
@@ -2266,9 +2412,18 @@ function actualizarBloqueados() {
 
         actualizarPaginacion(
             "blockedPagination",
-            0,
-            1,
-            () => {}
+            total,
+            pagina,
+            nuevaPagina => {
+
+                paginationState.blocked =
+                    nuevaPagina;
+
+
+                actualizarBloqueados();
+
+            },
+            DASHBOARD_ITEMS
         );
 
 
@@ -2280,6 +2435,7 @@ function actualizarBloqueados() {
     /*
        ========================================================
        FILTRO ACTIVO
+       20 cuentas por página
        ========================================================
     */
 
@@ -2346,6 +2502,7 @@ function actualizarBloqueados() {
 
             paginationState.blocked =
                 nuevaPagina;
+
 
             actualizarBloqueados();
 
@@ -2653,6 +2810,7 @@ function actualizarTablaAuditoria() {
     /*
        ========================================================
        DASHBOARD PRINCIPAL
+       5 eventos por página
        ========================================================
     */
 
@@ -2660,10 +2818,52 @@ function actualizarTablaAuditoria() {
         filtroActivo === null
     ) {
 
+        const total =
+            auditoriaDashboard.length;
+
+
+        const totalPaginas =
+            Math.ceil(
+                total /
+                DASHBOARD_ITEMS
+            );
+
+
+        if (
+            paginationState.audit >
+            totalPaginas
+        ) {
+
+            paginationState.audit =
+                totalPaginas;
+
+        }
+
+
+        const pagina =
+            paginationState.audit;
+
+
+        const inicio =
+            (
+                pagina - 1
+            )
+            *
+            DASHBOARD_ITEMS;
+
+
+        const fin =
+            Math.min(
+                inicio +
+                DASHBOARD_ITEMS,
+                total
+            );
+
+
         const eventos =
             auditoriaDashboard.slice(
-                0,
-                DASHBOARD_ITEMS
+                inicio,
+                fin
             );
 
 
@@ -2675,9 +2875,18 @@ function actualizarTablaAuditoria() {
 
         actualizarPaginacion(
             "auditPagination",
-            0,
-            1,
-            () => {}
+            total,
+            pagina,
+            nuevaPagina => {
+
+                paginationState.audit =
+                    nuevaPagina;
+
+
+                actualizarTablaAuditoria();
+
+            },
+            DASHBOARD_ITEMS
         );
 
 
@@ -2689,6 +2898,7 @@ function actualizarTablaAuditoria() {
     /*
        ========================================================
        FILTRO ACTIVO
+       20 eventos por página
        ========================================================
     */
 
@@ -2756,13 +2966,13 @@ function actualizarTablaAuditoria() {
             paginationState.audit =
                 nuevaPagina;
 
+
             actualizarTablaAuditoria();
 
         }
     );
 
 }
-
 
 /* ============================================================
    RENDER EVENTOS DE AUDITORÍA
@@ -2928,7 +3138,8 @@ function actualizarPaginacion(
     containerId,
     totalItems,
     paginaActual,
-    onPageChange
+    onPageChange,
+    itemsPorPagina = ITEMS_PER_PAGE
 ) {
 
     const container =
@@ -2949,7 +3160,7 @@ function actualizarPaginacion(
 
 
     if (
-        totalItems <= 0
+        totalItems <= itemsPorPagina
     ) {
 
         return;
@@ -2960,7 +3171,7 @@ function actualizarPaginacion(
     const totalPaginas =
         Math.ceil(
             totalItems /
-            ITEMS_PER_PAGE
+            itemsPorPagina
         );
 
 
@@ -2969,7 +3180,7 @@ function actualizarPaginacion(
             paginaActual - 1
         )
         *
-        ITEMS_PER_PAGE
+        itemsPorPagina
         +
         1;
 
@@ -2977,7 +3188,7 @@ function actualizarPaginacion(
     const fin =
         Math.min(
             paginaActual *
-            ITEMS_PER_PAGE,
+            itemsPorPagina,
             totalItems
         );
 

@@ -1395,56 +1395,52 @@ footer {
 }
 
 
-
-/* =========================================================
+/* ==========================================
    BUSCADOR DE TRABAJADORES
-========================================================= */
+========================================== */
 
 .worker-search {
     width: 100%;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 18px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+    max-width: none;
+    box-sizing: border-box;
+    background: #b8860b;
+    border: 1px solid #9a7208;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 0 0 18px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
 }
 
-.worker-search-header {
-    margin-bottom: 12px;
-}
-
-.worker-search-header h3 {
-    font-size: 17px;
-    color: #0f172a;
-    font-weight: 800;
+.worker-search h3 {
+    margin: 0 0 9px 0;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .search-box {
     position: relative;
-    display: flex;
-    align-items: center;
     width: 100%;
-}
-
-.search-icon {
-    position: absolute;
-    left: 15px;
-    font-size: 15px;
-    pointer-events: none;
+    box-sizing: border-box;
 }
 
 .search-box input {
+    display: block;
     width: 100%;
-    height: 46px;
-    padding: 0 45px 0 42px;
-    border: 1px solid #dbe2ea;
-    border-radius: 10px;
+    height: 38px;
+    box-sizing: border-box;
+
+    padding: 0 42px 0 38px;
+
+    border: 1px solid #d6dbe3;
+    border-radius: 8px;
+
     outline: none;
-    background: #f8fafc;
+
+    background: #ffffff;
     color: #0f172a;
-    font-size: 13px;
-    transition: .2s ease;
+
+    font-size: 12px;
 }
 
 .search-box input::placeholder {
@@ -1452,99 +1448,143 @@ footer {
 }
 
 .search-box input:focus {
-    border-color: #3b82f6;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+    border-color: #64748b;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, .25);
+}
+
+.search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 2;
 }
 
 .clear-search {
     position: absolute;
-    right: 10px;
-    width: 28px;
-    height: 28px;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 27px;
+    height: 27px;
+
     border: none;
-    border-radius: 7px;
+    border-radius: 6px;
+
     background: transparent;
-    color: #94a3b8;
-    font-size: 21px;
+    color: #64748b;
+
+    font-size: 19px;
     line-height: 1;
+
     cursor: pointer;
-    transition: .15s ease;
 }
 
 .clear-search:hover {
     background: #e2e8f0;
-    color: #334155;
+    color: #0f172a;
 }
 
 
-/* =========================================================
-   RESULTADOS DE BÚSQUEDA
-========================================================= */
+/* ==========================================
+   RESULTADOS
+========================================== */
 
 .worker-search-result {
-    margin-top: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
 }
 
 .search-results-header {
+    width: 100%;
+    box-sizing: border-box;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 4px;
+
+    padding: 7px 2px;
 }
 
 .search-results-header strong {
-    color: #334155;
-    font-size: 12px;
+    color: #ffffff;
+    font-size: 11px;
 }
 
 .search-results-header span {
-    min-width: 25px;
-    height: 25px;
-    padding: 0 7px;
-    border-radius: 20px;
-    background: #dbeafe;
-    color: #2563eb;
+    min-width: 23px;
+    height: 23px;
+
+    padding: 0 6px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    border-radius: 20px;
+
+    background: #ffffff;
+    color: #8a6500;
+
     font-size: 10px;
     font-weight: 800;
 }
 
+
+/* ==========================================
+   CADA TRABAJADOR
+========================================== */
+
 .search-results-list {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 7px;
 }
 
 .search-user {
+    width: 100%;
+    box-sizing: border-box;
+
     display: flex;
     align-items: center;
-    gap: 13px;
-    padding: 12px;
+    gap: 12px;
+
+    padding: 10px 12px;
+
     border: 1px solid #e2e8f0;
-    border-radius: 11px;
-    background: #fff;
+    border-radius: 8px;
+
+    background: #ffffff;
+
     cursor: pointer;
     transition: .15s ease;
 }
 
 .search-user:hover {
-    border-color: #93c5fd;
-    background: #f8fbff;
+    border-color: #94a3b8;
+    background: #f8fafc;
     transform: translateY(-1px);
 }
 
+
+/* Nombre + correo */
+
 .search-user-main {
-    width: 260px;
-    min-width: 0;
+    width: 280px;
+    min-width: 280px;
 }
 
 .search-user-main strong {
     display: block;
+
     color: #0f172a;
-    font-size: 12px;
+    font-size: 11px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1552,33 +1592,45 @@ footer {
 
 .search-user-main span {
     display: block;
+
     margin-top: 3px;
+
     color: #64748b;
-    font-size: 10px;
+    font-size: 9px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+
+/* Datos */
+
 .search-user-data {
     flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 110px 1.4fr;
-    gap: 15px;
     min-width: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 110px 1.5fr;
+
+    gap: 15px;
 }
 
 .search-user-data small {
     display: block;
+
     color: #94a3b8;
-    font-size: 9px;
-    margin-bottom: 3px;
+    font-size: 8px;
+
+    margin-bottom: 2px;
 }
 
 .search-user-data strong {
     display: block;
+
     color: #475569;
     font-size: 10px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1593,48 +1645,61 @@ footer {
 }
 
 
-/* =========================================================
+/* ==========================================
    SIN RESULTADOS
-========================================================= */
+========================================== */
 
 .search-no-results {
+    width: 100%;
+    box-sizing: border-box;
+
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 10px;
-    background: #f8fafc;
+    gap: 10px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    background: #ffffff;
     border: 1px solid #e2e8f0;
 }
 
 .search-no-results > span {
-    width: 35px;
-    height: 35px;
+    width: 32px;
+    height: 32px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9px;
-    background: #e2e8f0;
-    font-size: 15px;
+
+    border-radius: 7px;
+
+    background: #f1f5f9;
+
+    font-size: 14px;
 }
 
 .search-no-results strong {
     display: block;
+
     color: #475569;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .search-no-results small {
     display: block;
+
     color: #94a3b8;
-    font-size: 10px;
-    margin-top: 3px;
+    font-size: 9px;
+
+    margin-top: 2px;
 }
 
 
-/* =========================================================
-   RESPONSIVE BUSCADOR
-========================================================= */
+/* ==========================================
+   RESPONSIVE
+========================================== */
 
 @media (max-width: 900px) {
 
@@ -1644,14 +1709,19 @@ footer {
     }
 
     .search-user-main {
-        flex: 1;
-        width: auto;
+        width: 100%;
+        min-width: 0;
     }
 
     .search-user-data {
         width: 100%;
         flex-basis: 100%;
-        padding-left: 49px;
+
+        grid-template-columns:
+            1fr
+            1fr;
+
+        gap: 10px;
     }
 
 }
@@ -1660,16 +1730,11 @@ footer {
 @media (max-width: 600px) {
 
     .worker-search {
-        padding: 15px;
+        padding: 11px;
     }
 
     .search-user-data {
-        grid-template-columns: 1fr 1fr;
-        padding-left: 0;
-    }
-
-    .search-user-data > div:last-child {
-        grid-column: 1 / -1;
+        grid-template-columns: 1fr;
     }
 
 }

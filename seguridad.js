@@ -16,7 +16,7 @@
    ✗ Sign-ins
    ✗ signInActivity
    ✗ Intune
-   ============================================================ */
+============================================================ */
 
 
 /* ============================================================
@@ -103,6 +103,26 @@ const securityData = {
     }
 
 };
+
+
+/* ============================================================
+   PAGINACIÓN
+============================================================ */
+
+const paginationState = {
+
+    users: 1,
+
+    blocked: 1,
+
+    departments: 1,
+
+    audit: 1
+
+};
+
+
+const ITEMS_PER_PAGE = 20;
 
 
 /* ============================================================
@@ -536,6 +556,16 @@ async function cargarUsuarios() {
             "ok";
 
 
+        paginationState.users =
+            1;
+
+        paginationState.blocked =
+            1;
+
+        paginationState.departments =
+            1;
+
+
         console.log(
             "Usuarios:",
             usuarios.length
@@ -715,17 +745,34 @@ async function cargarAuditoria() {
 
 
         securityData.auditLogs =
-            eventos;
+            eventos
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+                        new Date(
+                            b.activityDateTime
+                        )
+                        -
+                        new Date(
+                            a.activityDateTime
+                        )
+                );
 
 
         securityData.auditTypes =
             calcularTiposAuditoria(
-                eventos
+                securityData.auditLogs
             );
 
 
         securityData.status.audit =
             "ok";
+
+
+        paginationState.audit =
+            1;
 
 
         console.log(
@@ -997,20 +1044,20 @@ function actualizarContadores() {
 
 function actualizarUsuarios() {
 
-    const container =
+    const tbody =
         document.getElementById(
-            "usersList"
+            "usersTable"
         );
 
 
-    if (!container) {
+    if (!tbody) {
 
         return;
 
     }
 
 
-    container.innerHTML =
+    tbody.innerHTML =
         "";
 
 
@@ -1018,118 +1065,212 @@ function actualizarUsuarios() {
         !securityData.users.length
     ) {
 
-        container.innerHTML = `
+        tbody.innerHTML = `
 
-            <div class="loading">
+            <tr>
 
-                No hay usuarios disponibles.
+                <td
+                    colspan="4"
+                    class="loading-cell"
+                >
 
-            </div>
+                    No hay usuarios disponibles.
+
+                </td>
+
+            </tr>
 
         `;
+
+
+        actualizarPaginacion(
+            "usersPagination",
+            0,
+            1,
+            () => {}
+        );
+
 
         return;
 
     }
 
 
-    securityData.users
-        .forEach(
-            user => {
+    const total =
+        securityData.users.length;
 
-                const nombre =
-                    user.displayName
+
+    const totalPaginas =
+        Math.ceil(
+            total /
+            ITEMS_PER_PAGE
+        );
+
+
+    if (
+        paginationState.users >
+        totalPaginas
+    ) {
+
+        paginationState.users =
+            totalPaginas;
+
+    }
+
+
+    const pagina =
+        paginationState.users;
+
+
+    const inicio =
+        (
+            pagina - 1
+        )
+        *
+        ITEMS_PER_PAGE;
+
+
+    const fin =
+        Math.min(
+            inicio +
+            ITEMS_PER_PAGE,
+            total
+        );
+
+
+    const usuarios =
+        securityData.users.slice(
+            inicio,
+            fin
+        );
+
+
+    usuarios.forEach(
+        user => {
+
+            const nombre =
+                user.displayName
+                ||
+                "Sin nombre";
+
+
+            const correo =
+                user.userPrincipalName
+                ||
+                "Sin correo";
+
+
+            const departamento =
+                String(
+                    user.department
                     ||
-                    "Sin nombre";
+                    ""
+                )
+                .trim()
+                ||
+                "Sin departamento";
 
 
-                const correo =
-                    user.userPrincipalName
-                    ||
-                    "Sin correo";
+            const iniciales =
+                obtenerIniciales(
+                    nombre
+                );
 
 
-                const departamento =
-                    String(
-                        user.department
-                        ||
-                        ""
-                    )
-                    .trim()
-                    ||
-                    "Sin departamento";
+            const activo =
+                user.accountEnabled !== false;
 
 
-                const iniciales =
-                    obtenerIniciales(
-                        nombre
-                    );
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
 
-                const activo =
-                    user.accountEnabled !== false;
+            tr.innerHTML = `
+
+                <td>
+
+                    <div class="user-cell">
+
+                        <div
+                            class="avatar ${
+                                activo
+                                    ? "blue-avatar"
+                                    : "red-avatar"
+                            }"
+                        >
+
+                            ${escapar(
+                                iniciales
+                            )}
+
+                        </div>
 
 
-                const div =
-                    document.createElement(
-                        "div"
-                    );
+                        <div class="user-cell-info">
+
+                            <strong>
+
+                                ${escapar(
+                                    nombre
+                                )}
+
+                            </strong>
+
+                            <small>
+                                ID: ${escapar(
+                                    user.id || "—"
+                                )}
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </td>
 
 
-                div.className =
-                    "directory-user";
-
-
-                div.innerHTML = `
+                <td>
 
                     <div
-                        class="avatar ${
-                            activo
-                                ? "blue-avatar"
-                                : "red-avatar"
-                        }"
+                        class="email-cell"
+                        title="${escapar(
+                            correo
+                        )}"
                     >
 
                         ${escapar(
-                            iniciales
+                            correo
                         )}
 
                     </div>
 
-
-                    <div class="directory-user-info">
-
-                        <strong>
-
-                            ${escapar(
-                                nombre
-                            )}
-
-                        </strong>
+                </td>
 
 
-                        <small>
+                <td>
 
-                            ${escapar(
-                                correo
-                            )}
+                    <div
+                        class="department-cell"
+                        title="${escapar(
+                            departamento
+                        )}"
+                    >
 
-                        </small>
-
-
-                        <small>
-
-                            ${escapar(
-                                departamento
-                            )}
-
-                        </small>
+                        ${escapar(
+                            departamento
+                        )}
 
                     </div>
 
+                </td>
+
+
+                <td>
 
                     <span
-                        class="directory-user-status ${
+                        class="status-badge ${
                             activo
                                 ? "status-active"
                                 : "status-blocked"
@@ -1144,15 +1285,32 @@ function actualizarUsuarios() {
 
                     </span>
 
-                `;
+                </td>
+
+            `;
 
 
-                container.appendChild(
-                    div
-                );
+            tbody.appendChild(
+                tr
+            );
 
-            }
-        );
+        }
+    );
+
+
+    actualizarPaginacion(
+        "usersPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.users =
+                nuevaPagina;
+
+            actualizarUsuarios();
+
+        }
+    );
 
 }
 
@@ -1163,20 +1321,20 @@ function actualizarUsuarios() {
 
 function actualizarDepartamentos() {
 
-    const container =
+    const tbody =
         document.getElementById(
-            "departmentList"
+            "departmentTable"
         );
 
 
-    if (!container) {
+    if (!tbody) {
 
         return;
 
     }
 
 
-    container.innerHTML =
+    tbody.innerHTML =
         "";
 
 
@@ -1184,58 +1342,131 @@ function actualizarDepartamentos() {
         !securityData.departments.length
     ) {
 
-        container.innerHTML = `
+        tbody.innerHTML = `
 
-            <div class="loading">
+            <tr>
 
-                No hay información disponible.
+                <td
+                    colspan="3"
+                    class="loading-cell"
+                >
 
-            </div>
+                    No hay información disponible.
+
+                </td>
+
+            </tr>
 
         `;
+
+
+        actualizarPaginacion(
+            "departmentsPagination",
+            0,
+            1,
+            () => {}
+        );
+
 
         return;
 
     }
 
 
+    const total =
+        securityData.departments.length;
+
+
+    const totalPaginas =
+        Math.ceil(
+            total /
+            ITEMS_PER_PAGE
+        );
+
+
+    if (
+        paginationState.departments >
+        totalPaginas
+    ) {
+
+        paginationState.departments =
+            totalPaginas;
+
+    }
+
+
+    const pagina =
+        paginationState.departments;
+
+
+    const inicio =
+        (
+            pagina - 1
+        )
+        *
+        ITEMS_PER_PAGE;
+
+
+    const fin =
+        Math.min(
+            inicio +
+            ITEMS_PER_PAGE,
+            total
+        );
+
+
+    const departamentos =
+        securityData.departments.slice(
+            inicio,
+            fin
+        );
+
+
+    const totalUsuarios =
+        securityData.users.length;
+
+
     const max =
         securityData.departments[0]
-            .cantidad;
+            ?.cantidad
+            ||
+            1;
 
 
-    securityData.departments
-        .slice(
-            0,
-            8
-        )
-        .forEach(
-            departamento => {
+    departamentos.forEach(
+        departamento => {
 
-                const porcentaje =
-                    Math.max(
-                        3,
-                        (
-                            departamento.cantidad /
-                            max
-                        ) * 100
-                    );
+            const porcentaje =
+                totalUsuarios > 0
+                    ? (
+                        departamento.cantidad /
+                        totalUsuarios
+                    ) * 100
+                    : 0;
 
 
-                const row =
-                    document.createElement(
-                        "div"
-                    );
+            const anchoBarra =
+                Math.max(
+                    3,
+                    (
+                        departamento.cantidad /
+                        max
+                    ) * 100
+                );
 
 
-                row.className =
-                    "department-row";
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
 
-                row.innerHTML = `
+            tr.innerHTML = `
+
+                <td>
 
                     <div
-                        class="department-name"
+                        class="department-name-cell"
                         title="${escapar(
                             departamento.nombre
                         )}"
@@ -1247,32 +1478,68 @@ function actualizarDepartamentos() {
 
                     </div>
 
-
-                    <div class="department-bar">
-
-                        <div
-                            class="department-fill"
-                            style="width:${porcentaje}%"
-                        ></div>
-
-                    </div>
+                </td>
 
 
-                    <div class="department-count">
+                <td>
+
+                    <div class="department-count-cell">
 
                         ${departamento.cantidad}
 
                     </div>
 
-                `;
+                </td>
 
 
-                container.appendChild(
-                    row
-                );
+                <td>
 
-            }
-        );
+                    <div class="department-progress">
+
+                        <div class="department-bar">
+
+                            <div
+                                class="department-fill"
+                                style="width:${anchoBarra}%"
+                            ></div>
+
+                        </div>
+
+
+                        <span class="department-percent">
+
+                            ${porcentaje.toFixed(1)}%
+
+                        </span>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    actualizarPaginacion(
+        "departmentsPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.departments =
+                nuevaPagina;
+
+            actualizarDepartamentos();
+
+        }
+    );
 
 }
 
@@ -1411,20 +1678,20 @@ function actualizarResumenAuditoria() {
 
 function actualizarBloqueados() {
 
-    const container =
+    const tbody =
         document.getElementById(
-            "blockedList"
+            "blockedTable"
         );
 
 
-    if (!container) {
+    if (!tbody) {
 
         return;
 
     }
 
 
-    container.innerHTML =
+    tbody.innerHTML =
         "";
 
 
@@ -1432,123 +1699,230 @@ function actualizarBloqueados() {
         !securityData.blockedUsers.length
     ) {
 
-        container.innerHTML = `
+        tbody.innerHTML = `
 
-            <div class="loading">
+            <tr>
 
-                No hay cuentas bloqueadas.
+                <td
+                    colspan="4"
+                    class="loading-cell"
+                >
 
-            </div>
+                    No hay cuentas bloqueadas.
+
+                </td>
+
+            </tr>
 
         `;
+
+
+        actualizarPaginacion(
+            "blockedPagination",
+            0,
+            1,
+            () => {}
+        );
+
 
         return;
 
     }
 
 
-    securityData.blockedUsers
-        .slice(
-            0,
-            10
+    const total =
+        securityData.blockedUsers.length;
+
+
+    const totalPaginas =
+        Math.ceil(
+            total /
+            ITEMS_PER_PAGE
+        );
+
+
+    if (
+        paginationState.blocked >
+        totalPaginas
+    ) {
+
+        paginationState.blocked =
+            totalPaginas;
+
+    }
+
+
+    const pagina =
+        paginationState.blocked;
+
+
+    const inicio =
+        (
+            pagina - 1
         )
-        .forEach(
-            user => {
+        *
+        ITEMS_PER_PAGE;
 
-                const nombre =
-                    user.displayName
+
+    const fin =
+        Math.min(
+            inicio +
+            ITEMS_PER_PAGE,
+            total
+        );
+
+
+    const usuarios =
+        securityData.blockedUsers.slice(
+            inicio,
+            fin
+        );
+
+
+    usuarios.forEach(
+        user => {
+
+            const nombre =
+                user.displayName
+                ||
+                "Sin nombre";
+
+
+            const correo =
+                user.userPrincipalName
+                ||
+                "Sin correo";
+
+
+            const departamento =
+                String(
+                    user.department
                     ||
-                    "Sin nombre";
+                    ""
+                )
+                .trim()
+                ||
+                "Sin departamento";
 
 
-                const correo =
-                    user.userPrincipalName
-                    ||
-                    "Sin correo";
+            const iniciales =
+                obtenerIniciales(
+                    nombre
+                );
 
 
-                const area =
-                    String(
-                        user.department
-                        ||
-                        ""
-                    )
-                    .trim()
-                    ||
-                    "Sin departamento";
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
 
-                const iniciales =
-                    obtenerIniciales(
-                        nombre
-                    );
+            tr.innerHTML = `
+
+                <td>
+
+                    <div class="user-cell">
+
+                        <div class="avatar red-avatar">
+
+                            ${escapar(
+                                iniciales
+                            )}
+
+                        </div>
 
 
-                const div =
-                    document.createElement(
-                        "div"
-                    );
+                        <div class="user-cell-info">
+
+                            <strong>
+
+                                ${escapar(
+                                    nombre
+                                )}
+
+                            </strong>
+
+                            <small>
+                                Cuenta deshabilitada
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </td>
 
 
-                div.className =
-                    "blocked-user";
+                <td>
 
-
-                div.innerHTML = `
-
-                    <div class="avatar red-avatar">
+                    <div
+                        class="email-cell"
+                        title="${escapar(
+                            correo
+                        )}"
+                    >
 
                         ${escapar(
-                            iniciales
+                            correo
                         )}
 
                     </div>
 
-
-                    <div class="blocked-info">
-
-                        <strong>
-
-                            ${escapar(
-                                nombre
-                            )}
-
-                        </strong>
+                </td>
 
 
-                        <small>
+                <td>
 
-                            ${escapar(
-                                area
-                            )}
+                    <div
+                        class="department-cell"
+                        title="${escapar(
+                            departamento
+                        )}"
+                    >
 
-                        </small>
-
-
-                        <small>
-
-                            ${escapar(
-                                correo
-                            )}
-
-                        </small>
+                        ${escapar(
+                            departamento
+                        )}
 
                     </div>
 
+                </td>
 
-                    <span>
+
+                <td>
+
+                    <span class="status-badge status-blocked">
+
                         Bloqueada
+
                     </span>
 
-                `;
+                </td>
+
+            `;
 
 
-                container.appendChild(
-                    div
-                );
+            tbody.appendChild(
+                tr
+            );
 
-            }
-        );
+        }
+    );
+
+
+    actualizarPaginacion(
+        "blockedPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.blocked =
+                nuevaPagina;
+
+            actualizarBloqueados();
+
+        }
+    );
 
 }
 
@@ -1630,171 +2004,573 @@ function actualizarTablaAuditoria() {
 
         `;
 
+
+        actualizarPaginacion(
+            "auditPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
         return;
 
     }
 
 
-    securityData.auditLogs
-        .slice(
-            0,
-            50
+    const total =
+        securityData.auditLogs.length;
+
+
+    const totalPaginas =
+        Math.ceil(
+            total /
+            ITEMS_PER_PAGE
+        );
+
+
+    if (
+        paginationState.audit >
+        totalPaginas
+    ) {
+
+        paginationState.audit =
+            totalPaginas;
+
+    }
+
+
+    const pagina =
+        paginationState.audit;
+
+
+    const inicio =
+        (
+            pagina - 1
         )
-        .sort(
-            (
-                a,
-                b
-            ) =>
-                new Date(
-                    b.activityDateTime
-                )
-                -
-                new Date(
-                    a.activityDateTime
-                )
-        )
-        .forEach(
-            evento => {
-
-                const accion =
-                    evento.activityDisplayName
-                    ||
-                    "Actividad desconocida";
+        *
+        ITEMS_PER_PAGE;
 
 
-                const iniciador =
-                    obtenerIniciador(
-                        evento
-                    );
+    const fin =
+        Math.min(
+            inicio +
+            ITEMS_PER_PAGE,
+            total
+        );
 
 
-                const recurso =
-                    obtenerRecurso(
-                        evento
-                    );
+    const eventos =
+        securityData.auditLogs.slice(
+            inicio,
+            fin
+        );
 
 
-                const fecha =
-                    formatearFecha(
-                        evento.activityDateTime
-                    );
+    eventos.forEach(
+        evento => {
+
+            const accion =
+                evento.activityDisplayName
+                ||
+                "Actividad desconocida";
 
 
-                const icono =
-                    obtenerIconoEvento(
-                        accion
-                    );
+            const iniciador =
+                obtenerIniciador(
+                    evento
+                );
 
 
-                const tr =
-                    document.createElement(
-                        "tr"
-                    );
+            const recurso =
+                obtenerRecurso(
+                    evento
+                );
 
 
-                tr.innerHTML = `
-
-                    <td>
-
-                        <div class="audit-action">
-
-                            <div class="audit-icon">
-
-                                ${icono}
-
-                            </div>
+            const fecha =
+                formatearFecha(
+                    evento.activityDateTime
+                );
 
 
-                            <div>
+            const icono =
+                obtenerIconoEvento(
+                    accion
+                );
 
-                                <strong>
 
-                                    ${escapar(
-                                        accion
-                                    )}
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
-                                </strong>
 
-                                <small>
+            tr.innerHTML = `
 
-                                    ${escapar(
-                                        obtenerCategoriaEvento(
-                                            accion
-                                        )
-                                    )}
+                <td>
 
-                                </small>
+                    <div class="audit-action">
 
-                            </div>
+                        <div class="audit-icon">
+
+                            ${icono}
 
                         </div>
 
-                    </td>
 
-
-                    <td>
-
-                        <div class="audit-user">
+                        <div>
 
                             <strong>
 
                                 ${escapar(
-                                    iniciador.nombre
+                                    accion
                                 )}
 
                             </strong>
 
-
                             <small>
 
                                 ${escapar(
-                                    iniciador.correo
+                                    obtenerCategoriaEvento(
+                                        accion
+                                    )
                                 )}
 
                             </small>
 
                         </div>
 
-                    </td>
+                    </div>
+
+                </td>
 
 
-                    <td>
+                <td>
 
-                        <div
-                            class="target-name"
-                            title="${escapar(
-                                recurso
-                            )}"
-                        >
+                    <div class="audit-user">
+
+                        <strong>
 
                             ${escapar(
-                                recurso
+                                iniciador.nombre
                             )}
 
-                        </div>
-
-                    </td>
+                        </strong>
 
 
-                    <td>
+                        <small>
 
-                        <div class="audit-date">
+                            ${escapar(
+                                iniciador.correo
+                            )}
 
-                            ${fecha}
+                        </small>
 
-                        </div>
+                    </div>
 
-                    </td>
-
-                `;
+                </td>
 
 
-                tbody.appendChild(
-                    tr
+                <td>
+
+                    <div
+                        class="target-name"
+                        title="${escapar(
+                            recurso
+                        )}"
+                    >
+
+                        ${escapar(
+                            recurso
+                        )}
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <div class="audit-date">
+
+                        ${fecha}
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    actualizarPaginacion(
+        "auditPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.audit =
+                nuevaPagina;
+
+            actualizarTablaAuditoria();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   PAGINACIÓN
+============================================================ */
+
+function actualizarPaginacion(
+    containerId,
+    totalItems,
+    paginaActual,
+    onPageChange
+) {
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        totalItems <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    const totalPaginas =
+        Math.ceil(
+            totalItems /
+            ITEMS_PER_PAGE
+        );
+
+
+    const inicio =
+        (
+            paginaActual - 1
+        )
+        *
+        ITEMS_PER_PAGE
+        +
+        1;
+
+
+    const fin =
+        Math.min(
+            paginaActual *
+            ITEMS_PER_PAGE,
+            totalItems
+        );
+
+
+    const info =
+        document.createElement(
+            "div"
+        );
+
+
+    info.className =
+        "pagination-info";
+
+
+    info.textContent =
+        `Mostrando ${inicio}–${fin} de ${totalItems}`;
+
+
+    const controls =
+        document.createElement(
+            "div"
+        );
+
+
+    controls.className =
+        "pagination-controls";
+
+
+    const anterior =
+        crearBotonPaginacion(
+            "‹",
+            paginaActual === 1,
+            false,
+            () => {
+
+                onPageChange(
+                    paginaActual - 1
                 );
 
             }
         );
+
+
+    controls.appendChild(
+        anterior
+    );
+
+
+    const paginas =
+        obtenerPaginasVisibles(
+            paginaActual,
+            totalPaginas
+        );
+
+
+    paginas.forEach(
+        pagina => {
+
+            if (
+                pagina === "..."
+            ) {
+
+                const ellipsis =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                ellipsis.className =
+                    "pagination-ellipsis";
+
+
+                ellipsis.textContent =
+                    "…";
+
+
+                controls.appendChild(
+                    ellipsis
+                );
+
+
+                return;
+
+            }
+
+
+            const boton =
+                crearBotonPaginacion(
+                    pagina,
+                    false,
+                    pagina === paginaActual,
+                    () => {
+
+                        onPageChange(
+                            pagina
+                        );
+
+                    }
+                );
+
+
+            controls.appendChild(
+                boton
+            );
+
+        }
+    );
+
+
+    const siguiente =
+        crearBotonPaginacion(
+            "›",
+            paginaActual === totalPaginas,
+            false,
+            () => {
+
+                onPageChange(
+                    paginaActual + 1
+                );
+
+            }
+        );
+
+
+    controls.appendChild(
+        siguiente
+    );
+
+
+    container.appendChild(
+        info
+    );
+
+
+    container.appendChild(
+        controls
+    );
+
+}
+
+
+/* ============================================================
+   CREAR BOTÓN PAGINACIÓN
+============================================================ */
+
+function crearBotonPaginacion(
+    texto,
+    disabled,
+    active,
+    callback
+) {
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+
+    button.type =
+        "button";
+
+
+    button.className =
+        "pagination-button";
+
+
+    if (active) {
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+
+    button.disabled =
+        disabled;
+
+
+    button.textContent =
+        texto;
+
+
+    button.addEventListener(
+        "click",
+        callback
+    );
+
+
+    return button;
+
+}
+
+
+/* ============================================================
+   PÁGINAS VISIBLES
+============================================================ */
+
+function obtenerPaginasVisibles(
+    actual,
+    total
+) {
+
+    if (
+        total <= 7
+    ) {
+
+        return Array.from(
+            {
+                length:
+                    total
+            },
+            (
+                _,
+                index
+            ) =>
+                index + 1
+        );
+
+    }
+
+
+    const paginas = [];
+
+
+    paginas.push(
+        1
+    );
+
+
+    if (
+        actual > 4
+    ) {
+
+        paginas.push(
+            "..."
+        );
+
+    }
+
+
+    const inicio =
+        Math.max(
+            2,
+            actual - 1
+        );
+
+
+    const fin =
+        Math.min(
+            total - 1,
+            actual + 1
+        );
+
+
+    for (
+        let i = inicio;
+        i <= fin;
+        i++
+    ) {
+
+        paginas.push(
+            i
+        );
+
+    }
+
+
+    if (
+        actual < total - 3
+    ) {
+
+        paginas.push(
+            "..."
+        );
+
+    }
+
+
+    paginas.push(
+        total
+    );
+
+
+    return paginas;
 
 }
 
@@ -2426,7 +3202,8 @@ document.addEventListener(
    FILTROS DEL DASHBOARD
 ============================================================ */
 
-let filtroActivo = null;
+let filtroActivo =
+    null;
 
 
 /* ============================================================
@@ -2547,6 +3324,21 @@ function aplicarFiltro(
     filtro
 ) {
 
+    const content =
+        document.querySelector(
+            ".content"
+        );
+
+
+    if (content) {
+
+        content.classList.add(
+            "filter-mode"
+        );
+
+    }
+
+
     document
         .querySelectorAll(
             ".filter-section"
@@ -2643,6 +3435,12 @@ function aplicarFiltro(
 
     }
 
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
 }
 
 
@@ -2654,6 +3452,21 @@ function mostrarTodoDashboard() {
 
     filtroActivo =
         null;
+
+
+    const content =
+        document.querySelector(
+            ".content"
+        );
+
+
+    if (content) {
+
+        content.classList.remove(
+            "filter-mode"
+        );
+
+    }
 
 
     document

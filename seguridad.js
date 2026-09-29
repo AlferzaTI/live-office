@@ -122,6 +122,19 @@ const paginationState = {
 };
 
 
+/*
+   Cantidad de registros cuando estamos
+   en el dashboard principal.
+*/
+
+const DASHBOARD_ITEMS = 10;
+
+
+/*
+   Cantidad de registros cuando
+   estamos dentro de un filtro.
+*/
+
 const ITEMS_PER_PAGE = 20;
 
 
@@ -1096,6 +1109,56 @@ function actualizarUsuarios() {
     }
 
 
+    /*
+       ========================================================
+       DASHBOARD PRINCIPAL
+       ========================================================
+       Solo muestra los primeros 10 usuarios.
+    */
+
+    if (
+        filtroActivo === null
+    ) {
+
+        const usuarios =
+            securityData.users.slice(
+                0,
+                DASHBOARD_ITEMS
+            );
+
+
+        usuarios.forEach(
+            user => {
+
+                renderUsuarioTabla(
+                    tbody,
+                    user
+                );
+
+            }
+        );
+
+
+        actualizarPaginacion(
+            "usersPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
+       FILTRO ACTIVO
+       ========================================================
+       Mantiene 20 registros por página.
+    */
+
     const total =
         securityData.users.length;
 
@@ -1148,150 +1211,9 @@ function actualizarUsuarios() {
     usuarios.forEach(
         user => {
 
-            const nombre =
-                user.displayName
-                ||
-                "Sin nombre";
-
-
-            const correo =
-                user.userPrincipalName
-                ||
-                "Sin correo";
-
-
-            const departamento =
-                String(
-                    user.department
-                    ||
-                    ""
-                )
-                .trim()
-                ||
-                "Sin departamento";
-
-
-            const iniciales =
-                obtenerIniciales(
-                    nombre
-                );
-
-
-            const activo =
-                user.accountEnabled !== false;
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            tr.innerHTML = `
-
-                <td>
-
-                    <div class="user-cell">
-
-                        <div
-                            class="avatar ${
-                                activo
-                                    ? "blue-avatar"
-                                    : "red-avatar"
-                            }"
-                        >
-
-                            ${escapar(
-                                iniciales
-                            )}
-
-                        </div>
-
-
-                        <div class="user-cell-info">
-
-                            <strong>
-
-                                ${escapar(
-                                    nombre
-                                )}
-
-                            </strong>
-
-                            <small>
-                                ID: ${escapar(
-                                    user.id || "—"
-                                )}
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div
-                        class="email-cell"
-                        title="${escapar(
-                            correo
-                        )}"
-                    >
-
-                        ${escapar(
-                            correo
-                        )}
-
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div
-                        class="department-cell"
-                        title="${escapar(
-                            departamento
-                        )}"
-                    >
-
-                        ${escapar(
-                            departamento
-                        )}
-
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <span
-                        class="status-badge ${
-                            activo
-                                ? "status-active"
-                                : "status-blocked"
-                        }"
-                    >
-
-                        ${
-                            activo
-                                ? "Activo"
-                                : "Bloqueado"
-                        }
-
-                    </span>
-
-                </td>
-
-            `;
-
-
-            tbody.appendChild(
-                tr
+            renderUsuarioTabla(
+                tbody,
+                user
             );
 
         }
@@ -1310,6 +1232,167 @@ function actualizarUsuarios() {
             actualizarUsuarios();
 
         }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER USUARIO
+============================================================ */
+
+function renderUsuarioTabla(
+    tbody,
+    user
+) {
+
+    const nombre =
+        user.displayName
+        ||
+        "Sin nombre";
+
+
+    const correo =
+        user.userPrincipalName
+        ||
+        "Sin correo";
+
+
+    const departamento =
+        String(
+            user.department
+            ||
+            ""
+        )
+        .trim()
+        ||
+        "Sin departamento";
+
+
+    const iniciales =
+        obtenerIniciales(
+            nombre
+        );
+
+
+    const activo =
+        user.accountEnabled !== false;
+
+
+    const tr =
+        document.createElement(
+            "tr"
+        );
+
+
+    tr.innerHTML = `
+
+        <td>
+
+            <div class="user-cell">
+
+                <div
+                    class="avatar ${
+                        activo
+                            ? "blue-avatar"
+                            : "red-avatar"
+                    }"
+                >
+
+                    ${escapar(
+                        iniciales
+                    )}
+
+                </div>
+
+
+                <div class="user-cell-info">
+
+                    <strong>
+
+                        ${escapar(
+                            nombre
+                        )}
+
+                    </strong>
+
+
+                    <small>
+
+                        ID: ${escapar(
+                            user.id || "—"
+                        )}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </td>
+
+
+        <td>
+
+            <div
+                class="email-cell"
+                title="${escapar(
+                    correo
+                )}"
+            >
+
+                ${escapar(
+                    correo
+                )}
+
+            </div>
+
+        </td>
+
+
+        <td>
+
+            <div
+                class="department-cell"
+                title="${escapar(
+                    departamento
+                )}"
+            >
+
+                ${escapar(
+                    departamento
+                )}
+
+            </div>
+
+        </td>
+
+
+        <td>
+
+            <span
+                class="status-badge ${
+                    activo
+                        ? "status-active"
+                        : "status-blocked"
+                }"
+            >
+
+                ${
+                    activo
+                        ? "Activo"
+                        : "Bloqueado"
+                }
+
+            </span>
+
+        </td>
+
+    `;
+
+
+    tbody.appendChild(
+        tr
     );
 
 }
@@ -1377,6 +1460,50 @@ function actualizarDepartamentos() {
         securityData.departments.length;
 
 
+    /*
+       ========================================================
+       DASHBOARD PRINCIPAL
+       Solo muestra los primeros 10 departamentos.
+       ========================================================
+    */
+
+    if (
+        filtroActivo === null
+    ) {
+
+        const departamentos =
+            securityData.departments.slice(
+                0,
+                DASHBOARD_ITEMS
+            );
+
+
+        renderDepartamentos(
+            tbody,
+            departamentos
+        );
+
+
+        actualizarPaginacion(
+            "departmentsPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
+       FILTRO ACTIVO
+       ========================================================
+       Mantiene 20 registros por página.
+    */
+
     const totalPaginas =
         Math.ceil(
             total /
@@ -1421,6 +1548,38 @@ function actualizarDepartamentos() {
             fin
         );
 
+
+    renderDepartamentos(
+        tbody,
+        departamentos
+    );
+
+
+    actualizarPaginacion(
+        "departmentsPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.departments =
+                nuevaPagina;
+
+            actualizarDepartamentos();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER DEPARTAMENTOS
+============================================================ */
+
+function renderDepartamentos(
+    tbody,
+    departamentos
+) {
 
     const totalUsuarios =
         securityData.users.length;
@@ -1522,21 +1681,6 @@ function actualizarDepartamentos() {
             tbody.appendChild(
                 tr
             );
-
-        }
-    );
-
-
-    actualizarPaginacion(
-        "departmentsPagination",
-        total,
-        pagina,
-        nuevaPagina => {
-
-            paginationState.departments =
-                nuevaPagina;
-
-            actualizarDepartamentos();
 
         }
     );
@@ -1730,6 +1874,50 @@ function actualizarBloqueados() {
     }
 
 
+    /*
+       ========================================================
+       DASHBOARD PRINCIPAL
+       Solo muestra las primeras 10 cuentas.
+       ========================================================
+    */
+
+    if (
+        filtroActivo === null
+    ) {
+
+        const usuarios =
+            securityData.blockedUsers.slice(
+                0,
+                DASHBOARD_ITEMS
+            );
+
+
+        renderBloqueados(
+            tbody,
+            usuarios
+        );
+
+
+        actualizarPaginacion(
+            "blockedPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
+       FILTRO ACTIVO
+       ========================================================
+       Mantiene 20 registros por página.
+    */
+
     const total =
         securityData.blockedUsers.length;
 
@@ -1778,6 +1966,38 @@ function actualizarBloqueados() {
             fin
         );
 
+
+    renderBloqueados(
+        tbody,
+        usuarios
+    );
+
+
+    actualizarPaginacion(
+        "blockedPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.blocked =
+                nuevaPagina;
+
+            actualizarBloqueados();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER BLOQUEADOS
+============================================================ */
+
+function renderBloqueados(
+    tbody,
+    usuarios
+) {
 
     usuarios.forEach(
         user => {
@@ -1842,8 +2062,11 @@ function actualizarBloqueados() {
 
                             </strong>
 
+
                             <small>
+
                                 Cuenta deshabilitada
+
                             </small>
 
                         </div>
@@ -1905,21 +2128,6 @@ function actualizarBloqueados() {
             tbody.appendChild(
                 tr
             );
-
-        }
-    );
-
-
-    actualizarPaginacion(
-        "blockedPagination",
-        total,
-        pagina,
-        nuevaPagina => {
-
-            paginationState.blocked =
-                nuevaPagina;
-
-            actualizarBloqueados();
 
         }
     );
@@ -2018,6 +2226,50 @@ function actualizarTablaAuditoria() {
     }
 
 
+    /*
+       ========================================================
+       DASHBOARD PRINCIPAL
+       Solo muestra los 10 eventos más recientes.
+       ========================================================
+    */
+
+    if (
+        filtroActivo === null
+    ) {
+
+        const eventos =
+            securityData.auditLogs.slice(
+                0,
+                DASHBOARD_ITEMS
+            );
+
+
+        renderEventosAuditoria(
+            tbody,
+            eventos
+        );
+
+
+        actualizarPaginacion(
+            "auditPagination",
+            0,
+            1,
+            () => {}
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       ========================================================
+       FILTRO ACTIVO
+       ========================================================
+       Mantiene 20 registros por página.
+    */
+
     const total =
         securityData.auditLogs.length;
 
@@ -2066,6 +2318,38 @@ function actualizarTablaAuditoria() {
             fin
         );
 
+
+    renderEventosAuditoria(
+        tbody,
+        eventos
+    );
+
+
+    actualizarPaginacion(
+        "auditPagination",
+        total,
+        pagina,
+        nuevaPagina => {
+
+            paginationState.audit =
+                nuevaPagina;
+
+            actualizarTablaAuditoria();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER EVENTOS DE AUDITORÍA
+============================================================ */
+
+function renderEventosAuditoria(
+    tbody,
+    eventos
+) {
 
     eventos.forEach(
         evento => {
@@ -2128,6 +2412,7 @@ function actualizarTablaAuditoria() {
                                 )}
 
                             </strong>
+
 
                             <small>
 
@@ -2206,21 +2491,6 @@ function actualizarTablaAuditoria() {
             tbody.appendChild(
                 tr
             );
-
-        }
-    );
-
-
-    actualizarPaginacion(
-        "auditPagination",
-        total,
-        pagina,
-        nuevaPagina => {
-
-            paginationState.audit =
-                nuevaPagina;
-
-            actualizarTablaAuditoria();
 
         }
     );
@@ -3436,6 +3706,58 @@ function aplicarFiltro(
     }
 
 
+    /*
+       Al entrar al filtro volvemos
+       siempre a la primera página.
+    */
+
+    if (
+        filtro === "usuarios"
+    ) {
+
+        paginationState.users =
+            1;
+
+    }
+
+
+    if (
+        filtro === "bloqueadas"
+    ) {
+
+        paginationState.blocked =
+            1;
+
+    }
+
+
+    if (
+        filtro === "departamentos"
+    ) {
+
+        paginationState.departments =
+            1;
+
+    }
+
+
+    if (
+        filtro === "auditoria"
+    ) {
+
+        paginationState.audit =
+            1;
+
+    }
+
+
+    /*
+       Redibujar inmediatamente.
+    */
+
+    actualizarDashboard();
+
+
     window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -3512,5 +3834,32 @@ function mostrarTodoDashboard() {
 
             }
         );
+
+
+    /*
+       Volver a la primera página
+       para la siguiente vez que
+       se abra un filtro.
+    */
+
+    paginationState.users =
+        1;
+
+    paginationState.blocked =
+        1;
+
+    paginationState.departments =
+        1;
+
+    paginationState.audit =
+        1;
+
+
+    /*
+       Redibujar para volver
+       inmediatamente a los 10.
+    */
+
+    actualizarDashboard();
 
 }

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="es">
@@ -300,6 +299,9 @@
 
             <!-- ==================================
                  DISTRIBUCIÓN POR DEPARTAMENTO
+                 
+                 Esta sección se muestra al
+                 seleccionar Usuarios o Departamentos
             ================================== -->
 
             <div
@@ -384,7 +386,10 @@
                  CUENTAS BLOQUEADAS
             ================================== -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card filter-section"
+                data-section="bloqueadas"
+            >
 
                 <div class="card-header">
 
@@ -428,12 +433,12 @@
 
             <!-- ==================================
                  INFORMACIÓN DEL DIRECTORIO
+                 
+                 ESTA SECCIÓN SIEMPRE SE MUESTRA
+                 porque es un resumen general.
             ================================== -->
 
-            <div
-                class="dashboard-card filter-section"
-                data-section="usuarios bloqueadas auditoria departamentos"
-            >
+            <div class="dashboard-card">
 
                 <div class="card-header">
 
@@ -633,6 +638,8 @@
 
             <!-- ==================================
                  INFORMACIÓN
+                 
+                 ESTA SECCIÓN SIEMPRE SE MUESTRA
             ================================== -->
 
             <div class="dashboard-card wide-card">

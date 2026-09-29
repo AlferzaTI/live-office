@@ -1672,6 +1672,8 @@ footer {
 }
 
 
+/* BOTÓN ACTIVO */
+
 .filter-card.filter-active {
 
     transform: translateY(-2px);
@@ -1683,6 +1685,8 @@ footer {
 }
 
 
+/* SECCIONES FILTRABLES */
+
 .filter-section {
 
     transition:
@@ -1692,8 +1696,10 @@ footer {
 }
 
 
+/* SECCIÓN OCULTA */
+
 .filter-section.filter-hidden {
 
-    display: none;
+    display: none !important;
 
 }

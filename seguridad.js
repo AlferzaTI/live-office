@@ -2270,6 +2270,10 @@ document.addEventListener(
 let filtroActivo = null;
 
 
+/* ============================================================
+   CLICK EN TARJETAS
+============================================================ */
+
 document.addEventListener(
     "click",
     event => {
@@ -2292,9 +2296,9 @@ document.addEventListener(
 
 
         /*
-         * Si hacemos click nuevamente
-         * sobre el filtro activo,
-         * mostramos todo el dashboard.
+         * Si se vuelve a pulsar
+         * el mismo botón activo,
+         * se restaura todo.
          */
 
         if (
@@ -2390,65 +2394,90 @@ function aplicarFiltro(
     filtro
 ) {
 
-    const sections =
-        document.querySelectorAll(
+    /*
+     * Ocultar TODO el contenido
+     * que pueda ser filtrado.
+     */
+
+    document
+        .querySelectorAll(
             ".filter-section"
-        );
+        )
+        .forEach(
+            section => {
 
-
-    /*
-     * Ocultar todas las secciones
-     */
-
-    sections.forEach(
-        section => {
-
-            section.classList.add(
-                "filter-hidden"
-            );
-
-        }
-    );
-
-
-    /*
-     * Mostrar solamente
-     * las relacionadas con el filtro.
-     */
-
-    sections.forEach(
-        section => {
-
-            const contenido =
-                section.dataset.section
-                ||
-                "";
-
-
-            const categorias =
-                contenido.split(
-                    " "
-                );
-
-
-            if (
-                categorias.includes(
-                    filtro
-                )
-            ) {
-
-                section.classList.remove(
+                section.classList.add(
                     "filter-hidden"
                 );
 
             }
-
-        }
-    );
+        );
 
 
     /*
-     * Marcar tarjeta activa
+     * Mostrar únicamente
+     * las secciones correspondientes.
+     */
+
+    document
+        .querySelectorAll(
+            ".filter-section"
+        )
+        .forEach(
+            section => {
+
+                const contenido =
+                    section.dataset.section
+                    ||
+                    "";
+
+
+                const categorias =
+                    contenido
+                        .split(/\s+/)
+                        .filter(Boolean);
+
+
+                if (
+                    categorias.includes(
+                        filtro
+                    )
+                ) {
+
+                    section.classList.remove(
+                        "filter-hidden"
+                    );
+
+                }
+
+            }
+        );
+
+
+    /*
+     * Ocultar las tarjetas generales.
+     *
+     * Estas son las que NO tienen
+     * .filter-section.
+     */
+
+    document
+        .querySelectorAll(
+            ".dashboard-card:not(.filter-section)"
+        )
+        .forEach(
+            card => {
+
+                card.classList.add(
+                    "filter-hidden"
+                );
+
+            }
+        );
+
+
+    /*
+     * Marcar el botón seleccionado.
      */
 
     document
@@ -2486,7 +2515,7 @@ function aplicarFiltro(
 
 
 /* ============================================================
-   MOSTRAR TODO
+   MOSTRAR TODO EL DASHBOARD
 ============================================================ */
 
 function mostrarTodoDashboard() {
@@ -2494,6 +2523,11 @@ function mostrarTodoDashboard() {
     filtroActivo =
         null;
 
+
+    /*
+     * Mostrar todas las secciones
+     * filtrables.
+     */
 
     document
         .querySelectorAll(
@@ -2509,6 +2543,30 @@ function mostrarTodoDashboard() {
             }
         );
 
+
+    /*
+     * Mostrar nuevamente
+     * las tarjetas generales.
+     */
+
+    document
+        .querySelectorAll(
+            ".dashboard-card:not(.filter-section)"
+        )
+        .forEach(
+            card => {
+
+                card.classList.remove(
+                    "filter-hidden"
+                );
+
+            }
+        );
+
+
+    /*
+     * Quitar estado activo.
+     */
 
     document
         .querySelectorAll(

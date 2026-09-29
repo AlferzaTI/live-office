@@ -636,158 +636,120 @@ function obtenerIconoServicio(
    RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
 
-function renderizarServicios(
-    datos
-) {
+function renderizarServicios(datos) {
+  const grid = document.getElementById("serviciosGrid");
+  const estadoInfraestructura = document.querySelector(
+    ".service-section .section-status"
+  );
 
-    const contenedor =
-        document.getElementById(
-            "serviciosGrid"
-        );
+  if (!grid) return;
 
+  grid.innerHTML = "";
 
-    if (
-        !contenedor
-    ) return;
+  if (!datos || datos.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        No hay servicios registrados.
+      </div>
+    `;
 
-
-    contenedor.innerHTML = "";
-
-
-    if (
-        !datos.length
-    ) {
-
-        contenedor.innerHTML = `
-
-            <div class="service-card">
-
-                <div class="service-top">
-
-                    <div class="service-icon">
-                        ⚙️
-                    </div>
-
-                    <span class="status-badge">
-                        Sin datos
-                    </span>
-
-                </div>
-
-                <h4>
-                    Monitoreo TI
-                </h4>
-
-                <p>
-                    No existen registros configurados en SharePoint.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
+    if (estadoInfraestructura) {
+      estadoInfraestructura.textContent = "NO CONFIGURADO";
     }
 
+    return;
+  }
 
-    datos.forEach(
-        item => {
+  const estados = [];
 
-            const fields =
-                obtenerCampos(
-                    item
-                );
+  datos.forEach(item => {
+    const campos = obtenerCampos(item);
 
+    const servicio = campos.Servicio || "Servicio";
+    const estado = campos.Estado || "No configurado";
+    const detalle = campos.Detalle || "Sin información disponible";
+    const latencia = campos.Latencia;
 
-            const servicio =
-                fields.Servicio ||
-                fields.Title ||
-                "Servicio";
+    const estadoNormalizado = normalizarEstado(estado);
+    estados.push(estadoNormalizado);
 
+    const tipoEstado = clasificarEstado(estado);
+    const icono = obtenerIconoServicio(servicio);
 
-            const estado =
-                normalizarEstado(
-                    fields.Estado
-                );
+    const latenciaTexto =
+      latencia !== undefined &&
+      latencia !== null &&
+      latencia !== ""
+        ? `${latencia} ms`
+        : "—";
 
+    const card = document.createElement("div");
 
-            const detalle =
-                fields.Detalle ||
-                "Sin detalle disponible";
+    card.className = `service-card ${tipoEstado}`;
 
+    card.innerHTML = `
+      <div class="service-icon">
+        ${icono}
+      </div>
 
-            const latencia =
-                fields.Latencia;
+      <div class="service-content">
+        <div class="service-status ${tipoEstado}">
+          <span class="status-dot"></span>
+          ${estado}
+        </div>
 
+        <h3>${servicio}</h3>
 
-            const clase =
-                clasificarEstado(
-                    estado
-                );
+        <p>${detalle}</p>
 
+        <div class="service-latency">
+          <span>Latencia</span>
+          <strong>${latenciaTexto}</strong>
+        </div>
+      </div>
+    `;
 
-            let datoTexto =
-                "Sin dato";
+    grid.appendChild(card);
+  });
 
+  // ==========================================
+  // ACTUALIZAR ESTADO DE INFRAESTRUCTURA
+  // ==========================================
 
-            if (
-                latencia !== undefined &&
-                latencia !== null &&
-                latencia !== ""
-            ) {
-
-                datoTexto =
-                    `${latencia} ms`;
-
-            }
-
-
-            contenedor.innerHTML += `
-
-                <div class="service-card">
-
-                    <div class="service-top">
-
-                        <div class="service-icon">
-                            ${obtenerIconoServicio(servicio)}
-                        </div>
-
-                        <span class="status-badge ${clase}">
-                            ${estado}
-                        </span>
-
-                    </div>
-
-                    <h4>
-                        ${servicio}
-                    </h4>
-
-                    <p>
-                        ${detalle}
-                    </p>
-
-                    <div class="service-data">
-
-                        <span>
-                            Latencia
-                        </span>
-
-                        <strong>
-                            ${datoTexto}
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        }
+  if (estadoInfraestructura) {
+    const hayIncidencia = estados.some(estado =>
+      ["incidencia", "error", "caido"].includes(estado)
     );
 
-}
+    const hayAdvertencia = estados.some(estado =>
+      ["advertencia", "warning", "pendiente"].includes(estado)
+    );
 
+    const todosNoConfigurados =
+      estados.length > 0 &&
+      estados.every(estado =>
+        estado === "no configurado" || estado === ""
+      );
+
+    const todosOperativos =
+      estados.length > 0 &&
+      estados.every(estado =>
+        ["operativo", "vigente", "activo", "responde"].includes(estado)
+      );
+
+    if (hayIncidencia) {
+      estadoInfraestructura.textContent = "INCIDENCIA";
+    } else if (hayAdvertencia) {
+      estadoInfraestructura.textContent = "ADVERTENCIA";
+    } else if (todosNoConfigurados) {
+      estadoInfraestructura.textContent = "NO CONFIGURADO";
+    } else if (todosOperativos) {
+      estadoInfraestructura.textContent = "OPERATIVO";
+    } else {
+      estadoInfraestructura.textContent = "NO CONFIGURADO";
+    }
+  }
+}
 
 /* =========================================
    ACTUALIZAR RESUMEN

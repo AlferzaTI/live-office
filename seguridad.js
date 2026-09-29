@@ -2262,3 +2262,266 @@ document.addEventListener(
 
     }
 );
+
+/* ============================================================
+   FILTROS DEL DASHBOARD
+============================================================ */
+
+let filtroActivo = null;
+
+
+document.addEventListener(
+    "click",
+    event => {
+
+        const card =
+            event.target.closest(
+                ".filter-card"
+            );
+
+
+        if (!card) {
+
+            return;
+
+        }
+
+
+        const filtro =
+            card.dataset.filter;
+
+
+        /*
+         * Si hacemos click nuevamente
+         * sobre el filtro activo,
+         * mostramos todo el dashboard.
+         */
+
+        if (
+            filtroActivo === filtro
+        ) {
+
+            mostrarTodoDashboard();
+
+            return;
+
+        }
+
+
+        filtroActivo =
+            filtro;
+
+
+        aplicarFiltro(
+            filtro
+        );
+
+    }
+);
+
+
+/* ============================================================
+   SOPORTE PARA TECLADO
+============================================================ */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !== "Enter"
+            &&
+            event.key !== " "
+        ) {
+
+            return;
+
+        }
+
+
+        const card =
+            event.target.closest(
+                ".filter-card"
+            );
+
+
+        if (!card) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        const filtro =
+            card.dataset.filter;
+
+
+        if (
+            filtroActivo === filtro
+        ) {
+
+            mostrarTodoDashboard();
+
+            return;
+
+        }
+
+
+        filtroActivo =
+            filtro;
+
+
+        aplicarFiltro(
+            filtro
+        );
+
+    }
+);
+
+
+/* ============================================================
+   APLICAR FILTRO
+============================================================ */
+
+function aplicarFiltro(
+    filtro
+) {
+
+    const sections =
+        document.querySelectorAll(
+            ".filter-section"
+        );
+
+
+    /*
+     * Ocultar todas las secciones
+     */
+
+    sections.forEach(
+        section => {
+
+            section.classList.add(
+                "filter-hidden"
+            );
+
+        }
+    );
+
+
+    /*
+     * Mostrar solamente
+     * las relacionadas con el filtro.
+     */
+
+    sections.forEach(
+        section => {
+
+            const contenido =
+                section.dataset.section
+                ||
+                "";
+
+
+            const categorias =
+                contenido.split(
+                    " "
+                );
+
+
+            if (
+                categorias.includes(
+                    filtro
+                )
+            ) {
+
+                section.classList.remove(
+                    "filter-hidden"
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Marcar tarjeta activa
+     */
+
+    document
+        .querySelectorAll(
+            ".filter-card"
+        )
+        .forEach(
+            card => {
+
+                card.classList.remove(
+                    "filter-active"
+                );
+
+            }
+        );
+
+
+    const tarjetaActiva =
+        document.querySelector(
+            `.filter-card[data-filter="${filtro}"]`
+        );
+
+
+    if (
+        tarjetaActiva
+    ) {
+
+        tarjetaActiva.classList.add(
+            "filter-active"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   MOSTRAR TODO
+============================================================ */
+
+function mostrarTodoDashboard() {
+
+    filtroActivo =
+        null;
+
+
+    document
+        .querySelectorAll(
+            ".filter-section"
+        )
+        .forEach(
+            section => {
+
+                section.classList.remove(
+                    "filter-hidden"
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".filter-card"
+        )
+        .forEach(
+            card => {
+
+                card.classList.remove(
+                    "filter-active"
+                );
+
+            }
+        );
+
+}

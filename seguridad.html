@@ -201,13 +201,20 @@
 
 
         <!-- ==================================
-             ESTADÍSTICAS
+             ESTADÍSTICAS / FILTROS
         ================================== -->
 
         <section class="stats">
 
 
-            <div class="stat blue">
+            <!-- USUARIOS -->
+
+            <div
+                class="stat blue filter-card"
+                data-filter="usuarios"
+                role="button"
+                tabindex="0"
+            >
 
                 <span id="totalUsuarios">
                     —
@@ -220,7 +227,14 @@
             </div>
 
 
-            <div class="stat red">
+            <!-- CUENTAS BLOQUEADAS -->
+
+            <div
+                class="stat red filter-card"
+                data-filter="bloqueadas"
+                role="button"
+                tabindex="0"
+            >
 
                 <span id="cuentasBloqueadas">
                     —
@@ -233,7 +247,14 @@
             </div>
 
 
-            <div class="stat purple">
+            <!-- AUDITORÍA -->
+
+            <div
+                class="stat purple filter-card"
+                data-filter="auditoria"
+                role="button"
+                tabindex="0"
+            >
 
                 <span id="eventosAuditoria">
                     —
@@ -246,7 +267,14 @@
             </div>
 
 
-            <div class="stat green">
+            <!-- DEPARTAMENTOS -->
+
+            <div
+                class="stat green filter-card"
+                data-filter="departamentos"
+                role="button"
+                tabindex="0"
+            >
 
                 <span id="totalDepartamentos">
                     —
@@ -274,7 +302,10 @@
                  DISTRIBUCIÓN POR DEPARTAMENTO
             ================================== -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card filter-section"
+                data-section="usuarios departamentos"
+            >
 
                 <div class="card-header">
 
@@ -312,7 +343,10 @@
                  TIPOS DE AUDITORÍA
             ================================== -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card filter-section"
+                data-section="auditoria"
+            >
 
                 <div class="card-header">
 
@@ -350,7 +384,10 @@
                  CUENTAS BLOQUEADAS
             ================================== -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card filter-section"
+                data-section="bloqueadas"
+            >
 
                 <div class="card-header">
 
@@ -396,7 +433,10 @@
                  INFORMACIÓN DEL DIRECTORIO
             ================================== -->
 
-            <div class="dashboard-card">
+            <div
+                class="dashboard-card filter-section"
+                data-section="usuarios bloqueadas auditoria departamentos"
+            >
 
                 <div class="card-header">
 
@@ -512,7 +552,10 @@
                  ACTIVIDAD DE AUDITORÍA
             ================================== -->
 
-            <div class="dashboard-card wide-card">
+            <div
+                class="dashboard-card wide-card filter-section"
+                data-section="auditoria"
+            >
 
                 <div class="card-header">
 
@@ -653,11 +696,10 @@
 ></script>
 
 <script
-    src="seguridad.js"
+    src="seguridad.js?v=3"
 ></script>
 
 
 </body>
 
 </html>
-

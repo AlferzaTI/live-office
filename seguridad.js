@@ -2716,47 +2716,31 @@ function actualizarTablaAuditoria() {
             "auditTable"
         );
 
-
     if (!tbody) {
-
         return;
-
     }
 
-
-    tbody.innerHTML =
-        "";
-
+    tbody.innerHTML = "";
 
     const auditoriaDashboard =
         obtenerAuditoriaDashboard();
 
-
-    if (
-        !auditoriaDashboard.length
-    ) {
+    if (!auditoriaDashboard.length) {
 
         tbody.innerHTML = `
-
             <tr>
-
                 <td
                     colspan="4"
                     class="loading-cell"
                 >
-
                     ${
                         trabajadorSeleccionado
                             ? "No hay eventos de auditoría asociados a este trabajador."
                             : "No hay eventos de auditoría registrados en los últimos 30 días."
                     }
-
                 </td>
-
             </tr>
-
         `;
-
 
         actualizarPaginacion(
             "auditPagination",
@@ -2765,9 +2749,7 @@ function actualizarTablaAuditoria() {
             () => {}
         );
 
-
         return;
-
     }
 
 
@@ -2777,22 +2759,12 @@ function actualizarTablaAuditoria() {
        ========================================================
     */
 
-    if (
-        trabajadorSeleccionado
-    ) {
-
-        const eventos =
-            auditoriaDashboard.slice(
-                0,
-                DASHBOARD_ITEMS
-            );
-
+    if (trabajadorSeleccionado) {
 
         renderEventosAuditoria(
             tbody,
-            eventos
+            auditoriaDashboard
         );
-
 
         actualizarPaginacion(
             "auditPagination",
@@ -2801,64 +2773,52 @@ function actualizarTablaAuditoria() {
             () => {}
         );
 
-
         return;
-
     }
 
 
     /*
        ========================================================
-       DASHBOARD PRINCIPAL
-       5 eventos por página
+       FILTRO DE AUDITORÍA
+       20 eventos por página
        ========================================================
     */
 
-    if (
-        filtroActivo === null
-    ) {
+    if (filtroActivo === "auditoria") {
 
         const total =
             auditoriaDashboard.length;
 
-
         const totalPaginas =
             Math.ceil(
                 total /
-                DASHBOARD_ITEMS
+                ITEMS_PER_PAGE
             );
-
 
         if (
             paginationState.audit >
             totalPaginas
         ) {
-
             paginationState.audit =
                 totalPaginas;
-
         }
-
 
         const pagina =
             paginationState.audit;
-
 
         const inicio =
             (
                 pagina - 1
             )
             *
-            DASHBOARD_ITEMS;
-
+            ITEMS_PER_PAGE;
 
         const fin =
             Math.min(
                 inicio +
-                DASHBOARD_ITEMS,
+                ITEMS_PER_PAGE,
                 total
             );
-
 
         const eventos =
             auditoriaDashboard.slice(
@@ -2866,12 +2826,10 @@ function actualizarTablaAuditoria() {
                 fin
             );
 
-
         renderEventosAuditoria(
             tbody,
             eventos
         );
-
 
         actualizarPaginacion(
             "auditPagination",
@@ -2882,67 +2840,56 @@ function actualizarTablaAuditoria() {
                 paginationState.audit =
                     nuevaPagina;
 
-
                 actualizarTablaAuditoria();
 
             },
-            DASHBOARD_ITEMS
+            ITEMS_PER_PAGE
         );
 
-
         return;
-
     }
 
 
     /*
        ========================================================
-       FILTRO ACTIVO
-       20 eventos por página
+       DASHBOARD PRINCIPAL
+       5 eventos por página
        ========================================================
     */
 
     const total =
         auditoriaDashboard.length;
 
-
     const totalPaginas =
         Math.ceil(
             total /
-            ITEMS_PER_PAGE
+            DASHBOARD_ITEMS
         );
-
 
     if (
         paginationState.audit >
         totalPaginas
     ) {
-
         paginationState.audit =
             totalPaginas;
-
     }
-
 
     const pagina =
         paginationState.audit;
-
 
     const inicio =
         (
             pagina - 1
         )
         *
-        ITEMS_PER_PAGE;
-
+        DASHBOARD_ITEMS;
 
     const fin =
         Math.min(
             inicio +
-            ITEMS_PER_PAGE,
+            DASHBOARD_ITEMS,
             total
         );
-
 
     const eventos =
         auditoriaDashboard.slice(
@@ -2950,12 +2897,10 @@ function actualizarTablaAuditoria() {
             fin
         );
 
-
     renderEventosAuditoria(
         tbody,
         eventos
     );
-
 
     actualizarPaginacion(
         "auditPagination",
@@ -2966,14 +2911,12 @@ function actualizarTablaAuditoria() {
             paginationState.audit =
                 nuevaPagina;
 
-
             actualizarTablaAuditoria();
 
-        }
+        },
+        DASHBOARD_ITEMS
     );
-
 }
-
 /* ============================================================
    RENDER EVENTOS DE AUDITORÍA
 ============================================================ */

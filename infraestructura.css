@@ -1934,3 +1934,33 @@ footer {
     }
 
 }
+
+/* ==========================================
+   INTERNET + MICROSOFT 365
+   ========================================== */
+
+.infrastructure-services {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.infrastructure-services .monitor-section {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 900px) {
+
+    .infrastructure-services {
+        grid-template-columns: 1fr;
+    }
+
+}

@@ -13,10 +13,7 @@ html {
 }
 
 body {
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #f3f6fa;
     color: #172033;
     min-height: 100vh;
@@ -29,13 +26,12 @@ body {
 
 .topbar {
     height: 82px;
-    background:
-        linear-gradient(
-            110deg,
-            #00143d 0%,
-            #00205c 45%,
-            #003b8f 100%
-        );
+    background: linear-gradient(
+        110deg,
+        #00143d 0%,
+        #00205c 45%,
+        #003b8f 100%
+    );
     color: white;
     display: flex;
     align-items: center;
@@ -46,8 +42,7 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow:
-        0 4px 18px rgba(0, 20, 61, 0.22);
+    box-shadow: 0 4px 18px rgba(0, 20, 61, 0.22);
 }
 
 .topbar::after {
@@ -57,14 +52,13 @@ body {
     right: 0;
     bottom: 0;
     height: 2px;
-    background:
-        linear-gradient(
-            90deg,
-            #20c878,
-            #2f80ed,
-            #7b61ff,
-            transparent
-        );
+    background: linear-gradient(
+        90deg,
+        #20c878,
+        #2f80ed,
+        #7b61ff,
+        transparent
+    );
 }
 
 .logo {
@@ -126,12 +120,11 @@ body {
 
 .sidebar {
     width: 230px;
-    background:
-        linear-gradient(
-            180deg,
-            #00205c 0%,
-            #00183f 100%
-        );
+    background: linear-gradient(
+        180deg,
+        #00205c 0%,
+        #00183f 100%
+    );
     color: white;
     min-height: calc(100vh - 82px);
     position: fixed;
@@ -139,8 +132,7 @@ body {
     left: 0;
     bottom: 0;
     padding: 30px 15px;
-    box-shadow:
-        4px 0 18px rgba(0, 25, 70, 0.08);
+    box-shadow: 4px 0 18px rgba(0, 25, 70, 0.08);
 }
 
 .sidebar h2 {
@@ -173,15 +165,13 @@ body {
 }
 
 .sidebar li.active {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.18),
-            rgba(255, 255, 255, 0.08)
-        );
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0.08)
+    );
     font-weight: 700;
-    box-shadow:
-        inset 3px 0 0 #42a5ff;
+    box-shadow: inset 3px 0 0 #42a5ff;
 }
 
 
@@ -205,13 +195,12 @@ body {
     overflow: hidden;
     min-height: 190px;
 
-    background:
-        linear-gradient(
-            115deg,
-            #00183f 0%,
-            #002b73 48%,
-            #0758a9 100%
-        );
+    background: linear-gradient(
+        115deg,
+        #00183f 0%,
+        #002b73 48%,
+        #0758a9 100%
+    );
 
     color: white;
 
@@ -225,13 +214,11 @@ body {
 
     margin-bottom: 22px;
 
-    box-shadow:
-        0 12px 30px rgba(0, 32, 92, 0.15);
+    box-shadow: 0 12px 30px rgba(0, 32, 92, 0.15);
 }
 
 .page-header::before {
     content: "";
-
     position: absolute;
 
     width: 330px;
@@ -242,13 +229,11 @@ body {
 
     border-radius: 50%;
 
-    background:
-        rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.07);
 }
 
 .page-header::after {
     content: "";
-
     position: absolute;
 
     width: 190px;
@@ -259,8 +244,7 @@ body {
 
     border-radius: 50%;
 
-    background:
-        rgba(70, 165, 255, 0.12);
+    background: rgba(70, 165, 255, 0.12);
 }
 
 .page-header > div {
@@ -321,22 +305,17 @@ body {
 
 .last-update {
     position: relative;
-
     z-index: 2;
 
     min-width: 205px;
 
     display: flex;
-
     align-items: center;
-
     gap: 12px;
 
-    background:
-        rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.10);
 
-    border:
-        1px solid rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.13);
 
     backdrop-filter: blur(8px);
 
@@ -386,8 +365,7 @@ body {
 .monitor-summary {
     display: grid;
 
-    grid-template-columns:
-        repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr);
 
     gap: 16px;
 
@@ -403,8 +381,7 @@ body {
 
     background: white;
 
-    border:
-        1px solid #e1e7ef;
+    border: 1px solid #e1e7ef;
 
     border-radius: 14px;
 
@@ -435,19 +412,15 @@ body {
 
     border-radius: 50%;
 
-    background:
-        rgba(0, 32, 92, 0.025);
+    background: rgba(0, 32, 92, 0.025);
 }
 
 .summary-card:hover {
-    transform:
-        translateY(-3px);
+    transform: translateY(-3px);
 
-    box-shadow:
-        0 12px 26px rgba(0, 32, 92, 0.08);
+    box-shadow: 0 12px 26px rgba(0, 32, 92, 0.08);
 
-    border-color:
-        #d5deea;
+    border-color: #d5deea;
 }
 
 .summary-icon {
@@ -473,45 +446,41 @@ body {
 }
 
 .summary-icon.green {
-    background:
-        linear-gradient(
-            135deg,
-            #e5f9ee,
-            #d8f4e5
-        );
+    background: linear-gradient(
+        135deg,
+        #e5f9ee,
+        #d8f4e5
+    );
 
     color: #159957;
 }
 
 .summary-icon.yellow {
-    background:
-        linear-gradient(
-            135deg,
-            #fff8df,
-            #fff0c4
-        );
+    background: linear-gradient(
+        135deg,
+        #fff8df,
+        #fff0c4
+    );
 
     color: #d49a00;
 }
 
 .summary-icon.red {
-    background:
-        linear-gradient(
-            135deg,
-            #ffeded,
-            #fbdede
-        );
+    background: linear-gradient(
+        135deg,
+        #ffeded,
+        #fbdede
+    );
 
     color: #d93636;
 }
 
 .summary-icon.blue {
-    background:
-        linear-gradient(
-            135deg,
-            #eaf2ff,
-            #dceaff
-        );
+    background: linear-gradient(
+        135deg,
+        #eaf2ff,
+        #dceaff
+    );
 
     color: #2457a6;
 }
@@ -550,8 +519,7 @@ body {
 .monitor-section {
     background: white;
 
-    border:
-        1px solid #e1e6ed;
+    border: 1px solid #e1e6ed;
 
     border-radius: 16px;
 
@@ -559,8 +527,7 @@ body {
 
     margin-bottom: 22px;
 
-    box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.025);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
 }
 
 .section-heading {
@@ -646,21 +613,20 @@ body {
 
 /* ==========================================
    SERVICIOS MONITOREADOS
-   DISEÑO PRINCIPAL
    ========================================== */
 
 .services-section {
-    padding: 0;
-
-    overflow: hidden;
+    padding: 28px;
 
     background: #ffffff;
 
-    border:
-        1px solid #dce4ee;
+    border: 1px solid #e1e6ed;
 
-    box-shadow:
-        0 10px 32px rgba(0, 32, 92, 0.08);
+    border-radius: 16px;
+
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
+
+    overflow: hidden;
 }
 
 
@@ -669,91 +635,64 @@ body {
    ========================================== */
 
 .services-section .section-heading {
-    position: relative;
+    display: flex;
 
-    min-height: 150px;
+    justify-content: space-between;
 
-    margin: 0;
+    align-items: center;
 
-    padding: 30px 34px;
+    margin-bottom: 24px;
 
-    background:
-        linear-gradient(
-            115deg,
-            #00183f 0%,
-            #002b73 52%,
-            #0758a9 100%
-        );
+    padding: 0;
 
-    color: white;
+    min-height: auto;
 
-    overflow: hidden;
+    background: transparent;
+
+    color: #172033;
+
+    overflow: visible;
 }
 
-.services-section .section-heading::before {
-    content: "";
-
-    position: absolute;
-
-    width: 280px;
-    height: 280px;
-
-    right: -90px;
-    top: -165px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(255, 255, 255, 0.07);
-}
-
+.services-section .section-heading::before,
 .services-section .section-heading::after {
-    content: "";
-
-    position: absolute;
-
-    width: 160px;
-    height: 160px;
-
-    right: 190px;
-    bottom: -105px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(57, 155, 255, 0.14);
+    display: none;
 }
 
 .services-section .section-title-group {
-    position: relative;
-
-    z-index: 2;
+    position: static;
 }
 
 .services-section .section-label {
-    color: #8bc7ff;
+    color: #52719e;
 
     font-size: 10px;
 
-    letter-spacing: 2px;
+    font-weight: 700;
+
+    letter-spacing: 1.6px;
 }
 
 .services-section .section-heading h3 {
-    margin-top: 7px;
+    margin-top: 6px;
 
-    color: white;
+    color: #111827;
 
-    font-size: 25px;
+    font-size: 20px;
 
-    letter-spacing: -0.3px;
+    font-weight: 700;
+
+    letter-spacing: 0;
 }
 
 .services-section .section-description {
-    margin-top: 7px;
+    margin-top: 6px;
 
-    color: #bdd0e8;
+    color: #8993a1;
 
     font-size: 11px;
+
+    line-height: 1.5;
 }
 
 
@@ -762,50 +701,42 @@ body {
    ========================================== */
 
 .services-section #estadoGeneral {
-    position: relative;
+    min-width: 145px;
 
-    z-index: 5;
+    background: #eaf8f0;
 
-    min-width: 150px;
+    border: 1px solid #d0eddd;
 
-    background:
-        rgba(32, 200, 120, 0.13);
+    color: #159957;
 
-    border:
-        1px solid rgba(32, 200, 120, 0.35);
+    padding: 9px 13px;
 
-    color: #71efb0;
+    border-radius: 9px;
 
-    padding: 11px 15px;
-
-    border-radius: 11px;
-
-    box-shadow:
-        0 6px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: none;
 }
 
 .services-section #estadoGeneral .status-indicator {
-    width: 9px;
+    width: 8px;
 
-    height: 9px;
+    height: 8px;
 
     background: #20c878;
 
     box-shadow:
-        0 0 0 4px rgba(32, 200, 120, 0.12),
-        0 0 12px rgba(32, 200, 120, 0.8);
+        0 0 0 3px rgba(32, 200, 120, 0.10);
 }
 
 .services-section #estadoGeneral .status-general-content strong {
-    color: #ffffff;
+    color: #159957;
 
-    font-size: 11px;
+    font-size: 10px;
 
-    letter-spacing: 0.7px;
+    letter-spacing: 0.5px;
 }
 
 .services-section #estadoGeneral .status-general-content small {
-    color: #a9c8e9;
+    color: #719080;
 
     font-size: 8px;
 }
@@ -818,26 +749,23 @@ body {
 .services-section .service-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+    );
 
     gap: 20px;
 
     width: 100%;
 
-    padding: 24px;
+    padding: 0;
 
-    background:
-        linear-gradient(
-            180deg,
-            #f5f8fc 0%,
-            #ffffff 100%
-        );
+    background: transparent;
 }
 
 
 /* ==========================================
-   TARJETA DE SERVICIO
+   TARJETAS DE SERVICIO
    ========================================== */
 
 .services-section .service-card {
@@ -849,10 +777,9 @@ body {
 
     border-radius: 16px;
 
-    border:
-        1px solid #dce4ed;
+    border: 1px solid #dce4ed;
 
-    background: white;
+    background: #ffffff;
 
     overflow: hidden;
 
@@ -870,10 +797,17 @@ body {
 }
 
 .services-section .service-card::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
     width: 5px;
 
-    border-radius:
-        0 5px 5px 0;
+    border-radius: 5px 0 0 5px;
 }
 
 .services-section .service-card::after {
@@ -889,70 +823,63 @@ body {
 
     border-radius: 50%;
 
-    background:
-        rgba(0, 32, 92, 0.035);
+    background: rgba(0, 32, 92, 0.035);
 }
 
 .services-section .service-card:hover {
-    transform:
-        translateY(-5px);
+    transform: translateY(-5px);
 
     box-shadow:
         0 16px 35px rgba(0, 32, 92, 0.11);
 
-    border-color:
-        #cbd7e6;
+    border-color: #cbd7e6;
 }
 
 
 /* ==========================================
-   TARJETA INTERNET
+   INTERNET
    ========================================== */
 
 .services-section .service-card.online {
-    background:
-        linear-gradient(
-            145deg,
-            #ffffff 0%,
-            #f8fcff 100%
-        );
+    background: linear-gradient(
+        145deg,
+        #ffffff 0%,
+        #f8fcff 100%
+    );
 }
 
 .services-section .service-card.online::before {
-    background:
-        linear-gradient(
-            180deg,
-            #20c878,
-            #159957
-        );
+    background: linear-gradient(
+        180deg,
+        #20c878,
+        #159957
+    );
 }
 
 
 /* ==========================================
-   TARJETA MICROSOFT 365
+   MICROSOFT 365
    ========================================== */
 
 .services-section .service-card.warning {
-    background:
-        linear-gradient(
-            145deg,
-            #ffffff 0%,
-            #fdfaff 100%
-        );
+    background: linear-gradient(
+        145deg,
+        #ffffff 0%,
+        #fdfaff 100%
+    );
 }
 
 .services-section .service-card.warning::before {
-    background:
-        linear-gradient(
-            180deg,
-            #7b61ff,
-            #5141b8
-        );
+    background: linear-gradient(
+        180deg,
+        #7b61ff,
+        #5141b8
+    );
 }
 
 
 /* ==========================================
-   ICONOS DE SERVICIOS
+   ICONOS
    ========================================== */
 
 .services-section .service-icon {
@@ -981,32 +908,28 @@ body {
 }
 
 .services-section .service-card.online .service-icon {
-    background:
-        linear-gradient(
-            135deg,
-            #e4faf0,
-            #d5f4e4
-        );
+    background: linear-gradient(
+        135deg,
+        #e4faf0,
+        #d5f4e4
+    );
 
-    border-color:
-        #c5ecd8;
+    border-color: #c5ecd8;
 }
 
 .services-section .service-card.warning .service-icon {
-    background:
-        linear-gradient(
-            135deg,
-            #eeeaff,
-            #e4dfff
-        );
+    background: linear-gradient(
+        135deg,
+        #eeeaff,
+        #e4dfff
+    );
 
-    border-color:
-        #d8d0ff;
+    border-color: #d8d0ff;
 }
 
 
 /* ==========================================
-   CONTENIDO SERVICIO
+   CONTENIDO
    ========================================== */
 
 .services-section .service-content {
@@ -1051,48 +974,39 @@ body {
 }
 
 .services-section .service-status.online {
-    background:
-        #e6f8ee;
+    background: #e6f8ee;
 
-    color:
-        #159957;
+    color: #159957;
 }
 
 .services-section .service-status.warning {
-    background:
-        #eeeaff;
+    background: #eeeaff;
 
-    color:
-        #5b49c5;
+    color: #5b49c5;
 }
 
 .services-section .service-status.offline {
-    background:
-        #fdeaea;
+    background: #fdeaea;
 
-    color:
-        #d93636;
+    color: #d93636;
 }
 
 .services-section .status-dot {
     width: 7px;
-
     height: 7px;
 
     border-radius: 50%;
 }
 
 .services-section .service-status.online .status-dot {
-    background:
-        #159957;
+    background: #159957;
 
     box-shadow:
         0 0 0 3px rgba(21, 153, 87, 0.10);
 }
 
 .services-section .service-status.warning .status-dot {
-    background:
-        #6b57d4;
+    background: #6b57d4;
 
     box-shadow:
         0 0 0 3px rgba(107, 87, 212, 0.10);
@@ -1100,7 +1014,7 @@ body {
 
 
 /* ==========================================
-   TITULO SERVICIO
+   TITULO DEL SERVICIO
    ========================================== */
 
 .services-section .service-card h3 {
@@ -1116,8 +1030,7 @@ body {
 
     font-weight: 700;
 
-    margin:
-        0 0 9px 0;
+    margin: 0 0 9px 0;
 }
 
 
@@ -1157,8 +1070,7 @@ body {
 
     padding-top: 18px;
 
-    border-top:
-        1px solid #e8edf3;
+    border-top: 1px solid #e8edf3;
 
     display: flex;
 
@@ -1195,14 +1107,11 @@ body {
         "Courier New",
         monospace;
 
-    background:
-        #f3f6fa;
+    background: #f3f6fa;
 
-    padding:
-        7px 10px;
+    padding: 7px 10px;
 
-    border-radius:
-        7px;
+    border-radius: 7px;
 }
 
 
@@ -1240,12 +1149,11 @@ body {
 
 
 /* ==========================================
-   MICROSOFT 365
+   LISTA DE SERVICIOS
    ========================================== */
 
 .service-list {
-    border:
-        1px solid #e2e6eb;
+    border: 1px solid #e2e6eb;
 
     border-radius: 10px;
 
@@ -1255,8 +1163,7 @@ body {
 .service-row {
     min-height: 67px;
 
-    padding:
-        12px 18px;
+    padding: 12px 18px;
 
     display: flex;
 
@@ -1264,8 +1171,7 @@ body {
 
     justify-content: space-between;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 }
 
 .service-row:last-child {
@@ -1337,8 +1243,7 @@ body {
 
     display: grid;
 
-    grid-template-columns:
-        1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 
     gap: 20px;
 
@@ -1357,13 +1262,11 @@ body {
    ========================================== */
 
 .certificate-card {
-    border:
-        1px solid #e4e6e9;
+    border: 1px solid #e4e6e9;
 
     border-radius: 9px;
 
-    padding:
-        17px 20px;
+    padding: 17px 20px;
 
     display: grid;
 
@@ -1458,15 +1361,13 @@ body {
 .server-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
 
     gap: 15px;
 }
 
 .server-card {
-    border:
-        1px solid #e4e6e9;
+    border: 1px solid #e4e6e9;
 
     border-radius: 10px;
 
@@ -1502,8 +1403,7 @@ body {
 
     display: grid;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 15px;
 }
@@ -1556,8 +1456,7 @@ body {
 .equipos-summary {
     display: grid;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 15px;
 
@@ -1565,13 +1464,11 @@ body {
 }
 
 .equipo-summary-card {
-    border:
-        1px solid #e4e6e9;
+    border: 1px solid #e4e6e9;
 
     border-radius: 10px;
 
-    padding:
-        16px 18px;
+    padding: 16px 18px;
 
     display: flex;
 
@@ -1660,11 +1557,9 @@ body {
 
     gap: 9px;
 
-    padding:
-        0 12px;
+    padding: 0 12px;
 
-    border:
-        1px solid #dfe3e8;
+    border: 1px solid #dfe3e8;
 
     border-radius: 7px;
 
@@ -1679,8 +1574,7 @@ body {
     border-color: #2457a6;
 
     box-shadow:
-        0 0 0 3px
-        rgba(36, 87, 166, 0.08);
+        0 0 0 3px rgba(36, 87, 166, 0.08);
 }
 
 .equipos-search span {
@@ -1712,11 +1606,9 @@ body {
 .equipos-select {
     height: 40px;
 
-    padding:
-        0 10px;
+    padding: 0 10px;
 
-    border:
-        1px solid #dfe3e8;
+    border: 1px solid #dfe3e8;
 
     border-radius: 7px;
 
@@ -1770,8 +1662,7 @@ body {
 .equipos-table-container {
     width: 100%;
 
-    border:
-        1px solid #e3e6ea;
+    border: 1px solid #e3e6ea;
 
     border-radius: 9px;
 
@@ -1795,8 +1686,7 @@ body {
 }
 
 .equipos-table th {
-    padding:
-        12px 14px;
+    padding: 12px 14px;
 
     text-align: left;
 
@@ -1808,8 +1698,7 @@ body {
 
     letter-spacing: 0.7px;
 
-    border-bottom:
-        1px solid #e2e5e9;
+    border-bottom: 1px solid #e2e5e9;
 
     white-space: nowrap;
 }
@@ -1839,11 +1728,9 @@ body {
 }
 
 .equipos-table td {
-    padding:
-        13px 14px;
+    padding: 13px 14px;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 
     color: #444;
 
@@ -1857,8 +1744,7 @@ body {
 }
 
 .equipos-table tbody tr {
-    transition:
-        background 0.15s ease;
+    transition: background 0.15s ease;
 }
 
 .equipos-table tbody tr:hover {
@@ -1938,8 +1824,7 @@ body {
 
     gap: 6px;
 
-    padding:
-        5px 8px;
+    padding: 5px 8px;
 
     border-radius: 5px;
 
@@ -2014,8 +1899,7 @@ body {
 .equipo-area {
     display: inline-block;
 
-    padding:
-        4px 7px;
+    padding: 4px 7px;
 
     background: #f1f4f8;
 
@@ -2040,8 +1924,7 @@ body {
    ========================================== */
 
 .equipos-loading {
-    padding:
-        35px 20px !important;
+    padding: 35px 20px !important;
 
     text-align: center;
 
@@ -2056,8 +1939,7 @@ body {
    ========================================== */
 
 .equipos-empty {
-    padding:
-        35px 20px;
+    padding: 35px 20px;
 
     text-align: center;
 
@@ -2090,19 +1972,17 @@ body {
 
 
 /* ==========================================
-   ESTADO VACÍO SERVICIOS
+   ESTADO VACÍO
    ========================================== */
 
 .empty-state {
     grid-column: 1 / -1;
 
-    padding:
-        45px 20px;
+    padding: 45px 20px;
 
     text-align: center;
 
-    border:
-        1px dashed #d8dde5;
+    border: 1px dashed #d8dde5;
 
     border-radius: 12px;
 
@@ -2127,8 +2007,7 @@ footer {
 
     background: #fff;
 
-    border-top:
-        1px solid #e4e6e9;
+    border-top: 1px solid #e4e6e9;
 
     color: #888;
 
@@ -2145,13 +2024,12 @@ footer {
 
     inset: 0;
 
-    background:
-        radial-gradient(
-            circle at center,
-            #002b73 0%,
-            #00143d 45%,
-            #000a20 100%
-        );
+    background: radial-gradient(
+        circle at center,
+        #002b73 0%,
+        #00143d 45%,
+        #000a20 100%
+    );
 
     display: flex;
 
@@ -2181,8 +2059,7 @@ footer {
 .gear-spinner {
     font-size: 35px;
 
-    animation:
-        spin 1.2s linear infinite;
+    animation: spin 1.2s linear infinite;
 }
 
 .loading-content p {
@@ -2204,7 +2081,6 @@ footer {
 }
 
 @keyframes spin {
-
     from {
         transform: rotate(0deg);
     }
@@ -2212,7 +2088,6 @@ footer {
     to {
         transform: rotate(360deg);
     }
-
 }
 
 
@@ -2246,7 +2121,6 @@ footer {
     .monitor-section {
         padding: 30px;
     }
-
 }
 
 
@@ -2257,10 +2131,8 @@ footer {
 @media (max-width: 1200px) {
 
     .monitor-summary {
-        grid-template-columns:
-            repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
-
 }
 
 
@@ -2271,13 +2143,11 @@ footer {
 @media (max-width: 1100px) {
 
     .services-section .service-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .equipos-summary {
-        grid-template-columns:
-            repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .equipos-filters {
@@ -2286,7 +2156,6 @@ footer {
             180px
             180px;
     }
-
 }
 
 
@@ -2303,7 +2172,6 @@ footer {
     .services-section .service-grid {
         grid-template-columns: 1fr;
     }
-
 }
 
 
@@ -2320,8 +2188,7 @@ footer {
     .content {
         margin-left: 190px;
 
-        width:
-            calc(100% - 190px);
+        width: calc(100% - 190px);
 
         padding: 25px;
     }
@@ -2353,7 +2220,6 @@ footer {
     .equipos-filters {
         grid-template-columns: 1fr;
     }
-
 }
 
 
@@ -2364,8 +2230,7 @@ footer {
 @media (max-width: 600px) {
 
     .topbar {
-        padding:
-            0 18px;
+        padding: 0 18px;
     }
 
     .logo h1 {
@@ -2379,8 +2244,7 @@ footer {
     .sidebar {
         width: 65px;
 
-        padding:
-            20px 8px;
+        padding: 20px 8px;
     }
 
     .sidebar h2 {
@@ -2392,8 +2256,7 @@ footer {
 
         text-align: center;
 
-        padding:
-            13px 5px;
+        padding: 13px 5px;
     }
 
     .sidebar li::first-letter {
@@ -2403,11 +2266,9 @@ footer {
     .content {
         margin-left: 65px;
 
-        width:
-            calc(100% - 65px);
+        width: calc(100% - 65px);
 
-        padding:
-            20px 15px;
+        padding: 20px 15px;
     }
 
     footer {
@@ -2455,8 +2316,7 @@ footer {
     }
 
     .page-header {
-        padding:
-            28px 24px;
+        padding: 28px 24px;
     }
 
     .page-header h2 {
@@ -2464,23 +2324,20 @@ footer {
     }
 
 
-    /* Servicios en móvil */
+    /* ==============================
+       SERVICIOS EN MÓVIL
+       ============================== */
 
     .services-section {
-        padding: 0;
+        padding: 20px;
     }
 
     .services-section .section-heading {
-        min-height: auto;
-
-        padding:
-            25px 22px;
-
         flex-direction: column;
 
         align-items: flex-start;
 
-        gap: 18px;
+        gap: 15px;
     }
 
     .services-section #estadoGeneral {
@@ -2488,8 +2345,6 @@ footer {
     }
 
     .services-section .service-grid {
-        padding: 15px;
-
         grid-template-columns: 1fr;
 
         gap: 15px;
@@ -2498,14 +2353,12 @@ footer {
     .services-section .service-card {
         min-height: 235px;
 
-        padding:
-            22px;
+        padding: 22px;
     }
 
     .services-section .service-card h3 {
         font-size: 20px;
     }
-
 }
 
 
@@ -2516,8 +2369,7 @@ footer {
 @media (max-width: 450px) {
 
     .content {
-        padding:
-            15px 10px;
+        padding: 15px 10px;
     }
 
     .page-header h2 {
@@ -2542,5 +2394,4 @@ footer {
 
         font-size: 25px;
     }
-
 }

@@ -5,7 +5,6 @@
 const ALFERZA_TENANT_ID =
     "dbab984f-4bb1-4b60-9dff-da59f54acdf1";
 
-
 const msalConfig = {
 
     auth: {
@@ -19,6 +18,9 @@ const msalConfig = {
         authority:
             `https://login.microsoftonline.com/${ALFERZA_TENANT_ID}`,
 
+        /*
+         * VERCEL
+         */
         redirectUri:
             "https://liveofficealfeza.vercel.app/blank.html"
 
@@ -37,6 +39,10 @@ const msalConfig = {
 };
 
 
+/* =========================================
+   PERMISOS
+========================================= */
+
 const scopes = [
 
     "User.Read",
@@ -44,11 +50,17 @@ const scopes = [
     "Presence.Read.All",
 
     "Sites.Read.All",
+
     "AuditLog.Read.All",
+
     "DeviceManagementManagedDevices.Read.All"
 
 ];
 
+
+/* =========================================
+   MSAL
+========================================= */
 
 const msalInstance =
     new msal.PublicClientApplication(
@@ -65,12 +77,10 @@ const loginButton =
         "loginButton"
     );
 
-
 const loginButtonText =
     document.getElementById(
         "loginButtonText"
     );
-
 
 const loginStatus =
     document.getElementById(
@@ -86,6 +96,10 @@ function mostrarMensaje(
     mensaje,
     tipo = ""
 ) {
+
+    if (!loginStatus) {
+        return;
+    }
 
     loginStatus.textContent =
         mensaje;
@@ -113,22 +127,38 @@ function bloquearBoton(
     mensaje
 ) {
 
-    loginButton.disabled =
-        true;
+    if (loginButton) {
 
-    loginButtonText.textContent =
-        mensaje;
+        loginButton.disabled =
+            true;
+
+    }
+
+    if (loginButtonText) {
+
+        loginButtonText.textContent =
+            mensaje;
+
+    }
 
 }
 
 
 function habilitarBoton() {
 
-    loginButton.disabled =
-        false;
+    if (loginButton) {
 
-    loginButtonText.textContent =
-        "Iniciar sesión con Microsoft";
+        loginButton.disabled =
+            false;
+
+    }
+
+    if (loginButtonText) {
+
+        loginButtonText.textContent =
+            "Iniciar sesión con Microsoft";
+
+    }
 
 }
 
@@ -145,13 +175,6 @@ function esCuentaAlferza(account) {
 
     }
 
-
-    /*
-     * tid = Tenant ID de Microsoft Entra
-     *
-     * Solo aceptamos cuentas pertenecientes
-     * al tenant oficial de ALFERZA.
-     */
 
     const tenantId =
         account.tenantId ||
@@ -179,9 +202,14 @@ function obtenerPaginaDestino() {
         );
 
 
+    /*
+     * VERCEL
+     *
+     * Ya no usamos /live-office/
+     */
     if (
         pagina &&
-        pagina.startsWith("/live-office/")
+        pagina.startsWith("/")
     ) {
 
         sessionStorage.removeItem(
@@ -189,20 +217,37 @@ function obtenerPaginaDestino() {
         );
 
 
-        return pagina;
+        /*
+         * Evitar volver a login.html
+         */
+        if (
+            !pagina.endsWith(
+                "/login.html"
+            )
+        ) {
+
+            return pagina;
+
+        }
 
     }
 
 
-    return "/live-office/index.html";
+    /*
+     * Página principal de Vercel
+     */
+    return "/index.html";
 
 }
+
 
 /* =========================================
    RECHAZAR CUENTA NO AUTORIZADA
 ========================================= */
 
-async function rechazarCuenta(account) {
+async function rechazarCuenta(
+    account
+) {
 
     console.warn(
         "Cuenta rechazada:",
@@ -248,7 +293,7 @@ async function rechazarCuenta(account) {
 
 
 /* =========================================
-   CUENTA EXISTENTE
+   OBTENER CUENTA
 ========================================= */
 
 function obtenerCuenta() {
@@ -286,6 +331,12 @@ function entrarAlSistema() {
 
     const paginaDestino =
         obtenerPaginaDestino();
+
+
+    console.log(
+        "Redirigiendo a:",
+        paginaDestino
+    );
 
 
     window.location.replace(
@@ -343,8 +394,7 @@ async function comprobarSesion() {
 
 
         /*
-         * Comprobamos silenciosamente
-         * que el token siga disponible.
+         * Intentamos recuperar el token
          */
 
         await msalInstance.acquireTokenSilent({
@@ -364,9 +414,22 @@ async function comprobarSesion() {
 
     catch (error) {
 
-        console.warn(
-            "No se pudo recuperar la sesión:",
+        console.error(
+            "Error recuperando sesión:",
             error
+        );
+
+
+        console.error(
+            "Código:",
+            error?.errorCode
+        );
+
+
+        console.error(
+            "Mensaje:",
+            error?.errorMessage ||
+            error?.message
         );
 
 
@@ -407,9 +470,8 @@ async function iniciarSesion() {
                     scopes,
 
                 /*
-                 * Muestra selección de cuenta.
+                 * Permite seleccionar cuenta
                  */
-
                 prompt:
                     "select_account"
 
@@ -427,6 +489,18 @@ async function iniciarSesion() {
             );
 
         }
+
+
+        console.log(
+            "Cuenta:",
+            cuenta.username
+        );
+
+
+        console.log(
+            "Tenant:",
+            cuenta.tenantId
+        );
 
 
         /* =====================================
@@ -455,8 +529,7 @@ async function iniciarSesion() {
 
 
         /*
-         * Obtener token y comprobar
-         * los permisos necesarios.
+         * Obtener token
          */
 
         await msalInstance.acquireTokenSilent({
@@ -493,7 +566,35 @@ async function iniciarSesion() {
     catch (error) {
 
         console.error(
-            "Error de autenticación:",
+            "================================="
+        );
+
+        console.error(
+            "ERROR DE AUTENTICACIÓN"
+        );
+
+        console.error(
+            "================================="
+        );
+
+        console.error(
+            "Código:",
+            error?.errorCode
+        );
+
+        console.error(
+            "Mensaje:",
+            error?.errorMessage ||
+            error?.message
+        );
+
+        console.error(
+            "Nombre:",
+            error?.name
+        );
+
+        console.error(
+            "Error completo:",
             error
         );
 
@@ -506,8 +607,19 @@ async function iniciarSesion() {
         habilitarBoton();
 
 
+        /*
+         * Mostrar el error real temporalmente
+         * para poder detectar el problema.
+         */
+
+        const mensajeError =
+            error?.errorMessage ||
+            error?.message ||
+            "Error desconocido";
+
+
         mostrarMensaje(
-            "No se pudo iniciar sesión. Inténtalo nuevamente.",
+            mensajeError,
             "error"
         );
 
@@ -520,10 +632,14 @@ async function iniciarSesion() {
    EVENTO BOTÓN
 ========================================= */
 
-loginButton.addEventListener(
-    "click",
-    iniciarSesion
-);
+if (loginButton) {
+
+    loginButton.addEventListener(
+        "click",
+        iniciarSesion
+    );
+
+}
 
 
 /* =========================================

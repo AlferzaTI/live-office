@@ -5,6 +5,7 @@
 const ALFERZA_TENANT_ID =
     "dbab984f-4bb1-4b60-9dff-da59f54acdf1";
 
+
 const msalConfig = {
 
     auth: {
@@ -18,11 +19,8 @@ const msalConfig = {
         authority:
             `https://login.microsoftonline.com/${ALFERZA_TENANT_ID}`,
 
-        /*
-         * VERCEL
-         */
         redirectUri:
-            "https://liveofficealfeza.vercel.app/blank.html"
+            "https://AlferzaTI.github.io/live-office/blank.html"
 
     },
 
@@ -39,10 +37,6 @@ const msalConfig = {
 };
 
 
-/* =========================================
-   PERMISOS
-========================================= */
-
 const scopes = [
 
     "User.Read",
@@ -50,17 +44,11 @@ const scopes = [
     "Presence.Read.All",
 
     "Sites.Read.All",
-
     "AuditLog.Read.All",
-
     "DeviceManagementManagedDevices.Read.All"
 
 ];
 
-
-/* =========================================
-   MSAL
-========================================= */
 
 const msalInstance =
     new msal.PublicClientApplication(
@@ -77,10 +65,12 @@ const loginButton =
         "loginButton"
     );
 
+
 const loginButtonText =
     document.getElementById(
         "loginButtonText"
     );
+
 
 const loginStatus =
     document.getElementById(
@@ -96,10 +86,6 @@ function mostrarMensaje(
     mensaje,
     tipo = ""
 ) {
-
-    if (!loginStatus) {
-        return;
-    }
 
     loginStatus.textContent =
         mensaje;
@@ -127,38 +113,22 @@ function bloquearBoton(
     mensaje
 ) {
 
-    if (loginButton) {
+    loginButton.disabled =
+        true;
 
-        loginButton.disabled =
-            true;
-
-    }
-
-    if (loginButtonText) {
-
-        loginButtonText.textContent =
-            mensaje;
-
-    }
+    loginButtonText.textContent =
+        mensaje;
 
 }
 
 
 function habilitarBoton() {
 
-    if (loginButton) {
+    loginButton.disabled =
+        false;
 
-        loginButton.disabled =
-            false;
-
-    }
-
-    if (loginButtonText) {
-
-        loginButtonText.textContent =
-            "Iniciar sesión con Microsoft";
-
-    }
+    loginButtonText.textContent =
+        "Iniciar sesión con Microsoft";
 
 }
 
@@ -175,6 +145,13 @@ function esCuentaAlferza(account) {
 
     }
 
+
+    /*
+     * tid = Tenant ID de Microsoft Entra
+     *
+     * Solo aceptamos cuentas pertenecientes
+     * al tenant oficial de ALFERZA.
+     */
 
     const tenantId =
         account.tenantId ||
@@ -202,14 +179,9 @@ function obtenerPaginaDestino() {
         );
 
 
-    /*
-     * VERCEL
-     *
-     * Ya no usamos /live-office/
-     */
     if (
         pagina &&
-        pagina.startsWith("/")
+        pagina.startsWith("/live-office/")
     ) {
 
         sessionStorage.removeItem(
@@ -217,37 +189,20 @@ function obtenerPaginaDestino() {
         );
 
 
-        /*
-         * Evitar volver a login.html
-         */
-        if (
-            !pagina.endsWith(
-                "/login.html"
-            )
-        ) {
-
-            return pagina;
-
-        }
+        return pagina;
 
     }
 
 
-    /*
-     * Página principal de Vercel
-     */
-    return "/index.html";
+    return "/live-office/index.html";
 
 }
-
 
 /* =========================================
    RECHAZAR CUENTA NO AUTORIZADA
 ========================================= */
 
-async function rechazarCuenta(
-    account
-) {
+async function rechazarCuenta(account) {
 
     console.warn(
         "Cuenta rechazada:",
@@ -293,7 +248,7 @@ async function rechazarCuenta(
 
 
 /* =========================================
-   OBTENER CUENTA
+   CUENTA EXISTENTE
 ========================================= */
 
 function obtenerCuenta() {
@@ -331,12 +286,6 @@ function entrarAlSistema() {
 
     const paginaDestino =
         obtenerPaginaDestino();
-
-
-    console.log(
-        "Redirigiendo a:",
-        paginaDestino
-    );
 
 
     window.location.replace(
@@ -394,7 +343,8 @@ async function comprobarSesion() {
 
 
         /*
-         * Intentamos recuperar el token
+         * Comprobamos silenciosamente
+         * que el token siga disponible.
          */
 
         await msalInstance.acquireTokenSilent({
@@ -414,22 +364,9 @@ async function comprobarSesion() {
 
     catch (error) {
 
-        console.error(
-            "Error recuperando sesión:",
+        console.warn(
+            "No se pudo recuperar la sesión:",
             error
-        );
-
-
-        console.error(
-            "Código:",
-            error?.errorCode
-        );
-
-
-        console.error(
-            "Mensaje:",
-            error?.errorMessage ||
-            error?.message
         );
 
 
@@ -470,8 +407,9 @@ async function iniciarSesion() {
                     scopes,
 
                 /*
-                 * Permite seleccionar cuenta
+                 * Muestra selección de cuenta.
                  */
+
                 prompt:
                     "select_account"
 
@@ -489,18 +427,6 @@ async function iniciarSesion() {
             );
 
         }
-
-
-        console.log(
-            "Cuenta:",
-            cuenta.username
-        );
-
-
-        console.log(
-            "Tenant:",
-            cuenta.tenantId
-        );
 
 
         /* =====================================
@@ -529,7 +455,8 @@ async function iniciarSesion() {
 
 
         /*
-         * Obtener token
+         * Obtener token y comprobar
+         * los permisos necesarios.
          */
 
         await msalInstance.acquireTokenSilent({
@@ -566,35 +493,7 @@ async function iniciarSesion() {
     catch (error) {
 
         console.error(
-            "================================="
-        );
-
-        console.error(
-            "ERROR DE AUTENTICACIÓN"
-        );
-
-        console.error(
-            "================================="
-        );
-
-        console.error(
-            "Código:",
-            error?.errorCode
-        );
-
-        console.error(
-            "Mensaje:",
-            error?.errorMessage ||
-            error?.message
-        );
-
-        console.error(
-            "Nombre:",
-            error?.name
-        );
-
-        console.error(
-            "Error completo:",
+            "Error de autenticación:",
             error
         );
 
@@ -607,19 +506,8 @@ async function iniciarSesion() {
         habilitarBoton();
 
 
-        /*
-         * Mostrar el error real temporalmente
-         * para poder detectar el problema.
-         */
-
-        const mensajeError =
-            error?.errorMessage ||
-            error?.message ||
-            "Error desconocido";
-
-
         mostrarMensaje(
-            mensajeError,
+            "No se pudo iniciar sesión. Inténtalo nuevamente.",
             "error"
         );
 
@@ -632,14 +520,10 @@ async function iniciarSesion() {
    EVENTO BOTÓN
 ========================================= */
 
-if (loginButton) {
-
-    loginButton.addEventListener(
-        "click",
-        iniciarSesion
-    );
-
-}
+loginButton.addEventListener(
+    "click",
+    iniciarSesion
+);
 
 
 /* =========================================

@@ -80,8 +80,6 @@ const SHAREPOINT_LIST =
    UBICACIÓN DEL EQUIPOS.JSON
 ========================================= */
 
-const EQUIPOS_JSON_PATH =
-    "Documents/Procedimientos T.I/equipos.json";
 
 
 /* =========================================
@@ -1294,161 +1292,118 @@ function actualizarHora() {
 
 async function obtenerEquipos() {
 
-    console.log(
-        "🖥️ Cargando inventario de equipos desde SharePoint..."
-    );
-
-
     try {
 
-        /* ================================
-           TOKEN
-        ================================= */
+        const TOKEN = await obtenerTokenInfraestructura();
 
-        cambiarMensaje(
-            "Verificando acceso al inventario..."
-        );
+        // Obtener el sitio personal de SharePoint / OneDrive
+        const sitio = await obtenerSitioSharePoint(TOKEN);
 
+        if (!sitio || !sitio.id) {
+            throw new Error("No se pudo obtener el sitio de SharePoint.");
+        }
 
-        const TOKEN =
-            await obtenerTokenInfraestructura();
+        console.log("Sitio SharePoint:", sitio);
 
-
-        /* ================================
-           SITIO SHAREPOINT
-        ================================= */
-
-        cambiarMensaje(
-            "Conectando con inventario de equipos..."
-        );
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
-            );
-
-
-        console.log(
-            "📁 Sitio del inventario:",
-            sitio.id
-        );
-
-
-        /* ================================
-           ARCHIVO EQUIPOS.JSON
-        ================================= */
-
-        const rutaArchivo =
-            encodeURI(
-                EQUIPOS_JSON_PATH
-            );
-
-
-        const urlArchivo =
-            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive/root:/${rutaArchivo}:/content`;
-
-
-        console.log(
-            "📄 Consultando:",
-            EQUIPOS_JSON_PATH
-        );
-
-
-        const respuesta =
-            await fetch(
-                urlArchivo,
-                {
-
-                    method:
-                        "GET",
-
-                    headers: {
-
-                        Authorization:
-                            `Bearer ${TOKEN}`,
-
-                        Accept:
-                            "application/json"
-
-                    }
-
+        // Obtener la unidad (Drive) del sitio
+        const respuestaDrive = await fetch(
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`,
+                    Accept: "application/json"
                 }
-            );
+            }
+        );
 
+        if (!respuestaDrive.ok) {
 
-        if (
-            !respuesta.ok
-        ) {
-
-            const error =
-                await respuesta.text();
-
+            const errorDrive = await respuestaDrive.text();
 
             console.error(
-                "❌ Error obteniendo equipos.json desde SharePoint:",
-                error
+                "Error obteniendo Drive:",
+                respuestaDrive.status,
+                errorDrive
             );
-
 
             throw new Error(
-                `equipos.json en SharePoint: HTTP ${respuesta.status}`
+                `No se pudo obtener el Drive (${respuestaDrive.status})`
             );
-
         }
 
+        const drive = await respuestaDrive.json();
 
-        /* ================================
-           LEER JSON
-        ================================= */
+        console.log("Drive encontrado:", drive);
 
-        const datos =
-            await respuesta.json();
+        if (!drive.id) {
+            throw new Error("El Drive no tiene un ID válido.");
+        }
 
+        // Ruta del archivo dentro del OneDrive
+        const rutaArchivo =
+            "Documents/Procedimientos T.I/equipos.json";
 
-        if (
-            !Array.isArray(
-                datos
-            )
-        ) {
+        const urlArchivo =
+            `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
+
+        console.log("URL Graph del archivo:", urlArchivo);
+
+        // Descargar equipos.json
+        const respuestaArchivo = await fetch(
+            urlArchivo,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`,
+                    Accept: "application/json"
+                }
+            }
+        );
+
+        if (!respuestaArchivo.ok) {
+
+            const errorArchivo = await respuestaArchivo.text();
+
+            console.error(
+                "Error obteniendo equipos.json:",
+                respuestaArchivo.status,
+                errorArchivo
+            );
 
             throw new Error(
-                "El archivo equipos.json de SharePoint no contiene un arreglo válido."
+                `No se pudo obtener equipos.json (${respuestaArchivo.status})`
             );
-
         }
 
+        const datos = await respuestaArchivo.json();
 
         console.log(
-            `✅ ${datos.length} equipos cargados desde SharePoint.`
+            `Inventario cargado correctamente: ${datos.length} equipos`
         );
-
-
-        console.table(
-            datos
-        );
-
 
         return datos;
 
-    }
-
-    catch (
-        error
-    ) {
+    } catch (error) {
 
         console.error(
-            "❌ Error cargando equipos desde SharePoint:",
+            "Error cargando inventario desde SharePoint:",
             error
         );
 
+        const contenedor = document.getElementById("equiposGrid");
 
-        throw error;
+        if (contenedor) {
+            contenedor.innerHTML = `
+                <div class="error-inventario">
+                    ❌ No se pudo cargar <strong>el inventario desde SharePoint</strong>.
+                </div>
+            `;
+        }
 
+        return [];
     }
-
 }
-
 
 /* =========================================
    FORMATEAR FECHA

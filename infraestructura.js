@@ -77,6 +77,14 @@ const SHAREPOINT_LIST =
 
 
 /* =========================================
+   UBICACIÓN DEL EQUIPOS.JSON
+========================================= */
+
+const EQUIPOS_JSON_PATH =
+    "Documents/Procedimientos T.I/equipos.json";
+
+
+/* =========================================
    ELEMENTOS
 ========================================= */
 
@@ -1281,21 +1289,91 @@ function actualizarHora() {
 
 
 /* =========================================
-   OBTENER EQUIPOS
+   OBTENER EQUIPOS DESDE SHAREPOINT
 ========================================= */
 
 async function obtenerEquipos() {
 
     console.log(
-        "🖥️ Cargando inventario de equipos..."
+        "🖥️ Cargando inventario de equipos desde SharePoint..."
     );
 
 
     try {
 
+        /* ================================
+           TOKEN
+        ================================= */
+
+        cambiarMensaje(
+            "Verificando acceso al inventario..."
+        );
+
+
+        const TOKEN =
+            await obtenerTokenInfraestructura();
+
+
+        /* ================================
+           SITIO SHAREPOINT
+        ================================= */
+
+        cambiarMensaje(
+            "Conectando con inventario de equipos..."
+        );
+
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                TOKEN
+            );
+
+
+        console.log(
+            "📁 Sitio del inventario:",
+            sitio.id
+        );
+
+
+        /* ================================
+           ARCHIVO EQUIPOS.JSON
+        ================================= */
+
+        const rutaArchivo =
+            encodeURI(
+                EQUIPOS_JSON_PATH
+            );
+
+
+        const urlArchivo =
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive/root:/${rutaArchivo}:/content`;
+
+
+        console.log(
+            "📄 Consultando:",
+            EQUIPOS_JSON_PATH
+        );
+
+
         const respuesta =
             await fetch(
-                "equipos.json"
+                urlArchivo,
+                {
+
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        Authorization:
+                            `Bearer ${TOKEN}`,
+
+                        Accept:
+                            "application/json"
+
+                    }
+
+                }
             );
 
 
@@ -1303,12 +1381,26 @@ async function obtenerEquipos() {
             !respuesta.ok
         ) {
 
+            const error =
+                await respuesta.text();
+
+
+            console.error(
+                "❌ Error obteniendo equipos.json desde SharePoint:",
+                error
+            );
+
+
             throw new Error(
-                `equipos.json: HTTP ${respuesta.status}`
+                `equipos.json en SharePoint: HTTP ${respuesta.status}`
             );
 
         }
 
+
+        /* ================================
+           LEER JSON
+        ================================= */
 
         const datos =
             await respuesta.json();
@@ -1321,14 +1413,19 @@ async function obtenerEquipos() {
         ) {
 
             throw new Error(
-                "El archivo equipos.json no contiene un arreglo válido."
+                "El archivo equipos.json de SharePoint no contiene un arreglo válido."
             );
 
         }
 
 
         console.log(
-            `✅ ${datos.length} equipos cargados.`
+            `✅ ${datos.length} equipos cargados desde SharePoint.`
+        );
+
+
+        console.table(
+            datos
         );
 
 
@@ -1341,7 +1438,7 @@ async function obtenerEquipos() {
     ) {
 
         console.error(
-            "❌ Error cargando equipos:",
+            "❌ Error cargando equipos desde SharePoint:",
             error
         );
 
@@ -2204,7 +2301,7 @@ async function cargarEquipos() {
                     >
 
                         ❌ No se pudo cargar
-                        <strong>equipos.json</strong>.
+                        <strong>el inventario desde SharePoint</strong>.
 
                     </td>
 

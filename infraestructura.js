@@ -1294,18 +1294,30 @@ async function obtenerEquipos() {
 
     try {
 
+        console.log("🔄 Cargando inventario desde SharePoint...");
+
         const TOKEN = await obtenerTokenInfraestructura();
 
-        // Obtener el sitio personal de SharePoint / OneDrive
+        if (!TOKEN) {
+            throw new Error("No se obtuvo el token de Microsoft Graph.");
+        }
+
+        // ============================================================
+        // 1. OBTENER SITIO SHAREPOINT
+        // ============================================================
+
         const sitio = await obtenerSitioSharePoint(TOKEN);
+
+        console.log("🏢 Sitio SharePoint:", sitio);
 
         if (!sitio || !sitio.id) {
             throw new Error("No se pudo obtener el sitio de SharePoint.");
         }
 
-        console.log("Sitio SharePoint:", sitio);
+        // ============================================================
+        // 2. OBTENER DRIVE
+        // ============================================================
 
-        // Obtener la unidad (Drive) del sitio
         const respuestaDrive = await fetch(
             `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
             {
@@ -1322,7 +1334,7 @@ async function obtenerEquipos() {
             const errorDrive = await respuestaDrive.text();
 
             console.error(
-                "Error obteniendo Drive:",
+                "❌ Error obteniendo Drive:",
                 respuestaDrive.status,
                 errorDrive
             );
@@ -1334,22 +1346,29 @@ async function obtenerEquipos() {
 
         const drive = await respuestaDrive.json();
 
-        console.log("Drive encontrado:", drive);
+        console.log("💾 Drive encontrado:", drive);
 
         if (!drive.id) {
             throw new Error("El Drive no tiene un ID válido.");
         }
 
-        // Ruta del archivo dentro del OneDrive
+        // ============================================================
+        // 3. RUTA DEL EQUIPOS.JSON
+        // ============================================================
+
         const rutaArchivo =
             "Documents/Procedimientos T.I/equipos.json";
 
         const urlArchivo =
             `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
 
-        console.log("URL Graph del archivo:", urlArchivo);
+        console.log("📂 Ruta del archivo:", rutaArchivo);
+        console.log("🌐 URL Graph:", urlArchivo);
 
-        // Descargar equipos.json
+        // ============================================================
+        // 4. DESCARGAR EQUIPOS.JSON
+        // ============================================================
+
         const respuestaArchivo = await fetch(
             urlArchivo,
             {
@@ -1366,7 +1385,7 @@ async function obtenerEquipos() {
             const errorArchivo = await respuestaArchivo.text();
 
             console.error(
-                "Error obteniendo equipos.json:",
+                "❌ Error obteniendo equipos.json:",
                 respuestaArchivo.status,
                 errorArchivo
             );
@@ -1376,10 +1395,57 @@ async function obtenerEquipos() {
             );
         }
 
+        // ============================================================
+        // 5. LEER JSON
+        // ============================================================
+
         const datos = await respuestaArchivo.json();
 
+        console.log("📦 RESPUESTA COMPLETA DEL JSON:", datos);
+        console.log("📊 ¿Es un array?:", Array.isArray(datos));
         console.log(
-            `Inventario cargado correctamente: ${datos.length} equipos`
+            "🔢 Cantidad:",
+            Array.isArray(datos) ? datos.length : "NO ES ARRAY"
+        );
+
+        // ============================================================
+        // 6. VALIDAR ESTRUCTURA
+        // ============================================================
+
+        if (!Array.isArray(datos)) {
+
+            console.error(
+                "❌ equipos.json no contiene directamente un array:",
+                datos
+            );
+
+            throw new Error(
+                "El archivo equipos.json no tiene el formato esperado."
+            );
+        }
+
+        if (datos.length === 0) {
+
+            console.warn(
+                "⚠️ equipos.json fue cargado correctamente, pero está vacío."
+            );
+
+            return [];
+        }
+
+        // ============================================================
+        // 7. MOSTRAR PRIMER EQUIPO PARA COMPROBAR ESTRUCTURA
+        // ============================================================
+
+        console.log(
+            "🔍 Primer equipo del inventario:",
+            datos[0]
+        );
+
+        console.log(
+            "✅ Inventario cargado correctamente:",
+            datos.length,
+            "equipos"
         );
 
         return datos;
@@ -1387,16 +1453,19 @@ async function obtenerEquipos() {
     } catch (error) {
 
         console.error(
-            "Error cargando inventario desde SharePoint:",
+            "❌ Error cargando inventario desde SharePoint:",
             error
         );
 
-        const contenedor = document.getElementById("equiposGrid");
+        const contenedor =
+            document.getElementById("equiposGrid");
 
         if (contenedor) {
+
             contenedor.innerHTML = `
                 <div class="error-inventario">
-                    ❌ No se pudo cargar <strong>el inventario desde SharePoint</strong>.
+                    ❌ No se pudo cargar
+                    <strong>el inventario desde SharePoint</strong>.
                 </div>
             `;
         }
@@ -1404,7 +1473,6 @@ async function obtenerEquipos() {
         return [];
     }
 }
-
 /* =========================================
    FORMATEAR FECHA
 ========================================= */

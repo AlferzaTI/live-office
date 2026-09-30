@@ -1,0 +1,2042 @@
+﻿[
+    {
+        "Nombre":  "SVRAD01",
+        "Estado":  "Conectado",
+        "IP":  "192.168.100.142",
+        "DNSHostName":  "SVRAD01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows Server 2022 Standard",
+        "VersionSO":  "10.0 (20348)",
+        "Area":  "Sin identificar",
+        "UltimoRegistroAD":  "\/Date(1790488686436)\/"
+    },
+    {
+        "Nombre":  "SERVER",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.242",
+        "DNSHostName":  "Server.AD.ALFERZA",
+        "SistemaOperativo":  "Windows Server 2012 R2 Standard",
+        "VersionSO":  "6.3 (9600)",
+        "Area":  "Sin identificar",
+        "UltimoRegistroAD":  "\/Date(1763376903145)\/"
+    },
+    {
+        "Nombre":  "SVRAD00",
+        "Estado":  "Conectado",
+        "IP":  "192.168.100.242",
+        "DNSHostName":  "SVRAD00.AD.ALFERZA",
+        "SistemaOperativo":  "Windows Server 2025 Standard",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Sin identificar",
+        "UltimoRegistroAD":  "\/Date(1790417189706)\/"
+    },
+    {
+        "Nombre":  "A-ADM-0015",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.50",
+        "DNSHostName":  "A-ADM-0015.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1677537412592)\/"
+    },
+    {
+        "Nombre":  "A-PROY-030",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.15",
+        "DNSHostName":  "A-PROY-030.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1679488945950)\/"
+    },
+    {
+        "Nombre":  "A-PROY-014",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.24",
+        "DNSHostName":  "A-PROY-014.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1682519009917)\/"
+    },
+    {
+        "Nombre":  "A-PROY-15",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.34",
+        "DNSHostName":  "A-PROY-15.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1685968230635)\/"
+    },
+    {
+        "Nombre":  "A-PROY-33",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.72",
+        "DNSHostName":  "A-PROY-33.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (22621)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1685977880812)\/"
+    },
+    {
+        "Nombre":  "A-PROY-20",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.94",
+        "DNSHostName":  "A-PROY-20.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (22621)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1686155941948)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-KM5VQF6",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.1.175",
+        "DNSHostName":  "DESKTOP-KM5VQF6.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1687544130845)\/"
+    },
+    {
+        "Nombre":  "A-INV-01",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.25",
+        "DNSHostName":  "A-INV-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro for Workstations",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1687782368446)\/"
+    },
+    {
+        "Nombre":  "A-PROY-25",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.36",
+        "DNSHostName":  "A-PROY-25.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1690808714612)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-PTM2RRA",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "DESKTOP-PTM2RRA.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1690924918602)\/"
+    },
+    {
+        "Nombre":  "A-COM-41",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.41",
+        "DNSHostName":  "A-COM-41.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Enterprise 2016 LTSB",
+        "VersionSO":  "10.0 (14393)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1691768076910)\/"
+    },
+    {
+        "Nombre":  "A-AMD-16",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.69",
+        "DNSHostName":  "A-AMD-16.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (22621)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1692018156670)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-VI650GK",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.47",
+        "DNSHostName":  "DESKTOP-VI650GK.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro for Workstations",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1697458891760)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-J38F7RJ",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.41",
+        "DNSHostName":  "DESKTOP-J38F7RJ.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro for Workstations",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1703797080125)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-VMRRQLV",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.49",
+        "DNSHostName":  "DESKTOP-VMRRQLV.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1710165356128)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-5VCIV2GA",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.65",
+        "DNSHostName":  "LAPTOP-5VCIV2GA.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (22631)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1711046021865)\/"
+    },
+    {
+        "Nombre":  "A-PROY-28",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.45",
+        "DNSHostName":  "A-PROY-28.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1712065262629)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-A0IG870",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.1.152",
+        "DNSHostName":  "DESKTOP-A0IG870.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1712860678719)\/"
+    },
+    {
+        "Nombre":  "A-ADM-38",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.93",
+        "DNSHostName":  "A-ADM-38.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1719929368002)\/"
+    },
+    {
+        "Nombre":  "A-ADM-65",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-ADM-65.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (22631)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1720458757562)\/"
+    },
+    {
+        "Nombre":  "A-PROY-21",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-PROY-21.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1721250275595)\/"
+    },
+    {
+        "Nombre":  "A-OBR-01",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-OBR-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1721333017691)\/"
+    },
+    {
+        "Nombre":  "A-OBR-08",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.90",
+        "DNSHostName":  "A-OBR-08.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1722521943274)\/"
+    },
+    {
+        "Nombre":  "A-OBR-10",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.29",
+        "DNSHostName":  "A-OBR-10.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1723551944475)\/"
+    },
+    {
+        "Nombre":  "A-PROY-14",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.89",
+        "DNSHostName":  "A-PROY-14.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1724176689110)\/"
+    },
+    {
+        "Nombre":  "A-PROY-34",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.47",
+        "DNSHostName":  "A-PROY-34.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1724266533050)\/"
+    },
+    {
+        "Nombre":  "A-OBR-15",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.80",
+        "DNSHostName":  "A-OBR-15.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1725890769819)\/"
+    },
+    {
+        "Nombre":  "A-ADM-60",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.250.3",
+        "DNSHostName":  "A-ADM-60.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1735389214182)\/"
+    },
+    {
+        "Nombre":  "A-COM-011",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.10",
+        "DNSHostName":  "A-COM-011.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (22631)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1737986792739)\/"
+    },
+    {
+        "Nombre":  "A-OBR-02",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.115",
+        "DNSHostName":  "A-OBR-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1743443514791)\/"
+    },
+    {
+        "Nombre":  "A-COM-19",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.112",
+        "DNSHostName":  "A-COM-19.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (22631)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1743449034094)\/"
+    },
+    {
+        "Nombre":  "A-ADM-09",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.40",
+        "DNSHostName":  "A-ADM-09.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1743442896609)\/"
+    },
+    {
+        "Nombre":  "ALFERZA",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "alferza",
+        "SistemaOperativo":  "pc-linux-gnu",
+        "VersionSO":  null,
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1744644497317)\/"
+    },
+    {
+        "Nombre":  "A-PROY-017",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.104",
+        "DNSHostName":  "A-PROY-017.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (18363)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1744645683268)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-54OR6N5M",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.46",
+        "DNSHostName":  "LAPTOP-54OR6N5M.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1747658996368)\/"
+    },
+    {
+        "Nombre":  "A-OBR-14",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.19",
+        "DNSHostName":  "A-OBR-14.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1751904802547)\/"
+    },
+    {
+        "Nombre":  "A-ADM-23",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.59",
+        "DNSHostName":  "A-ADM-23.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1751547946474)\/"
+    },
+    {
+        "Nombre":  "A-COM-26",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.12",
+        "DNSHostName":  "A-COM-26.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790001157614)\/"
+    },
+    {
+        "Nombre":  "A-COM-29",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-29.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1774550719020)\/"
+    },
+    {
+        "Nombre":  "A-OBR-13",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.51",
+        "DNSHostName":  "A-OBR-13.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1756995944059)\/"
+    },
+    {
+        "Nombre":  "A-COM-06",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.103",
+        "DNSHostName":  "A-COM-06.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790257732866)\/"
+    },
+    {
+        "Nombre":  "A-PRO-05",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.105",
+        "DNSHostName":  "A-PRO-05.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1758906882794)\/"
+    },
+    {
+        "Nombre":  "A-GER-02",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.105",
+        "DNSHostName":  "A-GER-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790771516917)\/"
+    },
+    {
+        "Nombre":  "A-COM-13",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.73",
+        "DNSHostName":  "A-COM-13.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1789679631285)\/"
+    },
+    {
+        "Nombre":  "A-ADM-01",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.22",
+        "DNSHostName":  "A-ADM-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790097899840)\/"
+    },
+    {
+        "Nombre":  "A-COM-18",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.86",
+        "DNSHostName":  "A-COM-18.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1774616642015)\/"
+    },
+    {
+        "Nombre":  "A-PROY-26",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-PROY-26.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1772145776194)\/"
+    },
+    {
+        "Nombre":  "A-COM-22",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.111",
+        "DNSHostName":  "A-COM-22.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1782336402785)\/"
+    },
+    {
+        "Nombre":  "A-COM-27",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-27.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1760733524439)\/"
+    },
+    {
+        "Nombre":  "A-COM-09",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.104",
+        "DNSHostName":  "A-COM-09.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790176260132)\/"
+    },
+    {
+        "Nombre":  "A-OBR-07",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.100.56",
+        "DNSHostName":  "A-OBR-07.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1790613609423)\/"
+    },
+    {
+        "Nombre":  "COMERCIAL2",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.130",
+        "DNSHostName":  "Comercial2.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790003325311)\/"
+    },
+    {
+        "Nombre":  "A-OBR-06",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.40",
+        "DNSHostName":  "A-OBR-06.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1761768585230)\/"
+    },
+    {
+        "Nombre":  "OBRAACCEACBD0",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.38",
+        "DNSHostName":  "ObraAcceAcbd0.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1761660403692)\/"
+    },
+    {
+        "Nombre":  "A-COM-05",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.55",
+        "DNSHostName":  "A-COM-05.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1782139025160)\/"
+    },
+    {
+        "Nombre":  "A-PRO-06",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.98",
+        "DNSHostName":  "A-PRO-06.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1784559991100)\/"
+    },
+    {
+        "Nombre":  "SVRFS00",
+        "Estado":  "Conectado",
+        "IP":  "192.168.100.241",
+        "DNSHostName":  "SVRFS00.AD.ALFERZA",
+        "SistemaOperativo":  "Windows Server 2025 Standard",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Sin identificar",
+        "UltimoRegistroAD":  "\/Date(1790689447589)\/"
+    },
+    {
+        "Nombre":  "SVRS1000",
+        "Estado":  "Conectado",
+        "IP":  "192.168.100.31",
+        "DNSHostName":  "SVRS1000.AD.ALFERZA",
+        "SistemaOperativo":  "Windows Server 2025 Standard",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Sin identificar",
+        "UltimoRegistroAD":  "\/Date(1790626838696)\/"
+    },
+    {
+        "Nombre":  "A-OBR-11",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.250.7",
+        "DNSHostName":  "A-OBR-11.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1771275899224)\/"
+    },
+    {
+        "Nombre":  "A-ADM-25",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.27",
+        "DNSHostName":  "A-ADM-25.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789993956818)\/"
+    },
+    {
+        "Nombre":  "A-OBR-03",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.104",
+        "DNSHostName":  "A-OBR-03.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1788784836456)\/"
+    },
+    {
+        "Nombre":  "A-COM-08",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.80",
+        "DNSHostName":  "A-COM-08.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1788275861935)\/"
+    },
+    {
+        "Nombre":  "A-ADM-02",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.86",
+        "DNSHostName":  "A-ADM-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1780316967940)\/"
+    },
+    {
+        "Nombre":  "A-ADM-07",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.91",
+        "DNSHostName":  "A-ADM-07.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790253170209)\/"
+    },
+    {
+        "Nombre":  "A-ADM-33",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.69",
+        "DNSHostName":  "A-ADM-33.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790005491551)\/"
+    },
+    {
+        "Nombre":  "A-ADM-22",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.117",
+        "DNSHostName":  "A-ADM-22.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1779367955608)\/"
+    },
+    {
+        "Nombre":  "A-ADM-05",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.49",
+        "DNSHostName":  "A-ADM-05.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789993446929)\/"
+    },
+    {
+        "Nombre":  "A-ADM-06",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.35",
+        "DNSHostName":  "A-ADM-06.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1780335698792)\/"
+    },
+    {
+        "Nombre":  "A-COM-03",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.1.174",
+        "DNSHostName":  "A-COM-03.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1787610579528)\/"
+    },
+    {
+        "Nombre":  "RRHH-COORD",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "RRHH-COORD.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1770044137046)\/"
+    },
+    {
+        "Nombre":  "A-COM-20",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.39",
+        "DNSHostName":  "A-COM-20.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790620129292)\/"
+    },
+    {
+        "Nombre":  "A-COM-25",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.48",
+        "DNSHostName":  "A-COM-25.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1761744441843)\/"
+    },
+    {
+        "Nombre":  "A-OBR-05",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.150",
+        "DNSHostName":  "A-OBR-05.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1774022249671)\/"
+    },
+    {
+        "Nombre":  "A-COM-04",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-04.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1762180559468)\/"
+    },
+    {
+        "Nombre":  "A-OBR-12",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-OBR-12.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1766086227102)\/"
+    },
+    {
+        "Nombre":  "A-COM-02",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.19",
+        "DNSHostName":  "A-COM-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1762433331847)\/"
+    },
+    {
+        "Nombre":  "A-ADM-17",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.106",
+        "DNSHostName":  "A-ADM-17.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro for Workstations",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1789996020867)\/"
+    },
+    {
+        "Nombre":  "A-ADM-30",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.24",
+        "DNSHostName":  "A-ADM-30.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1765370357782)\/"
+    },
+    {
+        "Nombre":  "A-COM-15",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.76",
+        "DNSHostName":  "A-COM-15.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1789994999732)\/"
+    },
+    {
+        "Nombre":  "A-PRO-13",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.39",
+        "DNSHostName":  "A-PRO-13.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1780319015690)\/"
+    },
+    {
+        "Nombre":  "A-GER-03",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.103",
+        "DNSHostName":  "A-GER-03.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790771116898)\/"
+    },
+    {
+        "Nombre":  "A-COM-31",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.84",
+        "DNSHostName":  "A-COM-31.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790345067366)\/"
+    },
+    {
+        "Nombre":  "A-ADM-10",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.56",
+        "DNSHostName":  "A-ADM-10.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro for Workstations",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789994392633)\/"
+    },
+    {
+        "Nombre":  "A-PRO-08",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.124",
+        "DNSHostName":  "A-PRO-08.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1780320052163)\/"
+    },
+    {
+        "Nombre":  "LT-0007",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.100.247",
+        "DNSHostName":  "LT-0007.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790636395492)\/"
+    },
+    {
+        "Nombre":  "A-COM-32",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-32.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1773669025577)\/"
+    },
+    {
+        "Nombre":  "A-ADM-19",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.49",
+        "DNSHostName":  "A-ADM-19.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1762439600715)\/"
+    },
+    {
+        "Nombre":  "A-COM-01",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.102",
+        "DNSHostName":  "A-COM-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790375329330)\/"
+    },
+    {
+        "Nombre":  "A-ADM-29",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.39",
+        "DNSHostName":  "A-ADM-29.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1762442062038)\/"
+    },
+    {
+        "Nombre":  "A-ADM-32",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-ADM-32.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1768232595435)\/"
+    },
+    {
+        "Nombre":  "A-PRO-02",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.93",
+        "DNSHostName":  "A-PRO-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1771849822126)\/"
+    },
+    {
+        "Nombre":  "A-ADM-04",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.71",
+        "DNSHostName":  "A-ADM-04.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1779976687368)\/"
+    },
+    {
+        "Nombre":  "A-GER-01",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.35",
+        "DNSHostName":  "A-GER-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790254007163)\/"
+    },
+    {
+        "Nombre":  "A-ADM-11",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.190",
+        "DNSHostName":  "A-ADM-11.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789995964294)\/"
+    },
+    {
+        "Nombre":  "A-PRO-04",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.174",
+        "DNSHostName":  "A-PRO-04.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1779719141788)\/"
+    },
+    {
+        "Nombre":  "LT-0011",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.138",
+        "DNSHostName":  "LT-0011.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1781724667204)\/"
+    },
+    {
+        "Nombre":  "A-ADM-12",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.80",
+        "DNSHostName":  "A-ADM-12.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1786393012427)\/"
+    },
+    {
+        "Nombre":  "A-ADM-14",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.65",
+        "DNSHostName":  "A-ADM-14.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790021574553)\/"
+    },
+    {
+        "Nombre":  "A-COM-21",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-21.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1762548596182)\/"
+    },
+    {
+        "Nombre":  "A-COM-07",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.57",
+        "DNSHostName":  "A-COM-07.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790691734072)\/"
+    },
+    {
+        "Nombre":  "A-ADM-13",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.94",
+        "DNSHostName":  "A-ADM-13.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1762455202547)\/"
+    },
+    {
+        "Nombre":  "A-ADM-24",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.33",
+        "DNSHostName":  "A-ADM-24.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790616923820)\/"
+    },
+    {
+        "Nombre":  "A-OBR-16",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.18.89",
+        "DNSHostName":  "A-OBR-16.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1789676763318)\/"
+    },
+    {
+        "Nombre":  "A-ADM-16",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.46",
+        "DNSHostName":  "A-ADM-16.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790598203780)\/"
+    },
+    {
+        "Nombre":  "A-PRO-07",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.55",
+        "DNSHostName":  "A-PRO-07.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1784896120953)\/"
+    },
+    {
+        "Nombre":  "EPRETELLALFERZA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.47",
+        "DNSHostName":  "EPretellAlferza.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790260206068)\/"
+    },
+    {
+        "Nombre":  "A-PRO-01",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.57",
+        "DNSHostName":  "A-PRO-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1766408618087)\/"
+    },
+    {
+        "Nombre":  "A-PRO-03",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.33",
+        "DNSHostName":  "A-PRO-03.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1772109503739)\/"
+    },
+    {
+        "Nombre":  "A-ADM-21",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.128",
+        "DNSHostName":  "A-ADM-21.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1787063168251)\/"
+    },
+    {
+        "Nombre":  "A-PRO-11",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.60",
+        "DNSHostName":  "A-PRO-11.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790259005070)\/"
+    },
+    {
+        "Nombre":  "A-ADM-03",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.147",
+        "DNSHostName":  "A-ADM-03.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1784662836377)\/"
+    },
+    {
+        "Nombre":  "A-ADM-20",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.93",
+        "DNSHostName":  "A-ADM-20.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1767962666587)\/"
+    },
+    {
+        "Nombre":  "GERBEC",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.17",
+        "DNSHostName":  "gerbec.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1762777867807)\/"
+    },
+    {
+        "Nombre":  "A-PRO-12",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.3",
+        "DNSHostName":  "A-PRO-12.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790603555486)\/"
+    },
+    {
+        "Nombre":  "A-ADM-18",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.63",
+        "DNSHostName":  "A-ADM-18.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790007352970)\/"
+    },
+    {
+        "Nombre":  "A-COM-14",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.43",
+        "DNSHostName":  "A-COM-14.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790253009214)\/"
+    },
+    {
+        "Nombre":  "LT-0012",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.104",
+        "DNSHostName":  "LT-0012.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790180616232)\/"
+    },
+    {
+        "Nombre":  "A-COM-17",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.100",
+        "DNSHostName":  "A-COM-17.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (22631)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790255189964)\/"
+    },
+    {
+        "Nombre":  "A-ADM-26",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.45",
+        "DNSHostName":  "A-ADM-26.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789994120549)\/"
+    },
+    {
+        "Nombre":  "A-COM-23",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-COM-23.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1770060424145)\/"
+    },
+    {
+        "Nombre":  "CORCOM",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "CORCOM.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1771339865247)\/"
+    },
+    {
+        "Nombre":  "A-COM-16",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.81",
+        "DNSHostName":  "A-COM-16.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1763647061498)\/"
+    },
+    {
+        "Nombre":  "A-COM-10",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.77",
+        "DNSHostName":  "A-COM-10.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1768225857280)\/"
+    },
+    {
+        "Nombre":  "A-PRO-14",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.41",
+        "DNSHostName":  "A-PRO-14.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1788179462444)\/"
+    },
+    {
+        "Nombre":  "CGAMARACOMERCIA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.30",
+        "DNSHostName":  "CGamaraComercial.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1770045707194)\/"
+    },
+    {
+        "Nombre":  "COMERCIALETAPIA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.50",
+        "DNSHostName":  "COMERCIALetapia.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790605565187)\/"
+    },
+    {
+        "Nombre":  "A-COM-12",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.110",
+        "DNSHostName":  "A-COM-12.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790445395126)\/"
+    },
+    {
+        "Nombre":  "A-ADM-27",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.34",
+        "DNSHostName":  "A-ADM-27.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789936351915)\/"
+    },
+    {
+        "Nombre":  "A-OBR-04",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.250.5",
+        "DNSHostName":  "A-OBR-04.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Obras",
+        "UltimoRegistroAD":  "\/Date(1762813194029)\/"
+    },
+    {
+        "Nombre":  "ANAHUACOM",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.22",
+        "DNSHostName":  "AnahuaCOM.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1788960877217)\/"
+    },
+    {
+        "Nombre":  "A-ADM-28",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-ADM-28.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1765828977513)\/"
+    },
+    {
+        "Nombre":  "A-PRO-09",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.93",
+        "DNSHostName":  "A-PRO-09.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1786141121130)\/"
+    },
+    {
+        "Nombre":  "A-ADM-08",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.107",
+        "DNSHostName":  "A-ADM-08.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790014596109)\/"
+    },
+    {
+        "Nombre":  "GCOMERCIAL",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "GComercial.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1768503024755)\/"
+    },
+    {
+        "Nombre":  "COM-1",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.75",
+        "DNSHostName":  "COM-1.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1762952105986)\/"
+    },
+    {
+        "Nombre":  "COM-2",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.71",
+        "DNSHostName":  "COM-2.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790288895320)\/"
+    },
+    {
+        "Nombre":  "ADM-RRHH",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "ADM-RRHH.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1763042363098)\/"
+    },
+    {
+        "Nombre":  "ACALA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.0.105",
+        "DNSHostName":  "aCala.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790705095335)\/"
+    },
+    {
+        "Nombre":  "DGUZMAN",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.29",
+        "DNSHostName":  "dguzman.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1773937457906)\/"
+    },
+    {
+        "Nombre":  "KDZA",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "Kdza.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1771529455608)\/"
+    },
+    {
+        "Nombre":  "LT-0010",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.30",
+        "DNSHostName":  "LT-0010.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789993866827)\/"
+    },
+    {
+        "Nombre":  "ARRHH",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "ARRHH.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1763401495403)\/"
+    },
+    {
+        "Nombre":  "ASTRRHH",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.37",
+        "DNSHostName":  "AstRRHH.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790256444385)\/"
+    },
+    {
+        "Nombre":  "COMER2",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "COMER2.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1766413057147)\/"
+    },
+    {
+        "Nombre":  "SIG",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.89",
+        "DNSHostName":  "sig.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789994248444)\/"
+    },
+    {
+        "Nombre":  "RRHH3",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.21",
+        "DNSHostName":  "RRHH3.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1769431172438)\/"
+    },
+    {
+        "Nombre":  "ADM112",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "ADM112.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1764248774222)\/"
+    },
+    {
+        "Nombre":  "A-ADM-151",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "A-ADM-151.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1767961940045)\/"
+    },
+    {
+        "Nombre":  "A-ADM-200",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.105",
+        "DNSHostName":  "A-ADM-200.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790105371954)\/"
+    },
+    {
+        "Nombre":  "ADM-89",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.66",
+        "DNSHostName":  "ADM-89.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790258887608)\/"
+    },
+    {
+        "Nombre":  "COR-COMERCIAL",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.67",
+        "DNSHostName":  "COR-COMERCIAL.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1789993736487)\/"
+    },
+    {
+        "Nombre":  "ASIS-FINANZAS",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.5.99",
+        "DNSHostName":  "ASIS-FINANZAS.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1768325905596)\/"
+    },
+    {
+        "Nombre":  "RECEPCION",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.49",
+        "DNSHostName":  "RECEPCION.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790256168966)\/"
+    },
+    {
+        "Nombre":  "LOGISTICA",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.75",
+        "DNSHostName":  "LOGISTICA.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1770296154207)\/"
+    },
+    {
+        "Nombre":  "CONT-01",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.8",
+        "DNSHostName":  "CONT-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Contabilidad",
+        "UltimoRegistroAD":  "\/Date(1790253191835)\/"
+    },
+    {
+        "Nombre":  "ASISGERENCIA",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.58",
+        "DNSHostName":  "AsisGerencia.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790603283502)\/"
+    },
+    {
+        "Nombre":  "COMERCIAL12",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.95",
+        "DNSHostName":  "COMERCIAL12.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1790169724678)\/"
+    },
+    {
+        "Nombre":  "ASTGERENCIA",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "astgerencia.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26100)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1770640167637)\/"
+    },
+    {
+        "Nombre":  "NOMINASRRHH",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.21",
+        "DNSHostName":  "NominasRRHH.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1770331929672)\/"
+    },
+    {
+        "Nombre":  "AUXSUBGERENCIA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.65",
+        "DNSHostName":  "AuxSubGerencia.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Gerencia",
+        "UltimoRegistroAD":  "\/Date(1790007391486)\/"
+    },
+    {
+        "Nombre":  "AUXCOBRANZAS2",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.54",
+        "DNSHostName":  "AuxCobranzas2.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Contabilidad",
+        "UltimoRegistroAD":  "\/Date(1789993749958)\/"
+    },
+    {
+        "Nombre":  "JEFEPROYECTOS",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.91",
+        "DNSHostName":  "JefeProyectos.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1772465577373)\/"
+    },
+    {
+        "Nombre":  "A-COM-116",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.65",
+        "DNSHostName":  "A-COM-116.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Comercial",
+        "UltimoRegistroAD":  "\/Date(1785422468535)\/"
+    },
+    {
+        "Nombre":  "LOGISGENERAL",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.103",
+        "DNSHostName":  "LogisGeneral.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790027551578)\/"
+    },
+    {
+        "Nombre":  "COOR-TI",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.40",
+        "DNSHostName":  "COOR-TI.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "TI",
+        "UltimoRegistroAD":  "\/Date(1789993145998)\/"
+    },
+    {
+        "Nombre":  "ADMIN",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "admin.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1771246835576)\/"
+    },
+    {
+        "Nombre":  "PLANNEROBRA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.77",
+        "DNSHostName":  "PlannerObra.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1789391973377)\/"
+    },
+    {
+        "Nombre":  "A-OBR-ACCES",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.23",
+        "DNSHostName":  "A-OBR-ACCES.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790603265219)\/"
+    },
+    {
+        "Nombre":  "OTLAMBRA",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.9",
+        "DNSHostName":  "OTLAMBRA.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1787835764298)\/"
+    },
+    {
+        "Nombre":  "PROYECTOS20",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.12",
+        "DNSHostName":  "PROYECTOS20.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790254039974)\/"
+    },
+    {
+        "Nombre":  "PROYECTOS6",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.11",
+        "DNSHostName":  "PROYECTOS6.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1790257054112)\/"
+    },
+    {
+        "Nombre":  "BIM-01",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.146",
+        "DNSHostName":  "BIM-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1776347463003)\/"
+    },
+    {
+        "Nombre":  "A-PROJECT-01",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.113",
+        "DNSHostName":  "A-PROJECT-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1776692711128)\/"
+    },
+    {
+        "Nombre":  "A-FIN-01",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.42",
+        "DNSHostName":  "A-FIN-01.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789994024608)\/"
+    },
+    {
+        "Nombre":  "COORDADM",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.109",
+        "DNSHostName":  "CoordAdm.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1789993622660)\/"
+    },
+    {
+        "Nombre":  "LT-0009",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.59",
+        "DNSHostName":  "LT-0009.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790607415321)\/"
+    },
+    {
+        "Nombre":  "LT-0008",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.68",
+        "DNSHostName":  "LT-0008.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790603865490)\/"
+    },
+    {
+        "Nombre":  "LAPTOP47",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.51",
+        "DNSHostName":  "LAPTOP47.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1789996129648)\/"
+    },
+    {
+        "Nombre":  "LAPTOPASISPRO",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.114",
+        "DNSHostName":  "laptopAsisPro.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790287875609)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-01-2026",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.126",
+        "DNSHostName":  "LAPTOP-01-2026.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1787592424924)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-02-2026",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.53",
+        "DNSHostName":  "LAPTOP-02-2026.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790263697356)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-03-2026",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.90",
+        "DNSHostName":  "LAPTOP-03-2026.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1789762617949)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-04-2025",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.107",
+        "DNSHostName":  "LAPTOP-04-2025.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790278355894)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-05-2026",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.110",
+        "DNSHostName":  "LAPTOP-05-2026.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1788180344158)\/"
+    },
+    {
+        "Nombre":  "LT-0013",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.144",
+        "DNSHostName":  "LT-0013.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1787772479177)\/"
+    },
+    {
+        "Nombre":  "LAPTOP-07-GG",
+        "Estado":  "Desconectado",
+        "IP":  null,
+        "DNSHostName":  "LAPTOP-07-GG.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1774383636069)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-BTK9U56",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.4",
+        "DNSHostName":  "DESKTOP-BTK9U56.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790253003115)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-DM6UL88",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.114",
+        "DNSHostName":  "DESKTOP-DM6UL88.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790619091573)\/"
+    },
+    {
+        "Nombre":  "DESKTOP-02",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.91",
+        "DNSHostName":  "DESKTOP-02.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Proyectos",
+        "UltimoRegistroAD":  "\/Date(1789479281626)\/"
+    },
+    {
+        "Nombre":  "LT-0001",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.141",
+        "DNSHostName":  "LT-0001.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1781729554119)\/"
+    },
+    {
+        "Nombre":  "LT-0002",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.137",
+        "DNSHostName":  "LT-0002.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1781724217657)\/"
+    },
+    {
+        "Nombre":  "DP-0001",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.174",
+        "DNSHostName":  "DP-0001.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1789994476243)\/"
+    },
+    {
+        "Nombre":  "LT-0003",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.136",
+        "DNSHostName":  "LT-0003.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1781723999309)\/"
+    },
+    {
+        "Nombre":  "LT-0004",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.46",
+        "DNSHostName":  "LT-0004.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Legal",
+        "UltimoRegistroAD":  "\/Date(1789993836448)\/"
+    },
+    {
+        "Nombre":  "LT-0005",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.18",
+        "DNSHostName":  "LT-0005.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Legal",
+        "UltimoRegistroAD":  "\/Date(1789994084298)\/"
+    },
+    {
+        "Nombre":  "DP-0002",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.19",
+        "DNSHostName":  "DP-0002.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1789994142511)\/"
+    },
+    {
+        "Nombre":  "DP-0003",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.43",
+        "DNSHostName":  "DP-0003.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790255646802)\/"
+    },
+    {
+        "Nombre":  "LT-0006",
+        "Estado":  "Desconectado",
+        "IP":  "100.100.100.109",
+        "DNSHostName":  "LT-0006.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1790090706152)\/"
+    },
+    {
+        "Nombre":  "DP-0005",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.25",
+        "DNSHostName":  "DP-0005.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "SinIdentifcar",
+        "UltimoRegistroAD":  "\/Date(1789993799012)\/"
+    },
+    {
+        "Nombre":  "DEVELOPER",
+        "Estado":  "Conectado",
+        "IP":  "192.168.2.70",
+        "DNSHostName":  "Developer.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 11 Pro",
+        "VersionSO":  "10.0 (26200)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790276441186)\/"
+    },
+    {
+        "Nombre":  "A-ADM-21-",
+        "Estado":  "Desconectado",
+        "IP":  "192.168.2.128",
+        "DNSHostName":  "A-ADM-21-.AD.ALFERZA",
+        "SistemaOperativo":  "Windows 10 Pro",
+        "VersionSO":  "10.0 (19045)",
+        "Area":  "Administracion",
+        "UltimoRegistroAD":  "\/Date(1790339627007)\/"
+    }
+]

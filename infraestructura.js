@@ -93,6 +93,13 @@ const loadingMessage =
 
 
 /* =========================================
+   VARIABLES DE EQUIPOS
+========================================= */
+
+let equiposData = [];
+
+
+/* =========================================
    MENSAJE DE CARGA
 ========================================= */
 
@@ -635,16 +642,16 @@ function obtenerIconoServicio(
 /* =========================================
    RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
-/* =========================================
-   RENDERIZAR SERVICIOS PRINCIPALES
-========================================= */
 
-function renderizarServicios(datos) {
+function renderizarServicios(
+    datos
+) {
 
     const grid =
         document.getElementById(
             "serviciosGrid"
         );
+
 
     const estadoGeneral =
         document.getElementById(
@@ -652,15 +659,18 @@ function renderizarServicios(datos) {
         );
 
 
-    if (!grid) return;
+    if (
+        !grid
+    ) return;
 
 
-    grid.innerHTML = "";
+    grid.innerHTML =
+        "";
 
 
-    // ==========================================
-    // SIN DATOS
-    // ==========================================
+    /* =====================================
+       SIN DATOS
+    ===================================== */
 
     if (
         !datos ||
@@ -674,7 +684,9 @@ function renderizarServicios(datos) {
         `;
 
 
-        if (estadoGeneral) {
+        if (
+            estadoGeneral
+        ) {
 
             estadoGeneral.textContent =
                 "● NO CONFIGURADO";
@@ -690,9 +702,9 @@ function renderizarServicios(datos) {
     }
 
 
-    // ==========================================
-    // ESTADOS
-    // ==========================================
+    /* =====================================
+       ESTADOS
+    ===================================== */
 
     const estados = [];
 
@@ -756,10 +768,6 @@ function renderizarServicios(datos) {
                     : "—";
 
 
-            // ======================================
-            // CREAR TARJETA
-            // ======================================
-
             const card =
                 document.createElement(
                     "div"
@@ -771,6 +779,7 @@ function renderizarServicios(datos) {
 
 
             card.innerHTML = `
+
                 <div class="service-icon">
                     ${icono}
                 </div>
@@ -778,8 +787,11 @@ function renderizarServicios(datos) {
                 <div class="service-content">
 
                     <div class="service-status ${tipoEstado}">
+
                         <span class="status-dot"></span>
+
                         ${estado}
+
                     </div>
 
                     <h3>
@@ -803,6 +815,7 @@ function renderizarServicios(datos) {
                     </div>
 
                 </div>
+
             `;
 
 
@@ -814,19 +827,13 @@ function renderizarServicios(datos) {
     );
 
 
-    // ==========================================
-    // ESTADO GENERAL DE INFRAESTRUCTURA
-    // ==========================================
+    /* =====================================
+       ESTADO GENERAL
+    ===================================== */
 
-    if (estadoGeneral) {
-
-        /*
-         * Normalizamos todos los estados
-         * a minúsculas para evitar problemas
-         * como:
-         *
-         * "Operativo" !== "operativo"
-         */
+    if (
+        estadoGeneral
+    ) {
 
         const estadosNormalizados =
             estados.map(
@@ -838,10 +845,6 @@ function renderizarServicios(datos) {
                     .toLowerCase()
             );
 
-
-        // ======================================
-        // BUSCAR INCIDENCIAS
-        // ======================================
 
         const hayIncidencia =
             estadosNormalizados.some(
@@ -857,10 +860,6 @@ function renderizarServicios(datos) {
             );
 
 
-        // ======================================
-        // BUSCAR ADVERTENCIAS
-        // ======================================
-
         const hayAdvertencia =
             estadosNormalizados.some(
                 estado =>
@@ -874,10 +873,6 @@ function renderizarServicios(datos) {
             );
 
 
-        // ======================================
-        // VERIFICAR NO CONFIGURADOS
-        // ======================================
-
         const todosNoConfigurados =
             estadosNormalizados.length > 0 &&
             estadosNormalizados.every(
@@ -886,10 +881,6 @@ function renderizarServicios(datos) {
                     estado === ""
             );
 
-
-        // ======================================
-        // VERIFICAR OPERATIVOS
-        // ======================================
 
         const todosOperativos =
             estadosNormalizados.length > 0 &&
@@ -906,11 +897,9 @@ function renderizarServicios(datos) {
             );
 
 
-        // ======================================
-        // DETERMINAR ESTADO FINAL
-        // ======================================
-
-        if (hayIncidencia) {
+        if (
+            hayIncidencia
+        ) {
 
             estadoGeneral.textContent =
                 "● INCIDENCIA";
@@ -920,7 +909,9 @@ function renderizarServicios(datos) {
 
         }
 
-        else if (hayAdvertencia) {
+        else if (
+            hayAdvertencia
+        ) {
 
             estadoGeneral.textContent =
                 "● ADVERTENCIA";
@@ -930,7 +921,9 @@ function renderizarServicios(datos) {
 
         }
 
-        else if (todosOperativos) {
+        else if (
+            todosOperativos
+        ) {
 
             estadoGeneral.textContent =
                 "● OPERATIVO";
@@ -940,7 +933,9 @@ function renderizarServicios(datos) {
 
         }
 
-        else if (todosNoConfigurados) {
+        else if (
+            todosNoConfigurados
+        ) {
 
             estadoGeneral.textContent =
                 "● NO CONFIGURADO";
@@ -963,6 +958,8 @@ function renderizarServicios(datos) {
     }
 
 }
+
+
 /* =========================================
    ACTUALIZAR RESUMEN
 ========================================= */
@@ -1078,55 +1075,164 @@ function actualizarResumen(
    ACTUALIZAR ESTADO GENERAL
 ========================================= */
 
-function actualizarEstadoGeneral(datos) {
-  const estadoGeneral = document.getElementById("estadoMonitoreo");
+function actualizarEstadoGeneral(
+    datos
+) {
 
-  if (!estadoGeneral) return;
+    const estadoGeneral =
+        document.getElementById(
+            "estadoMonitoreo"
+        );
 
-  if (!datos || datos.length === 0) {
-    estadoGeneral.textContent = "No configurado";
-    estadoGeneral.className = "status-badge neutral";
-    return;
-  }
 
-  const estados = datos.map(item => {
-    const campos = obtenerCampos(item);
-    return normalizarEstado(campos.Estado);
-  });
+    if (
+        !estadoGeneral
+    ) return;
 
-  const tieneIncidencia = estados.some(estado =>
-    ["incidencia", "error", "caido"].includes(estado)
-  );
 
-  const tieneAdvertencia = estados.some(estado =>
-    ["advertencia", "warning", "pendiente"].includes(estado)
-  );
+    if (
+        !datos ||
+        datos.length === 0
+    ) {
 
-  const todosNoConfigurados = estados.every(estado =>
-    estado === "no configurado" || estado === ""
-  );
+        estadoGeneral.textContent =
+            "No configurado";
 
-  const todosOperativos = estados.every(estado =>
-    ["operativo", "vigente", "activo", "responde"].includes(estado)
-  );
+        estadoGeneral.className =
+            "status-badge neutral";
 
-  if (tieneIncidencia) {
-    estadoGeneral.textContent = "Incidencia";
-    estadoGeneral.className = "status-badge offline";
-  } else if (tieneAdvertencia) {
-    estadoGeneral.textContent = "Advertencia";
-    estadoGeneral.className = "status-badge warning";
-  } else if (todosNoConfigurados) {
-    estadoGeneral.textContent = "No configurado";
-    estadoGeneral.className = "status-badge neutral";
-  } else if (todosOperativos) {
-    estadoGeneral.textContent = "Operativo";
-    estadoGeneral.className = "status-badge online";
-  } else {
-    estadoGeneral.textContent = "No configurado";
-    estadoGeneral.className = "status-badge neutral";
-  }
+        return;
+
+    }
+
+
+    const estados =
+        datos.map(
+            item => {
+
+                const campos =
+                    obtenerCampos(
+                        item
+                    );
+
+                return normalizarEstado(
+                    campos.Estado
+                )
+                .toLowerCase();
+
+            }
+        );
+
+
+    const tieneIncidencia =
+        estados.some(
+            estado =>
+                [
+                    "incidencia",
+                    "error",
+                    "caido",
+                    "caído"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    const tieneAdvertencia =
+        estados.some(
+            estado =>
+                [
+                    "advertencia",
+                    "warning",
+                    "pendiente"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    const todosNoConfigurados =
+        estados.every(
+            estado =>
+                estado === "no configurado" ||
+                estado === ""
+        );
+
+
+    const todosOperativos =
+        estados.every(
+            estado =>
+                [
+                    "operativo",
+                    "vigente",
+                    "activo",
+                    "responde"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    if (
+        tieneIncidencia
+    ) {
+
+        estadoGeneral.textContent =
+            "Incidencia";
+
+        estadoGeneral.className =
+            "status-badge offline";
+
+    }
+
+    else if (
+        tieneAdvertencia
+    ) {
+
+        estadoGeneral.textContent =
+            "Advertencia";
+
+        estadoGeneral.className =
+            "status-badge warning";
+
+    }
+
+    else if (
+        todosNoConfigurados
+    ) {
+
+        estadoGeneral.textContent =
+            "No configurado";
+
+        estadoGeneral.className =
+            "status-badge neutral";
+
+    }
+
+    else if (
+        todosOperativos
+    ) {
+
+        estadoGeneral.textContent =
+            "Operativo";
+
+        estadoGeneral.className =
+            "status-badge online";
+
+    }
+
+    else {
+
+        estadoGeneral.textContent =
+            "No configurado";
+
+        estadoGeneral.className =
+            "status-badge neutral";
+
+    }
+
 }
+
 
 /* =========================================
    ACTUALIZAR HORA
@@ -1170,6 +1276,969 @@ function actualizarHora() {
 
 
 /* =========================================
+   EQUIPOS
+========================================= */
+
+
+/* =========================================
+   OBTENER EQUIPOS
+========================================= */
+
+async function obtenerEquipos() {
+
+    console.log(
+        "🖥️ Cargando inventario de equipos..."
+    );
+
+
+    try {
+
+        const respuesta =
+            await fetch(
+                "equipos.json"
+            );
+
+
+        if (
+            !respuesta.ok
+        ) {
+
+            throw new Error(
+                `equipos.json: HTTP ${respuesta.status}`
+            );
+
+        }
+
+
+        const datos =
+            await respuesta.json();
+
+
+        if (
+            !Array.isArray(
+                datos
+            )
+        ) {
+
+            throw new Error(
+                "El archivo equipos.json no contiene un arreglo válido."
+            );
+
+        }
+
+
+        console.log(
+            `✅ ${datos.length} equipos cargados.`
+        );
+
+
+        return datos;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Error cargando equipos:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+
+/* =========================================
+   FORMATEAR FECHA
+========================================= */
+
+function formatearFechaEquipo(
+    fecha
+) {
+
+    if (
+        !fecha
+    ) {
+
+        return "—";
+
+    }
+
+
+    const fechaObjeto =
+        new Date(
+            fecha
+        );
+
+
+    if (
+        Number.isNaN(
+            fechaObjeto.getTime()
+        )
+    ) {
+
+        return String(
+            fecha
+        );
+
+    }
+
+
+    return fechaObjeto.toLocaleDateString(
+        "es-PE",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric"
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ESCAPAR HTML
+========================================= */
+
+function escaparHTML(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(
+        valor
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================
+   CLASIFICAR ESTADO DE EQUIPO
+========================================= */
+
+function clasificarEstadoEquipo(
+    estado
+) {
+
+    const valor =
+        String(
+            estado || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+        valor === "conectado"
+    ) {
+
+        return "online";
+
+    }
+
+
+    if (
+        valor === "desconectado"
+    ) {
+
+        return "offline";
+
+    }
+
+
+    return "neutral";
+
+}
+
+
+/* =========================================
+   RENDERIZAR TABLA DE EQUIPOS
+========================================= */
+
+function renderizarEquipos(
+    equipos
+) {
+
+    const tbody =
+        document.getElementById(
+            "equiposTableBody"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "equiposEmpty"
+        );
+
+
+    const resultados =
+        document.getElementById(
+            "equiposResultados"
+        );
+
+
+    if (
+        !tbody
+    ) return;
+
+
+    tbody.innerHTML =
+        "";
+
+
+    if (
+        !equipos ||
+        equipos.length === 0
+    ) {
+
+        if (
+            empty
+        ) {
+
+            empty.style.display =
+                "block";
+
+        }
+
+
+        if (
+            resultados
+        ) {
+
+            resultados.textContent =
+                "0";
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (
+        empty
+    ) {
+
+        empty.style.display =
+            "none";
+
+    }
+
+
+    if (
+        resultados
+    ) {
+
+        resultados.textContent =
+            equipos.length;
+
+    }
+
+
+    equipos.forEach(
+        equipo => {
+
+            const nombre =
+                equipo.Nombre ||
+                "Sin nombre";
+
+
+            const estado =
+                equipo.Estado ||
+                "No verificable";
+
+
+            const ip =
+                equipo.IP ||
+                "—";
+
+
+            const sistemaOperativo =
+                equipo.SistemaOperativo ||
+                "—";
+
+
+            const versionSO =
+                equipo.VersionSO ||
+                "";
+
+
+            const area =
+                equipo.Area ||
+                "Sin identificar";
+
+
+            const ultimoRegistro =
+                formatearFechaEquipo(
+                    equipo.UltimoRegistroAD
+                );
+
+
+            const tipoEstado =
+                clasificarEstadoEquipo(
+                    estado
+                );
+
+
+            const fila =
+                document.createElement(
+                    "tr"
+                );
+
+
+            fila.innerHTML = `
+
+                <td>
+
+                    <div class="equipo-name">
+
+                        <div class="equipo-icon">
+                            🖥️
+                        </div>
+
+                        <div>
+
+                            <strong
+                                title="${escaparHTML(nombre)}"
+                            >
+                                ${escaparHTML(nombre)}
+                            </strong>
+
+                            ${
+                                equipo.DNSHostName
+                                    ? `
+                                        <span
+                                            title="${escaparHTML(equipo.DNSHostName)}"
+                                        >
+                                            ${escaparHTML(equipo.DNSHostName)}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="equipo-status ${tipoEstado}"
+                    >
+
+                        <span
+                            class="equipo-status-dot"
+                        ></span>
+
+                        ${escaparHTML(estado)}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-ip">
+                        ${escaparHTML(ip)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-so">
+
+                        ${escaparHTML(
+                            sistemaOperativo
+                        )}
+
+                        ${
+                            versionSO
+                                ? `<br><small>${escaparHTML(versionSO)}</small>`
+                                : ""
+                        }
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-area">
+
+                        ${escaparHTML(
+                            area
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-date">
+
+                        ${escaparHTML(
+                            ultimoRegistro
+                        )}
+
+                    </span>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                fila
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ACTUALIZAR RESUMEN DE EQUIPOS
+========================================= */
+
+function actualizarResumenEquipos(
+    equipos
+) {
+
+    const total =
+        equipos.length;
+
+
+    const conectados =
+        equipos.filter(
+            equipo =>
+                String(
+                    equipo.Estado || ""
+                )
+                .toLowerCase()
+                .trim() ===
+                "conectado"
+        ).length;
+
+
+    const desconectados =
+        equipos.filter(
+            equipo =>
+                String(
+                    equipo.Estado || ""
+                )
+                .toLowerCase()
+                .trim() ===
+                "desconectado"
+        ).length;
+
+
+    const totalElemento =
+        document.getElementById(
+            "totalEquipos"
+        );
+
+
+    const conectadosElemento =
+        document.getElementById(
+            "equiposConectados"
+        );
+
+
+    const desconectadosElemento =
+        document.getElementById(
+            "equiposDesconectados"
+        );
+
+
+    if (
+        totalElemento
+    ) {
+
+        totalElemento.textContent =
+            total;
+
+    }
+
+
+    if (
+        conectadosElemento
+    ) {
+
+        conectadosElemento.textContent =
+            conectados;
+
+    }
+
+
+    if (
+        desconectadosElemento
+    ) {
+
+        desconectadosElemento.textContent =
+            desconectados;
+
+    }
+
+}
+
+
+/* =========================================
+   CREAR FILTRO DE ÁREAS
+========================================= */
+
+function cargarFiltroAreas(
+    equipos
+) {
+
+    const select =
+        document.getElementById(
+            "filtroAreaEquipo"
+        );
+
+
+    if (
+        !select
+    ) return;
+
+
+    const areas =
+        [
+            ...new Set(
+                equipos
+                    .map(
+                        equipo =>
+                            equipo.Area ||
+                            "Sin identificar"
+                    )
+                    .filter(
+                        area =>
+                            area
+                    )
+            )
+        ]
+        .sort(
+            (a, b) =>
+                String(a).localeCompare(
+                    String(b),
+                    "es"
+                )
+        );
+
+
+    select.innerHTML = `
+
+        <option value="todos">
+            Todas las áreas
+        </option>
+
+    `;
+
+
+    areas.forEach(
+        area => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                area;
+
+
+            option.textContent =
+                area;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   APLICAR FILTROS
+========================================= */
+
+function aplicarFiltrosEquipos() {
+
+    const buscar =
+        document.getElementById(
+            "buscarEquipo"
+        );
+
+
+    const filtroEstado =
+        document.getElementById(
+            "filtroEstadoEquipo"
+        );
+
+
+    const filtroArea =
+        document.getElementById(
+            "filtroAreaEquipo"
+        );
+
+
+    const texto =
+        buscar
+            ? buscar.value
+                .trim()
+                .toLowerCase()
+            : "";
+
+
+    const estadoSeleccionado =
+        filtroEstado
+            ? filtroEstado.value
+            : "todos";
+
+
+    const areaSeleccionada =
+        filtroArea
+            ? filtroArea.value
+            : "todos";
+
+
+    const filtrados =
+        equiposData.filter(
+            equipo => {
+
+                const nombre =
+                    String(
+                        equipo.Nombre || ""
+                    )
+                    .toLowerCase();
+
+
+                const ip =
+                    String(
+                        equipo.IP || ""
+                    )
+                    .toLowerCase();
+
+
+                const dns =
+                    String(
+                        equipo.DNSHostName || ""
+                    )
+                    .toLowerCase();
+
+
+                const area =
+                    String(
+                        equipo.Area ||
+                        "Sin identificar"
+                    );
+
+
+                const estado =
+                    String(
+                        equipo.Estado || ""
+                    );
+
+
+                const coincideBusqueda =
+                    !texto ||
+                    nombre.includes(
+                        texto
+                    ) ||
+                    ip.includes(
+                        texto
+                    ) ||
+                    dns.includes(
+                        texto
+                    );
+
+
+                const coincideEstado =
+                    estadoSeleccionado ===
+                        "todos" ||
+                    estado ===
+                        estadoSeleccionado;
+
+
+                const coincideArea =
+                    areaSeleccionada ===
+                        "todos" ||
+                    area ===
+                        areaSeleccionada;
+
+
+                return (
+                    coincideBusqueda &&
+                    coincideEstado &&
+                    coincideArea
+                );
+
+            }
+        );
+
+
+    renderizarEquipos(
+        filtrados
+    );
+
+}
+
+
+/* =========================================
+   CONFIGURAR FILTROS
+========================================= */
+
+function configurarFiltrosEquipos() {
+
+    const buscar =
+        document.getElementById(
+            "buscarEquipo"
+        );
+
+
+    const filtroEstado =
+        document.getElementById(
+            "filtroEstadoEquipo"
+        );
+
+
+    const filtroArea =
+        document.getElementById(
+            "filtroAreaEquipo"
+        );
+
+
+    if (
+        buscar
+    ) {
+
+        buscar.addEventListener(
+            "input",
+            aplicarFiltrosEquipos
+        );
+
+    }
+
+
+    if (
+        filtroEstado
+    ) {
+
+        filtroEstado.addEventListener(
+            "change",
+            aplicarFiltrosEquipos
+        );
+
+    }
+
+
+    if (
+        filtroArea
+    ) {
+
+        filtroArea.addEventListener(
+            "change",
+            aplicarFiltrosEquipos
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   CARGAR EQUIPOS
+========================================= */
+
+async function cargarEquipos() {
+
+    try {
+
+        console.log(
+            "===================================="
+        );
+
+        console.log(
+            "🖥️ INICIANDO INVENTARIO DE EQUIPOS"
+        );
+
+        console.log(
+            "===================================="
+        );
+
+
+        const equipos =
+            await obtenerEquipos();
+
+
+        equiposData =
+            equipos;
+
+
+        actualizarResumenEquipos(
+            equiposData
+        );
+
+
+        cargarFiltroAreas(
+            equiposData
+        );
+
+
+        renderizarEquipos(
+            equiposData
+        );
+
+
+        configurarFiltrosEquipos();
+
+
+        const estado =
+            document.getElementById(
+                "equiposEstado"
+            );
+
+
+        if (
+            estado
+        ) {
+
+            estado.textContent =
+                "● ACTUALIZADO";
+
+            estado.className =
+                "section-status online";
+
+        }
+
+
+        console.log(
+            "✅ Inventario de equipos cargado correctamente."
+        );
+
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ No se pudo cargar el inventario:",
+            error
+        );
+
+
+        const tbody =
+            document.getElementById(
+                "equiposTableBody"
+            );
+
+
+        if (
+            tbody
+        ) {
+
+            tbody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="equipos-loading"
+                    >
+
+                        ❌ No se pudo cargar
+                        <strong>equipos.json</strong>.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        const estado =
+            document.getElementById(
+                "equiposEstado"
+            );
+
+
+        if (
+            estado
+        ) {
+
+            estado.textContent =
+                "● ERROR";
+
+            estado.className =
+                "section-status offline";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
    CARGAR MONITOREO
 ========================================= */
 
@@ -1181,6 +2250,10 @@ async function cargarMonitoreo() {
             "Cargando monitoreo..."
         );
 
+
+        /* =================================
+           SHAREPOINT
+        ================================= */
 
         const datos =
             await obtenerMonitoreoTI();
@@ -1200,6 +2273,22 @@ async function cargarMonitoreo() {
             datos
         );
 
+
+        /* =================================
+           EQUIPOS
+        ================================= */
+
+        cambiarMensaje(
+            "Cargando inventario de equipos..."
+        );
+
+
+        await cargarEquipos();
+
+
+        /* =================================
+           HORA
+        ================================= */
 
         actualizarHora();
 

@@ -508,6 +508,279 @@
         </section>
 
 
+        <!-- ==================================
+             EQUIPOS
+             ================================== -->
+
+        <section class="monitor-section equipos-section">
+
+            <!-- ==================================
+                 ENCABEZADO EQUIPOS
+                 ================================== -->
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        INVENTARIO
+                    </span>
+
+                    <h3>
+                        Equipos
+                    </h3>
+
+                </div>
+
+                <span
+                    id="equiposEstado"
+                    class="section-status online"
+                >
+                    ● ACTUALIZADO
+                </span>
+
+            </div>
+
+
+            <!-- ==================================
+                 RESUMEN DE EQUIPOS
+                 ================================== -->
+
+            <div class="equipos-summary">
+
+
+                <div class="equipo-summary-card">
+
+                    <div class="equipo-summary-icon blue">
+                        🖥️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total de equipos
+                        </span>
+
+                        <strong id="totalEquipos">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="equipo-summary-card">
+
+                    <div class="equipo-summary-icon green">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Conectados
+                        </span>
+
+                        <strong id="equiposConectados">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="equipo-summary-card">
+
+                    <div class="equipo-summary-icon red">
+                        ×
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Desconectados
+                        </span>
+
+                        <strong id="equiposDesconectados">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================
+                 FILTROS
+                 ================================== -->
+
+            <div class="equipos-filters">
+
+
+                <div class="equipos-search">
+
+                    <span>
+                        🔎
+                    </span>
+
+                    <input
+                        type="text"
+                        id="buscarEquipo"
+                        placeholder="Buscar por nombre o IP..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <select
+                    id="filtroEstadoEquipo"
+                    class="equipos-select"
+                >
+
+                    <option value="todos">
+                        Todos los estados
+                    </option>
+
+                    <option value="Conectado">
+                        Conectados
+                    </option>
+
+                    <option value="Desconectado">
+                        Desconectados
+                    </option>
+
+                    <option value="No verificable">
+                        No verificables
+                    </option>
+
+                </select>
+
+
+                <select
+                    id="filtroAreaEquipo"
+                    class="equipos-select"
+                >
+
+                    <option value="todos">
+                        Todas las áreas
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ==================================
+                 CONTADOR DE RESULTADOS
+                 ================================== -->
+
+            <div class="equipos-results">
+
+                <span>
+                    Equipos encontrados:
+                </span>
+
+                <strong id="equiposResultados">
+                    0
+                </strong>
+
+            </div>
+
+
+            <!-- ==================================
+                 TABLA
+                 ================================== -->
+
+            <div class="equipos-table-container">
+
+                <table class="equipos-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                EQUIPO
+                            </th>
+
+                            <th>
+                                ESTADO
+                            </th>
+
+                            <th>
+                                IP
+                            </th>
+
+                            <th>
+                                SISTEMA OPERATIVO
+                            </th>
+
+                            <th>
+                                ÁREA / OU
+                            </th>
+
+                            <th>
+                                ÚLTIMO REGISTRO AD
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="equiposTableBody">
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="equipos-loading"
+                            >
+                                Cargando equipos...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- ==================================
+                 MENSAJE SIN RESULTADOS
+                 ================================== -->
+
+            <div
+                id="equiposEmpty"
+                class="equipos-empty"
+                style="display: none;"
+            >
+
+                <div>
+                    🔎
+                </div>
+
+                <strong>
+                    No se encontraron equipos
+                </strong>
+
+                <span>
+                    Prueba con otro nombre, IP, estado o área.
+                </span>
+
+            </div>
+
+        </section>
+
+
     </main>
 
 </div>

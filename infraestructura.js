@@ -1356,7 +1356,8 @@ async function obtenerEquipos() {
         // 3. RUTA DEL EQUIPOS.JSON
         // ============================================================
 
-        const rutaArchivo ="Procedimientos T.I/equipos.json";
+        const rutaArchivo =
+    "Procedimientos T.I/equipos.json";
 
         const urlArchivo =
             `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;

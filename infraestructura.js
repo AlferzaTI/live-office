@@ -18,7 +18,7 @@ const msalConfigInfraestructura = {
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
-            "https://AlferzaTI.github.io/live-office/blank.html"
+            "https://liveofficealfeza.vercel.app/blank.html"
 
     },
 

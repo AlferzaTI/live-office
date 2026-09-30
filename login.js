@@ -20,7 +20,7 @@ const msalConfig = {
             `https://login.microsoftonline.com/${ALFERZA_TENANT_ID}`,
 
         redirectUri:
-            "https://AlferzaTI.github.io/live-office/blank.html"
+            "https://liveofficealfeza.vercel.app/blank.html"
 
     },
 

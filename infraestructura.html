@@ -331,49 +331,57 @@
 
 
         <!-- ==================================
-             SERVICIOS MONITOREADOS
-             ================================== -->
+     SERVICIOS MONITOREADOS
+     ================================== -->
 
-        <section class="monitor-section">
+<section class="monitor-section services-section">
 
-            <div class="section-heading">
+    <div class="section-heading">
 
-                <div>
+        <div class="section-title-group">
 
-                    <span class="section-label">
-                        SERVICIOS
-                    </span>
+            <span class="section-label">
+                SERVICIOS MONITOREADOS
+            </span>
 
-                    <h3>
-                        Estado de infraestructura
-                    </h3>
+            <h3>
+                Estado de infraestructura
+            </h3>
 
-                </div>
+            <p class="section-description">
+                Supervisión del estado y disponibilidad de los servicios críticos.
+            </p>
 
-                <span
-                    id="estadoGeneral"
-                    class="section-status online"
-                >
-                    ● CONSULTANDO
-                </span>
+        </div>
 
+        <div
+            id="estadoGeneral"
+            class="section-status online"
+        >
+            <span class="status-indicator"></span>
+
+            <div>
+                <strong>CONSULTANDO</strong>
+                <small>Estado general</small>
             </div>
+        </div>
+
+    </div>
 
 
-            <div
-                id="serviciosGrid"
-                class="service-grid"
-            >
+    <div
+        id="serviciosGrid"
+        class="service-grid"
+    >
 
-                <!--
-                    Los servicios se generan
-                    dinámicamente desde SharePoint.
-                -->
+        <!--
+            Los servicios se generan
+            dinámicamente desde SharePoint.
+        -->
 
-            </div>
+    </div>
 
-        </section>
-
+</section>
 
         <!-- ==================================
              MICROSOFT 365

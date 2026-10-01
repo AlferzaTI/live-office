@@ -2329,6 +2329,10 @@ async function cargarEquipos() {
             "section-status warning";
 
 
+        /* =====================================
+           1. OBTENER EQUIPOS
+        ====================================== */
+
         const equipos =
             await obtenerEquiposDesdeSharePoint(
                 tokenActual
@@ -2339,20 +2343,13 @@ async function cargarEquipos() {
             equipos;
 
 
+        /* =====================================
+           2. MOSTRAR INVENTARIO INMEDIATAMENTE
+        ====================================== */
+
         actualizarResumenEquipos();
 
         actualizarFiltroAreas();
-
-
-        /*
-         * Cargamos las asignaciones
-         * independientemente de equipos.json.
-         */
-
-        await obtenerTrabajadores(
-            tokenActual
-        );
-
 
         equiposFiltrados =
             [...equiposData];
@@ -2366,12 +2363,48 @@ async function cargarEquipos() {
         lastUpdate.textContent =
             obtenerFechaActual();
 
-
         equiposEstado.textContent =
             "● ACTUALIZADO";
 
         equiposEstado.className =
             "section-status online";
+
+
+        /* =====================================
+           3. CARGAR TRABAJADORES EN SEGUNDO PLANO
+        ====================================== */
+
+        obtenerTrabajadores(
+            tokenActual
+        )
+            .then(
+                () => {
+
+                    /*
+                     * Cuando SharePoint termine de
+                     * devolver las asignaciones,
+                     * actualizamos solamente la tabla.
+                     */
+
+                    renderizarTablaEquipos();
+
+                }
+            )
+            .catch(
+                error => {
+
+                    console.error(
+                        "Error cargando asignaciones de trabajadores:",
+                        error
+                    );
+
+                    /*
+                     * El inventario sigue funcionando
+                     * aunque falle TrabajadoresEquipos.
+                     */
+
+                }
+            );
 
 
     } catch (error) {
@@ -2415,7 +2448,9 @@ async function cargarEquipos() {
 
             equiposResultados.textContent =
                 "Error al obtener los equipos.";
+
         }
+
     }
 }
 
@@ -2521,20 +2556,20 @@ async function cargarDashboard() {
         );
 
 
+        /*
+         * Servicios e inventario se cargan
+         * simultáneamente.
+         */
+
         mostrarLoading(
-            "Cargando servicios..."
+            "Cargando información de TI..."
         );
 
 
-        await cargarServicios();
-
-
-        mostrarLoading(
-            "Cargando inventario de equipos..."
-        );
-
-
-        await cargarEquipos();
+        await Promise.allSettled([
+            cargarServicios(),
+            cargarEquipos()
+        ]);
 
 
         ocultarLoading();
@@ -2552,6 +2587,7 @@ async function cargarDashboard() {
 
             loadingMessage.textContent =
                 "No se pudo cargar el monitoreo.";
+
         }
 
 
@@ -2563,6 +2599,7 @@ async function cargarDashboard() {
             },
             2500
         );
+
     }
 }
 

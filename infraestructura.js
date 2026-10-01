@@ -77,12 +77,6 @@ const SHAREPOINT_LIST =
 
 
 /* =========================================
-   UBICACIÓN DEL EQUIPOS.JSON
-========================================= */
-
-
-
-/* =========================================
    ELEMENTOS
 ========================================= */
 
@@ -467,6 +461,28 @@ async function obtenerMonitoreoTI() {
         );
 
 
+        /* =================================
+           COMPROBAR CAMPOS
+        ================================= */
+
+        if (
+            data.value &&
+            data.value.length > 0
+        ) {
+
+            console.log(
+                "📅 CAMPOS DEL PRIMER SERVICIO:",
+                data.value[0].fields
+            );
+
+            console.log(
+                "🕐 Ultimarevision:",
+                data.value[0].fields?.Ultimarevision
+            );
+
+        }
+
+
         return data.value || [];
 
     }
@@ -646,6 +662,188 @@ function obtenerIconoServicio(
 
 
 /* =========================================
+   FORMATEAR ÚLTIMA REVISIÓN
+========================================= */
+
+function formatearUltimaRevision(
+    fecha
+) {
+
+    if (
+        !fecha
+    ) {
+
+        return "Sin registro";
+
+    }
+
+
+    const fechaObjeto =
+        new Date(
+            fecha
+        );
+
+
+    if (
+        Number.isNaN(
+            fechaObjeto.getTime()
+        )
+    ) {
+
+        return String(
+            fecha
+        );
+
+    }
+
+
+    return fechaObjeto.toLocaleString(
+        "es-PE",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit",
+
+            second:
+                "2-digit"
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ACTUALIZAR ÚLTIMA ACTUALIZACIÓN
+   BASADA EN ULTIMAREVISION DE SHAREPOINT
+========================================= */
+
+function actualizarHora(
+    datos
+) {
+
+    const elemento =
+        document.getElementById(
+            "lastUpdate"
+        );
+
+
+    if (
+        !elemento
+    ) return;
+
+
+    if (
+        !datos ||
+        datos.length === 0
+    ) {
+
+        elemento.textContent =
+            "Sin registro";
+
+        return;
+
+    }
+
+
+    const fechas =
+        datos
+            .map(
+                item => {
+
+                    const campos =
+                        obtenerCampos(
+                            item
+                        );
+
+                    return campos.Ultimarevision;
+
+                }
+            )
+            .filter(
+                fecha =>
+                    fecha
+            );
+
+
+    if (
+        fechas.length === 0
+    ) {
+
+        elemento.textContent =
+            "Sin registro";
+
+        return;
+
+    }
+
+
+    const fechasValidas =
+        fechas
+            .map(
+                fecha =>
+                    new Date(
+                        fecha
+                    )
+            )
+            .filter(
+                fecha =>
+                    !Number.isNaN(
+                        fecha.getTime()
+                    )
+            );
+
+
+    if (
+        fechasValidas.length === 0
+    ) {
+
+        elemento.textContent =
+            "Fecha inválida";
+
+        return;
+
+    }
+
+
+    const ultimaFecha =
+        new Date(
+            Math.max(
+                ...fechasValidas.map(
+                    fecha =>
+                        fecha.getTime()
+                )
+            )
+        );
+
+
+    elemento.textContent =
+        formatearUltimaRevision(
+            ultimaFecha
+        );
+
+
+    console.log(
+        "🕐 Última revisión general:",
+        elemento.textContent
+    );
+
+}
+
+
+/* =========================================
    RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
 
@@ -743,6 +941,16 @@ function renderizarServicios(
                 campos.Latencia;
 
 
+            const ultimaRevision =
+                campos.Ultimarevision;
+
+
+            console.log(
+                `🕐 ${servicio} - Última revisión:`,
+                ultimaRevision
+            );
+
+
             const estadoNormalizado =
                 normalizarEstado(
                     estado
@@ -772,6 +980,12 @@ function renderizarServicios(
                 latencia !== ""
                     ? `${latencia} ms`
                     : "—";
+
+
+            const revisionTexto =
+                formatearUltimaRevision(
+                    ultimaRevision
+                );
 
 
             const card =
@@ -817,6 +1031,26 @@ function renderizarServicios(
                         <strong>
                             ${latenciaTexto}
                         </strong>
+
+                    </div>
+
+                    <div class="service-revision">
+
+                        <span>
+                            🕐
+                        </span>
+
+                        <div>
+
+                            <span>
+                                Última revisión
+                            </span>
+
+                            <strong>
+                                ${revisionTexto}
+                            </strong>
+
+                        </div>
 
                     </div>
 
@@ -1241,47 +1475,6 @@ function actualizarEstadoGeneral(
 
 
 /* =========================================
-   ACTUALIZAR HORA
-========================================= */
-
-function actualizarHora() {
-
-    const elemento =
-        document.getElementById(
-            "lastUpdate"
-        );
-
-
-    if (
-        !elemento
-    ) return;
-
-
-    const ahora =
-        new Date();
-
-
-    elemento.textContent =
-        ahora.toLocaleTimeString(
-            "es-PE",
-            {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit"
-
-            }
-        );
-
-}
-
-
-/* =========================================
    EQUIPOS
 ========================================= */
 
@@ -1294,44 +1487,90 @@ async function obtenerEquipos() {
 
     try {
 
-        console.log("🔄 Cargando inventario desde SharePoint...");
-
-        const TOKEN = await obtenerTokenInfraestructura();
-
-        if (!TOKEN) {
-            throw new Error("No se obtuvo el token de Microsoft Graph.");
-        }
-
-        // ============================================================
-        // 1. OBTENER SITIO SHAREPOINT
-        // ============================================================
-
-        const sitio = await obtenerSitioSharePoint(TOKEN);
-
-        console.log("🏢 Sitio SharePoint:", sitio);
-
-        if (!sitio || !sitio.id) {
-            throw new Error("No se pudo obtener el sitio de SharePoint.");
-        }
-
-        // ============================================================
-        // 2. OBTENER DRIVE
-        // ============================================================
-
-        const respuestaDrive = await fetch(
-            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    Accept: "application/json"
-                }
-            }
+        console.log(
+            "🔄 Cargando inventario desde SharePoint..."
         );
 
-        if (!respuestaDrive.ok) {
 
-            const errorDrive = await respuestaDrive.text();
+        const TOKEN =
+            await obtenerTokenInfraestructura();
+
+
+        if (
+            !TOKEN
+        ) {
+
+            throw new Error(
+                "No se obtuvo el token de Microsoft Graph."
+            );
+
+        }
+
+
+        /* =====================================
+           1. OBTENER SITIO
+        ===================================== */
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                TOKEN
+            );
+
+
+        console.log(
+            "🏢 Sitio SharePoint:",
+            sitio
+        );
+
+
+        if (
+            !sitio ||
+            !sitio.id
+        ) {
+
+            throw new Error(
+                "No se pudo obtener el sitio de SharePoint."
+            );
+
+        }
+
+
+        /* =====================================
+           2. OBTENER DRIVE
+        ===================================== */
+
+        const respuestaDrive =
+            await fetch(
+
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
+
+                {
+
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        Authorization:
+                            `Bearer ${TOKEN}`,
+
+                        Accept:
+                            "application/json"
+
+                    }
+
+                }
+
+            );
+
+
+        if (
+            !respuestaDrive.ok
+        ) {
+
+            const errorDrive =
+                await respuestaDrive.text();
+
 
             console.error(
                 "❌ Error obteniendo Drive:",
@@ -1339,50 +1578,95 @@ async function obtenerEquipos() {
                 errorDrive
             );
 
+
             throw new Error(
                 `No se pudo obtener el Drive (${respuestaDrive.status})`
             );
+
         }
 
-        const drive = await respuestaDrive.json();
 
-        console.log("💾 Drive encontrado:", drive);
+        const drive =
+            await respuestaDrive.json();
 
-        if (!drive.id) {
-            throw new Error("El Drive no tiene un ID válido.");
+
+        console.log(
+            "💾 Drive encontrado:",
+            drive
+        );
+
+
+        if (
+            !drive.id
+        ) {
+
+            throw new Error(
+                "El Drive no tiene un ID válido."
+            );
+
         }
 
-        // ============================================================
-        // 3. RUTA DEL EQUIPOS.JSON
-        // ============================================================
+
+        /* =====================================
+           3. RUTA EQUIPOS.JSON
+        ===================================== */
 
         const rutaArchivo =
-    "Procedimientos T.I/equipos.json";
+            "Procedimientos T.I/equipos.json";
+
 
         const urlArchivo =
             `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
 
-        console.log("📂 Ruta del archivo:", rutaArchivo);
-        console.log("🌐 URL Graph:", urlArchivo);
 
-        // ============================================================
-        // 4. DESCARGAR EQUIPOS.JSON
-        // ============================================================
-
-        const respuestaArchivo = await fetch(
-            urlArchivo,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    Accept: "application/json"
-                }
-            }
+        console.log(
+            "📂 Ruta del archivo:",
+            rutaArchivo
         );
 
-        if (!respuestaArchivo.ok) {
 
-            const errorArchivo = await respuestaArchivo.text();
+        console.log(
+            "🌐 URL Graph:",
+            urlArchivo
+        );
+
+
+        /* =====================================
+           4. DESCARGAR EQUIPOS.JSON
+        ===================================== */
+
+        const respuestaArchivo =
+            await fetch(
+
+                urlArchivo,
+
+                {
+
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        Authorization:
+                            `Bearer ${TOKEN}`,
+
+                        Accept:
+                            "application/json"
+
+                    }
+
+                }
+
+            );
+
+
+        if (
+            !respuestaArchivo.ok
+        ) {
+
+            const errorArchivo =
+                await respuestaArchivo.text();
+
 
             console.error(
                 "❌ Error obteniendo equipos.json:",
@@ -1390,57 +1674,92 @@ async function obtenerEquipos() {
                 errorArchivo
             );
 
+
             throw new Error(
                 `No se pudo obtener equipos.json (${respuestaArchivo.status})`
             );
+
         }
 
-        // ============================================================
-        // 5. LEER JSON
-        // ============================================================
 
-        const datos = await respuestaArchivo.json();
+        /* =====================================
+           5. LEER JSON
+        ===================================== */
 
-        console.log("📦 RESPUESTA COMPLETA DEL JSON:", datos);
-        console.log("📊 ¿Es un array?:", Array.isArray(datos));
+        const datos =
+            await respuestaArchivo.json();
+
+
         console.log(
-            "🔢 Cantidad:",
-            Array.isArray(datos) ? datos.length : "NO ES ARRAY"
+            "📦 RESPUESTA COMPLETA DEL JSON:",
+            datos
         );
 
-        // ============================================================
-        // 6. VALIDAR ESTRUCTURA
-        // ============================================================
 
-        if (!Array.isArray(datos)) {
+        console.log(
+            "📊 ¿Es un array?:",
+            Array.isArray(
+                datos
+            )
+        );
+
+
+        console.log(
+            "🔢 Cantidad:",
+            Array.isArray(
+                datos
+            )
+                ? datos.length
+                : "NO ES ARRAY"
+        );
+
+
+        /* =====================================
+           6. VALIDAR
+        ===================================== */
+
+        if (
+            !Array.isArray(
+                datos
+            )
+        ) {
 
             console.error(
                 "❌ equipos.json no contiene directamente un array:",
                 datos
             );
 
+
             throw new Error(
                 "El archivo equipos.json no tiene el formato esperado."
             );
+
         }
 
-        if (datos.length === 0) {
+
+        if (
+            datos.length === 0
+        ) {
 
             console.warn(
                 "⚠️ equipos.json fue cargado correctamente, pero está vacío."
             );
 
+
             return [];
+
         }
 
-        // ============================================================
-        // 7. MOSTRAR PRIMER EQUIPO PARA COMPROBAR ESTRUCTURA
-        // ============================================================
+
+        /* =====================================
+           7. PRIMER EQUIPO
+        ===================================== */
 
         console.log(
             "🔍 Primer equipo del inventario:",
             datos[0]
         );
+
 
         console.log(
             "✅ Inventario cargado correctamente:",
@@ -1448,19 +1767,30 @@ async function obtenerEquipos() {
             "equipos"
         );
 
+
         return datos;
 
-    } catch (error) {
+    }
+
+    catch (
+        error
+    ) {
 
         console.error(
             "❌ Error cargando inventario desde SharePoint:",
             error
         );
 
-        const contenedor =
-            document.getElementById("equiposGrid");
 
-        if (contenedor) {
+        const contenedor =
+            document.getElementById(
+                "equiposGrid"
+            );
+
+
+        if (
+            contenedor
+        ) {
 
             contenedor.innerHTML = `
                 <div class="error-inventario">
@@ -1468,11 +1798,17 @@ async function obtenerEquipos() {
                     <strong>el inventario desde SharePoint</strong>.
                 </div>
             `;
+
         }
 
+
         return [];
+
     }
+
 }
+
+
 /* =========================================
    FORMATEAR FECHA
 ========================================= */
@@ -1574,7 +1910,7 @@ function escaparHTML(
 
 
 /* =========================================
-   CLASIFICAR ESTADO DE EQUIPO
+   CLASIFICAR ESTADO EQUIPO
 ========================================= */
 
 function clasificarEstadoEquipo(
@@ -1613,7 +1949,7 @@ function clasificarEstadoEquipo(
 
 
 /* =========================================
-   RENDERIZAR TABLA DE EQUIPOS
+   RENDERIZAR TABLA EQUIPOS
 ========================================= */
 
 function renderizarEquipos(
@@ -1869,7 +2205,7 @@ function renderizarEquipos(
 
 
 /* =========================================
-   ACTUALIZAR RESUMEN DE EQUIPOS
+   ACTUALIZAR RESUMEN EQUIPOS
 ========================================= */
 
 function actualizarResumenEquipos(
@@ -1955,7 +2291,7 @@ function actualizarResumenEquipos(
 
 
 /* =========================================
-   CREAR FILTRO DE ÁREAS
+   CREAR FILTRO ÁREAS
 ========================================= */
 
 function cargarFiltroAreas(
@@ -2395,6 +2731,15 @@ async function cargarMonitoreo() {
 
 
         /* =================================
+           ÚLTIMA REVISIÓN
+        ================================= */
+
+        actualizarHora(
+            datos
+        );
+
+
+        /* =================================
            EQUIPOS
         ================================= */
 
@@ -2404,13 +2749,6 @@ async function cargarMonitoreo() {
 
 
         await cargarEquipos();
-
-
-        /* =================================
-           HORA
-        ================================= */
-
-        actualizarHora();
 
 
         console.log(
@@ -2499,14 +2837,18 @@ document.addEventListener(
 
 /* =========================================
    ACTUALIZACIÓN
-   CADA 5 MINUTOS
+   CADA 2 MINUTOS
 ========================================= */
 
 setInterval(
     function () {
 
+        console.log(
+            "🔄 Actualización automática de monitoreo..."
+        );
+
         cargarMonitoreo();
 
     },
-    300000
+    120000
 );

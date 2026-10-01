@@ -356,204 +356,7 @@ async function obtenerSitioSharePoint(
    OBTENER LISTA MONITOREOTI
 ========================================= */
 
-/* =========================================
-   OBTENER MONITOREO TI
-========================================= */
-
-async function obtenerMonitoreoTI(TOKEN, sitio) {
-
-    console.log("🔎 Consultando MonitoreoTI...");
-
-    const respuesta = await fetch(
-
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields&$top=999`,
-
-        {
-            method: "GET",
-
-            headers: {
-                Authorization: `Bearer ${TOKEN}`,
-                Accept: "application/json"
-            }
-        }
-
-    );
-
-
-    if (!respuesta.ok) {
-
-        const error =
-            await respuesta.text();
-
-        console.error(
-            "❌ Error obteniendo MonitoreoTI:",
-            respuesta.status,
-            error
-        );
-
-        throw new Error(
-            `MonitoreoTI HTTP ${respuesta.status}`
-        );
-
-    }
-
-
-    const data =
-        await respuesta.json();
-
-
-    console.log(
-        "✅ MonitoreoTI:",
-        data.value?.length || 0,
-        "registros"
-    );
-
-
-    return data.value || [];
-
-}
-
-
-/* =========================================
-   OBTENER EQUIPOS
-========================================= */
-
-async function obtenerEquipos(TOKEN, sitio) {
-
-    console.log(
-        "🖥️ Cargando equipos.json..."
-    );
-
-
-    const respuestaDrive =
-        await fetch(
-
-            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
-
-            {
-                method: "GET",
-
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    Accept: "application/json"
-                }
-            }
-
-        );
-
-
-    if (!respuestaDrive.ok) {
-
-        const error =
-            await respuestaDrive.text();
-
-        console.error(
-            "❌ Error obteniendo Drive:",
-            respuestaDrive.status,
-            error
-        );
-
-        throw new Error(
-            `Drive HTTP ${respuestaDrive.status}`
-        );
-
-    }
-
-
-    const drive =
-        await respuestaDrive.json();
-
-
-    if (!drive.id) {
-
-        throw new Error(
-            "El Drive de SharePoint no tiene ID."
-        );
-
-    }
-
-
-    const rutaArchivo =
-        "Procedimientos T.I/equipos.json";
-
-
-    const urlArchivo =
-        `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
-
-
-    console.log(
-        "📂 Descargando:",
-        rutaArchivo
-    );
-
-
-    const respuestaArchivo =
-        await fetch(
-
-            urlArchivo,
-
-            {
-                method: "GET",
-
-                headers: {
-                    Authorization: `Bearer ${TOKEN}`,
-                    Accept: "application/json"
-                }
-            }
-
-        );
-
-
-    if (!respuestaArchivo.ok) {
-
-        const error =
-            await respuestaArchivo.text();
-
-        console.error(
-            "❌ Error obteniendo equipos.json:",
-            respuestaArchivo.status,
-            error
-        );
-
-        throw new Error(
-            `equipos.json HTTP ${respuestaArchivo.status}`
-        );
-
-    }
-
-
-    const datos =
-        await respuestaArchivo.json();
-
-
-    if (!Array.isArray(datos)) {
-
-        throw new Error(
-            "equipos.json no contiene un array válido."
-        );
-
-    }
-
-
-    console.log(
-        "✅ Equipos encontrados:",
-        datos.length
-    );
-
-
-    return datos;
-
-}
-
-
-/* =========================================
-   CARGAR EQUIPOS
-========================================= */
-
-async function cargarEquipos(
-    TOKEN = null,
-    sitio = null
-) {
+async function obtenerMonitoreoTI() {
 
     try {
 
@@ -562,7 +365,7 @@ async function cargarEquipos(
         );
 
         console.log(
-            "🖥️ INICIANDO INVENTARIO"
+            "🚀 INICIANDO MONITOREO TI"
         );
 
         console.log(
@@ -570,312 +373,22 @@ async function cargarEquipos(
         );
 
 
-        /*
-         * Si no recibimos token/sitio,
-         * los obtenemos.
-         */
-
-        if (!TOKEN) {
-
-            TOKEN =
-                await obtenerTokenInfraestructura();
-
-        }
-
-
-        if (!sitio) {
-
-            sitio =
-                await obtenerSitioSharePoint(
-                    TOKEN
-                );
-
-        }
-
-
-        const equipos =
-            await obtenerEquipos(
-                TOKEN,
-                sitio
-            );
-
-
-        equiposData =
-            equipos;
-
-
-        actualizarResumenEquipos(
-            equiposData
+        cambiarMensaje(
+            "Conectando con Microsoft..."
         );
 
 
-        cargarFiltroAreas(
-            equiposData
-        );
-
-
-        paginaEquiposActual =
-            1;
-
-
-        renderizarEquipos(
-            equiposData
-        );
-
-
-        configurarFiltrosEquipos();
-
-
-        const estado =
-            document.getElementById(
-                "equiposEstado"
-            );
-
-
-        if (estado) {
-
-            estado.textContent =
-                "● ACTUALIZADO";
-
-            estado.className =
-                "section-status online";
-
-        }
-
-
-        console.log(
-            "✅ Inventario cargado:",
-            equiposData.length,
-            "equipos"
-        );
-
-
-        return equiposData;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "❌ Error cargando inventario:",
-            error
-        );
-
-
-        const tbody =
-            document.getElementById(
-                "equiposTableBody"
-            );
-
-
-        if (tbody) {
-
-            tbody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="7"
-                        class="equipos-loading"
-                    >
-
-                        ❌ No se pudo cargar
-                        <strong>el inventario desde SharePoint</strong>.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-
-
-        const estado =
-            document.getElementById(
-                "equiposEstado"
-            );
-
-
-        if (estado) {
-
-            estado.textContent =
-                "● ERROR";
-
-            estado.className =
-                "section-status offline";
-
-        }
-
-
-        /*
-         * Importante:
-         * no propagamos el error.
-         *
-         * Así una falla del inventario
-         * no bloquea todo el dashboard.
-         */
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================
-   CARGAR SERVICIOS
-========================================= */
-
-async function cargarServicios(
-    TOKEN,
-    sitio
-) {
-
-    try {
-
-        console.log(
-            "☁️ Cargando servicios..."
-        );
-
-
-        const datos =
-            await obtenerMonitoreoTI(
-                TOKEN,
-                sitio
-            );
-
-
-        renderizarServicios(
-            datos
-        );
-
-
-        actualizarResumen(
-            datos
-        );
-
-
-        actualizarEstadoGeneral(
-            datos
-        );
-
-
-        actualizarHora(
-            datos
-        );
-
-
-        console.log(
-            "✅ Servicios cargados:",
-            datos.length
-        );
-
-
-        return datos;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "❌ Error cargando servicios:",
-            error
-        );
-
-
-        const grid =
-            document.getElementById(
-                "serviciosGrid"
-            );
-
-
-        if (grid) {
-
-            grid.innerHTML = `
-
-                <div class="empty-state">
-
-                    ❌ No se pudieron cargar
-                    los servicios.
-
-                </div>
-
-            `;
-
-        }
-
-
-        const estado =
-            document.getElementById(
-                "estadoGeneral"
-            );
-
-
-        if (estado) {
-
-            estado.textContent =
-                "● ERROR";
-
-            estado.className =
-                "section-status offline";
-
-        }
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================
-   CARGAR TODO EL DASHBOARD
-========================================= */
-
-async function cargarMonitoreo() {
-
-    console.log(
-        "===================================="
-    );
-
-    console.log(
-        "🚀 INICIANDO CENTRO DE MONITOREO TI"
-    );
-
-    console.log(
-        "===================================="
-    );
-
-
-    mostrarCarga(
-        "Conectando con Microsoft..."
-    );
-
-
-    const inicio =
-        performance.now();
-
-
-    try {
-
-        /* =====================================
-           1. TOKEN — SOLO UNA VEZ
-        ===================================== */
+        /* ================================
+           TOKEN
+        ================================= */
 
         const TOKEN =
             await obtenerTokenInfraestructura();
 
 
-        console.log(
-            "🔐 Token listo."
-        );
-
-
-        /* =====================================
-           2. SHAREPOINT — SOLO UNA VEZ
-        ===================================== */
+        /* ================================
+           SITIO
+        ================================= */
 
         cambiarMensaje(
             "Conectando con SharePoint..."
@@ -888,209 +401,118 @@ async function cargarMonitoreo() {
             );
 
 
-        console.log(
-            "📍 Sitio listo:",
-            sitio.id
-        );
-
-
-        /* =====================================
-           3. SERVICIOS + EQUIPOS EN PARALELO
-        ===================================== */
+        /* ================================
+           LISTA
+        ================================= */
 
         cambiarMensaje(
-            "Cargando monitoreo..."
+            "Consultando Monitoreo TI..."
         );
 
 
-        const resultado =
-            await Promise.allSettled([
+        const respuesta =
+            await fetch(
 
-                cargarServicios(
-                    TOKEN,
-                    sitio
-                ),
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields`,
 
-                cargarEquipos(
-                    TOKEN,
-                    sitio
-                )
+                {
 
-            ]);
+                    method:
+                        "GET",
 
+                    headers: {
 
-        console.log(
-            "📊 Resultado de cargas:",
-            resultado
-        );
+                        Authorization:
+                            `Bearer ${TOKEN}`
 
+                    }
 
-        /* =====================================
-           4. TIEMPO TOTAL
-        ===================================== */
+                }
 
-        const tiempo =
-            (
-                performance.now() -
-                inicio
-            ) / 1000;
-
-
-        console.log(
-            `⚡ Dashboard cargado en ${tiempo.toFixed(2)} segundos`
-        );
-
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "❌ Error general del dashboard:",
-            error
-        );
-
-
-        cambiarMensaje(
-            "No se pudo conectar con Microsoft."
-        );
-
-    }
-
-    finally {
-
-        /*
-         * SIEMPRE ocultamos el overlay.
-         *
-         * Aunque Graph o SharePoint
-         * tenga un problema.
-         */
-
-        setTimeout(
-            ocultarCarga,
-            300
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   ACTUALIZACIÓN AUTOMÁTICA
-========================================= */
-
-let actualizacionEnCurso =
-    false;
-
-
-async function actualizarDashboard() {
-
-    /*
-     * Evita que una actualización nueva
-     * empiece mientras la anterior sigue
-     * ejecutándose.
-     */
-
-    if (actualizacionEnCurso) {
-
-        console.log(
-            "⏳ Ya existe una actualización en curso."
-        );
-
-        return;
-
-    }
-
-
-    actualizacionEnCurso =
-        true;
-
-
-    try {
-
-        console.log(
-            "🔄 Actualización automática..."
-        );
-
-
-        const TOKEN =
-            await obtenerTokenInfraestructura();
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
             );
 
 
-        await Promise.allSettled([
+        if (
+            !respuesta.ok
+        ) {
 
-            cargarServicios(
-                TOKEN,
-                sitio
-            ),
+            const error =
+                await respuesta.text();
 
-            cargarEquipos(
-                TOKEN,
-                sitio
-            )
 
-        ]);
+            console.error(
+                "❌ Error obteniendo lista MonitoreoTI:",
+                error
+            );
+
+
+            throw new Error(
+                `MonitoreoTI: HTTP ${respuesta.status}`
+            );
+
+        }
+
+
+        const data =
+            await respuesta.json();
 
 
         console.log(
-            "✅ Actualización terminada."
+            "===================================="
         );
+
+        console.log(
+            "✅ DATOS DE MONITOREO TI"
+        );
+
+        console.log(
+            "===================================="
+        );
+
+
+        console.table(
+            data.value
+        );
+
+
+        if (
+            data.value &&
+            data.value.length > 0
+        ) {
+
+            console.log(
+                "📅 Campos del primer servicio:",
+                data.value[0].fields
+            );
+
+            console.log(
+                "🕐 Ultimarevision:",
+                data.value[0].fields?.Ultimarevision
+            );
+
+        }
+
+
+        return data.value || [];
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
-            "❌ Error en actualización automática:",
+            "❌ Error obteniendo Monitoreo TI:",
             error
         );
 
-    }
 
-    finally {
-
-        actualizacionEnCurso =
-            false;
+        throw error;
 
     }
 
 }
 
-
-/* =========================================
-   INICIO
-========================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        console.log(
-            "🚀 DOM listo."
-        );
-
-
-        cargarMonitoreo();
-
-    }
-);
-
-
-/* =========================================
-   ACTUALIZACIÓN CADA 2 MINUTOS
-========================================= */
-
-setInterval(
-    actualizarDashboard,
-    120000
-);
 
 /* =========================================
    OBTENER CAMPOS

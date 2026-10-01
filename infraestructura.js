@@ -47,7 +47,9 @@ if (
         "❌ MSAL no está disponible."
     );
 
-} else {
+}
+
+else {
 
     console.log(
         "✅ MSAL disponible en Infraestructura."
@@ -111,6 +113,14 @@ let paginaEquiposActual =
 
 let equiposFiltradosActuales =
     [];
+
+
+/* =========================================
+   CONTROL DE ACTUALIZACIÓN
+========================================= */
+
+let actualizacionEnCurso =
+    false;
 
 
 /* =========================================
@@ -307,7 +317,10 @@ async function obtenerSitioSharePoint(
                 headers: {
 
                     Authorization:
-                        `Bearer ${TOKEN}`
+                        `Bearer ${TOKEN}`,
+
+                    Accept:
+                        "application/json"
 
                 }
 
@@ -326,6 +339,7 @@ async function obtenerSitioSharePoint(
 
         console.error(
             "❌ Error obteniendo sitio SharePoint:",
+            respuesta.status,
             error
         );
 
@@ -354,162 +368,346 @@ async function obtenerSitioSharePoint(
 
 /* =========================================
    OBTENER LISTA MONITOREOTI
+   USA TOKEN Y SITIO YA OBTENIDOS
 ========================================= */
 
-async function obtenerMonitoreoTI() {
+async function obtenerMonitoreoTI(
+    TOKEN,
+    sitio
+) {
 
-    try {
-
-        console.log(
-            "===================================="
-        );
-
-        console.log(
-            "🚀 INICIANDO MONITOREO TI"
-        );
-
-        console.log(
-            "===================================="
-        );
+    console.log(
+        "☁️ Consultando MonitoreoTI..."
+    );
 
 
-        cambiarMensaje(
-            "Conectando con Microsoft..."
-        );
+    const respuesta =
+        await fetch(
 
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields&$top=999`,
 
-        /* ================================
-           TOKEN
-        ================================= */
+            {
 
-        const TOKEN =
-            await obtenerTokenInfraestructura();
+                method:
+                    "GET",
 
+                headers: {
 
-        /* ================================
-           SITIO
-        ================================= */
+                    Authorization:
+                        `Bearer ${TOKEN}`,
 
-        cambiarMensaje(
-            "Conectando con SharePoint..."
-        );
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
-            );
-
-
-        /* ================================
-           LISTA
-        ================================= */
-
-        cambiarMensaje(
-            "Consultando Monitoreo TI..."
-        );
-
-
-        const respuesta =
-            await fetch(
-
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields`,
-
-                {
-
-                    method:
-                        "GET",
-
-                    headers: {
-
-                        Authorization:
-                            `Bearer ${TOKEN}`
-
-                    }
+                    Accept:
+                        "application/json"
 
                 }
 
-            );
+            }
 
-
-        if (
-            !respuesta.ok
-        ) {
-
-            const error =
-                await respuesta.text();
-
-
-            console.error(
-                "❌ Error obteniendo lista MonitoreoTI:",
-                error
-            );
-
-
-            throw new Error(
-                `MonitoreoTI: HTTP ${respuesta.status}`
-            );
-
-        }
-
-
-        const data =
-            await respuesta.json();
-
-
-        console.log(
-            "===================================="
-        );
-
-        console.log(
-            "✅ DATOS DE MONITOREO TI"
-        );
-
-        console.log(
-            "===================================="
         );
 
 
-        console.table(
-            data.value
-        );
-
-
-        if (
-            data.value &&
-            data.value.length > 0
-        ) {
-
-            console.log(
-                "📅 Campos del primer servicio:",
-                data.value[0].fields
-            );
-
-            console.log(
-                "🕐 Ultimarevision:",
-                data.value[0].fields?.Ultimarevision
-            );
-
-        }
-
-
-        return data.value || [];
-
-    }
-
-    catch (
-        error
+    if (
+        !respuesta.ok
     ) {
 
+        const error =
+            await respuesta.text();
+
+
         console.error(
-            "❌ Error obteniendo Monitoreo TI:",
+            "❌ Error obteniendo lista MonitoreoTI:",
+            respuesta.status,
             error
         );
 
 
-        throw error;
+        throw new Error(
+            `MonitoreoTI: HTTP ${respuesta.status}`
+        );
 
     }
+
+
+    const data =
+        await respuesta.json();
+
+
+    console.log(
+        "===================================="
+    );
+
+    console.log(
+        "✅ DATOS DE MONITOREO TI"
+    );
+
+    console.log(
+        "===================================="
+    );
+
+
+    console.log(
+        "📊 Registros encontrados:",
+        data.value?.length || 0
+    );
+
+
+    if (
+        data.value &&
+        data.value.length > 0
+    ) {
+
+        console.log(
+            "📅 Campos del primer servicio:",
+            data.value[0].fields
+        );
+
+        console.log(
+            "🕐 Ultimarevision:",
+            data.value[0].fields?.Ultimarevision
+        );
+
+    }
+
+
+    return data.value || [];
+
+}
+
+
+/* =========================================
+   OBTENER EQUIPOS DESDE SHAREPOINT
+   USA TOKEN Y SITIO YA OBTENIDOS
+========================================= */
+
+async function obtenerEquipos(
+    TOKEN,
+    sitio
+) {
+
+    console.log(
+        "🖥️ Cargando equipos.json..."
+    );
+
+
+    if (
+        !TOKEN
+    ) {
+
+        throw new Error(
+            "No se obtuvo el token de Microsoft Graph."
+        );
+
+    }
+
+
+    if (
+        !sitio ||
+        !sitio.id
+    ) {
+
+        throw new Error(
+            "No se pudo obtener el sitio de SharePoint."
+        );
+
+    }
+
+
+    /* =====================================
+       OBTENER DRIVE
+    ===================================== */
+
+    const respuestaDrive =
+        await fetch(
+
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
+
+            {
+
+                method:
+                    "GET",
+
+                headers: {
+
+                    Authorization:
+                        `Bearer ${TOKEN}`,
+
+                    Accept:
+                        "application/json"
+
+                }
+
+            }
+
+        );
+
+
+    if (
+        !respuestaDrive.ok
+    ) {
+
+        const errorDrive =
+            await respuestaDrive.text();
+
+
+        console.error(
+            "❌ Error obteniendo Drive:",
+            respuestaDrive.status,
+            errorDrive
+        );
+
+
+        throw new Error(
+            `No se pudo obtener el Drive (${respuestaDrive.status})`
+        );
+
+    }
+
+
+    const drive =
+        await respuestaDrive.json();
+
+
+    if (
+        !drive.id
+    ) {
+
+        throw new Error(
+            "El Drive no tiene un ID válido."
+        );
+
+    }
+
+
+    console.log(
+        "✅ Drive encontrado:",
+        drive.id
+    );
+
+
+    /* =====================================
+       RUTA EQUIPOS.JSON
+    ===================================== */
+
+    const rutaArchivo =
+        "Procedimientos T.I/equipos.json";
+
+
+    const urlArchivo =
+        `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
+
+
+    console.log(
+        "📂 Descargando:",
+        rutaArchivo
+    );
+
+
+    /* =====================================
+       DESCARGAR EQUIPOS.JSON
+    ===================================== */
+
+    const respuestaArchivo =
+        await fetch(
+
+            urlArchivo,
+
+            {
+
+                method:
+                    "GET",
+
+                headers: {
+
+                    Authorization:
+                        `Bearer ${TOKEN}`,
+
+                    Accept:
+                        "application/json"
+
+                }
+
+            }
+
+        );
+
+
+    if (
+        !respuestaArchivo.ok
+    ) {
+
+        const errorArchivo =
+            await respuestaArchivo.text();
+
+
+        console.error(
+            "❌ Error obteniendo equipos.json:",
+            respuestaArchivo.status,
+            errorArchivo
+        );
+
+
+        throw new Error(
+            `No se pudo obtener equipos.json (${respuestaArchivo.status})`
+        );
+
+    }
+
+
+    /* =====================================
+       LEER JSON
+    ===================================== */
+
+    const datos =
+        await respuestaArchivo.json();
+
+
+    console.log(
+        "📊 Equipos encontrados:",
+        Array.isArray(datos)
+            ? datos.length
+            : 0
+    );
+
+
+    /* =====================================
+       VALIDAR
+    ===================================== */
+
+    if (
+        !Array.isArray(
+            datos
+        )
+    ) {
+
+        throw new Error(
+            "El archivo equipos.json no tiene el formato esperado."
+        );
+
+    }
+
+
+    if (
+        datos.length === 0
+    ) {
+
+        console.warn(
+            "⚠️ equipos.json está vacío."
+        );
+
+
+        return [];
+
+    }
+
+
+    console.log(
+        "✅ Inventario cargado:",
+        datos.length,
+        "equipos"
+    );
+
+
+    return datos;
 
 }
 
@@ -992,15 +1190,6 @@ function renderizarServicios(
             card.className =
                 `service-card ${tipoEstado}`;
 
-
-            /*
-             * ESTRUCTURA HORIZONTAL:
-             *
-             * ICONO | INFORMACIÓN
-             *
-             * Esto permite que la tarjeta sea
-             * mucho más compacta.
-             */
 
             card.innerHTML = `
 
@@ -1493,266 +1682,7 @@ function actualizarEstadoGeneral(
 
 
 /* =========================================
-   EQUIPOS
-========================================= */
-
-
-/* =========================================
-   OBTENER EQUIPOS DESDE SHAREPOINT
-========================================= */
-
-async function obtenerEquipos() {
-
-    try {
-
-        console.log(
-            "🔄 Cargando inventario desde SharePoint..."
-        );
-
-
-        const TOKEN =
-            await obtenerTokenInfraestructura();
-
-
-        if (
-            !TOKEN
-        ) {
-
-            throw new Error(
-                "No se obtuvo el token de Microsoft Graph."
-            );
-
-        }
-
-
-        /* =====================================
-           1. OBTENER SITIO
-        ===================================== */
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
-            );
-
-
-        if (
-            !sitio ||
-            !sitio.id
-        ) {
-
-            throw new Error(
-                "No se pudo obtener el sitio de SharePoint."
-            );
-
-        }
-
-
-        /* =====================================
-           2. OBTENER DRIVE
-        ===================================== */
-
-        const respuestaDrive =
-            await fetch(
-
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
-
-                {
-
-                    method:
-                        "GET",
-
-                    headers: {
-
-                        Authorization:
-                            `Bearer ${TOKEN}`,
-
-                        Accept:
-                            "application/json"
-
-                    }
-
-                }
-
-            );
-
-
-        if (
-            !respuestaDrive.ok
-        ) {
-
-            const errorDrive =
-                await respuestaDrive.text();
-
-
-            console.error(
-                "❌ Error obteniendo Drive:",
-                respuestaDrive.status,
-                errorDrive
-            );
-
-
-            throw new Error(
-                `No se pudo obtener el Drive (${respuestaDrive.status})`
-            );
-
-        }
-
-
-        const drive =
-            await respuestaDrive.json();
-
-
-        if (
-            !drive.id
-        ) {
-
-            throw new Error(
-                "El Drive no tiene un ID válido."
-            );
-
-        }
-
-
-        /* =====================================
-           3. RUTA EQUIPOS.JSON
-        ===================================== */
-
-        const rutaArchivo =
-            "Procedimientos T.I/equipos.json";
-
-
-        const urlArchivo =
-            `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
-
-
-        /* =====================================
-           4. DESCARGAR EQUIPOS.JSON
-        ===================================== */
-
-        const respuestaArchivo =
-            await fetch(
-
-                urlArchivo,
-
-                {
-
-                    method:
-                        "GET",
-
-                    headers: {
-
-                        Authorization:
-                            `Bearer ${TOKEN}`,
-
-                        Accept:
-                            "application/json"
-
-                    }
-
-                }
-
-            );
-
-
-        if (
-            !respuestaArchivo.ok
-        ) {
-
-            const errorArchivo =
-                await respuestaArchivo.text();
-
-
-            console.error(
-                "❌ Error obteniendo equipos.json:",
-                respuestaArchivo.status,
-                errorArchivo
-            );
-
-
-            throw new Error(
-                `No se pudo obtener equipos.json (${respuestaArchivo.status})`
-            );
-
-        }
-
-
-        /* =====================================
-           5. LEER JSON
-        ===================================== */
-
-        const datos =
-            await respuestaArchivo.json();
-
-
-        console.log(
-            "📊 Equipos encontrados:",
-            Array.isArray(datos)
-                ? datos.length
-                : 0
-        );
-
-
-        /* =====================================
-           6. VALIDAR
-        ===================================== */
-
-        if (
-            !Array.isArray(
-                datos
-            )
-        ) {
-
-            throw new Error(
-                "El archivo equipos.json no tiene el formato esperado."
-            );
-
-        }
-
-
-        if (
-            datos.length === 0
-        ) {
-
-            console.warn(
-                "⚠️ equipos.json está vacío."
-            );
-
-
-            return [];
-
-        }
-
-
-        console.log(
-            "✅ Inventario cargado:",
-            datos.length,
-            "equipos"
-        );
-
-
-        return datos;
-
-    }
-
-    catch (
-        error
-    ) {
-
-        console.error(
-            "❌ Error cargando inventario desde SharePoint:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================
-   FORMATEAR FECHA
+   FORMATEAR FECHA EQUIPO
 ========================================= */
 
 function formatearFechaEquipo(
@@ -2046,13 +1976,6 @@ function renderizarPaginacion(
         botonAnterior
     );
 
-
-    /*
-     * Generamos páginas visibles.
-     *
-     * Con muchos resultados no mostramos
-     * 50 botones de golpe.
-     */
 
     const paginas =
         obtenerPaginasVisibles(
@@ -2361,11 +2284,6 @@ function renderizarEquipos(
     ) return;
 
 
-    /*
-     * Guardamos los resultados actuales
-     * para poder cambiar de página.
-     */
-
     equiposFiltradosActuales =
         equipos || [];
 
@@ -2612,6 +2530,20 @@ function renderizarEquipos(
                 </td>
 
 
+                <!-- TRABAJADOR
+                     Se mantiene la columna del HTML.
+                     La asignación se integrará desde
+                     TrabajadoresEquipos. -->
+
+                <td>
+
+                    <span class="trabajador-sin-asignar">
+                        —
+                    </span>
+
+                </td>
+
+
                 <td>
 
                     <span class="equipo-ip">
@@ -2680,23 +2612,9 @@ function renderizarEquipos(
        PAGINACIÓN
     ===================================== */
 
-    if (
-        actualizarPaginacion
-    ) {
-
-        renderizarPaginacion(
-            equipos.length
-        );
-
-    }
-
-    else {
-
-        renderizarPaginacion(
-            equipos.length
-        );
-
-    }
+    renderizarPaginacion(
+        equipos.length
+    );
 
 }
 
@@ -2985,11 +2903,6 @@ function aplicarFiltrosEquipos() {
         );
 
 
-    /*
-     * Cada vez que cambia un filtro,
-     * volvemos a la primera página.
-     */
-
     paginaEquiposActual =
         1;
 
@@ -3080,9 +2993,13 @@ function configurarFiltrosEquipos() {
 
 /* =========================================
    CARGAR EQUIPOS
+   RECIBE TOKEN Y SITIO
 ========================================= */
 
-async function cargarEquipos() {
+async function cargarEquipos(
+    TOKEN = null,
+    sitio = null
+) {
 
     try {
 
@@ -3099,8 +3016,33 @@ async function cargarEquipos() {
         );
 
 
+        if (
+            !TOKEN
+        ) {
+
+            TOKEN =
+                await obtenerTokenInfraestructura();
+
+        }
+
+
+        if (
+            !sitio
+        ) {
+
+            sitio =
+                await obtenerSitioSharePoint(
+                    TOKEN
+                );
+
+        }
+
+
         const equipos =
-            await obtenerEquipos();
+            await obtenerEquipos(
+                TOKEN,
+                sitio
+            );
 
 
         equiposData =
@@ -3116,10 +3058,6 @@ async function cargarEquipos() {
             equiposData
         );
 
-
-        /*
-         * Primera página.
-         */
 
         paginaEquiposActual =
             1;
@@ -3153,9 +3091,13 @@ async function cargarEquipos() {
 
 
         console.log(
-            "✅ Inventario de equipos cargado correctamente."
+            "✅ Inventario de equipos cargado:",
+            equiposData.length,
+            "equipos"
         );
 
+
+        return equiposData;
 
     }
 
@@ -3184,12 +3126,14 @@ async function cargarEquipos() {
                 <tr>
 
                     <td
-                        colspan="6"
+                        colspan="7"
                         class="equipos-loading"
                     >
 
                         ❌ No se pudo cargar
-                        <strong>el inventario desde SharePoint</strong>.
+                        <strong>
+                            el inventario desde SharePoint
+                        </strong>.
 
                     </td>
 
@@ -3218,30 +3162,36 @@ async function cargarEquipos() {
 
         }
 
+
+        return [];
+
     }
 
 }
 
 
 /* =========================================
-   CARGAR MONITOREO
+   CARGAR SERVICIOS
+   RECIBE TOKEN Y SITIO
 ========================================= */
 
-async function cargarMonitoreo() {
+async function cargarServicios(
+    TOKEN,
+    sitio
+) {
 
     try {
 
-        mostrarCarga(
-            "Cargando monitoreo..."
+        console.log(
+            "☁️ Cargando servicios..."
         );
 
 
-        /* =================================
-           SHAREPOINT
-        ================================= */
-
         const datos =
-            await obtenerMonitoreoTI();
+            await obtenerMonitoreoTI(
+                TOKEN,
+                sitio
+            );
 
 
         renderizarServicios(
@@ -3259,31 +3209,18 @@ async function cargarMonitoreo() {
         );
 
 
-        /* =================================
-           ÚLTIMA REVISIÓN
-        ================================= */
-
         actualizarHora(
             datos
         );
 
 
-        /* =================================
-           EQUIPOS
-        ================================= */
-
-        cambiarMensaje(
-            "Cargando inventario de equipos..."
-        );
-
-
-        await cargarEquipos();
-
-
         console.log(
-            "✅ Centro de Monitoreo TI actualizado."
+            "✅ Servicios cargados:",
+            datos.length
         );
 
+
+        return datos;
 
     }
 
@@ -3292,25 +3229,204 @@ async function cargarMonitoreo() {
     ) {
 
         console.error(
-            "❌ No se pudo cargar el monitoreo:",
+            "❌ Error cargando servicios:",
             error
         );
 
 
-        const elemento =
+        const grid =
+            document.getElementById(
+                "serviciosGrid"
+            );
+
+
+        if (
+            grid
+        ) {
+
+            grid.innerHTML = `
+
+                <div class="empty-state">
+
+                    ❌ No se pudieron cargar
+                    los servicios.
+
+                </div>
+
+            `;
+
+        }
+
+
+        const estado =
             document.getElementById(
                 "estadoGeneral"
             );
 
 
         if (
-            elemento
+            estado
         ) {
 
-            elemento.textContent =
+            estado.textContent =
+                "● ERROR";
+
+            estado.className =
+                "section-status offline";
+
+        }
+
+
+        return [];
+
+    }
+
+}
+
+
+/* =========================================
+   CARGAR MONITOREO
+   OPTIMIZADO
+========================================= */
+
+async function cargarMonitoreo() {
+
+    console.log(
+        "===================================="
+    );
+
+    console.log(
+        "🚀 INICIANDO CENTRO DE MONITOREO TI"
+    );
+
+    console.log(
+        "===================================="
+    );
+
+
+    mostrarCarga(
+        "Conectando con Microsoft..."
+    );
+
+
+    const inicio =
+        performance.now();
+
+
+    try {
+
+        /* =================================
+           TOKEN - UNA SOLA VEZ
+        ================================= */
+
+        const TOKEN =
+            await obtenerTokenInfraestructura();
+
+
+        console.log(
+            "🔐 Token listo."
+        );
+
+
+        /* =================================
+           SHAREPOINT - UNA SOLA VEZ
+        ================================= */
+
+        cambiarMensaje(
+            "Conectando con SharePoint..."
+        );
+
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                TOKEN
+            );
+
+
+        console.log(
+            "📍 Sitio listo:",
+            sitio.id
+        );
+
+
+        /* =================================
+           SERVICIOS + EQUIPOS EN PARALELO
+        ================================= */
+
+        cambiarMensaje(
+            "Cargando monitoreo..."
+        );
+
+
+        const resultados =
+            await Promise.allSettled([
+
+                cargarServicios(
+                    TOKEN,
+                    sitio
+                ),
+
+                cargarEquipos(
+                    TOKEN,
+                    sitio
+                )
+
+            ]);
+
+
+        console.log(
+            "📊 Resultado de cargas:",
+            resultados
+        );
+
+
+        const tiempo =
+            (
+                performance.now() -
+                inicio
+            ) / 1000;
+
+
+        console.log(
+            `⚡ Dashboard cargado en ${tiempo.toFixed(2)} segundos`
+        );
+
+
+        console.log(
+            "✅ Centro de Monitoreo TI actualizado."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Error general del dashboard:",
+            error
+        );
+
+
+        cambiarMensaje(
+            "No se pudo conectar con Microsoft."
+        );
+
+
+        const estadoGeneral =
+            document.getElementById(
+                "estadoGeneral"
+            );
+
+
+        if (
+            estadoGeneral
+        ) {
+
+            estadoGeneral.textContent =
                 "● ERROR DE CONEXIÓN";
 
-            elemento.className =
+            estadoGeneral.className =
                 "section-status offline";
 
         }
@@ -3329,16 +3445,107 @@ async function cargarMonitoreo() {
             estadoMonitoreo.textContent =
                 "Error";
 
+            estadoMonitoreo.className =
+                "status-badge offline";
+
         }
 
     }
 
     finally {
 
+        /*
+         * Importante:
+         * El overlay se oculta siempre,
+         * incluso si SharePoint o el JSON fallan.
+         */
+
         setTimeout(
             ocultarCarga,
-            500
+            300
         );
+
+    }
+
+}
+
+
+/* =========================================
+   ACTUALIZACIÓN AUTOMÁTICA
+========================================= */
+
+async function actualizarDashboard() {
+
+    if (
+        actualizacionEnCurso
+    ) {
+
+        console.log(
+            "⏳ Ya existe una actualización en curso."
+        );
+
+        return;
+
+    }
+
+
+    actualizacionEnCurso =
+        true;
+
+
+    try {
+
+        console.log(
+            "🔄 Actualización automática..."
+        );
+
+
+        const TOKEN =
+            await obtenerTokenInfraestructura();
+
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                TOKEN
+            );
+
+
+        await Promise.allSettled([
+
+            cargarServicios(
+                TOKEN,
+                sitio
+            ),
+
+            cargarEquipos(
+                TOKEN,
+                sitio
+            )
+
+        ]);
+
+
+        console.log(
+            "✅ Actualización automática terminada."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Error en actualización automática:",
+            error
+        );
+
+    }
+
+    finally {
+
+        actualizacionEnCurso =
+            false;
 
     }
 
@@ -3354,7 +3561,7 @@ document.addEventListener(
     function () {
 
         console.log(
-            "🚀 Iniciando Centro de Monitoreo TI..."
+            "🚀 DOM listo."
         );
 
 
@@ -3370,15 +3577,6 @@ document.addEventListener(
 ========================================= */
 
 setInterval(
-    function () {
-
-        console.log(
-            "🔄 Actualización automática de monitoreo..."
-        );
-
-
-        cargarMonitoreo();
-
-    },
+    actualizarDashboard,
     120000
 );

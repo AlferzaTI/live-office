@@ -344,6 +344,17 @@ function ayudaError(texto) {
     return hallada ? hallada[1] : "";
 }
 
+const peticionesFallidas = [];
+
+/* Guarda qué petición a Graph falló (sin el token) para mostrarla en el diagnóstico. */
+function registrarFallo(status, url) {
+    let corta = String(url).replace("https://graph.microsoft.com/v1.0", "");
+    try { corta = decodeURIComponent(corta); } catch (e) {}
+    const linea = status + "  " + corta.slice(0, 170);
+    if (!peticionesFallidas.includes(linea)) peticionesFallidas.push(linea);
+    console.warn("[Graph] petición fallida:", status, corta);
+}
+
 const diagnosticoLineas = [];
 
 function mostrarDiagnostico(paso, error) {
@@ -389,6 +400,21 @@ function mostrarDiagnostico(paso, error) {
                 "Ojo: la página se abre desde " + location.origin + " pero el redirectUri del código es " + origenRedirect +
                 ". Deben ser el mismo dominio o el inicio de sesión por popup no puede completarse.";
             panel.appendChild(aviso);
+        }
+
+        if (peticionesFallidas.length) {
+            const pf = document.createElement("div");
+            pf.style.cssText = "background:#fdecea;border:1px solid #f1a9a0;border-radius:8px;padding:8px;margin-bottom:8px;";
+            const pt = document.createElement("strong");
+            pt.textContent = "Peticiones a Microsoft Graph que fallaron:";
+            pf.appendChild(pt);
+            peticionesFallidas.slice(-8).forEach(l => {
+                const d = document.createElement("div");
+                d.textContent = l;
+                d.style.cssText = "font-family:Consolas,monospace;font-size:11px;word-break:break-all;";
+                pf.appendChild(d);
+            });
+            panel.appendChild(pf);
         }
 
         diagnosticoLineas.forEach(l => {
@@ -495,6 +521,7 @@ async function graphFetch(url, opciones, intento) {
             signal: ctrl.signal,
             headers: { Authorization: `Bearer ${tokenActual}`, ...(resto.headers || {}) }
         });
+        if (!response.ok) registrarFallo(response.status, url);
         if ((response.status === 429 || response.status === 503) && intento < 3) {
             const espera = (parseInt(response.headers.get("Retry-After"), 10) || 2 ** intento) * 1000;
             await new Promise(r => setTimeout(r, Math.min(espera, 10000)));

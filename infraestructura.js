@@ -2377,306 +2377,179 @@ function mostrarErrorTrabajador(
 ========================================= */
 
 async function guardarAsignacionTrabajador() {
+    const nombre = trabajadorNombre.value.trim();
 
-    const nombre =
-        trabajadorNombre.value.trim();
-
-
-    if (
-        !equipoSeleccionado
-    ) {
-
-        mostrarErrorTrabajador(
-            "No se seleccionó ningún equipo."
-        );
-
+    if (!equipoSeleccionado) {
+        mostrarErrorTrabajador("No se ha seleccionado ningún equipo.");
         return;
     }
 
-
-    if (
-        !nombre
-    ) {
-
-        mostrarErrorTrabajador(
-            "Ingrese el nombre del trabajador."
-        );
-
-
+    if (!nombre) {
+        mostrarErrorTrabajador("Ingresa el nombre del trabajador.");
         trabajadorNombre.focus();
-
-
         return;
     }
-
 
     try {
+        guardarTrabajador.disabled = true;
+        trabajadorError.style.display = "none";
+        guardarTrabajador.textContent = "Guardando...";
 
-        guardarTrabajador.disabled =
-            true;
+        const sitio = await obtenerSitioSharePoint(tokenActual);
+        const lista = await obtenerListaTrabajadores(tokenActual);
+        const columnas = await obtenerColumnasTrabajadores(tokenActual);
 
+        // Buscar únicamente las columnas que realmente utilizamos
+        const campoEquipo = obtenerNombreInternoColumna(
+            columnas,
+            "Equipo1"
+        );
 
-        trabajadorError.style.display =
-            "none";
+        const campoTrabajador = obtenerNombreInternoColumna(
+            columnas,
+            "Trabajador"
+        );
 
-
-        guardarTrabajador.textContent =
-            "Guardando...";
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                tokenActual
-            );
-
-
-        const lista =
-            await obtenerListaTrabajadores(
-                tokenActual
-            );
-
-
-        const columnas =
-            await obtenerColumnasTrabajadores(
-                tokenActual
-            );
-
-
-        const campoEquipo =
-            obtenerNombreInternoColumna(
-                columnas,
-                "Equipo1"
-            );
-
-
-        const campoTrabajador =
-            obtenerNombreInternoColumna(
-                columnas,
-                "Trabajador"
-            );
-
-
-        if (
-            !campoEquipo
-        ) {
-
+        if (!campoEquipo) {
             throw new Error(
-                'No se encontró la columna "Equipo1".'
+                'No se encontró la columna "Equipo1" en la lista TrabajadoresEquipos.'
             );
         }
 
-
-        if (
-            !campoTrabajador
-        ) {
-
+        if (!campoTrabajador) {
             throw new Error(
-                'No se encontró la columna "Trabajador".'
+                'No se encontró la columna "Trabajador" en la lista TrabajadoresEquipos.'
             );
         }
 
+        // Comprobar si el equipo ya tiene una asignación
+        let asignacionActual = obtenerTrabajadorEquipo(
+            equipoSeleccionado
+        );
 
-        /*
-         * Verificamos si ya existe una asignación.
-         */
+        if (!asignacionActual && !trabajadoresCargados) {
+            await obtenerTrabajadores(tokenActual);
 
-        const asignacionActual =
-            obtenerTrabajadorEquipo(
+            asignacionActual = obtenerTrabajadorEquipo(
                 equipoSeleccionado
             );
-
-
-        /*
-         * Si no estaba en memoria,
-         * hacemos una consulta antes de crear
-         * para evitar duplicados.
-         */
-
-        let asignacionFinal =
-            asignacionActual;
-
-
-        if (
-            !asignacionFinal &&
-            !trabajadoresCargados
-        ) {
-
-            await obtenerTrabajadores(
-                tokenActual
-            );
-
-
-            asignacionFinal =
-                obtenerTrabajadorEquipo(
-                    equipoSeleccionado
-                );
         }
 
-
+        // IMPORTANTE:
+        // Solo enviamos Equipo1 y Trabajador.
+        // NO enviamos Title ni LinkTitle.
         const fields = {};
 
+        fields[campoEquipo] = equipoSeleccionado;
+        fields[campoTrabajador] = nombre;
 
-        fields[campoEquipo] =
-            equipoSeleccionado;
-
-
-        fields[campoTrabajador] =
-            nombre;
-
-
-        /*
-         * Title solo si es obligatorio.
-         */
-
-        const columnaTitle =
-            columnas.find(
-                columna =>
-                    normalizarTexto(
-                        columna.displayName
-                    ) === "title" ||
-                    columna.name === "Title"
-            );
-
-
-        if (
-            columnaTitle &&
-            columnaTitle.required === true
-        ) {
-
-            fields[
-                columnaTitle.name
-            ] =
-                equipoSeleccionado;
-        }
-
+        console.log(
+            "Campos enviados a SharePoint:",
+            fields
+        );
 
         let response;
 
-
-        /* =====================================
-           ACTUALIZAR
-        ====================================== */
-
+        // ==========================================
+        // ACTUALIZAR ASIGNACIÓN EXISTENTE
+        // ==========================================
         if (
-            asignacionFinal &&
-            asignacionFinal.itemId
+            asignacionActual &&
+            asignacionActual.itemId
         ) {
-
             const url =
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacionFinal.itemId}/fields`;
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacionActual.itemId}/fields`;
 
+            console.log(
+                "Actualizando asignación:",
+                url
+            );
 
-            response =
-                await fetch(
-                    url,
-                    {
+            response = await graphFetch(
+                url,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify(fields)
+                }
+            );
+        }
 
-                        method:
-                            "PATCH",
-
-                        headers: {
-
-                            Authorization:
-                                `Bearer ${tokenActual}`,
-
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify(
-                                fields
-                            )
-                    }
-                );
-
-
-        } else {
-
-            /* =====================================
-               CREAR
-            ====================================== */
-
+        // ==========================================
+        // CREAR NUEVA ASIGNACIÓN
+        // ==========================================
+        else {
             const url =
                 `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
 
+            console.log(
+                "Creando nueva asignación:",
+                url
+            );
 
-            response =
-                await fetch(
-                    url,
-                    {
-
-                        method:
-                            "POST",
-
-                        headers: {
-
-                            Authorization:
-                                `Bearer ${tokenActual}`,
-
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                fields:
-                                    fields
-                            })
-                    }
-                );
+            response = await graphFetch(
+                url,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        fields: fields
+                    })
+                }
+            );
         }
 
+        // ==========================================
+        // COMPROBAR RESPUESTA
+        // ==========================================
+        if (!response.ok) {
+            const texto = await response.text();
 
-        if (
-            !response.ok
-        ) {
-
-            const texto =
-                await response.text();
-
+            console.error(
+                "Error de SharePoint:",
+                response.status,
+                texto
+            );
 
             throw new Error(
                 `SharePoint respondió ${response.status}: ${texto}`
             );
         }
 
+        const resultado = await response.json();
 
-        const resultado =
-            await response.json();
+        console.log(
+            "Asignación guardada correctamente:",
+            resultado
+        );
 
-
-        /*
-         * Actualizar memoria local.
-         */
-
+        // ==========================================
+        // ACTUALIZAR DATOS LOCALES
+        // ==========================================
         trabajadoresPorEquipo[
-            normalizarTexto(
-                equipoSeleccionado
-            )
+            normalizarTexto(equipoSeleccionado)
         ] = {
-
-            nombre:
-                nombre,
-
+            nombre: nombre,
             itemId:
                 resultado.id ||
-                asignacionFinal?.itemId,
-
-            equipo:
-                equipoSeleccionado
+                asignacionActual?.itemId,
+            equipo: equipoSeleccionado
         };
 
+        trabajadoresCargados = true;
+        trabajadoresListos = true;
 
-        trabajadoresCargados =
-            true;
-
-
+        // Cerrar modal
         cerrarModalTrabajador();
 
-
+        // Actualizar tabla
         renderizarTablaEquipos();
-
 
     } catch (error) {
 
@@ -2685,26 +2558,16 @@ async function guardarAsignacionTrabajador() {
             error
         );
 
-
         mostrarErrorTrabajador(
-            obtenerMensajeError(
-                error
-            )
+            obtenerMensajeError(error)
         );
-
 
     } finally {
 
-        guardarTrabajador.disabled =
-            false;
-
-
-        guardarTrabajador.textContent =
-            "Guardar";
+        guardarTrabajador.disabled = false;
+        guardarTrabajador.textContent = "Guardar";
     }
 }
-
-
 /* =========================================
    MENSAJES DE ERROR
 ========================================= */

@@ -917,51 +917,94 @@ function obtenerTrabajadores() {
 
 async function cargarTrabajadoresDesdeSharePoint() {
     try {
-        const sitio = await obtenerSitioSharePoint();
+        const sitio = await obtenerSitioSharePoint(tokenActual);
         const lista = await obtenerListaTrabajadores(tokenActual);
 
-        let url = `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields($select=Equipo1,Trabajador)&$top=999`;
+        let url =
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items` +
+            `?expand=fields($select=Equipo1,NombreTrabajador)&$top=999`;
+
         const items = [];
-        while (url) {                       /* antes se perdían los items >999 */
+
+        while (url) {
             const response = await graphFetch(url);
+
             if (!response.ok) {
-                throw new Error(`No se pudieron obtener las asignaciones de trabajadores. ${response.status} ${await response.text()}`);
+                const texto = await response.text();
+
+                throw new Error(
+                    `Error cargando trabajadores: ${response.status} ${texto}`
+                );
             }
+
             const data = await response.json();
+
             items.push(...(data.value || []));
+
             url = data["@odata.nextLink"] || null;
         }
 
         trabajadoresData = items;
         trabajadoresPorEquipo = {};
+
         items.forEach(item => {
             const fields = item.fields || {};
-            if (fields.Equipo1 && fields.Trabajador) {
-                trabajadoresPorEquipo[normalizarTexto(fields.Equipo1)] = {
-                    nombre: fields.Trabajador,
+
+            if (
+                fields.Equipo1 &&
+                fields.NombreTrabajador
+            ) {
+                trabajadoresPorEquipo[
+                    normalizarTexto(fields.Equipo1)
+                ] = {
+                    nombre: fields.NombreTrabajador,
                     itemId: item.id,
                     equipo: fields.Equipo1
                 };
             }
         });
 
-        if (items.length > 0 && Object.keys(trabajadoresPorEquipo).length === 0) {
-            await cargarTrabajadoresConColumnas(tokenActual, sitio, lista);
+        console.log(
+            "Asignaciones de trabajadores cargadas:",
+            Object.keys(trabajadoresPorEquipo).length
+        );
+
+        if (
+            items.length > 0 &&
+            Object.keys(trabajadoresPorEquipo).length === 0
+        ) {
+            await cargarTrabajadoresConColumnas(
+                tokenActual,
+                sitio,
+                lista
+            );
         }
 
         trabajadoresCargados = true;
         trabajadoresListos = true;
-        console.log(`Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`);
-        if (equiposData.length > 0) renderizarTablaEquipos();
+
+        if (equiposData.length > 0) {
+            renderizarTablaEquipos();
+        }
+
         return trabajadoresPorEquipo;
+
     } catch (error) {
-        console.warn("No se pudieron cargar las asignaciones de trabajadores:", error);
-        trabajadoresListos = true;   /* se habilita «Registrar»; el modal reintentará la consulta */
-        if (equiposData.length > 0) renderizarTablaEquipos();
+
+        console.warn(
+            "No se pudieron cargar las asignaciones de trabajadores:",
+            error
+        );
+
+        trabajadoresListos = true;
+
+        if (equiposData.length > 0) {
+            renderizarTablaEquipos();
+        }
+
         return trabajadoresPorEquipo;
     }
 }
-
 
 /* =========================================
    RESPALDO PARA COLUMNAS
@@ -2380,12 +2423,16 @@ async function guardarAsignacionTrabajador() {
     const nombre = trabajadorNombre.value.trim();
 
     if (!equipoSeleccionado) {
-        mostrarErrorTrabajador("No se ha seleccionado ningún equipo.");
+        mostrarErrorTrabajador(
+            "No se ha seleccionado ningún equipo."
+        );
         return;
     }
 
     if (!nombre) {
-        mostrarErrorTrabajador("Ingresa el nombre del trabajador.");
+        mostrarErrorTrabajador(
+            "Ingresa el nombre del trabajador."
+        );
         trabajadorNombre.focus();
         return;
     }
@@ -2395,70 +2442,117 @@ async function guardarAsignacionTrabajador() {
         trabajadorError.style.display = "none";
         guardarTrabajador.textContent = "Guardando...";
 
-        const sitio = await obtenerSitioSharePoint(tokenActual);
-        const lista = await obtenerListaTrabajadores(tokenActual);
-        const columnas = await obtenerColumnasTrabajadores(tokenActual);
+        const sitio =
+            await obtenerSitioSharePoint(tokenActual);
 
-        // Buscar únicamente las columnas que realmente utilizamos
-        const campoEquipo = obtenerNombreInternoColumna(
-            columnas,
-            "Equipo1"
+        const lista =
+            await obtenerListaTrabajadores(tokenActual);
+
+        const columnas =
+            await obtenerColumnasTrabajadores(tokenActual);
+
+        console.log(
+            "COLUMNAS DE TRABAJADORES:",
+            columnas.map(columna => ({
+                displayName: columna.displayName,
+                name: columna.name,
+                required: columna.required,
+                readOnly: columna.readOnly
+            }))
         );
 
-        const campoTrabajador = obtenerNombreInternoColumna(
-            columnas,
-            "Trabajador"
-        );
+        // ==========================================
+        // BUSCAR COLUMNAS
+        // ==========================================
+
+        const campoEquipo =
+            obtenerNombreInternoColumna(
+                columnas,
+                "Equipo1"
+            );
+
+        const campoTrabajador =
+            obtenerNombreInternoColumna(
+                columnas,
+                "NombreTrabajador"
+            );
 
         if (!campoEquipo) {
             throw new Error(
-                'No se encontró la columna "Equipo1" en la lista TrabajadoresEquipos.'
+                'No se encontró la columna "Equipo1".'
             );
         }
 
         if (!campoTrabajador) {
             throw new Error(
-                'No se encontró la columna "Trabajador" en la lista TrabajadoresEquipos.'
+                'No se encontró la columna "NombreTrabajador".'
             );
         }
 
-        // Comprobar si el equipo ya tiene una asignación
-        let asignacionActual = obtenerTrabajadorEquipo(
-            equipoSeleccionado
-        );
+        // Nunca permitir que la columna del trabajador
+        // sea Title o LinkTitle.
+        if (
+            campoTrabajador === "Title" ||
+            campoTrabajador === "LinkTitle"
+        ) {
+            throw new Error(
+                `La columna "NombreTrabajador" está resolviendo incorrectamente a "${campoTrabajador}".`
+            );
+        }
 
-        if (!asignacionActual && !trabajadoresCargados) {
-            await obtenerTrabajadores(tokenActual);
+        // ==========================================
+        // COMPROBAR SI YA EXISTE ASIGNACIÓN
+        // ==========================================
 
-            asignacionActual = obtenerTrabajadorEquipo(
+        let asignacionActual =
+            obtenerTrabajadorEquipo(
                 equipoSeleccionado
             );
+
+        if (
+            !asignacionActual &&
+            !trabajadoresCargados
+        ) {
+            await cargarTrabajadoresDesdeSharePoint();
+
+            asignacionActual =
+                obtenerTrabajadorEquipo(
+                    equipoSeleccionado
+                );
         }
 
-        // IMPORTANTE:
-        // Solo enviamos Equipo1 y Trabajador.
-        // NO enviamos Title ni LinkTitle.
+        // ==========================================
+        // CAMPOS QUE SE ENVIARÁN A SHAREPOINT
+        // ==========================================
+
         const fields = {};
 
-        fields[campoEquipo] = equipoSeleccionado;
-        fields[campoTrabajador] = nombre;
+        fields[campoEquipo] =
+            equipoSeleccionado;
+
+        fields[campoTrabajador] =
+            nombre;
 
         console.log(
-            "Campos enviados a SharePoint:",
+            "CAMPOS ENVIADOS A SHAREPOINT:",
             fields
         );
 
         let response;
 
         // ==========================================
-        // ACTUALIZAR ASIGNACIÓN EXISTENTE
+        // ACTUALIZAR REGISTRO EXISTENTE
         // ==========================================
+
         if (
             asignacionActual &&
             asignacionActual.itemId
         ) {
+
             const url =
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacionActual.itemId}/fields`;
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}` +
+                `/lists/${lista.id}` +
+                `/items/${asignacionActual.itemId}/fields`;
 
             console.log(
                 "Actualizando asignación:",
@@ -2469,21 +2563,29 @@ async function guardarAsignacionTrabajador() {
                 url,
                 {
                     method: "PATCH",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
-                    body: JSON.stringify(fields)
+
+                    body:
+                        JSON.stringify(fields)
                 }
             );
+
         }
 
         // ==========================================
-        // CREAR NUEVA ASIGNACIÓN
+        // CREAR NUEVO REGISTRO
         // ==========================================
+
         else {
+
             const url =
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}` +
+                `/lists/${lista.id}` +
+                `/items`;
 
             console.log(
                 "Creando nueva asignación:",
@@ -2494,25 +2596,31 @@ async function guardarAsignacionTrabajador() {
                 url,
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
-                    body: JSON.stringify({
-                        fields: fields
-                    })
+
+                    body:
+                        JSON.stringify({
+                            fields: fields
+                        })
                 }
             );
         }
 
         // ==========================================
-        // COMPROBAR RESPUESTA
+        // VALIDAR RESPUESTA
         // ==========================================
+
         if (!response.ok) {
-            const texto = await response.text();
+
+            const texto =
+                await response.text();
 
             console.error(
-                "Error de SharePoint:",
+                "ERROR SHAREPOINT:",
                 response.status,
                 texto
             );
@@ -2522,33 +2630,42 @@ async function guardarAsignacionTrabajador() {
             );
         }
 
-        const resultado = await response.json();
+        const resultado =
+            await response.json();
 
         console.log(
-            "Asignación guardada correctamente:",
+            "ASIGNACIÓN GUARDADA CORRECTAMENTE:",
             resultado
         );
 
         // ==========================================
         // ACTUALIZAR DATOS LOCALES
         // ==========================================
+
         trabajadoresPorEquipo[
-            normalizarTexto(equipoSeleccionado)
+            normalizarTexto(
+                equipoSeleccionado
+            )
         ] = {
             nombre: nombre,
+
             itemId:
                 resultado.id ||
                 asignacionActual?.itemId,
-            equipo: equipoSeleccionado
+
+            equipo:
+                equipoSeleccionado
         };
 
         trabajadoresCargados = true;
         trabajadoresListos = true;
 
-        // Cerrar modal
+        // ==========================================
+        // ACTUALIZAR INTERFAZ
+        // ==========================================
+
         cerrarModalTrabajador();
 
-        // Actualizar tabla
         renderizarTablaEquipos();
 
     } catch (error) {
@@ -2565,7 +2682,9 @@ async function guardarAsignacionTrabajador() {
     } finally {
 
         guardarTrabajador.disabled = false;
-        guardarTrabajador.textContent = "Guardar";
+
+        guardarTrabajador.textContent =
+            "Guardar";
     }
 }
 /* =========================================

@@ -2,1818 +2,2928 @@
    INFRAESTRUCTURA - MONITOREO TI
 ========================================= */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-html {
-    scroll-behavior: smooth;
-}
+/* =========================================
+   CONFIGURACIÓN MSAL
+========================================= */
 
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f3f6fa;
-    color: #172033;
-    min-height: 100vh;
-}
+const msalConfigInfraestructura = {
+
+    auth: {
+        clientId:
+            "5d98417c-74a7-4fab-8f2c-41ac127be696",
+
+        authority:
+            "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
+
+        redirectUri:
+            "https://AlferzaTI.github.io/live-office/blank.html"
+    },
+
+    cache: {
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: false
+    }
+};
+
+
+/* Si el script de MSAL no cargó (CDN bloqueado/lento) no rompemos todo el archivo. */
+const msalInstanceInfraestructura =
+    (typeof msal !== "undefined")
+        ? new msal.PublicClientApplication(msalConfigInfraestructura)
+        : null;
+
+
+/* =========================================
+   SHAREPOINT
+========================================= */
+
+const SHAREPOINT_HOSTNAME =
+    "alferzaholding-my.sharepoint.com";
+
+const SHAREPOINT_SITE =
+    "/personal/soporte1_alferza_pe";
+
+const SHAREPOINT_LIST_SERVICIOS =
+    "MonitoreoTI";
+
+const SHAREPOINT_LIST_TRABAJADORES =
+    "TrabajadoresEquipos";
+
+const RUTA_EQUIPOS =
+    "Procedimientos T.I/equipos.json";
+
+
+/* =========================================
+   CONFIGURACIÓN
+========================================= */
+
+const EQUIPOS_POR_PAGINA = 40;
+
+const INTERVALO_ACTUALIZACION =
+    120000;
+
 
 /* =========================================
    VARIABLES
 ========================================= */
 
-:root {
-    --blue: #00205c;
-    --blue-light: #0a4da2;
-    --blue-soft: #eaf1fb;
-    --green: #16834b;
-    --green-soft: #eaf8f0;
-    --orange: #d97706;
-    --orange-soft: #fff5e6;
-    --red: #c62828;
-    --red-soft: #fdecec;
+let cuentaActual = null;
 
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
+let tokenActual = null;
 
-    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
-    --shadow-md: 0 8px 25px rgba(15, 23, 42, 0.08);
-    --radius: 14px;
-}
+let sitioSharePoint = null;
 
-/* =========================================
-   SCROLLBAR
-========================================= */
+let driveSharePoint = null;
 
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
 
-::-webkit-scrollbar-track {
-    background: #eef2f7;
-}
+/*
+ * Datos de trabajadores.
+ *
+ * IMPORTANTE:
+ * Estos datos se cargan en segundo plano.
+ * Nunca bloquean la carga inicial del inventario.
+ */
 
-::-webkit-scrollbar-thumb {
-    background: #b8c4d4;
-    border-radius: 10px;
-}
+let listaTrabajadores = null;
 
-::-webkit-scrollbar-thumb:hover {
-    background: #8fa0b7;
-}
+let columnasTrabajadores = null;
+
+let trabajadoresData = [];
+
+let trabajadoresPorEquipo = {};
+
+let trabajadoresCargados = false;
+
+let cargandoTrabajadores = false;
+
 
 /* =========================================
-   TOPBAR
+   EQUIPOS
 ========================================= */
 
-.topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 76px;
-    background: linear-gradient(
-        135deg,
-        #001744 0%,
-        #00205c 55%,
-        #073779 100%
-    );
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    z-index: 1000;
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
-}
+let equiposData = [];
 
-/* =========================================
-   BRAND
-========================================= */
+let equiposFiltrados = [];
 
-.topbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-}
+let paginaActual = 1;
 
-.brand-mark {
-    width: 38px;
-    height: 38px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.13);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    font-size: 19px;
-    font-weight: 800;
-}
-
-.brand-text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.brand-text strong {
-    font-size: 15px;
-    letter-spacing: 0.4px;
-}
-
-.brand-text span {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.68);
-}
-
-.topbar-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    color: #d8ffe9;
-}
-
-.live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #35d477;
-    box-shadow: 0 0 0 4px rgba(53, 212, 119, 0.14);
-}
-
-/* =========================================
-   LAYOUT
-========================================= */
-
-.container {
-    min-height: 100vh;
-}
-
-/* =========================================
-   SIDEBAR
-========================================= */
-
-.sidebar {
-    position: fixed;
-    top: 76px;
-    left: 0;
-    bottom: 0;
-    width: 230px;
-    background: #ffffff;
-    border-right: 1px solid var(--gray-200);
-    display: flex;
-    flex-direction: column;
-    z-index: 900;
-    overflow-y: auto;
-}
-
-.sidebar-header {
-    padding: 27px 22px 14px;
-}
-
-.sidebar-title {
-    color: var(--gray-400);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.4px;
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    padding: 8px 12px;
-    gap: 4px;
-}
-
-.nav-item {
-    min-height: 45px;
-    padding: 0 13px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    color: var(--gray-600);
-    font-size: 13px;
-    font-weight: 600;
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.nav-item:hover {
-    background: var(--gray-100);
-    color: var(--blue);
-    transform: translateX(2px);
-}
-
-.nav-item.active {
-    color: var(--blue);
-    background: #edf3fc;
-}
-
-.nav-icon {
-    width: 27px;
-    text-align: center;
-    font-size: 16px;
-}
-
-.sidebar-footer {
-    margin-top: auto;
-    padding: 20px 20px 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.sidebar-footer-line {
-    height: 1px;
-    background: var(--gray-200);
-    margin-bottom: 12px;
-}
-
-.sidebar-footer span {
-    color: var(--gray-600);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-}
-
-.sidebar-footer small {
-    color: var(--gray-400);
-    font-size: 9px;
-    line-height: 1.4;
-}
-
-/* =========================================
-   CONTENT
-========================================= */
-
-.content {
-    margin-left: 230px;
-    padding-top: 76px;
-    min-height: 100vh;
-}
-
-/* =========================================
-   PAGE HEADER
-========================================= */
-
-.page-header {
-    min-height: 205px;
-    padding: 38px 40px 34px;
-    background: linear-gradient(
-        135deg,
-        #001a4c 0%,
-        #00205c 50%,
-        #063d83 100%
-    );
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 35px;
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header::after {
-    content: "";
-    position: absolute;
-    width: 380px;
-    height: 380px;
-    right: -140px;
-    top: -190px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.page-header-main {
-    position: relative;
-    z-index: 2;
-    max-width: 620px;
-}
-
-.page-label {
-    display: inline-block;
-    margin-bottom: 10px;
-    color: #9ec4f7;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.6px;
-}
-
-.page-header h1 {
-    font-size: 31px;
-    line-height: 1.15;
-    margin-bottom: 10px;
-    letter-spacing: -0.5px;
-}
-
-.page-header-main p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
-    line-height: 1.6;
-}
-
-/* =========================================
-   ÚLTIMA REVISIÓN
-========================================= */
-
-.last-update {
-    position: relative;
-    z-index: 3;
-    min-width: 330px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 17px 19px;
-    background: rgba(255, 255, 255, 0.09);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 13px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.update-icon {
-    width: 43px;
-    height: 43px;
-    flex: 0 0 43px;
-    border-radius: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.11);
-    font-size: 18px;
-}
-
-.update-content {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.update-label {
-    color: #9ec4f7;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1.1px;
-}
-
-.update-content strong {
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.update-content small {
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 9px;
-}
-
-.update-indicator {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #baf5d1;
-    font-size: 9px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.update-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #35d477;
-    box-shadow: 0 0 0 4px rgba(53, 212, 119, 0.12);
-}
-
-/* =========================================
-   SECCIONES
-========================================= */
-
-.monitor-section {
-    margin: 25px 30px 0;
-    background: #ffffff;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-}
-
-.section-heading {
-    padding: 25px 27px 21px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    border-bottom: 1px solid var(--gray-100);
-}
-
-.section-title-group {
-    min-width: 0;
-}
-
-.section-kicker {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--blue-light);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-}
-
-.section-title-group h2 {
-    color: #172033;
-    font-size: 20px;
-    line-height: 1.2;
-    margin-bottom: 5px;
-}
-
-.section-title-group p {
-    color: var(--gray-500);
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-/* =========================================
-   ESTADO SECCIÓN
-========================================= */
-
-.section-status {
-    flex-shrink: 0;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    background: var(--gray-100);
-    color: var(--gray-600);
-}
-
-.section-status.online {
-    background: var(--green-soft);
-    color: var(--green);
-}
-
-.section-status.warning {
-    background: var(--orange-soft);
-    color: var(--orange);
-}
-
-.section-status.offline {
-    background: var(--red-soft);
-    color: var(--red);
-}
-
-/* =========================================
-   SERVICIOS
-========================================= */
-
-.service-grid {
-    padding: 22px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-.service-card {
-    min-height: 145px;
-    padding: 18px 20px;
-    border: 1px solid var(--gray-200);
-    border-radius: 13px;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 15px;
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.service-card::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--gray-300);
-}
-
-.service-card.online::before {
-    background: var(--green);
-}
-
-.service-card.warning::before {
-    background: var(--orange);
-}
-
-.service-card.offline::before {
-    background: var(--red);
-}
-
-.service-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: #d5deea;
-}
-
-/* =========================================
-   SERVICIO
-========================================= */
-
-.service-main {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    min-width: 0;
-}
-
-.service-icon {
-    width: 52px;
-    height: 52px;
-    flex: 0 0 52px;
-    border-radius: 12px;
-    background: var(--blue-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 23px;
-}
-
-.service-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.service-heading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
-}
-
-.service-heading h3 {
-    color: #172033;
-    font-size: 17px;
-    font-weight: 800;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.service-status {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 9px;
-    font-weight: 800;
-}
-
-.service-status.online {
-    color: var(--green);
-    background: var(--green-soft);
-}
-
-.service-status.warning {
-    color: var(--orange);
-    background: var(--orange-soft);
-}
-
-.service-status.offline {
-    color: var(--red);
-    background: var(--red-soft);
-}
-
-.service-status.neutral {
-    color: var(--gray-600);
-    background: var(--gray-100);
-}
-
-.status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-.service-info p {
-    color: var(--gray-500);
-    font-size: 11px;
-    line-height: 1.45;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* =========================================
-   METADATA SERVICIO
-========================================= */
-
-.service-meta {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    padding-top: 11px;
-    border-top: 1px solid var(--gray-100);
-}
-
-.service-latency,
-.service-revision {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.service-latency {
-    min-width: 90px;
-}
-
-.service-latency > span,
-.service-revision span:not(.revision-icon) {
-    color: var(--gray-400);
-    font-size: 9px;
-    font-weight: 700;
-}
-
-.service-latency strong,
-.service-revision strong {
-    color: var(--gray-700);
-    font-size: 10px;
-}
-
-.service-revision {
-    flex: 1;
-}
-
-.revision-icon {
-    font-size: 13px;
-}
-
-.service-revision > div {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-/* =========================================
-   CARGA
-========================================= */
-
-.service-loading {
-    grid-column: 1 / -1;
-    min-height: 110px;
-    justify-content: center;
-    align-items: center;
-    color: var(--gray-500);
-    flex-direction: row;
-}
-
-.loading-spinner {
-    width: 31px;
-    height: 31px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-.loading-spinner.small {
-    width: 22px;
-    height: 22px;
-    border: 2px solid #dce4ee;
-    border-top-color: var(--blue);
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* =========================================
-   EQUIPOS - RESUMEN
-========================================= */
-
-.equipos-summary {
-    padding: 20px 22px 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 13px;
-}
-
-.equipment-stat {
-    min-height: 72px;
-    padding: 13px 15px;
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: 11px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.equipment-stat-icon {
-    width: 39px;
-    height: 39px;
-    flex: 0 0 39px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 800;
-}
-
-.equipment-stat-icon.total {
-    color: var(--blue);
-    background: var(--blue-soft);
-}
-
-.equipment-stat-icon.online {
-    color: var(--green);
-    background: var(--green-soft);
-}
-
-.equipment-stat-icon.offline {
-    color: var(--red);
-    background: var(--red-soft);
-}
-
-.equipment-stat > div:last-child {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.equipment-stat span {
-    color: var(--gray-500);
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.equipment-stat strong {
-    color: #172033;
-    font-size: 20px;
-}
-
-/* =========================================
-   CONTROLES
-========================================= */
-
-.equipos-controls {
-    padding: 20px 22px 13px;
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) 190px 220px;
-    gap: 12px;
-}
-
-.search-wrapper {
-    position: relative;
-}
-
-.search-icon {
-    position: absolute;
-    left: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 14px;
-    pointer-events: none;
-}
-
-.search-wrapper input,
-.filter-wrapper select {
-    width: 100%;
-    height: 40px;
-    border: 1px solid var(--gray-200);
-    border-radius: 8px;
-    background: #ffffff;
-    color: var(--gray-700);
-    font-family: inherit;
-    font-size: 11px;
-    outline: none;
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.search-wrapper input {
-    padding: 0 13px 0 38px;
-}
-
-.filter-wrapper select {
-    padding: 0 11px;
-}
-
-.search-wrapper input:focus,
-.filter-wrapper select:focus {
-    border-color: #76a6dd;
-    box-shadow: 0 0 0 3px rgba(10, 77, 162, 0.08);
-}
-
-.search-wrapper input::placeholder {
-    color: var(--gray-400);
-}
-
-.filter-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.filter-wrapper label {
-    display: none;
-}
-
-/* =========================================
-   RESULTADOS
-========================================= */
-
-.equipos-results {
-    padding: 0 22px 12px;
-    color: var(--gray-500);
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/* =========================================
-   TABLA
-========================================= */
-
-.equipos-table-container {
-    width: 100%;
-    overflow-x: auto;
-    border-top: 1px solid var(--gray-200);
-}
-
-.equipos-table {
-    width: 100%;
-    min-width: 1180px;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.equipos-table th {
-    height: 43px;
-    padding: 0 15px;
-    background: #f7f9fc;
-    color: var(--gray-500);
-    border-bottom: 1px solid var(--gray-200);
-    text-align: left;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-}
-
-.equipos-table td {
-    height: 67px;
-    padding: 9px 15px;
-    color: var(--gray-600);
-    border-bottom: 1px solid #edf1f5;
-    font-size: 13px;
-    vertical-align: middle;
-}
-
-.equipos-table tbody tr {
-    transition: background 0.15s ease;
-}
-
-.equipos-table tbody tr:hover {
-    background: #f8fbff;
-}
-
-/* =========================================
-   ANCHOS COLUMNAS
-========================================= */
-
-.equipos-table th:nth-child(1),
-.equipos-table td:nth-child(1) {
-    width: 19%;
-}
-
-.equipos-table th:nth-child(2),
-.equipos-table td:nth-child(2) {
-    width: 12%;
-}
-
-.equipos-table th:nth-child(3),
-.equipos-table td:nth-child(3) {
-    width: 15%;
-}
-
-.equipos-table th:nth-child(4),
-.equipos-table td:nth-child(4) {
-    width: 13%;
-}
-
-.equipos-table th:nth-child(5),
-.equipos-table td:nth-child(5) {
-    width: 19%;
-}
-
-.equipos-table th:nth-child(6),
-.equipos-table td:nth-child(6) {
-    width: 12%;
-}
-
-.equipos-table th:nth-child(7),
-.equipos-table td:nth-child(7) {
-    width: 10%;
-}
-
-/* =========================================
-   EQUIPO
-========================================= */
-
-.equipo-name {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-}
-
-.equipo-icon {
-    width: 35px;
-    height: 35px;
-    flex: 0 0 35px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--blue-soft);
-    font-size: 15px;
-}
-
-.equipo-name > div:last-child {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.equipo-name strong {
-    color: #172033;
-    font-size: 13px;
-    font-weight: 800;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.equipo-name span {
-    color: var(--gray-400);
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* =========================================
-   ESTADO EQUIPO
-========================================= */
-
-.equipo-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 6px 9px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 800;
-    white-space: nowrap;
-}
-
-.equipo-status.online {
-    color: var(--green);
-    background: var(--green-soft);
-}
-
-.equipo-status.offline {
-    color: var(--red);
-    background: var(--red-soft);
-}
-
-.equipo-status.neutral {
-    color: var(--gray-600);
-    background: var(--gray-100);
-}
-
-.equipo-status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-/* =========================================
-   TRABAJADOR
-========================================= */
-
-.trabajador-cell {
-    min-width: 0;
-}
-
-.trabajador-name {
-    display: block;
-    color: var(--gray-700);
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.registrar-trabajador {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 31px;
-    padding: 0 11px;
-    border: 1px solid #bfd0e5;
-    border-radius: 7px;
-    background: #f5f9ff;
-    color: var(--blue);
-    font-family: inherit;
-    font-size: 10px;
-    font-weight: 800;
-    cursor: pointer;
-    transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        transform 0.15s ease;
-}
-
-.registrar-trabajador:hover {
-    background: var(--blue-soft);
-    border-color: #9db8d8;
-    transform: translateY(-1px);
-}
-
-/* =========================================
-   DATOS EQUIPO
-========================================= */
-
-.equipo-ip {
-    font-family: Consolas, "Courier New", monospace;
-    color: var(--gray-700);
-    font-size: 12px;
-}
-
-.equipo-so {
-    color: var(--gray-700);
-    font-size: 12px;
-    line-height: 1.4;
-}
-
-.equipo-so small {
-    color: var(--gray-400);
-    font-size: 10px;
-}
-
-.equipo-area {
-    color: var(--gray-600);
-    font-size: 12px;
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.equipo-date {
-    color: var(--gray-600);
-    font-size: 11px;
-    white-space: nowrap;
-}
-
-/* =========================================
-   LOADING TABLA
-========================================= */
-
-.equipos-loading {
-    height: 150px !important;
-    text-align: center;
-    color: var(--gray-500) !important;
-}
-
-.table-loading {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-}
-
-/* =========================================
-   EMPTY STATE
-========================================= */
-
-.equipos-empty {
-    padding: 50px 20px;
-    text-align: center;
-    color: var(--gray-500);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-}
-
-.empty-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 5px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--gray-100);
-    font-size: 21px;
-}
-
-.equipos-empty strong {
-    color: var(--gray-700);
-    font-size: 13px;
-}
-
-.equipos-empty span {
-    font-size: 11px;
-}
-
-/* =========================================
-   PAGINACIÓN
-========================================= */
-
-.equipos-pagination {
-    min-height: 65px;
-    padding: 13px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    border-top: 1px solid var(--gray-200);
-    background: #ffffff;
-}
-
-.pagination-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 0 8px;
-    border: 1px solid var(--gray-200);
-    border-radius: 7px;
-    background: #ffffff;
-    color: var(--gray-600);
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition:
-        background 0.15s ease,
-        color 0.15s ease,
-        border-color 0.15s ease;
-}
-
-.pagination-btn:hover:not(:disabled) {
-    border-color: #a9bdd7;
-    background: #f1f6fc;
-    color: var(--blue);
-}
-
-.pagination-btn.active {
-    border-color: var(--blue);
-    background: var(--blue);
-    color: #ffffff;
-}
-
-.pagination-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-.pagination-prev,
-.pagination-next {
-    font-size: 19px;
-    line-height: 1;
-}
-
-.pagination-ellipsis {
-    min-width: 25px;
-    text-align: center;
-    color: var(--gray-400);
-    font-size: 13px;
-}
 
 /* =========================================
    MODAL
 ========================================= */
 
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 5000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(15, 23, 42, 0.55);
-}
+let equipoSeleccionado = null;
 
-.trabajador-modal {
-    width: 100%;
-    max-width: 430px;
-    background: #ffffff;
-    border: 1px solid var(--gray-200);
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.22);
-    overflow: hidden;
-    animation: modalIn 0.18s ease-out;
-}
-
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal-header {
-    padding: 20px 21px 17px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--gray-100);
-}
-
-.modal-kicker {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--blue-light);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-}
-
-.modal-header h3 {
-    color: #172033;
-    font-size: 18px;
-}
-
-.modal-close {
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 7px;
-    background: var(--gray-100);
-    color: var(--gray-600);
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.modal-close:hover {
-    background: var(--gray-200);
-}
-
-.modal-body {
-    padding: 21px;
-}
-
-.modal-equipo {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 18px;
-    padding: 12px 13px;
-    border-radius: 9px;
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-}
-
-.modal-equipo span {
-    color: var(--gray-400);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-}
-
-.modal-equipo strong {
-    color: var(--gray-700);
-    font-size: 13px;
-}
-
-.modal-label {
-    display: block;
-    margin-bottom: 7px;
-    color: var(--gray-700);
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.modal-input {
-    width: 100%;
-    height: 42px;
-    padding: 0 12px;
-    border: 1px solid var(--gray-200);
-    border-radius: 8px;
-    color: var(--gray-700);
-    background: #ffffff;
-    font-family: inherit;
-    font-size: 12px;
-    outline: none;
-}
-
-.modal-input:focus {
-    border-color: #76a6dd;
-    box-shadow: 0 0 0 3px rgba(10, 77, 162, 0.08);
-}
-
-.modal-error {
-    margin-top: 8px;
-    padding: 9px 10px;
-    border-radius: 7px;
-    background: var(--red-soft);
-    color: var(--red);
-    font-size: 10px;
-    line-height: 1.4;
-}
-
-.modal-footer {
-    padding: 15px 21px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    border-top: 1px solid var(--gray-100);
-    background: #fafbfd;
-}
-
-.modal-btn {
-    height: 36px;
-    padding: 0 15px;
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-}
-
-.modal-btn.secondary {
-    border: 1px solid var(--gray-200);
-    background: #ffffff;
-    color: var(--gray-600);
-}
-
-.modal-btn.secondary:hover {
-    background: var(--gray-100);
-}
-
-.modal-btn.primary {
-    border: 1px solid var(--blue);
-    background: var(--blue);
-    color: #ffffff;
-}
-
-.modal-btn.primary:hover {
-    background: #073779;
-}
-
-.modal-btn:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
 
 /* =========================================
-   FOOTER
+   ELEMENTOS DOM
 ========================================= */
 
-.page-footer {
-    margin: 25px 30px;
-    padding: 18px 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--gray-400);
-    font-size: 9px;
-    border-top: 1px solid var(--gray-200);
-}
+const loadingOverlay =
+    document.getElementById(
+        "loadingOverlay"
+    );
 
-.page-footer span:first-child {
-    color: var(--gray-600);
-    font-weight: 800;
-    letter-spacing: 0.5px;
-}
+const loadingMessage =
+    document.getElementById(
+        "loadingMessage"
+    );
+
+const serviciosGrid =
+    document.getElementById(
+        "serviciosGrid"
+    );
+
+const estadoGeneral =
+    document.getElementById(
+        "estadoGeneral"
+    );
+
+const equiposTableBody =
+    document.getElementById(
+        "equiposTableBody"
+    );
+
+const equiposEmpty =
+    document.getElementById(
+        "equiposEmpty"
+    );
+
+const equiposResultados =
+    document.getElementById(
+        "equiposResultados"
+    );
+
+const totalEquipos =
+    document.getElementById(
+        "totalEquipos"
+    );
+
+const equiposConectados =
+    document.getElementById(
+        "equiposConectados"
+    );
+
+const equiposDesconectados =
+    document.getElementById(
+        "equiposDesconectados"
+    );
+
+const filtroEstadoEquipo =
+    document.getElementById(
+        "filtroEstadoEquipo"
+    );
+
+const filtroAreaEquipo =
+    document.getElementById(
+        "filtroAreaEquipo"
+    );
+
+const buscarEquipo =
+    document.getElementById(
+        "buscarEquipo"
+    );
+
+const equiposEstado =
+    document.getElementById(
+        "equiposEstado"
+    );
+
+const lastUpdate =
+    document.getElementById(
+        "lastUpdate"
+    );
+
 
 /* =========================================
-   RESPONSIVE 1500
+   ELEMENTOS MODAL
 ========================================= */
 
-@media (max-width: 1500px) {
-    .page-header {
-        padding-left: 32px;
-        padding-right: 32px;
-    }
+const trabajadorModal =
+    document.getElementById(
+        "trabajadorModal"
+    );
 
-    .monitor-section {
-        margin-left: 25px;
-        margin-right: 25px;
-    }
+const modalEquipoNombre =
+    document.getElementById(
+        "modalEquipoNombre"
+    );
 
-    .page-footer {
-        margin-left: 25px;
-        margin-right: 25px;
-    }
-}
+const trabajadorNombre =
+    document.getElementById(
+        "trabajadorNombre"
+    );
+
+const trabajadorError =
+    document.getElementById(
+        "trabajadorError"
+    );
+
+const guardarTrabajador =
+    document.getElementById(
+        "guardarTrabajador"
+    );
+
+const cerrarTrabajadorModal =
+    document.getElementById(
+        "cerrarTrabajadorModal"
+    );
+
+const cancelarTrabajador =
+    document.getElementById(
+        "cancelarTrabajador"
+    );
+
 
 /* =========================================
-   RESPONSIVE 1200
+   UTILIDADES
 ========================================= */
 
-@media (max-width: 1200px) {
-    .last-update {
-        min-width: 300px;
+function escaparHTML(valor) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+        return "";
     }
 
-    .equipos-controls {
-        grid-template-columns: 1fr 180px 210px;
+    return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function mostrarLoading(mensaje) {
+
+    if (loadingOverlay) {
+        loadingOverlay.style.display =
+            "flex";
+    }
+
+    if (loadingMessage) {
+        loadingMessage.textContent =
+            mensaje || "Cargando...";
     }
 }
+
+
+function ocultarLoading() {
+
+    if (loadingOverlay) {
+        loadingOverlay.style.display =
+            "none";
+    }
+}
+
+
+function obtenerFechaActual() {
+
+    const ahora =
+        new Date();
+
+    return ahora.toLocaleString(
+        "es-PE",
+        {
+            dateStyle: "short",
+            timeStyle: "medium"
+        }
+    );
+}
+
+
+function normalizarTexto(valor) {
+
+    return String(
+        valor || ""
+    )
+        .trim()
+        .toLowerCase();
+}
+
 
 /* =========================================
-   RESPONSIVE 1100
+   AUTENTICACIÓN
 ========================================= */
 
-@media (max-width: 1100px) {
-    .sidebar {
-        width: 205px;
-    }
+const SCOPES_GRAPH = ["User.Read", "Sites.Read.All", "Sites.ReadWrite.All"];
+const CACHE_PREFIJO = "alferza_ti_";
 
-    .content {
-        margin-left: 205px;
-    }
+let etagEquipos = null;
+let promesaSitio = null;
+let promesaDrive = null;
+let promesaTrabajadores = null;
+let cargandoEquipos = false;
+let ultimaActualizacion = 0;
 
-    .service-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .page-header {
-        align-items: flex-start;
-        flex-direction: column;
-        min-height: auto;
-    }
-
-    .last-update {
-        width: 100%;
-        max-width: 500px;
+function leerCache(clave) {
+    try {
+        const valor = localStorage.getItem(CACHE_PREFIJO + clave);
+        return valor ? JSON.parse(valor) : null;
+    } catch (e) {
+        return null;
     }
 }
+
+function guardarCache(clave, valor) {
+    try {
+        localStorage.setItem(CACHE_PREFIJO + clave, JSON.stringify(valor));
+    } catch (e) {
+        console.warn("No se pudo guardar en caché:", clave);
+    }
+}
+
+/* Token desde caché de MSAL, sin popups. Devuelve null si no hay sesión. */
+async function obtenerTokenSilencioso() {
+    if (!msalInstanceInfraestructura) return null;
+    const cuentas = msalInstanceInfraestructura.getAllAccounts();
+    if (!cuentas.length) return null;
+    cuentaActual = cuentas[0];
+    try {
+        const r = await msalInstanceInfraestructura.acquireTokenSilent({
+            scopes: SCOPES_GRAPH,
+            account: cuentaActual
+        });
+        tokenActual = r.accessToken;
+        return tokenActual;
+    } catch (error) {
+        console.warn("Token silencioso no disponible:", error);
+        return null;
+    }
+}
+
+/* interactivo=true abre popup: debe llamarse desde un clic del usuario. */
+async function iniciarSesion(interactivo) {
+    const silencioso = await obtenerTokenSilencioso();
+    if (silencioso || !interactivo) return silencioso;
+    const r = cuentaActual
+        ? await msalInstanceInfraestructura.acquireTokenPopup({ scopes: SCOPES_GRAPH, account: cuentaActual })
+        : await msalInstanceInfraestructura.loginPopup({ scopes: SCOPES_GRAPH });
+    cuentaActual = r.account;
+    tokenActual = r.accessToken || (await obtenerTokenSilencioso());
+    return tokenActual;
+}
+
+/* fetch a Graph con timeout, reintento en 429/503 y renovación de token en 401. */
+async function graphFetch(url, opciones, intento) {
+    intento = intento || 0;
+    const { timeoutMs = 30000, ...resto } = opciones || {};
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, {
+            ...resto,
+            signal: ctrl.signal,
+            headers: { Authorization: `Bearer ${tokenActual}`, ...(resto.headers || {}) }
+        });
+        if ((response.status === 429 || response.status === 503) && intento < 3) {
+            const espera = (parseInt(response.headers.get("Retry-After"), 10) || 2 ** intento) * 1000;
+            await new Promise(r => setTimeout(r, Math.min(espera, 10000)));
+            return graphFetch(url, opciones, intento + 1);
+        }
+        if (response.status === 401 && intento < 1 && (await obtenerTokenSilencioso())) {
+            return graphFetch(url, opciones, intento + 1);
+        }
+        return response;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 
 /* =========================================
-   RESPONSIVE 900
+   OBTENER SITIO SHAREPOINT
 ========================================= */
 
-@media (max-width: 900px) {
-    .sidebar {
-        width: 185px;
+/* Una sola petición aunque varias funciones la pidan a la vez; el id se guarda en caché. */
+function obtenerSitioSharePoint() {
+    if (!promesaSitio) {
+        promesaSitio = (async () => {
+            const clave = "sitio:" + SHAREPOINT_SITE;
+            const guardado = leerCache(clave);
+            if (guardado && guardado.id) return guardado;
+            const response = await graphFetch(
+                `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}?$select=id`
+            );
+            if (!response.ok) {
+                throw new Error(`No se pudo obtener el sitio SharePoint. ${response.status} ${await response.text()}`);
+            }
+            const sitio = await response.json();
+            guardarCache(clave, { id: sitio.id });
+            return { id: sitio.id };
+        })().catch(error => { promesaSitio = null; throw error; });
     }
-
-    .content {
-        margin-left: 185px;
-    }
-
-    .topbar {
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    .page-header {
-        padding: 30px 25px;
-    }
-
-    .monitor-section {
-        margin-left: 18px;
-        margin-right: 18px;
-    }
-
-    .page-footer {
-        margin-left: 18px;
-        margin-right: 18px;
-    }
-
-    .equipos-summary {
-        grid-template-columns: 1fr;
-    }
-
-    .equipos-controls {
-        grid-template-columns: 1fr;
-    }
+    return promesaSitio;
 }
+
 
 /* =========================================
-   RESPONSIVE 800
+   OBTENER DRIVE
 ========================================= */
 
-@media (max-width: 800px) {
-    .sidebar {
-        width: 70px;
+function obtenerDriveSharePoint() {
+    if (!promesaDrive) {
+        promesaDrive = (async () => {
+            const sitio = await obtenerSitioSharePoint();
+            const clave = "drive:" + sitio.id;
+            const guardado = leerCache(clave);
+            if (guardado && guardado.id) return guardado;
+            const response = await graphFetch(
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive?$select=id`
+            );
+            if (!response.ok) {
+                throw new Error(`No se pudo obtener el drive de SharePoint. ${response.status} ${await response.text()}`);
+            }
+            const drive = await response.json();
+            guardarCache(clave, { id: drive.id });
+            return { id: drive.id };
+        })().catch(error => { promesaDrive = null; throw error; });
     }
-
-    .sidebar-header {
-        padding: 20px 0 10px;
-        text-align: center;
-    }
-
-    .sidebar-title {
-        display: none;
-    }
-
-    .nav-item {
-        justify-content: center;
-        padding: 0;
-        gap: 0;
-    }
-
-    .nav-item > span:last-child {
-        display: none;
-    }
-
-    .nav-icon {
-        width: auto;
-    }
-
-    .sidebar-footer {
-        display: none;
-    }
-
-    .content {
-        margin-left: 70px;
-    }
-
-    .brand-text span {
-        display: none;
-    }
-
-    .page-header h1 {
-        font-size: 27px;
-    }
-
-    .section-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .service-heading {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 6px;
-    }
+    return promesaDrive;
 }
+
 
 /* =========================================
-   RESPONSIVE 600
+   OBTENER ARCHIVO EQUIPOS
 ========================================= */
 
-@media (max-width: 600px) {
-    .topbar {
-        height: 68px;
-    }
+/* Devuelve null si equipos.json no cambió (no se vuelve a descargar). */
+async function obtenerEquiposDesdeSharePoint() {
+    const drive = await obtenerDriveSharePoint();
+    const ruta = RUTA_EQUIPOS.split("/").map(p => encodeURIComponent(p)).join("/");
+    const base = `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${ruta}`;
 
-    .sidebar {
-        top: 68px;
+    let etag = null;
+    try {
+        const meta = await graphFetch(`${base}?$select=eTag`);
+        if (meta.ok) etag = (await meta.json()).eTag || null;
+    } catch (e) {
+        console.warn("No se pudo consultar la versión de equipos.json:", e);
     }
+    if (etag && etag === etagEquipos && equiposData.length > 0) return null;
 
-    .content {
-        padding-top: 68px;
+    const response = await graphFetch(`${base}:/content`, { timeoutMs: 90000 });
+    if (!response.ok) {
+        throw new Error(`No se pudo descargar equipos.json. ${response.status} ${await response.text()}`);
     }
-
-    .brand-mark {
-        width: 34px;
-        height: 34px;
+    const datos = await response.json();
+    if (!Array.isArray(datos)) {
+        throw new Error("El archivo equipos.json no contiene un arreglo válido.");
     }
-
-    .brand-text strong {
-        font-size: 12px;
-    }
-
-    .topbar-status {
-        font-size: 9px;
-    }
-
-    .page-header {
-        padding: 25px 18px;
-    }
-
-    .page-header h1 {
-        font-size: 24px;
-    }
-
-    .page-header-main p {
-        font-size: 11px;
-    }
-
-    .last-update {
-        min-width: 0;
-        padding: 13px;
-    }
-
-    .update-indicator {
-        display: none;
-    }
-
-    .monitor-section {
-        margin: 16px 10px 0;
-        border-radius: 11px;
-    }
-
-    .section-heading {
-        padding: 20px 18px;
-    }
-
-    .service-grid {
-        padding: 13px;
-    }
-
-    .service-card {
-        padding: 15px;
-    }
-
-    .service-main {
-        align-items: flex-start;
-    }
-
-    .service-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .service-revision {
-        flex: none;
-    }
-
-    .equipos-summary {
-        padding: 15px 13px 0;
-    }
-
-    .equipos-controls {
-        padding: 15px 13px 10px;
-    }
-
-    .equipos-results {
-        padding: 0 13px 10px;
-    }
-
-    .equipos-pagination {
-        padding-left: 10px;
-        padding-right: 10px;
-        overflow-x: auto;
-        justify-content: flex-start;
-    }
-
-    .page-footer {
-        margin: 18px 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-
-    .trabajador-modal {
-        max-width: 100%;
-    }
+    etagEquipos = etag;
+    return datos;
 }
+
 
 /* =========================================
-   RESPONSIVE 450
+   OBTENER LISTA TRABAJADORES
 ========================================= */
 
-@media (max-width: 450px) {
-    .topbar {
-        padding: 0 13px;
+async function obtenerListaTrabajadores(
+    token
+) {
+
+    if (
+        listaTrabajadores
+    ) {
+        return listaTrabajadores;
     }
 
-    .brand-mark {
-        display: none;
+
+    const sitio =
+        await obtenerSitioSharePoint(
+            token
+        );
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudieron obtener las listas SharePoint. ${response.status} ${texto}`
+        );
     }
 
-    .page-header h1 {
-        font-size: 21px;
+
+    const data =
+        await response.json();
+
+
+    const listas =
+        data.value || [];
+
+
+    listaTrabajadores =
+        listas.find(
+            lista =>
+                normalizarTexto(
+                    lista.displayName
+                ) ===
+                normalizarTexto(
+                    SHAREPOINT_LIST_TRABAJADORES
+                )
+        );
+
+
+    if (
+        !listaTrabajadores
+    ) {
+
+        throw new Error(
+            `No se encontró la lista "${SHAREPOINT_LIST_TRABAJADORES}" en el sitio SharePoint.`
+        );
     }
 
-    .last-update {
-        flex-wrap: wrap;
-    }
 
-    .update-content strong {
-        white-space: normal;
-    }
-
-    .service-card {
-        min-height: 0;
-    }
-
-    .service-main {
-        gap: 11px;
-    }
-
-    .service-icon {
-        width: 44px;
-        height: 44px;
-        flex-basis: 44px;
-        font-size: 19px;
-    }
-
-    .service-heading h3 {
-        font-size: 15px;
-    }
-
-    .service-info p {
-        font-size: 10px;
-    }
-
-    .pagination-btn {
-        min-width: 29px;
-        height: 29px;
-        padding: 0 6px;
-    }
+    return listaTrabajadores;
 }
+
 
 /* =========================================
-   OVERLAY DE CARGA / LOGIN
-   (antes no tenía estilos)
+   OBTENER COLUMNAS
 ========================================= */
 
-.loading-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(243, 246, 250, 0.92);
+async function obtenerColumnasTrabajadores(
+    token
+) {
+
+    if (
+        columnasTrabajadores
+    ) {
+        return columnasTrabajadores;
+    }
+
+
+    const lista =
+        await obtenerListaTrabajadores(
+            token
+        );
+
+
+    const sitio =
+        await obtenerSitioSharePoint(
+            token
+        );
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/columns`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudieron obtener las columnas de TrabajadoresEquipos. ${response.status} ${texto}`
+        );
+    }
+
+
+    const data =
+        await response.json();
+
+
+    columnasTrabajadores =
+        data.value || [];
+
+
+    return columnasTrabajadores;
 }
 
-.loading-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    min-width: 280px;
-    max-width: 380px;
-    padding: 28px 34px;
-    background: var(--blue);
-    color: #ffffff;
-    border-radius: 14px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
-    text-align: center;
+
+/* =========================================
+   BUSCAR NOMBRE INTERNO DE COLUMNA
+========================================= */
+
+function obtenerNombreInternoColumna(
+    columnas,
+    nombreVisible
+) {
+
+    const columna =
+        columnas.find(
+            item =>
+                normalizarTexto(
+                    item.displayName
+                ) ===
+                normalizarTexto(
+                    nombreVisible
+                )
+        );
+
+
+    return columna
+        ? columna.name
+        : null;
 }
 
-.loading-card span {
-    font-size: 13px;
-    opacity: 0.9;
+
+/* =========================================
+   CARGAR TRABAJADORES
+   -----------------------------------------
+   ESTA FUNCIÓN YA NO BLOQUEA EL INVENTARIO.
+========================================= */
+
+/* Comparte una sola carga entre todos los llamadores (evita duplicados y listas vacías). */
+function obtenerTrabajadores() {
+    if (trabajadoresCargados) return Promise.resolve(trabajadoresPorEquipo);
+    if (!promesaTrabajadores) {
+        promesaTrabajadores = cargarTrabajadoresDesdeSharePoint()
+            .finally(() => { promesaTrabajadores = null; });
+    }
+    return promesaTrabajadores;
 }
 
-.loading-btn {
-    margin-top: 6px;
-    padding: 10px 18px;
-    border: 0;
-    border-radius: 9px;
-    background: #ffffff;
-    color: var(--blue);
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
+async function cargarTrabajadoresDesdeSharePoint() {
+    try {
+        const sitio = await obtenerSitioSharePoint();
+        const lista = await obtenerListaTrabajadores(tokenActual);
+
+        let url = `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields($select=Equipo1,Trabajador)&$top=999`;
+        const items = [];
+        while (url) {                       /* antes se perdían los items >999 */
+            const response = await graphFetch(url);
+            if (!response.ok) {
+                throw new Error(`No se pudieron obtener las asignaciones de trabajadores. ${response.status} ${await response.text()}`);
+            }
+            const data = await response.json();
+            items.push(...(data.value || []));
+            url = data["@odata.nextLink"] || null;
+        }
+
+        trabajadoresData = items;
+        trabajadoresPorEquipo = {};
+        items.forEach(item => {
+            const fields = item.fields || {};
+            if (fields.Equipo1 && fields.Trabajador) {
+                trabajadoresPorEquipo[normalizarTexto(fields.Equipo1)] = {
+                    nombre: fields.Trabajador,
+                    itemId: item.id,
+                    equipo: fields.Equipo1
+                };
+            }
+        });
+
+        if (items.length > 0 && Object.keys(trabajadoresPorEquipo).length === 0) {
+            await cargarTrabajadoresConColumnas(tokenActual, sitio, lista);
+        }
+
+        trabajadoresCargados = true;
+        console.log(`Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`);
+        if (equiposData.length > 0) renderizarTablaEquipos();
+        return trabajadoresPorEquipo;
+    } catch (error) {
+        console.warn("No se pudieron cargar las asignaciones de trabajadores:", error);
+        return trabajadoresPorEquipo;
+    }
 }
 
-.loading-btn:disabled {
-    opacity: 0.6;
-    cursor: wait;
+
+/* =========================================
+   RESPALDO PARA COLUMNAS
+========================================= */
+
+async function cargarTrabajadoresConColumnas(
+    token,
+    sitio,
+    lista
+) {
+
+    const columnas =
+        await obtenerColumnasTrabajadores(
+            token
+        );
+
+
+    const campoEquipo =
+        obtenerNombreInternoColumna(
+            columnas,
+            "Equipo1"
+        );
+
+
+    const campoTrabajador =
+        obtenerNombreInternoColumna(
+            columnas,
+            "Trabajador"
+        );
+
+
+    if (
+        !campoEquipo ||
+        !campoTrabajador
+    ) {
+
+        return;
+    }
+
+
+    trabajadoresPorEquipo =
+        {};
+
+
+    trabajadoresData.forEach(
+        item => {
+
+            const fields =
+                item.fields || {};
+
+
+            const equipo =
+                fields[campoEquipo];
+
+
+            const trabajador =
+                fields[campoTrabajador];
+
+
+            if (
+                equipo &&
+                trabajador
+            ) {
+
+                trabajadoresPorEquipo[
+                    normalizarTexto(
+                        equipo
+                    )
+                ] = {
+
+                    nombre:
+                        trabajador,
+
+                    itemId:
+                        item.id,
+
+                    equipo:
+                        equipo
+                };
+            }
+        }
+    );
+}
+
+
+/* =========================================
+   OBTENER ASIGNACIÓN
+========================================= */
+
+function obtenerTrabajadorEquipo(
+    nombreEquipo
+) {
+
+    return trabajadoresPorEquipo[
+        normalizarTexto(
+            nombreEquipo
+        )
+    ] || null;
+}
+
+
+/* =========================================
+   CARGAR SERVICIOS DESDE SHAREPOINT
+========================================= */
+
+async function obtenerMonitoreoTI() {
+    const sitio = await obtenerSitioSharePoint();
+    const url = `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(SHAREPOINT_LIST_SERVICIOS)}/items?expand=fields&$top=999`;
+    const response = await graphFetch(url);
+    if (!response.ok) {
+        throw new Error(`No se pudo obtener MonitoreoTI. ${response.status} ${await response.text()}`);
+    }
+    return (await response.json()).value || [];
+}
+
+
+/* =========================================
+   RENDER SERVICIOS
+========================================= */
+
+function renderizarServicios(
+    items
+) {
+
+    if (
+        !serviciosGrid
+    ) {
+        return;
+    }
+
+
+    if (
+        !items ||
+        items.length === 0
+    ) {
+
+        serviciosGrid.innerHTML = `
+            <div class="service-card service-loading">
+                <span>
+                    No hay servicios registrados.
+                </span>
+            </div>
+        `;
+
+
+        estadoGeneral.textContent =
+            "● SIN DATOS";
+
+        estadoGeneral.className =
+            "section-status warning";
+
+
+        return;
+    }
+
+
+    let serviciosOnline =
+        0;
+
+
+    serviciosGrid.innerHTML =
+        items
+            .map(
+                item => {
+
+                    const fields =
+                        item.fields || {};
+
+
+                    const nombre =
+                        fields.Nombre ||
+                        fields.Title ||
+                        "Servicio";
+
+
+                    const descripcion =
+                        fields.Descripcion ||
+                        fields.Descripción ||
+                        "Sin descripción";
+
+
+                    const estado =
+                        fields.Estado ||
+                        "Sin estado";
+
+
+                    const latencia =
+                        fields.Latencia ||
+                        fields.Ping ||
+                        "--";
+
+
+                    const revision =
+                        fields.UltimaRevision ||
+                        fields["ÚltimaRevision"] ||
+                        fields.Fecha ||
+                        "--";
+
+
+                    const estadoNormalizado =
+                        normalizarTexto(
+                            estado
+                        );
+
+
+                    let claseEstado =
+                        "neutral";
+
+
+                    if (
+                        estadoNormalizado.includes(
+                            "operativo"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "online"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "conectado"
+                        )
+                    ) {
+
+                        claseEstado =
+                            "online";
+
+                        serviciosOnline++;
+
+
+                    } else if (
+                        estadoNormalizado.includes(
+                            "mantenimiento"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "advertencia"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "warning"
+                        )
+                    ) {
+
+                        claseEstado =
+                            "warning";
+
+
+                    } else if (
+                        estadoNormalizado.includes(
+                            "caido"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "offline"
+                        ) ||
+                        estadoNormalizado.includes(
+                            "desconectado"
+                        )
+                    ) {
+
+                        claseEstado =
+                            "offline";
+                    }
+
+
+                    return `
+                        <article
+                            class="service-card ${claseEstado}"
+                        >
+
+                            <div class="service-main">
+
+                                <div class="service-icon">
+                                    🖥️
+                                </div>
+
+                                <div class="service-info">
+
+                                    <div class="service-heading">
+
+                                        <h3>
+                                            ${escaparHTML(
+                                                nombre
+                                            )}
+                                        </h3>
+
+                                        <span
+                                            class="service-status ${claseEstado}"
+                                        >
+
+                                            <span class="status-dot"></span>
+
+                                            ${escaparHTML(
+                                                estado
+                                            )}
+
+                                        </span>
+
+                                    </div>
+
+                                    <p>
+                                        ${escaparHTML(
+                                            descripcion
+                                        )}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="service-meta">
+
+                                <div class="service-latency">
+
+                                    <span>
+                                        Latencia
+                                    </span>
+
+                                    <strong>
+                                        ${escaparHTML(
+                                            latencia
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="service-revision">
+
+                                    <span class="revision-icon">
+                                        🕐
+                                    </span>
+
+                                    <div>
+
+                                        <span>
+                                            Última revisión
+                                        </span>
+
+                                        <strong>
+                                            ${escaparHTML(
+                                                revision
+                                            )}
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                    `;
+                }
+            )
+            .join("");
+
+
+    if (
+        serviciosOnline ===
+        items.length
+    ) {
+
+        estadoGeneral.textContent =
+            "● OPERATIVO";
+
+        estadoGeneral.className =
+            "section-status online";
+
+
+    } else if (
+        serviciosOnline > 0
+    ) {
+
+        estadoGeneral.textContent =
+            "● REVISAR";
+
+        estadoGeneral.className =
+            "section-status warning";
+
+
+    } else {
+
+        estadoGeneral.textContent =
+            "● NO DISPONIBLE";
+
+        estadoGeneral.className =
+            "section-status offline";
+    }
+}
+
+
+/* =========================================
+   RESUMEN EQUIPOS
+========================================= */
+
+function actualizarResumenEquipos() {
+
+    const total =
+        equiposData.length;
+
+
+    const conectados =
+        equiposData.filter(
+            equipo =>
+                normalizarTexto(
+                    equipo.Estado
+                ) ===
+                "conectado"
+        ).length;
+
+
+    const desconectados =
+        equiposData.filter(
+            equipo =>
+                normalizarTexto(
+                    equipo.Estado
+                ) ===
+                "desconectado"
+        ).length;
+
+
+    totalEquipos.textContent =
+        total;
+
+
+    equiposConectados.textContent =
+        conectados;
+
+
+    equiposDesconectados.textContent =
+        desconectados;
+}
+
+
+/* =========================================
+   ÁREAS
+========================================= */
+
+function actualizarFiltroAreas() {
+
+    const areas =
+        [
+            ...new Set(
+                equiposData
+                    .map(
+                        equipo =>
+                            equipo.Area
+                    )
+                    .filter(Boolean)
+            )
+        ]
+        .sort(
+            (a, b) =>
+                String(a)
+                    .localeCompare(
+                        String(b),
+                        "es"
+                    )
+        );
+
+
+    filtroAreaEquipo.innerHTML = `
+        <option value="todos">
+            Todas las áreas
+        </option>
+    `;
+
+
+    areas.forEach(
+        area => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                area;
+
+
+            option.textContent =
+                area;
+
+
+            filtroAreaEquipo.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+/* =========================================
+   FILTRAR EQUIPOS
+========================================= */
+
+function aplicarFiltrosEquipos(conservarPagina) {
+
+    const texto =
+        normalizarTexto(
+            buscarEquipo.value
+        );
+
+
+    const estado =
+        filtroEstadoEquipo.value;
+
+
+    const area =
+        filtroAreaEquipo.value;
+
+
+    equiposFiltrados =
+        equiposData.filter(
+            equipo => {
+
+                const coincideTexto =
+                    !texto ||
+                    normalizarTexto(
+                        equipo.Nombre
+                    ).includes(texto) ||
+                    normalizarTexto(
+                        equipo.IP
+                    ).includes(texto) ||
+                    normalizarTexto(
+                        equipo.DNSHostName
+                    ).includes(texto);
+
+
+                const coincideEstado =
+                    estado === "todos" ||
+                    String(
+                        equipo.Estado || ""
+                    ) === estado;
+
+
+                const coincideArea =
+                    area === "todos" ||
+                    String(
+                        equipo.Area || ""
+                    ) === area;
+
+
+                return (
+                    coincideTexto &&
+                    coincideEstado &&
+                    coincideArea
+                );
+            }
+        );
+
+
+    if (!conservarPagina) {
+        paginaActual = 1;
+    }
+
+
+    renderizarTablaEquipos();
+}
+
+
+/* =========================================
+   CLASE ESTADO
+========================================= */
+
+function obtenerClaseEstado(
+    estado
+) {
+
+    const estadoNormalizado =
+        normalizarTexto(
+            estado
+        );
+
+
+    if (
+        estadoNormalizado ===
+        "conectado"
+    ) {
+
+        return "online";
+    }
+
+
+    if (
+        estadoNormalizado ===
+        "desconectado"
+    ) {
+
+        return "offline";
+    }
+
+
+    return "neutral";
+}
+
+
+/* =========================================
+   RENDER TABLA
+========================================= */
+
+function renderizarTablaEquipos() {
+
+    const totalResultados =
+        equiposFiltrados.length;
+
+
+    const totalPaginas =
+        Math.max(
+            1,
+            Math.ceil(
+                totalResultados /
+                EQUIPOS_POR_PAGINA
+            )
+        );
+
+
+    if (
+        paginaActual >
+        totalPaginas
+    ) {
+
+        paginaActual =
+            totalPaginas;
+    }
+
+
+    const inicio =
+        (
+            paginaActual - 1
+        ) *
+        EQUIPOS_POR_PAGINA;
+
+
+    const fin =
+        inicio +
+        EQUIPOS_POR_PAGINA;
+
+
+    const equiposPagina =
+        equiposFiltrados.slice(
+            inicio,
+            fin
+        );
+
+
+    if (
+        equiposResultados
+    ) {
+
+        if (
+            totalResultados === 0
+        ) {
+
+            equiposResultados.textContent =
+                "0 equipos encontrados";
+
+        } else {
+
+            equiposResultados.textContent =
+                `Equipos encontrados: ${totalResultados}`;
+        }
+    }
+
+
+    if (
+        totalResultados === 0
+    ) {
+
+        equiposTableBody.innerHTML =
+            "";
+
+        equiposEmpty.style.display =
+            "flex";
+
+
+        renderizarPaginacion(
+            0
+        );
+
+
+        return;
+    }
+
+
+    equiposEmpty.style.display =
+        "none";
+
+
+    equiposTableBody.innerHTML =
+        equiposPagina
+            .map(
+                equipo => {
+
+                    const estado =
+                        equipo.Estado ||
+                        "No verificable";
+
+
+                    const claseEstado =
+                        obtenerClaseEstado(
+                            estado
+                        );
+
+
+                    /*
+                     * SOLO SE CONSULTA LA MEMORIA.
+                     *
+                     * No se hace ninguna petición
+                     * a SharePoint aquí.
+                     */
+
+                    const trabajador =
+                        obtenerTrabajadorEquipo(
+                            equipo.Nombre
+                        );
+
+
+                    const trabajadorHTML =
+                        trabajador
+                            ? `
+                                <span
+                                    class="trabajador-name"
+                                    title="${escaparHTML(
+                                        trabajador.nombre
+                                    )}"
+                                >
+                                    ${escaparHTML(
+                                        trabajador.nombre
+                                    )}
+                                </span>
+                            `
+                            : `
+                                <button
+                                    type="button"
+                                    class="registrar-trabajador"
+                                    data-equipo="${escaparHTML(
+                                        equipo.Nombre
+                                    )}"
+                                >
+                                    Registrar
+                                </button>
+                            `;
+
+
+                    return `
+                        <tr>
+
+                            <td>
+
+                                <div class="equipo-name">
+
+                                    <div class="equipo-icon">
+                                        🖥️
+                                    </div>
+
+                                    <div>
+
+                                        <strong
+                                            title="${escaparHTML(
+                                                equipo.Nombre
+                                            )}"
+                                        >
+                                            ${escaparHTML(
+                                                equipo.Nombre
+                                            )}
+                                        </strong>
+
+                                        <span
+                                            title="${escaparHTML(
+                                                equipo.DNSHostName
+                                            )}"
+                                        >
+                                            ${escaparHTML(
+                                                equipo.DNSHostName ||
+                                                "Sin DNS"
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span
+                                    class="equipo-status ${claseEstado}"
+                                >
+
+                                    <span
+                                        class="equipo-status-dot"
+                                    ></span>
+
+                                    ${escaparHTML(
+                                        estado
+                                    )}
+
+                                </span>
+
+                            </td>
+
+
+                            <td class="trabajador-cell">
+
+                                ${trabajadorHTML}
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="equipo-ip">
+
+                                    ${escaparHTML(
+                                        equipo.IP ||
+                                        "--"
+                                    )}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="equipo-so">
+
+                                    ${escaparHTML(
+                                        equipo.SistemaOperativo ||
+                                        "--"
+                                    )}
+
+                                    ${
+                                        equipo.VersionSO
+                                            ? `
+                                                <br>
+
+                                                <small>
+                                                    ${escaparHTML(
+                                                        equipo.VersionSO
+                                                    )}
+                                                </small>
+                                            `
+                                            : ""
+                                    }
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <span
+                                    class="equipo-area"
+                                    title="${escaparHTML(
+                                        equipo.Area
+                                    )}"
+                                >
+                                    ${escaparHTML(
+                                        equipo.Area ||
+                                        "--"
+                                    )}
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="equipo-date">
+
+                                    ${escaparHTML(
+                                        equipo.UltimoRegistroAD ||
+                                        "--"
+                                    )}
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+                    `;
+                }
+            )
+            .join("");
+
+
+    renderizarPaginacion(
+        totalPaginas
+    );
+}
+
+
+/* =========================================
+   PAGINACIÓN
+========================================= */
+
+function renderizarPaginacion(
+    totalPaginas
+) {
+
+    const existente =
+        document.querySelector(
+            ".equipos-pagination"
+        );
+
+
+    if (
+        existente
+    ) {
+
+        existente.remove();
+    }
+
+
+    if (
+        totalPaginas <= 1
+    ) {
+
+        return;
+    }
+
+
+    const contenedor =
+        document.createElement(
+            "div"
+        );
+
+
+    contenedor.className =
+        "equipos-pagination";
+
+
+    const botonAnterior =
+        document.createElement(
+            "button"
+        );
+
+
+    botonAnterior.type =
+        "button";
+
+
+    botonAnterior.className =
+        "pagination-btn pagination-prev";
+
+
+    botonAnterior.innerHTML =
+        "‹";
+
+
+    botonAnterior.disabled =
+        paginaActual === 1;
+
+
+    botonAnterior.addEventListener(
+        "click",
+        () => {
+
+            if (
+                paginaActual > 1
+            ) {
+
+                paginaActual--;
+
+                renderizarTablaEquipos();
+            }
+        }
+    );
+
+
+    contenedor.appendChild(
+        botonAnterior
+    );
+
+
+    const paginas =
+        generarPaginas(
+            paginaActual,
+            totalPaginas
+        );
+
+
+    paginas.forEach(
+        pagina => {
+
+            if (
+                pagina === "..."
+            ) {
+
+                const puntos =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                puntos.className =
+                    "pagination-ellipsis";
+
+
+                puntos.textContent =
+                    "...";
+
+
+                contenedor.appendChild(
+                    puntos
+                );
+
+
+                return;
+            }
+
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "pagination-btn";
+
+
+            boton.textContent =
+                pagina;
+
+
+            if (
+                pagina === paginaActual
+            ) {
+
+                boton.classList.add(
+                    "active"
+                );
+            }
+
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    paginaActual =
+                        pagina;
+
+
+                    renderizarTablaEquipos();
+                }
+            );
+
+
+            contenedor.appendChild(
+                boton
+            );
+        }
+    );
+
+
+    const botonSiguiente =
+        document.createElement(
+            "button"
+        );
+
+
+    botonSiguiente.type =
+        "button";
+
+
+    botonSiguiente.className =
+        "pagination-btn pagination-next";
+
+
+    botonSiguiente.innerHTML =
+        "›";
+
+
+    botonSiguiente.disabled =
+        paginaActual ===
+        totalPaginas;
+
+
+    botonSiguiente.addEventListener(
+        "click",
+        () => {
+
+            if (
+                paginaActual <
+                totalPaginas
+            ) {
+
+                paginaActual++;
+
+                renderizarTablaEquipos();
+            }
+        }
+    );
+
+
+    contenedor.appendChild(
+        botonSiguiente
+    );
+
+
+    const tableContainer =
+        document.querySelector(
+            ".equipos-table-container"
+        );
+
+
+    if (
+        tableContainer
+    ) {
+
+        tableContainer.parentNode.insertBefore(
+            contenedor,
+            tableContainer.nextSibling
+        );
+    }
+}
+
+
+/* =========================================
+   GENERAR PÁGINAS
+========================================= */
+
+function generarPaginas(
+    actual,
+    total
+) {
+
+    if (
+        total <= 7
+    ) {
+
+        return Array.from(
+            {
+                length: total
+            },
+            (_, index) =>
+                index + 1
+        );
+    }
+
+
+    const paginas =
+        [];
+
+
+    paginas.push(
+        1
+    );
+
+
+    if (
+        actual > 4
+    ) {
+
+        paginas.push(
+            "..."
+        );
+    }
+
+
+    const inicio =
+        Math.max(
+            2,
+            actual - 1
+        );
+
+
+    const fin =
+        Math.min(
+            total - 1,
+            actual + 1
+        );
+
+
+    for (
+        let i = inicio;
+        i <= fin;
+        i++
+    ) {
+
+        paginas.push(
+            i
+        );
+    }
+
+
+    if (
+        actual <
+        total - 3
+    ) {
+
+        paginas.push(
+            "..."
+        );
+    }
+
+
+    paginas.push(
+        total
+    );
+
+
+    return paginas;
+}
+
+
+/* =========================================
+   ABRIR MODAL
+========================================= */
+
+async function abrirModalTrabajador(
+    nombreEquipo
+) {
+
+    equipoSeleccionado =
+        nombreEquipo;
+
+
+    modalEquipoNombre.textContent =
+        nombreEquipo;
+
+
+    trabajadorNombre.value =
+        "";
+
+
+    trabajadorError.style.display =
+        "none";
+
+
+    trabajadorError.textContent =
+        "";
+
+
+    guardarTrabajador.disabled =
+        false;
+
+
+    guardarTrabajador.textContent =
+        "Guardar";
+
+
+    trabajadorModal.style.display =
+        "flex";
+
+
+    /*
+     * Si ya tenemos trabajadores cargados,
+     * mostramos inmediatamente la asignación.
+     */
+
+    const trabajador =
+        obtenerTrabajadorEquipo(
+            nombreEquipo
+        );
+
+
+    if (
+        trabajador
+    ) {
+
+        trabajadorNombre.value =
+            trabajador.nombre;
+
+    } else {
+
+        /*
+         * Si todavía no terminaron de cargar,
+         * intentamos cargar la información.
+         *
+         * Esto ocurre únicamente al abrir
+         * el modal, nunca durante el inventario.
+         */
+
+        if (
+            !trabajadoresCargados
+        ) {
+
+            trabajadorError.textContent =
+                "Consultando asignación...";
+
+            trabajadorError.style.display =
+                "block";
+
+
+            try {
+
+                await obtenerTrabajadores(
+                    tokenActual
+                );
+
+
+                const trabajadorActual =
+                    obtenerTrabajadorEquipo(
+                        nombreEquipo
+                    );
+
+
+                if (
+                    trabajadorActual
+                ) {
+
+                    trabajadorNombre.value =
+                        trabajadorActual.nombre;
+
+                    trabajadorError.style.display =
+                        "none";
+
+                } else {
+
+                    trabajadorError.style.display =
+                        "none";
+                }
+
+
+            } catch (error) {
+
+                console.warn(
+                    "Error consultando trabajador:",
+                    error
+                );
+
+
+                trabajadorError.textContent =
+                    "No se pudo consultar la asignación.";
+
+                trabajadorError.style.display =
+                    "block";
+            }
+        }
+    }
+
+
+    setTimeout(
+        () => {
+
+            trabajadorNombre.focus();
+
+        },
+        50
+    );
+}
+
+
+/* =========================================
+   CERRAR MODAL
+========================================= */
+
+function cerrarModalTrabajador() {
+
+    trabajadorModal.style.display =
+        "none";
+
+
+    equipoSeleccionado =
+        null;
+
+
+    trabajadorNombre.value =
+        "";
+
+
+    trabajadorError.textContent =
+        "";
+
+
+    trabajadorError.style.display =
+        "none";
+
+
+    guardarTrabajador.disabled =
+        false;
+
+
+    guardarTrabajador.textContent =
+        "Guardar";
+}
+
+
+/* =========================================
+   ERROR MODAL
+========================================= */
+
+function mostrarErrorTrabajador(
+    mensaje
+) {
+
+    trabajadorError.textContent =
+        mensaje;
+
+
+    trabajadorError.style.display =
+        "block";
+}
+
+
+/* =========================================
+   GUARDAR TRABAJADOR
+========================================= */
+
+async function guardarAsignacionTrabajador() {
+
+    const nombre =
+        trabajadorNombre.value.trim();
+
+
+    if (
+        !equipoSeleccionado
+    ) {
+
+        mostrarErrorTrabajador(
+            "No se seleccionó ningún equipo."
+        );
+
+        return;
+    }
+
+
+    if (
+        !nombre
+    ) {
+
+        mostrarErrorTrabajador(
+            "Ingrese el nombre del trabajador."
+        );
+
+
+        trabajadorNombre.focus();
+
+
+        return;
+    }
+
+
+    try {
+
+        guardarTrabajador.disabled =
+            true;
+
+
+        trabajadorError.style.display =
+            "none";
+
+
+        guardarTrabajador.textContent =
+            "Guardando...";
+
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                tokenActual
+            );
+
+
+        const lista =
+            await obtenerListaTrabajadores(
+                tokenActual
+            );
+
+
+        const columnas =
+            await obtenerColumnasTrabajadores(
+                tokenActual
+            );
+
+
+        const campoEquipo =
+            obtenerNombreInternoColumna(
+                columnas,
+                "Equipo1"
+            );
+
+
+        const campoTrabajador =
+            obtenerNombreInternoColumna(
+                columnas,
+                "Trabajador"
+            );
+
+
+        if (
+            !campoEquipo
+        ) {
+
+            throw new Error(
+                'No se encontró la columna "Equipo1".'
+            );
+        }
+
+
+        if (
+            !campoTrabajador
+        ) {
+
+            throw new Error(
+                'No se encontró la columna "Trabajador".'
+            );
+        }
+
+
+        /*
+         * Verificamos si ya existe una asignación.
+         */
+
+        const asignacionActual =
+            obtenerTrabajadorEquipo(
+                equipoSeleccionado
+            );
+
+
+        /*
+         * Si no estaba en memoria,
+         * hacemos una consulta antes de crear
+         * para evitar duplicados.
+         */
+
+        let asignacionFinal =
+            asignacionActual;
+
+
+        if (
+            !asignacionFinal &&
+            !trabajadoresCargados
+        ) {
+
+            await obtenerTrabajadores(
+                tokenActual
+            );
+
+
+            asignacionFinal =
+                obtenerTrabajadorEquipo(
+                    equipoSeleccionado
+                );
+        }
+
+
+        const fields = {};
+
+
+        fields[campoEquipo] =
+            equipoSeleccionado;
+
+
+        fields[campoTrabajador] =
+            nombre;
+
+
+        /*
+         * Title solo si es obligatorio.
+         */
+
+        const columnaTitle =
+            columnas.find(
+                columna =>
+                    normalizarTexto(
+                        columna.displayName
+                    ) === "title" ||
+                    columna.name === "Title"
+            );
+
+
+        if (
+            columnaTitle &&
+            columnaTitle.required === true
+        ) {
+
+            fields[
+                columnaTitle.name
+            ] =
+                equipoSeleccionado;
+        }
+
+
+        let response;
+
+
+        /* =====================================
+           ACTUALIZAR
+        ====================================== */
+
+        if (
+            asignacionFinal &&
+            asignacionFinal.itemId
+        ) {
+
+            const url =
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacionFinal.itemId}/fields`;
+
+
+            response =
+                await fetch(
+                    url,
+                    {
+
+                        method:
+                            "PATCH",
+
+                        headers: {
+
+                            Authorization:
+                                `Bearer ${tokenActual}`,
+
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                fields
+                            )
+                    }
+                );
+
+
+        } else {
+
+            /* =====================================
+               CREAR
+            ====================================== */
+
+            const url =
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
+
+
+            response =
+                await fetch(
+                    url,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            Authorization:
+                                `Bearer ${tokenActual}`,
+
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                fields:
+                                    fields
+                            })
+                    }
+                );
+        }
+
+
+        if (
+            !response.ok
+        ) {
+
+            const texto =
+                await response.text();
+
+
+            throw new Error(
+                `SharePoint respondió ${response.status}: ${texto}`
+            );
+        }
+
+
+        const resultado =
+            await response.json();
+
+
+        /*
+         * Actualizar memoria local.
+         */
+
+        trabajadoresPorEquipo[
+            normalizarTexto(
+                equipoSeleccionado
+            )
+        ] = {
+
+            nombre:
+                nombre,
+
+            itemId:
+                resultado.id ||
+                asignacionFinal?.itemId,
+
+            equipo:
+                equipoSeleccionado
+        };
+
+
+        trabajadoresCargados =
+            true;
+
+
+        cerrarModalTrabajador();
+
+
+        renderizarTablaEquipos();
+
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando trabajador:",
+            error
+        );
+
+
+        mostrarErrorTrabajador(
+            obtenerMensajeError(
+                error
+            )
+        );
+
+
+    } finally {
+
+        guardarTrabajador.disabled =
+            false;
+
+
+        guardarTrabajador.textContent =
+            "Guardar";
+    }
+}
+
+
+/* =========================================
+   MENSAJES DE ERROR
+========================================= */
+
+function obtenerMensajeError(
+    error
+) {
+
+    const mensaje =
+        String(
+            error?.message ||
+            error ||
+            ""
+        );
+
+
+    if (
+        mensaje.includes(
+            "403"
+        )
+    ) {
+
+        return (
+            "No tienes permisos para modificar esta lista."
+        );
+    }
+
+
+    if (
+        mensaje.includes(
+            "401"
+        )
+    ) {
+
+        return (
+            "La sesión expiró. Recarga la página e inicia sesión nuevamente."
+        );
+    }
+
+
+    return (
+        mensaje ||
+        "No se pudo guardar la asignación."
+    );
+}
+
+
+/* =========================================
+   EVENTOS TABLA
+========================================= */
+
+if (
+    equiposTableBody
+) {
+
+    equiposTableBody.addEventListener(
+        "click",
+        event => {
+
+            const boton =
+                event.target.closest(
+                    ".registrar-trabajador"
+                );
+
+
+            if (
+                !boton
+            ) {
+                return;
+            }
+
+
+            const equipo =
+                boton.dataset.equipo;
+
+
+            if (
+                !equipo
+            ) {
+                return;
+            }
+
+
+            abrirModalTrabajador(
+                equipo
+            );
+        }
+    );
+}
+
+
+/* =========================================
+   EVENTOS FILTROS
+========================================= */
+
+if (
+    buscarEquipo
+) {
+
+    let temporizadorBusqueda = null;
+
+    buscarEquipo.addEventListener(
+        "input",
+        () => {
+            clearTimeout(temporizadorBusqueda);
+            temporizadorBusqueda = setTimeout(aplicarFiltrosEquipos, 200);
+        }
+    );
+}
+
+
+if (
+    filtroEstadoEquipo
+) {
+
+    filtroEstadoEquipo.addEventListener(
+        "change",
+        () => {
+
+            aplicarFiltrosEquipos();
+        }
+    );
+}
+
+
+if (
+    filtroAreaEquipo
+) {
+
+    filtroAreaEquipo.addEventListener(
+        "change",
+        () => {
+
+            aplicarFiltrosEquipos();
+        }
+    );
+}
+
+
+/* =========================================
+   EVENTOS MODAL
+========================================= */
+
+if (
+    cerrarTrabajadorModal
+) {
+
+    cerrarTrabajadorModal.addEventListener(
+        "click",
+        cerrarModalTrabajador
+    );
+}
+
+
+if (
+    cancelarTrabajador
+) {
+
+    cancelarTrabajador.addEventListener(
+        "click",
+        cerrarModalTrabajador
+    );
+}
+
+
+if (
+    guardarTrabajador
+) {
+
+    guardarTrabajador.addEventListener(
+        "click",
+        guardarAsignacionTrabajador
+    );
+}
+
+
+if (
+    trabajadorNombre
+) {
+
+    trabajadorNombre.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                guardarAsignacionTrabajador();
+            }
+
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                cerrarModalTrabajador();
+            }
+        }
+    );
+}
+
+
+if (
+    trabajadorModal
+) {
+
+    trabajadorModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                trabajadorModal
+            ) {
+
+                cerrarModalTrabajador();
+            }
+        }
+    );
+}
+
+
+/* =========================================
+   CARGAR EQUIPOS
+   -----------------------------------------
+   ESTA ES LA PARTE CRÍTICA.
+   
+   NO CARGA TRABAJADORES.
+   NO ESPERA TRABAJADORES.
+   NO CONSULTA LA LISTA.
+========================================= */
+
+/* Aplica datos nuevos SIN perder búsqueda, filtros ni página actual. */
+function aplicarDatosEquipos(equipos) {
+    equiposData = equipos;
+    const areaPrevia = filtroAreaEquipo.value;
+    actualizarResumenEquipos();
+    actualizarFiltroAreas();
+    if ([...filtroAreaEquipo.options].some(o => o.value === areaPrevia)) {
+        filtroAreaEquipo.value = areaPrevia;
+    }
+    aplicarFiltrosEquipos(true);
+}
+
+async function cargarEquipos() {
+    if (cargandoEquipos) return;
+    cargandoEquipos = true;
+    try {
+        equiposEstado.textContent = "● ACTUALIZANDO";
+        equiposEstado.className = "section-status warning";
+
+        const equipos = await obtenerEquiposDesdeSharePoint();
+        if (equipos) {
+            aplicarDatosEquipos(equipos);
+            guardarCache("equipos", { etag: etagEquipos, datos: equipos });
+        }
+
+        lastUpdate.textContent = obtenerFechaActual();
+        equiposEstado.textContent = "● ACTUALIZADO";
+        equiposEstado.className = "section-status online";
+    } catch (error) {
+        console.error("Error cargando equipos:", error);
+        if (equiposData.length > 0) {
+            equiposEstado.textContent = "● SIN ACTUALIZAR";
+            equiposEstado.className = "section-status warning";
+        } else {
+            equiposEstado.textContent = "● ERROR";
+            equiposEstado.className = "section-status offline";
+            equiposTableBody.innerHTML = `
+                <tr><td colspan="7" class="equipos-loading">
+                    <div class="table-loading"><span>No se pudo cargar el inventario.</span></div>
+                </td></tr>`;
+            if (equiposResultados) equiposResultados.textContent = "Error al obtener los equipos.";
+        }
+    } finally {
+        cargandoEquipos = false;
+    }
+}
+
+
+/* =========================================
+   CARGAR SERVICIOS
+========================================= */
+
+async function cargarServicios() {
+
+    try {
+
+        const servicios =
+            await obtenerMonitoreoTI(
+                tokenActual
+            );
+
+
+        renderizarServicios(
+            servicios
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando servicios:",
+            error
+        );
+
+
+        serviciosGrid.innerHTML = `
+            <div
+                class="service-card offline"
+            >
+
+                <div class="service-main">
+
+                    <div class="service-icon">
+                        ⚠️
+                    </div>
+
+                    <div class="service-info">
+
+                        <div class="service-heading">
+
+                            <h3>
+                                Error de conexión
+                            </h3>
+
+                            <span
+                                class="service-status offline"
+                            >
+
+                                <span class="status-dot"></span>
+
+                                ERROR
+
+                            </span>
+
+                        </div>
+
+                        <p>
+                            No se pudieron obtener
+                            los servicios desde SharePoint.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+
+        estadoGeneral.textContent =
+            "● ERROR";
+
+
+        estadoGeneral.className =
+            "section-status offline";
+    }
+}
+
+
+/* =========================================
+   CARGA INICIAL
+========================================= */
+
+function mostrarBotonLogin(mensaje) {
+    mostrarLoading(mensaje);
+    if (document.getElementById("btnLoginMs")) return;
+    const boton = document.createElement("button");
+    boton.id = "btnLoginMs";
+    boton.type = "button";
+    boton.className = "loading-btn";
+    boton.textContent = "Iniciar sesión con Microsoft";
+    boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        try {
+            if (await iniciarSesion(true)) {
+                boton.remove();
+                ocultarLoading();
+                iniciarCargas();
+            }
+        } catch (error) {
+            console.error("Error de inicio de sesión:", error);
+            loadingMessage.textContent = "No se pudo iniciar sesión. Permite las ventanas emergentes e inténtalo de nuevo.";
+        } finally {
+            boton.disabled = false;
+        }
+    });
+    loadingOverlay.querySelector(".loading-card").appendChild(boton);
+}
+
+/* Cada sección se pinta apenas llegan sus datos; ninguna espera a la otra. */
+function iniciarCargas() {
+    ultimaActualizacion = Date.now();
+    cargarServicios();
+    cargarEquipos();
+    obtenerTrabajadores().catch(error => console.warn("Carga de trabajadores falló:", error));
+}
+
+async function cargarDashboard() {
+    try {
+        if (!msalInstanceInfraestructura) {
+            mostrarLoading("No se pudo cargar el componente de Microsoft (MSAL). Revisa tu conexión o bloqueadores y recarga la página.");
+            return;
+        }
+
+        /* Si ya hay sesión, mostramos el último inventario guardado al instante. */
+        let conCache = false;
+        if (msalInstanceInfraestructura.getAllAccounts().length > 0) {
+            const cache = leerCache("equipos");
+            if (cache && Array.isArray(cache.datos) && cache.datos.length > 0) {
+                etagEquipos = cache.etag || null;
+                aplicarDatosEquipos(cache.datos);
+                conCache = true;
+            }
+        }
+        if (!conCache) mostrarLoading("Iniciando sesión...");
+
+        const token = await iniciarSesion(false);
+        if (!token) {
+            mostrarBotonLogin("Inicia sesión para ver el monitoreo.");
+            return;
+        }
+        ocultarLoading();
+        iniciarCargas();
+    } catch (error) {
+        console.error("Error inicializando infraestructura:", error);
+        mostrarBotonLogin("No se pudo cargar el monitoreo.");
+    }
+}
+
+
+/* =========================================
+   ACTUALIZACIÓN AUTOMÁTICA
+========================================= */
+
+async function actualizarDashboard() {
+    if (document.hidden || !tokenActual) return;   /* no gastar red en pestañas ocultas */
+    try {
+        if (!(await obtenerTokenSilencioso())) return;
+        ultimaActualizacion = Date.now();
+        await Promise.all([cargarServicios(), cargarEquipos()]);
+    } catch (error) {
+        console.error("Error en actualización automática:", error);
+    }
+}
+
+
+/* =========================================
+   INICIO
+========================================= */
+
+function iniciarInfraestructura() {
+    cargarDashboard();
+    setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && Date.now() - ultimaActualizacion > 30000) {
+            actualizarDashboard();
+        }
+    });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", iniciarInfraestructura);
+} else {
+    iniciarInfraestructura();
 }

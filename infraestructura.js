@@ -27,11 +27,10 @@ const msalConfigInfraestructura = {
 };
 
 
-/* Si el script de MSAL no cargó (CDN bloqueado/lento) no rompemos todo el archivo. */
 const msalInstanceInfraestructura =
-    (typeof msal !== "undefined")
-        ? new msal.PublicClientApplication(msalConfigInfraestructura)
-        : null;
+    new msal.PublicClientApplication(
+        msalConfigInfraestructura
+    );
 
 
 /* =========================================
@@ -310,87 +309,105 @@ function normalizarTexto(valor) {
    AUTENTICACIÓN
 ========================================= */
 
-const SCOPES_GRAPH = ["User.Read", "Sites.Read.All", "Sites.ReadWrite.All"];
-const CACHE_PREFIJO = "alferza_ti_";
+async function iniciarSesion() {
 
-let etagEquipos = null;
-let promesaSitio = null;
-let promesaDrive = null;
-let promesaTrabajadores = null;
-let cargandoEquipos = false;
-let ultimaActualizacion = 0;
-
-function leerCache(clave) {
     try {
-        const valor = localStorage.getItem(CACHE_PREFIJO + clave);
-        return valor ? JSON.parse(valor) : null;
-    } catch (e) {
-        return null;
-    }
-}
 
-function guardarCache(clave, valor) {
-    try {
-        localStorage.setItem(CACHE_PREFIJO + clave, JSON.stringify(valor));
-    } catch (e) {
-        console.warn("No se pudo guardar en caché:", clave);
-    }
-}
+        const cuentas =
+            msalInstanceInfraestructura
+                .getAllAccounts();
 
-/* Token desde caché de MSAL, sin popups. Devuelve null si no hay sesión. */
-async function obtenerTokenSilencioso() {
-    if (!msalInstanceInfraestructura) return null;
-    const cuentas = msalInstanceInfraestructura.getAllAccounts();
-    if (!cuentas.length) return null;
-    cuentaActual = cuentas[0];
-    try {
-        const r = await msalInstanceInfraestructura.acquireTokenSilent({
-            scopes: SCOPES_GRAPH,
-            account: cuentaActual
-        });
-        tokenActual = r.accessToken;
+
+        if (
+            cuentas.length > 0
+        ) {
+
+            cuentaActual =
+                cuentas[0];
+
+        } else {
+
+            const loginResponse =
+                await msalInstanceInfraestructura
+                    .loginPopup({
+
+                        scopes: [
+                            "User.Read",
+                            "Sites.Read.All",
+                            "Sites.ReadWrite.All"
+                        ]
+
+                    });
+
+            cuentaActual =
+                loginResponse.account;
+        }
+
+
+        const tokenResponse =
+            await msalInstanceInfraestructura
+                .acquireTokenSilent({
+
+                    scopes: [
+                        "User.Read",
+                        "Sites.Read.All",
+                        "Sites.ReadWrite.All"
+                    ],
+
+                    account:
+                        cuentaActual
+                });
+
+
+        tokenActual =
+            tokenResponse.accessToken;
+
+
         return tokenActual;
+
+
     } catch (error) {
-        console.warn("Token silencioso no disponible:", error);
-        return null;
-    }
-}
 
-/* interactivo=true abre popup: debe llamarse desde un clic del usuario. */
-async function iniciarSesion(interactivo) {
-    const silencioso = await obtenerTokenSilencioso();
-    if (silencioso || !interactivo) return silencioso;
-    const r = cuentaActual
-        ? await msalInstanceInfraestructura.acquireTokenPopup({ scopes: SCOPES_GRAPH, account: cuentaActual })
-        : await msalInstanceInfraestructura.loginPopup({ scopes: SCOPES_GRAPH });
-    cuentaActual = r.account;
-    tokenActual = r.accessToken || (await obtenerTokenSilencioso());
-    return tokenActual;
-}
+        console.error(
+            "Error de autenticación:",
+            error
+        );
 
-/* fetch a Graph con timeout, reintento en 429/503 y renovación de token en 401. */
-async function graphFetch(url, opciones, intento) {
-    intento = intento || 0;
-    const { timeoutMs = 30000, ...resto } = opciones || {};
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-    try {
-        const response = await fetch(url, {
-            ...resto,
-            signal: ctrl.signal,
-            headers: { Authorization: `Bearer ${tokenActual}`, ...(resto.headers || {}) }
-        });
-        if ((response.status === 429 || response.status === 503) && intento < 3) {
-            const espera = (parseInt(response.headers.get("Retry-After"), 10) || 2 ** intento) * 1000;
-            await new Promise(r => setTimeout(r, Math.min(espera, 10000)));
-            return graphFetch(url, opciones, intento + 1);
+
+        try {
+
+            const tokenPopup =
+                await msalInstanceInfraestructura
+                    .acquireTokenPopup({
+
+                        scopes: [
+                            "User.Read",
+                            "Sites.Read.All",
+                            "Sites.ReadWrite.All"
+                        ]
+
+                    });
+
+
+            tokenActual =
+                tokenPopup.accessToken;
+
+            cuentaActual =
+                tokenPopup.account;
+
+
+            return tokenActual;
+
+
+        } catch (popupError) {
+
+            console.error(
+                "Error obteniendo token:",
+                popupError
+            );
+
+            throw popupError;
         }
-        if (response.status === 401 && intento < 1 && (await obtenerTokenSilencioso())) {
-            return graphFetch(url, opciones, intento + 1);
-        }
-        return response;
-    } finally {
-        clearTimeout(timer);
     }
 }
 
@@ -399,25 +416,51 @@ async function graphFetch(url, opciones, intento) {
    OBTENER SITIO SHAREPOINT
 ========================================= */
 
-/* Una sola petición aunque varias funciones la pidan a la vez; el id se guarda en caché. */
-function obtenerSitioSharePoint() {
-    if (!promesaSitio) {
-        promesaSitio = (async () => {
-            const clave = "sitio:" + SHAREPOINT_SITE;
-            const guardado = leerCache(clave);
-            if (guardado && guardado.id) return guardado;
-            const response = await graphFetch(
-                `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}?$select=id`
-            );
-            if (!response.ok) {
-                throw new Error(`No se pudo obtener el sitio SharePoint. ${response.status} ${await response.text()}`);
-            }
-            const sitio = await response.json();
-            guardarCache(clave, { id: sitio.id });
-            return { id: sitio.id };
-        })().catch(error => { promesaSitio = null; throw error; });
+async function obtenerSitioSharePoint(
+    token
+) {
+
+    if (
+        sitioSharePoint
+    ) {
+        return sitioSharePoint;
     }
-    return promesaSitio;
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudo obtener el sitio SharePoint. ${response.status} ${texto}`
+        );
+    }
+
+
+    sitioSharePoint =
+        await response.json();
+
+
+    return sitioSharePoint;
 }
 
 
@@ -425,25 +468,57 @@ function obtenerSitioSharePoint() {
    OBTENER DRIVE
 ========================================= */
 
-function obtenerDriveSharePoint() {
-    if (!promesaDrive) {
-        promesaDrive = (async () => {
-            const sitio = await obtenerSitioSharePoint();
-            const clave = "drive:" + sitio.id;
-            const guardado = leerCache(clave);
-            if (guardado && guardado.id) return guardado;
-            const response = await graphFetch(
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive?$select=id`
-            );
-            if (!response.ok) {
-                throw new Error(`No se pudo obtener el drive de SharePoint. ${response.status} ${await response.text()}`);
-            }
-            const drive = await response.json();
-            guardarCache(clave, { id: drive.id });
-            return { id: drive.id };
-        })().catch(error => { promesaDrive = null; throw error; });
+async function obtenerDriveSharePoint(
+    token
+) {
+
+    if (
+        driveSharePoint
+    ) {
+        return driveSharePoint;
     }
-    return promesaDrive;
+
+
+    const sitio =
+        await obtenerSitioSharePoint(
+            token
+        );
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudo obtener el drive de SharePoint. ${response.status} ${texto}`
+        );
+    }
+
+
+    driveSharePoint =
+        await response.json();
+
+
+    return driveSharePoint;
 }
 
 
@@ -451,30 +526,71 @@ function obtenerDriveSharePoint() {
    OBTENER ARCHIVO EQUIPOS
 ========================================= */
 
-/* Devuelve null si equipos.json no cambió (no se vuelve a descargar). */
-async function obtenerEquiposDesdeSharePoint() {
-    const drive = await obtenerDriveSharePoint();
-    const ruta = RUTA_EQUIPOS.split("/").map(p => encodeURIComponent(p)).join("/");
-    const base = `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${ruta}`;
+async function obtenerEquiposDesdeSharePoint(
+    token
+) {
 
-    let etag = null;
-    try {
-        const meta = await graphFetch(`${base}?$select=eTag`);
-        if (meta.ok) etag = (await meta.json()).eTag || null;
-    } catch (e) {
-        console.warn("No se pudo consultar la versión de equipos.json:", e);
-    }
-    if (etag && etag === etagEquipos && equiposData.length > 0) return null;
+    const drive =
+        await obtenerDriveSharePoint(
+            token
+        );
 
-    const response = await graphFetch(`${base}:/content`, { timeoutMs: 90000 });
-    if (!response.ok) {
-        throw new Error(`No se pudo descargar equipos.json. ${response.status} ${await response.text()}`);
+
+    const rutaCodificada =
+        RUTA_EQUIPOS
+            .split("/")
+            .map(
+                parte =>
+                    encodeURIComponent(
+                        parte
+                    )
+            )
+            .join("/");
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${rutaCodificada}:/content`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudo descargar equipos.json. ${response.status} ${texto}`
+        );
     }
-    const datos = await response.json();
-    if (!Array.isArray(datos)) {
-        throw new Error("El archivo equipos.json no contiene un arreglo válido.");
+
+
+    const datos =
+        await response.json();
+
+
+    if (
+        !Array.isArray(datos)
+    ) {
+
+        throw new Error(
+            "El archivo equipos.json no contiene un arreglo válido."
+        );
     }
-    etagEquipos = etag;
+
+
     return datos;
 }
 
@@ -664,57 +780,226 @@ function obtenerNombreInternoColumna(
    ESTA FUNCIÓN YA NO BLOQUEA EL INVENTARIO.
 ========================================= */
 
-/* Comparte una sola carga entre todos los llamadores (evita duplicados y listas vacías). */
-function obtenerTrabajadores() {
-    if (trabajadoresCargados) return Promise.resolve(trabajadoresPorEquipo);
-    if (!promesaTrabajadores) {
-        promesaTrabajadores = cargarTrabajadoresDesdeSharePoint()
-            .finally(() => { promesaTrabajadores = null; });
+async function obtenerTrabajadores(
+    token
+) {
+
+    /*
+     * Si ya fueron cargados,
+     * no hacemos otra petición.
+     */
+
+    if (
+        trabajadoresCargados
+    ) {
+
+        return trabajadoresPorEquipo;
     }
-    return promesaTrabajadores;
-}
 
-async function cargarTrabajadoresDesdeSharePoint() {
+
+    /*
+     * Si otra ejecución ya está cargando,
+     * esperamos la misma promesa.
+     */
+
+    if (
+        cargandoTrabajadores
+    ) {
+
+        return trabajadoresPorEquipo;
+    }
+
+
+    cargandoTrabajadores =
+        true;
+
+
     try {
-        const sitio = await obtenerSitioSharePoint();
-        const lista = await obtenerListaTrabajadores(tokenActual);
 
-        let url = `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields($select=Equipo1,Trabajador)&$top=999`;
-        const items = [];
-        while (url) {                       /* antes se perdían los items >999 */
-            const response = await graphFetch(url);
-            if (!response.ok) {
-                throw new Error(`No se pudieron obtener las asignaciones de trabajadores. ${response.status} ${await response.text()}`);
-            }
-            const data = await response.json();
-            items.push(...(data.value || []));
-            url = data["@odata.nextLink"] || null;
+        const sitio =
+            await obtenerSitioSharePoint(
+                token
+            );
+
+
+        const lista =
+            await obtenerListaTrabajadores(
+                token
+            );
+
+
+        /*
+         * IMPORTANTE:
+         *
+         * Solo solicitamos los campos
+         * necesarios.
+         *
+         * Ya no usamos:
+         *
+         * expand=fields
+         *
+         * para traer toda la información.
+         */
+
+        const url =
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields($select=Equipo1,Trabajador)&$top=999`;
+
+
+        const response =
+            await fetch(
+                url,
+                {
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            const texto =
+                await response.text();
+
+            throw new Error(
+                `No se pudieron obtener las asignaciones de trabajadores. ${response.status} ${texto}`
+            );
         }
 
-        trabajadoresData = items;
-        trabajadoresPorEquipo = {};
-        items.forEach(item => {
-            const fields = item.fields || {};
-            if (fields.Equipo1 && fields.Trabajador) {
-                trabajadoresPorEquipo[normalizarTexto(fields.Equipo1)] = {
-                    nombre: fields.Trabajador,
-                    itemId: item.id,
-                    equipo: fields.Equipo1
-                };
-            }
-        });
 
-        if (items.length > 0 && Object.keys(trabajadoresPorEquipo).length === 0) {
-            await cargarTrabajadoresConColumnas(tokenActual, sitio, lista);
+        const data =
+            await response.json();
+
+
+        trabajadoresData =
+            data.value || [];
+
+
+        trabajadoresPorEquipo =
+            {};
+
+
+        /*
+         * Como solicitamos los nombres visibles
+         * de las columnas, primero intentamos
+         * acceder directamente.
+         */
+
+        trabajadoresData.forEach(
+            item => {
+
+                const fields =
+                    item.fields || {};
+
+
+                const equipo =
+                    fields.Equipo1;
+
+
+                const trabajador =
+                    fields.Trabajador;
+
+
+                if (
+                    equipo &&
+                    trabajador
+                ) {
+
+                    trabajadoresPorEquipo[
+                        normalizarTexto(
+                            equipo
+                        )
+                    ] = {
+
+                        nombre:
+                            trabajador,
+
+                        itemId:
+                            item.id,
+
+                        equipo:
+                            equipo
+                    };
+                }
+            }
+        );
+
+
+        /*
+         * Si SharePoint devolvió los campos
+         * con nombres internos diferentes,
+         * usamos el método anterior como respaldo.
+         */
+
+        if (
+            trabajadoresData.length > 0 &&
+            Object.keys(
+                trabajadoresPorEquipo
+            ).length === 0
+        ) {
+
+            await cargarTrabajadoresConColumnas(
+                token,
+                sitio,
+                lista
+            );
         }
 
-        trabajadoresCargados = true;
-        console.log(`Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`);
-        if (equiposData.length > 0) renderizarTablaEquipos();
+
+        trabajadoresCargados =
+            true;
+
+
+        console.log(
+            `Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`
+        );
+
+
+        /*
+         * Actualizamos la tabla únicamente
+         * después de terminar la consulta.
+         *
+         * La página ya estaba visible.
+         */
+
+        if (
+            equiposData.length > 0
+        ) {
+
+            renderizarTablaEquipos();
+        }
+
+
         return trabajadoresPorEquipo;
+
+
     } catch (error) {
-        console.warn("No se pudieron cargar las asignaciones de trabajadores:", error);
+
+        console.warn(
+            "No se pudieron cargar las asignaciones de trabajadores:",
+            error
+        );
+
+
+        /*
+         * IMPORTANTE:
+         *
+         * No lanzamos el error.
+         *
+         * Si falla esta parte,
+         * el inventario sigue funcionando.
+         */
+
         return trabajadoresPorEquipo;
+
+
+    } finally {
+
+        cargandoTrabajadores =
+            false;
     }
 }
 
@@ -823,14 +1108,50 @@ function obtenerTrabajadorEquipo(
    CARGAR SERVICIOS DESDE SHAREPOINT
 ========================================= */
 
-async function obtenerMonitoreoTI() {
-    const sitio = await obtenerSitioSharePoint();
-    const url = `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(SHAREPOINT_LIST_SERVICIOS)}/items?expand=fields&$top=999`;
-    const response = await graphFetch(url);
-    if (!response.ok) {
-        throw new Error(`No se pudo obtener MonitoreoTI. ${response.status} ${await response.text()}`);
+async function obtenerMonitoreoTI(
+    token
+) {
+
+    const sitio =
+        await obtenerSitioSharePoint(
+            token
+        );
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(SHAREPOINT_LIST_SERVICIOS)}/items?expand=fields&$top=999`;
+
+
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        const texto =
+            await response.text();
+
+        throw new Error(
+            `No se pudo obtener MonitoreoTI. ${response.status} ${texto}`
+        );
     }
-    return (await response.json()).value || [];
+
+
+    const data =
+        await response.json();
+
+
+    return data.value || [];
 }
 
 
@@ -1212,7 +1533,7 @@ function actualizarFiltroAreas() {
    FILTRAR EQUIPOS
 ========================================= */
 
-function aplicarFiltrosEquipos(conservarPagina) {
+function aplicarFiltrosEquipos() {
 
     const texto =
         normalizarTexto(
@@ -1268,9 +1589,8 @@ function aplicarFiltrosEquipos(conservarPagina) {
         );
 
 
-    if (!conservarPagina) {
-        paginaActual = 1;
-    }
+    paginaActual =
+        1;
 
 
     renderizarTablaEquipos();
@@ -2554,13 +2874,11 @@ if (
     buscarEquipo
 ) {
 
-    let temporizadorBusqueda = null;
-
     buscarEquipo.addEventListener(
         "input",
         () => {
-            clearTimeout(temporizadorBusqueda);
-            temporizadorBusqueda = setTimeout(aplicarFiltrosEquipos, 200);
+
+            aplicarFiltrosEquipos();
         }
     );
 }
@@ -2692,50 +3010,131 @@ if (
    NO CONSULTA LA LISTA.
 ========================================= */
 
-/* Aplica datos nuevos SIN perder búsqueda, filtros ni página actual. */
-function aplicarDatosEquipos(equipos) {
-    equiposData = equipos;
-    const areaPrevia = filtroAreaEquipo.value;
-    actualizarResumenEquipos();
-    actualizarFiltroAreas();
-    if ([...filtroAreaEquipo.options].some(o => o.value === areaPrevia)) {
-        filtroAreaEquipo.value = areaPrevia;
-    }
-    aplicarFiltrosEquipos(true);
-}
-
 async function cargarEquipos() {
-    if (cargandoEquipos) return;
-    cargandoEquipos = true;
+
     try {
-        equiposEstado.textContent = "● ACTUALIZANDO";
-        equiposEstado.className = "section-status warning";
 
-        const equipos = await obtenerEquiposDesdeSharePoint();
-        if (equipos) {
-            aplicarDatosEquipos(equipos);
-            guardarCache("equipos", { etag: etagEquipos, datos: equipos });
+        equiposEstado.textContent =
+            "● ACTUALIZANDO";
+
+
+        equiposEstado.className =
+            "section-status warning";
+
+
+        /*
+         * SOLO OBTENEMOS equipos.json.
+         */
+
+        const equipos =
+            await obtenerEquiposDesdeSharePoint(
+                tokenActual
+            );
+
+
+        if (
+            !Array.isArray(equipos)
+        ) {
+
+            throw new Error(
+                "equipos.json no contiene un arreglo válido."
+            );
         }
 
-        lastUpdate.textContent = obtenerFechaActual();
-        equiposEstado.textContent = "● ACTUALIZADO";
-        equiposEstado.className = "section-status online";
+
+        equiposData =
+            equipos;
+
+
+        equiposFiltrados =
+            [...equiposData];
+
+
+        paginaActual =
+            1;
+
+
+        /*
+         * Actualizar resumen.
+         */
+
+        actualizarResumenEquipos();
+
+
+        actualizarFiltroAreas();
+
+
+        /*
+         * PINTAR INMEDIATAMENTE.
+         */
+
+        renderizarTablaEquipos();
+
+
+        /*
+         * Fecha.
+         */
+
+        lastUpdate.textContent =
+            obtenerFechaActual();
+
+
+        equiposEstado.textContent =
+            "● ACTUALIZADO";
+
+
+        equiposEstado.className =
+            "section-status online";
+
+
+        console.log(
+            `Inventario cargado: ${equiposData.length} equipos`
+        );
+
+
     } catch (error) {
-        console.error("Error cargando equipos:", error);
-        if (equiposData.length > 0) {
-            equiposEstado.textContent = "● SIN ACTUALIZAR";
-            equiposEstado.className = "section-status warning";
-        } else {
-            equiposEstado.textContent = "● ERROR";
-            equiposEstado.className = "section-status offline";
-            equiposTableBody.innerHTML = `
-                <tr><td colspan="7" class="equipos-loading">
-                    <div class="table-loading"><span>No se pudo cargar el inventario.</span></div>
-                </td></tr>`;
-            if (equiposResultados) equiposResultados.textContent = "Error al obtener los equipos.";
+
+        console.error(
+            "Error cargando equipos:",
+            error
+        );
+
+
+        equiposEstado.textContent =
+            "● ERROR";
+
+
+        equiposEstado.className =
+            "section-status offline";
+
+
+        equiposTableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="7"
+                    class="equipos-loading"
+                >
+
+                    <div class="table-loading">
+
+                        <span>
+                            No se pudo cargar el inventario.
+                        </span>
+
+                    </div>
+
+                </td>
+            </tr>
+        `;
+
+
+        if (
+            equiposResultados
+        ) {
+
+            equiposResultados.textContent =
+                "Error al obtener los equipos.";
         }
-    } finally {
-        cargandoEquipos = false;
     }
 }
 
@@ -2825,69 +3224,123 @@ async function cargarServicios() {
    CARGA INICIAL
 ========================================= */
 
-function mostrarBotonLogin(mensaje) {
-    mostrarLoading(mensaje);
-    if (document.getElementById("btnLoginMs")) return;
-    const boton = document.createElement("button");
-    boton.id = "btnLoginMs";
-    boton.type = "button";
-    boton.className = "loading-btn";
-    boton.textContent = "Iniciar sesión con Microsoft";
-    boton.addEventListener("click", async () => {
-        boton.disabled = true;
-        try {
-            if (await iniciarSesion(true)) {
-                boton.remove();
-                ocultarLoading();
-                iniciarCargas();
-            }
-        } catch (error) {
-            console.error("Error de inicio de sesión:", error);
-            loadingMessage.textContent = "No se pudo iniciar sesión. Permite las ventanas emergentes e inténtalo de nuevo.";
-        } finally {
-            boton.disabled = false;
-        }
-    });
-    loadingOverlay.querySelector(".loading-card").appendChild(boton);
-}
-
-/* Cada sección se pinta apenas llegan sus datos; ninguna espera a la otra. */
-function iniciarCargas() {
-    ultimaActualizacion = Date.now();
-    cargarServicios();
-    cargarEquipos();
-    obtenerTrabajadores().catch(error => console.warn("Carga de trabajadores falló:", error));
-}
-
 async function cargarDashboard() {
+
     try {
-        if (!msalInstanceInfraestructura) {
-            mostrarLoading("No se pudo cargar el componente de Microsoft (MSAL). Revisa tu conexión o bloqueadores y recarga la página.");
-            return;
-        }
 
-        /* Si ya hay sesión, mostramos el último inventario guardado al instante. */
-        let conCache = false;
-        if (msalInstanceInfraestructura.getAllAccounts().length > 0) {
-            const cache = leerCache("equipos");
-            if (cache && Array.isArray(cache.datos) && cache.datos.length > 0) {
-                etagEquipos = cache.etag || null;
-                aplicarDatosEquipos(cache.datos);
-                conCache = true;
-            }
-        }
-        if (!conCache) mostrarLoading("Iniciando sesión...");
+        mostrarLoading(
+            "Iniciando sesión..."
+        );
 
-        const token = await iniciarSesion(false);
-        if (!token) {
-            mostrarBotonLogin("Inicia sesión para ver el monitoreo.");
-            return;
-        }
+
+        await iniciarSesion();
+
+
+        mostrarLoading(
+            "Conectando con SharePoint..."
+        );
+
+
+        await obtenerSitioSharePoint(
+            tokenActual
+        );
+
+
+        /*
+         * =====================================
+         * SERVICIOS + INVENTARIO
+         * =====================================
+         *
+         * Se ejecutan en paralelo.
+         *
+         * Antes:
+         *
+         * servicios → esperar → equipos
+         *
+         * Ahora:
+         *
+         * servicios ┐
+         *           ├── simultáneamente
+         * equipos   ┘
+         *
+         * Esto reduce el tiempo total.
+         */
+
+        mostrarLoading(
+            "Cargando monitoreo..."
+        );
+
+
+        await Promise.all([
+            cargarServicios(),
+            cargarEquipos()
+        ]);
+
+
+        /*
+         * Ocultamos el loading apenas
+         * servicios + equipos están listos.
+         */
+
         ocultarLoading();
-        iniciarCargas();
+
+
+        /*
+         * =====================================
+         * TRABAJADORES EN SEGUNDO PLANO
+         * =====================================
+         *
+         * IMPORTANTE:
+         *
+         * NO usamos await.
+         *
+         * La página ya está funcionando.
+         *
+         * Si SharePoint tarda:
+         * NO importa.
+         *
+         * Si falla:
+         * NO afecta el inventario.
+         */
+
+        obtenerTrabajadores(
+            tokenActual
+        ).catch(
+            error => {
+
+                console.warn(
+                    "Carga secundaria de trabajadores falló:",
+                    error
+                );
+            }
+        );
+
+
     } catch (error) {
-        console.error("Error inicializando infraestructura:", error);
-        mostrarBotonLogin("No se pudo cargar el monitoreo.");
+
+        console.error(
+            "Error inicializando infraestructura:",
+            error
+        );
+
+
+        if (
+            loadingMessage
+        ) {
+
+            loadingMessage.textContent =
+                "No se pudo cargar el monitoreo.";
+        }
+
+
+        setTimeout(
+            () => {
+
+                ocultarLoading();
+
+            },
+            2500
+        );
     }
 }
 
@@ -2897,13 +3350,67 @@ async function cargarDashboard() {
 ========================================= */
 
 async function actualizarDashboard() {
-    if (document.hidden || !tokenActual) return;   /* no gastar red en pestañas ocultas */
+
     try {
-        if (!(await obtenerTokenSilencioso())) return;
-        ultimaActualizacion = Date.now();
-        await Promise.all([cargarServicios(), cargarEquipos()]);
+
+        const cuentas =
+            msalInstanceInfraestructura
+                .getAllAccounts();
+
+
+        if (
+            !cuentas.length
+        ) {
+
+            return;
+        }
+
+
+        cuentaActual =
+            cuentas[0];
+
+
+        const tokenResponse =
+            await msalInstanceInfraestructura
+                .acquireTokenSilent({
+
+                    scopes: [
+                        "User.Read",
+                        "Sites.Read.All",
+                        "Sites.ReadWrite.All"
+                    ],
+
+                    account:
+                        cuentaActual
+                });
+
+
+        tokenActual =
+            tokenResponse.accessToken;
+
+
+        /*
+         * Solo actualizamos:
+         *
+         * - Servicios
+         * - equipos.json
+         *
+         * NO volvemos a descargar
+         * TrabajadoresEquipos.
+         */
+
+        await Promise.all([
+            cargarServicios(),
+            cargarEquipos()
+        ]);
+
+
     } catch (error) {
-        console.error("Error en actualización automática:", error);
+
+        console.error(
+            "Error en actualización automática:",
+            error
+        );
     }
 }
 
@@ -2912,18 +3419,16 @@ async function actualizarDashboard() {
    INICIO
 ========================================= */
 
-function iniciarInfraestructura() {
-    cargarDashboard();
-    setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
-    document.addEventListener("visibilitychange", () => {
-        if (!document.hidden && Date.now() - ultimaActualizacion > 30000) {
-            actualizarDashboard();
-        }
-    });
-}
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", iniciarInfraestructura);
-} else {
-    iniciarInfraestructura();
-}
+        cargarDashboard();
+
+
+        setInterval(
+            actualizarDashboard,
+            INTERVALO_ACTUALIZACION
+        );
+    }
+);

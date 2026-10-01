@@ -4,12 +4,13 @@
 
 
 /* =========================================
-   CONFIGURACIÓN MSAL
+   CONFIGURACIÓN MICROSOFT
 ========================================= */
 
 const msalConfigInfraestructura = {
 
     auth: {
+
         clientId:
             "5d98417c-74a7-4fab-8f2c-41ac127be696",
 
@@ -18,13 +19,41 @@ const msalConfigInfraestructura = {
 
         redirectUri:
             "https://AlferzaTI.github.io/live-office/blank.html"
+
     },
 
     cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false
+
+        cacheLocation:
+            "sessionStorage",
+
+        storeAuthStateInCookie:
+            false
+
     }
+
 };
+
+
+/* =========================================
+   INSTANCIA MSAL
+========================================= */
+
+if (
+    typeof msal === "undefined"
+) {
+
+    console.error(
+        "❌ MSAL no está disponible."
+    );
+
+} else {
+
+    console.log(
+        "✅ MSAL disponible en Infraestructura."
+    );
+
+}
 
 
 const msalInstanceInfraestructura =
@@ -34,7 +63,7 @@ const msalInstanceInfraestructura =
 
 
 /* =========================================
-   SHAREPOINT
+   CONFIGURACIÓN SHAREPOINT
 ========================================= */
 
 const SHAREPOINT_HOSTNAME =
@@ -43,80 +72,18 @@ const SHAREPOINT_HOSTNAME =
 const SHAREPOINT_SITE =
     "/personal/soporte1_alferza_pe";
 
-const SHAREPOINT_LIST_SERVICIOS =
+const SHAREPOINT_LIST =
     "MonitoreoTI";
 
-const SHAREPOINT_LIST_TRABAJADORES =
-    "TrabajadoresEquipos";
-
-const RUTA_EQUIPOS =
-    "Procedimientos T.I/equipos.json";
-
 
 /* =========================================
-   CONFIGURACIÓN
+   UBICACIÓN DEL EQUIPOS.JSON
 ========================================= */
 
-const EQUIPOS_POR_PAGINA = 40;
-
-const INTERVALO_ACTUALIZACION =
-    120000;
 
 
 /* =========================================
-   VARIABLES
-========================================= */
-
-let cuentaActual = null;
-
-let tokenActual = null;
-
-let sitioSharePoint = null;
-
-let driveSharePoint = null;
-
-
-/*
- * Datos de trabajadores.
- *
- * IMPORTANTE:
- * Estos datos se cargan en segundo plano.
- * Nunca bloquean la carga inicial del inventario.
- */
-
-let listaTrabajadores = null;
-
-let columnasTrabajadores = null;
-
-let trabajadoresData = [];
-
-let trabajadoresPorEquipo = {};
-
-let trabajadoresCargados = false;
-
-let cargandoTrabajadores = false;
-
-
-/* =========================================
-   EQUIPOS
-========================================= */
-
-let equiposData = [];
-
-let equiposFiltrados = [];
-
-let paginaActual = 1;
-
-
-/* =========================================
-   MODAL
-========================================= */
-
-let equipoSeleccionado = null;
-
-
-/* =========================================
-   ELEMENTOS DOM
+   ELEMENTOS
 ========================================= */
 
 const loadingOverlay =
@@ -124,291 +91,185 @@ const loadingOverlay =
         "loadingOverlay"
     );
 
+
 const loadingMessage =
     document.getElementById(
         "loadingMessage"
     );
 
-const serviciosGrid =
-    document.getElementById(
-        "serviciosGrid"
-    );
 
-const estadoGeneral =
-    document.getElementById(
-        "estadoGeneral"
-    );
+/* =========================================
+   VARIABLES DE EQUIPOS
+========================================= */
 
-const equiposTableBody =
-    document.getElementById(
-        "equiposTableBody"
-    );
-
-const equiposEmpty =
-    document.getElementById(
-        "equiposEmpty"
-    );
-
-const equiposResultados =
-    document.getElementById(
-        "equiposResultados"
-    );
-
-const totalEquipos =
-    document.getElementById(
-        "totalEquipos"
-    );
-
-const equiposConectados =
-    document.getElementById(
-        "equiposConectados"
-    );
-
-const equiposDesconectados =
-    document.getElementById(
-        "equiposDesconectados"
-    );
-
-const filtroEstadoEquipo =
-    document.getElementById(
-        "filtroEstadoEquipo"
-    );
-
-const filtroAreaEquipo =
-    document.getElementById(
-        "filtroAreaEquipo"
-    );
-
-const buscarEquipo =
-    document.getElementById(
-        "buscarEquipo"
-    );
-
-const equiposEstado =
-    document.getElementById(
-        "equiposEstado"
-    );
-
-const lastUpdate =
-    document.getElementById(
-        "lastUpdate"
-    );
+let equiposData = [];
 
 
 /* =========================================
-   ELEMENTOS MODAL
+   MENSAJE DE CARGA
 ========================================= */
 
-const trabajadorModal =
-    document.getElementById(
-        "trabajadorModal"
-    );
-
-const modalEquipoNombre =
-    document.getElementById(
-        "modalEquipoNombre"
-    );
-
-const trabajadorNombre =
-    document.getElementById(
-        "trabajadorNombre"
-    );
-
-const trabajadorError =
-    document.getElementById(
-        "trabajadorError"
-    );
-
-const guardarTrabajador =
-    document.getElementById(
-        "guardarTrabajador"
-    );
-
-const cerrarTrabajadorModal =
-    document.getElementById(
-        "cerrarTrabajadorModal"
-    );
-
-const cancelarTrabajador =
-    document.getElementById(
-        "cancelarTrabajador"
-    );
-
-
-/* =========================================
-   UTILIDADES
-========================================= */
-
-function escaparHTML(valor) {
+function cambiarMensaje(
+    mensaje
+) {
 
     if (
-        valor === null ||
-        valor === undefined
+        loadingMessage
     ) {
-        return "";
-    }
 
-    return String(valor)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-function mostrarLoading(mensaje) {
-
-    if (loadingOverlay) {
-        loadingOverlay.style.display =
-            "flex";
-    }
-
-    if (loadingMessage) {
         loadingMessage.textContent =
-            mensaje || "Cargando...";
+            mensaje;
+
     }
-}
 
-
-function ocultarLoading() {
-
-    if (loadingOverlay) {
-        loadingOverlay.style.display =
-            "none";
-    }
-}
-
-
-function obtenerFechaActual() {
-
-    const ahora =
-        new Date();
-
-    return ahora.toLocaleString(
-        "es-PE",
-        {
-            dateStyle: "short",
-            timeStyle: "medium"
-        }
-    );
-}
-
-
-function normalizarTexto(valor) {
-
-    return String(
-        valor || ""
-    )
-        .trim()
-        .toLowerCase();
 }
 
 
 /* =========================================
-   AUTENTICACIÓN
+   MOSTRAR CARGA
 ========================================= */
 
-async function iniciarSesion() {
+function mostrarCarga(
+    mensaje
+) {
+
+    cambiarMensaje(
+        mensaje
+    );
+
+
+    if (
+        loadingOverlay
+    ) {
+
+        loadingOverlay.classList.remove(
+            "hidden"
+        );
+
+        loadingOverlay.classList.remove(
+            "oculto"
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   OCULTAR CARGA
+========================================= */
+
+function ocultarCarga() {
+
+    if (
+        loadingOverlay
+    ) {
+
+        loadingOverlay.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   OBTENER TOKEN
+========================================= */
+
+async function obtenerTokenInfraestructura() {
+
+    console.log(
+        "🔐 Buscando sesión Microsoft..."
+    );
+
+
+    const cuentas =
+        msalInstanceInfraestructura
+            .getAllAccounts();
+
+
+    console.log(
+        "Cuentas encontradas:",
+        cuentas.length
+    );
+
+
+    if (
+        !cuentas.length
+    ) {
+
+        throw new Error(
+            "No se encontró una cuenta Microsoft activa."
+        );
+
+    }
+
+
+    const cuenta =
+        cuentas[0];
+
+
+    msalInstanceInfraestructura
+        .setActiveAccount(
+            cuenta
+        );
+
+
+    console.log(
+        "👤 Cuenta activa:",
+        cuenta.username
+    );
+
 
     try {
 
-        const cuentas =
-            msalInstanceInfraestructura
-                .getAllAccounts();
+        cambiarMensaje(
+            "Verificando permisos..."
+        );
 
 
-        if (
-            cuentas.length > 0
-        ) {
-
-            cuentaActual =
-                cuentas[0];
-
-        } else {
-
-            const loginResponse =
-                await msalInstanceInfraestructura
-                    .loginPopup({
-
-                        scopes: [
-                            "User.Read",
-                            "Sites.Read.All",
-                            "Sites.ReadWrite.All"
-                        ]
-
-                    });
-
-            cuentaActual =
-                loginResponse.account;
-        }
-
-
-        const tokenResponse =
+        const respuesta =
             await msalInstanceInfraestructura
                 .acquireTokenSilent({
 
                     scopes: [
+
                         "User.Read",
-                        "Sites.Read.All",
-                        "Sites.ReadWrite.All"
+
+                        "Sites.Read.All"
+
                     ],
 
                     account:
-                        cuentaActual
+                        cuenta
+
                 });
 
 
-        tokenActual =
-            tokenResponse.accessToken;
-
-
-        return tokenActual;
-
-
-    } catch (error) {
-
-        console.error(
-            "Error de autenticación:",
-            error
+        console.log(
+            "✅ Token obtenido correctamente."
         );
 
 
-        try {
+        return respuesta.accessToken;
 
-            const tokenPopup =
-                await msalInstanceInfraestructura
-                    .acquireTokenPopup({
-
-                        scopes: [
-                            "User.Read",
-                            "Sites.Read.All",
-                            "Sites.ReadWrite.All"
-                        ]
-
-                    });
-
-
-            tokenActual =
-                tokenPopup.accessToken;
-
-            cuentaActual =
-                tokenPopup.account;
-
-
-            return tokenActual;
-
-
-        } catch (popupError) {
-
-            console.error(
-                "Error obteniendo token:",
-                popupError
-            );
-
-            throw popupError;
-        }
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Error obteniendo token silenciosamente:",
+            error
+        );
+
+        throw error;
+
+    }
+
 }
 
 
@@ -417,1090 +278,1731 @@ async function iniciarSesion() {
 ========================================= */
 
 async function obtenerSitioSharePoint(
-    token
+    TOKEN
 ) {
 
-    if (
-        sitioSharePoint
-    ) {
-        return sitioSharePoint;
-    }
+    console.log(
+        "🔎 Buscando sitio SharePoint..."
+    );
 
 
-    const url =
-        `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}`;
-
-
-    const response =
+    const respuesta =
         await fetch(
-            url,
+
+            `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}`,
+
             {
+
+                method:
+                    "GET",
+
                 headers: {
+
                     Authorization:
-                        `Bearer ${token}`
+                        `Bearer ${TOKEN}`
+
                 }
+
             }
+
         );
 
 
     if (
-        !response.ok
+        !respuesta.ok
     ) {
 
-        const texto =
-            await response.text();
+        const error =
+            await respuesta.text();
 
-        throw new Error(
-            `No se pudo obtener el sitio SharePoint. ${response.status} ${texto}`
-        );
-    }
 
-
-    sitioSharePoint =
-        await response.json();
-
-
-    return sitioSharePoint;
-}
-
-
-/* =========================================
-   OBTENER DRIVE
-========================================= */
-
-async function obtenerDriveSharePoint(
-    token
-) {
-
-    if (
-        driveSharePoint
-    ) {
-        return driveSharePoint;
-    }
-
-
-    const sitio =
-        await obtenerSitioSharePoint(
-            token
-        );
-
-
-    const url =
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`;
-
-
-    const response =
-        await fetch(
-            url,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        const texto =
-            await response.text();
-
-        throw new Error(
-            `No se pudo obtener el drive de SharePoint. ${response.status} ${texto}`
-        );
-    }
-
-
-    driveSharePoint =
-        await response.json();
-
-
-    return driveSharePoint;
-}
-
-
-/* =========================================
-   OBTENER ARCHIVO EQUIPOS
-========================================= */
-
-async function obtenerEquiposDesdeSharePoint(
-    token
-) {
-
-    const drive =
-        await obtenerDriveSharePoint(
-            token
-        );
-
-
-    const rutaCodificada =
-        RUTA_EQUIPOS
-            .split("/")
-            .map(
-                parte =>
-                    encodeURIComponent(
-                        parte
-                    )
-            )
-            .join("/");
-
-
-    const url =
-        `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${rutaCodificada}:/content`;
-
-
-    const response =
-        await fetch(
-            url,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        const texto =
-            await response.text();
-
-        throw new Error(
-            `No se pudo descargar equipos.json. ${response.status} ${texto}`
-        );
-    }
-
-
-    const datos =
-        await response.json();
-
-
-    if (
-        !Array.isArray(datos)
-    ) {
-
-        throw new Error(
-            "El archivo equipos.json no contiene un arreglo válido."
-        );
-    }
-
-
-    return datos;
-}
-
-
-/* =========================================
-   OBTENER LISTA TRABAJADORES
-========================================= */
-
-async function obtenerListaTrabajadores(
-    token
-) {
-
-    if (
-        listaTrabajadores
-    ) {
-        return listaTrabajadores;
-    }
-
-
-    const sitio =
-        await obtenerSitioSharePoint(
-            token
-        );
-
-
-    const url =
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists`;
-
-
-    const response =
-        await fetch(
-            url,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        const texto =
-            await response.text();
-
-        throw new Error(
-            `No se pudieron obtener las listas SharePoint. ${response.status} ${texto}`
-        );
-    }
-
-
-    const data =
-        await response.json();
-
-
-    const listas =
-        data.value || [];
-
-
-    listaTrabajadores =
-        listas.find(
-            lista =>
-                normalizarTexto(
-                    lista.displayName
-                ) ===
-                normalizarTexto(
-                    SHAREPOINT_LIST_TRABAJADORES
-                )
-        );
-
-
-    if (
-        !listaTrabajadores
-    ) {
-
-        throw new Error(
-            `No se encontró la lista "${SHAREPOINT_LIST_TRABAJADORES}" en el sitio SharePoint.`
-        );
-    }
-
-
-    return listaTrabajadores;
-}
-
-
-/* =========================================
-   OBTENER COLUMNAS
-========================================= */
-
-async function obtenerColumnasTrabajadores(
-    token
-) {
-
-    if (
-        columnasTrabajadores
-    ) {
-        return columnasTrabajadores;
-    }
-
-
-    const lista =
-        await obtenerListaTrabajadores(
-            token
-        );
-
-
-    const sitio =
-        await obtenerSitioSharePoint(
-            token
-        );
-
-
-    const url =
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/columns`;
-
-
-    const response =
-        await fetch(
-            url,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-    if (
-        !response.ok
-    ) {
-
-        const texto =
-            await response.text();
-
-        throw new Error(
-            `No se pudieron obtener las columnas de TrabajadoresEquipos. ${response.status} ${texto}`
-        );
-    }
-
-
-    const data =
-        await response.json();
-
-
-    columnasTrabajadores =
-        data.value || [];
-
-
-    return columnasTrabajadores;
-}
-
-
-/* =========================================
-   BUSCAR NOMBRE INTERNO DE COLUMNA
-========================================= */
-
-function obtenerNombreInternoColumna(
-    columnas,
-    nombreVisible
-) {
-
-    const columna =
-        columnas.find(
-            item =>
-                normalizarTexto(
-                    item.displayName
-                ) ===
-                normalizarTexto(
-                    nombreVisible
-                )
-        );
-
-
-    return columna
-        ? columna.name
-        : null;
-}
-
-
-/* =========================================
-   CARGAR TRABAJADORES
-   -----------------------------------------
-   ESTA FUNCIÓN YA NO BLOQUEA EL INVENTARIO.
-========================================= */
-
-async function obtenerTrabajadores(
-    token
-) {
-
-    /*
-     * Si ya fueron cargados,
-     * no hacemos otra petición.
-     */
-
-    if (
-        trabajadoresCargados
-    ) {
-
-        return trabajadoresPorEquipo;
-    }
-
-
-    /*
-     * Si otra ejecución ya está cargando,
-     * esperamos la misma promesa.
-     */
-
-    if (
-        cargandoTrabajadores
-    ) {
-
-        return trabajadoresPorEquipo;
-    }
-
-
-    cargandoTrabajadores =
-        true;
-
-
-    try {
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                token
-            );
-
-
-        const lista =
-            await obtenerListaTrabajadores(
-                token
-            );
-
-
-        /*
-         * IMPORTANTE:
-         *
-         * Solo solicitamos los campos
-         * necesarios.
-         *
-         * Ya no usamos:
-         *
-         * expand=fields
-         *
-         * para traer toda la información.
-         */
-
-        const url =
-            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields($select=Equipo1,Trabajador)&$top=999`;
-
-
-        const response =
-            await fetch(
-                url,
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
-                }
-            );
-
-
-        if (
-            !response.ok
-        ) {
-
-            const texto =
-                await response.text();
-
-            throw new Error(
-                `No se pudieron obtener las asignaciones de trabajadores. ${response.status} ${texto}`
-            );
-        }
-
-
-        const data =
-            await response.json();
-
-
-        trabajadoresData =
-            data.value || [];
-
-
-        trabajadoresPorEquipo =
-            {};
-
-
-        /*
-         * Como solicitamos los nombres visibles
-         * de las columnas, primero intentamos
-         * acceder directamente.
-         */
-
-        trabajadoresData.forEach(
-            item => {
-
-                const fields =
-                    item.fields || {};
-
-
-                const equipo =
-                    fields.Equipo1;
-
-
-                const trabajador =
-                    fields.Trabajador;
-
-
-                if (
-                    equipo &&
-                    trabajador
-                ) {
-
-                    trabajadoresPorEquipo[
-                        normalizarTexto(
-                            equipo
-                        )
-                    ] = {
-
-                        nombre:
-                            trabajador,
-
-                        itemId:
-                            item.id,
-
-                        equipo:
-                            equipo
-                    };
-                }
-            }
-        );
-
-
-        /*
-         * Si SharePoint devolvió los campos
-         * con nombres internos diferentes,
-         * usamos el método anterior como respaldo.
-         */
-
-        if (
-            trabajadoresData.length > 0 &&
-            Object.keys(
-                trabajadoresPorEquipo
-            ).length === 0
-        ) {
-
-            await cargarTrabajadoresConColumnas(
-                token,
-                sitio,
-                lista
-            );
-        }
-
-
-        trabajadoresCargados =
-            true;
-
-
-        console.log(
-            `Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`
-        );
-
-
-        /*
-         * Actualizamos la tabla únicamente
-         * después de terminar la consulta.
-         *
-         * La página ya estaba visible.
-         */
-
-        if (
-            equiposData.length > 0
-        ) {
-
-            renderizarTablaEquipos();
-        }
-
-
-        return trabajadoresPorEquipo;
-
-
-    } catch (error) {
-
-        console.warn(
-            "No se pudieron cargar las asignaciones de trabajadores:",
+        console.error(
+            "❌ Error obteniendo sitio SharePoint:",
             error
         );
 
 
-        /*
-         * IMPORTANTE:
-         *
-         * No lanzamos el error.
-         *
-         * Si falla esta parte,
-         * el inventario sigue funcionando.
-         */
-
-        return trabajadoresPorEquipo;
-
-
-    } finally {
-
-        cargandoTrabajadores =
-            false;
-    }
-}
-
-
-/* =========================================
-   RESPALDO PARA COLUMNAS
-========================================= */
-
-async function cargarTrabajadoresConColumnas(
-    token,
-    sitio,
-    lista
-) {
-
-    const columnas =
-        await obtenerColumnasTrabajadores(
-            token
+        throw new Error(
+            `SharePoint Site: HTTP ${respuesta.status}`
         );
 
-
-    const campoEquipo =
-        obtenerNombreInternoColumna(
-            columnas,
-            "Equipo1"
-        );
-
-
-    const campoTrabajador =
-        obtenerNombreInternoColumna(
-            columnas,
-            "Trabajador"
-        );
-
-
-    if (
-        !campoEquipo ||
-        !campoTrabajador
-    ) {
-
-        return;
     }
 
-
-    trabajadoresPorEquipo =
-        {};
-
-
-    trabajadoresData.forEach(
-        item => {
-
-            const fields =
-                item.fields || {};
-
-
-            const equipo =
-                fields[campoEquipo];
-
-
-            const trabajador =
-                fields[campoTrabajador];
-
-
-            if (
-                equipo &&
-                trabajador
-            ) {
-
-                trabajadoresPorEquipo[
-                    normalizarTexto(
-                        equipo
-                    )
-                ] = {
-
-                    nombre:
-                        trabajador,
-
-                    itemId:
-                        item.id,
-
-                    equipo:
-                        equipo
-                };
-            }
-        }
-    );
-}
-
-
-/* =========================================
-   OBTENER ASIGNACIÓN
-========================================= */
-
-function obtenerTrabajadorEquipo(
-    nombreEquipo
-) {
-
-    return trabajadoresPorEquipo[
-        normalizarTexto(
-            nombreEquipo
-        )
-    ] || null;
-}
-
-
-/* =========================================
-   CARGAR SERVICIOS DESDE SHAREPOINT
-========================================= */
-
-async function obtenerMonitoreoTI(
-    token
-) {
 
     const sitio =
-        await obtenerSitioSharePoint(
-            token
-        );
+        await respuesta.json();
 
 
-    const url =
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(SHAREPOINT_LIST_SERVICIOS)}/items?expand=fields&$top=999`;
+    console.log(
+        "✅ Sitio SharePoint encontrado:",
+        sitio
+    );
 
 
-    const response =
-        await fetch(
-            url,
-            {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`
-                }
-            }
-        );
+    return sitio;
 
-
-    if (
-        !response.ok
-    ) {
-
-        const texto =
-            await response.text();
-
-        throw new Error(
-            `No se pudo obtener MonitoreoTI. ${response.status} ${texto}`
-        );
-    }
-
-
-    const data =
-        await response.json();
-
-
-    return data.value || [];
 }
 
 
 /* =========================================
-   RENDER SERVICIOS
+   OBTENER LISTA MONITOREOTI
+========================================= */
+
+async function obtenerMonitoreoTI() {
+
+    try {
+
+        console.log(
+            "===================================="
+        );
+
+        console.log(
+            "🚀 INICIANDO MONITOREO TI"
+        );
+
+        console.log(
+            "===================================="
+        );
+
+
+        cambiarMensaje(
+            "Conectando con Microsoft..."
+        );
+
+
+        /* ================================
+           TOKEN
+        ================================= */
+
+        const TOKEN =
+            await obtenerTokenInfraestructura();
+
+
+        /* ================================
+           SITIO
+        ================================= */
+
+        cambiarMensaje(
+            "Conectando con SharePoint..."
+        );
+
+
+        const sitio =
+            await obtenerSitioSharePoint(
+                TOKEN
+            );
+
+
+        /* ================================
+           LISTA
+        ================================= */
+
+        cambiarMensaje(
+            "Consultando Monitoreo TI..."
+        );
+
+
+        const respuesta =
+            await fetch(
+
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields`,
+
+                {
+
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        Authorization:
+                            `Bearer ${TOKEN}`
+
+                    }
+
+                }
+
+            );
+
+
+        if (
+            !respuesta.ok
+        ) {
+
+            const error =
+                await respuesta.text();
+
+
+            console.error(
+                "❌ Error obteniendo lista MonitoreoTI:",
+                error
+            );
+
+
+            throw new Error(
+                `MonitoreoTI: HTTP ${respuesta.status}`
+            );
+
+        }
+
+
+        const data =
+            await respuesta.json();
+
+
+        console.log(
+            "===================================="
+        );
+
+        console.log(
+            "✅ DATOS DE MONITOREO TI"
+        );
+
+        console.log(
+            "===================================="
+        );
+
+
+        console.table(
+            data.value
+        );
+
+
+        return data.value || [];
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ Error obteniendo Monitoreo TI:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+
+/* =========================================
+   OBTENER CAMPOS
+========================================= */
+
+function obtenerCampos(
+    item
+) {
+
+    return (
+        item.fields || {}
+    );
+
+}
+
+
+/* =========================================
+   NORMALIZAR ESTADO
+========================================= */
+
+function normalizarEstado(
+    estado
+) {
+
+    if (
+        !estado
+    ) {
+
+        return "No configurado";
+
+    }
+
+
+    return String(
+        estado
+    ).trim();
+
+}
+
+
+/* =========================================
+   CLASIFICAR ESTADO
+========================================= */
+
+function clasificarEstado(
+    estado
+) {
+
+    const valor =
+        normalizarEstado(
+            estado
+        ).toLowerCase();
+
+
+    if (
+        valor.includes("operativo") ||
+        valor.includes("vigente") ||
+        valor.includes("activo") ||
+        valor.includes("responde")
+    ) {
+
+        return "online";
+
+    }
+
+
+    if (
+        valor.includes("advertencia") ||
+        valor.includes("warning") ||
+        valor.includes("pendiente")
+    ) {
+
+        return "warning";
+
+    }
+
+
+    if (
+        valor.includes("incidencia") ||
+        valor.includes("error") ||
+        valor.includes("caído") ||
+        valor.includes("caido")
+    ) {
+
+        return "offline";
+
+    }
+
+
+    return "neutral";
+
+}
+
+
+/* =========================================
+   ICONO DEL SERVICIO
+========================================= */
+
+function obtenerIconoServicio(
+    servicio
+) {
+
+    const nombre =
+        String(
+            servicio
+        ).toLowerCase();
+
+
+    if (
+        nombre.includes("internet")
+    ) {
+
+        return "🌐";
+
+    }
+
+
+    if (
+        nombre.includes("microsoft")
+    ) {
+
+        return "☁️";
+
+    }
+
+
+    if (
+        nombre.includes("certificado")
+    ) {
+
+        return "🔒";
+
+    }
+
+
+    if (
+        nombre.includes("servidor")
+    ) {
+
+        return "🖥️";
+
+    }
+
+
+    if (
+        nombre.includes("dns")
+    ) {
+
+        return "🔎";
+
+    }
+
+
+    return "⚙️";
+
+}
+
+
+/* =========================================
+   RENDERIZAR SERVICIOS PRINCIPALES
 ========================================= */
 
 function renderizarServicios(
-    items
+    datos
 ) {
 
-    if (
-        !serviciosGrid
-    ) {
-        return;
-    }
+    const grid =
+        document.getElementById(
+            "serviciosGrid"
+        );
+
+
+    const estadoGeneral =
+        document.getElementById(
+            "estadoGeneral"
+        );
 
 
     if (
-        !items ||
-        items.length === 0
+        !grid
+    ) return;
+
+
+    grid.innerHTML =
+        "";
+
+
+    /* =====================================
+       SIN DATOS
+    ===================================== */
+
+    if (
+        !datos ||
+        datos.length === 0
     ) {
 
-        serviciosGrid.innerHTML = `
-            <div class="service-card service-loading">
-                <span>
-                    No hay servicios registrados.
-                </span>
+        grid.innerHTML = `
+            <div class="empty-state">
+                No hay servicios registrados.
             </div>
         `;
 
 
-        estadoGeneral.textContent =
-            "● SIN DATOS";
+        if (
+            estadoGeneral
+        ) {
 
-        estadoGeneral.className =
-            "section-status warning";
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        }
 
 
         return;
+
     }
 
 
-    let serviciosOnline =
-        0;
+    /* =====================================
+       ESTADOS
+    ===================================== */
+
+    const estados = [];
 
 
-    serviciosGrid.innerHTML =
-        items
-            .map(
-                item => {
+    datos.forEach(
+        item => {
 
-                    const fields =
-                        item.fields || {};
-
-
-                    const nombre =
-                        fields.Nombre ||
-                        fields.Title ||
-                        "Servicio";
+            const campos =
+                obtenerCampos(
+                    item
+                );
 
 
-                    const descripcion =
-                        fields.Descripcion ||
-                        fields.Descripción ||
-                        "Sin descripción";
+            const servicio =
+                campos.Servicio ||
+                "Servicio";
 
 
-                    const estado =
-                        fields.Estado ||
-                        "Sin estado";
+            const estado =
+                campos.Estado ||
+                "No configurado";
 
 
-                    const latencia =
-                        fields.Latencia ||
-                        fields.Ping ||
-                        "--";
+            const detalle =
+                campos.Detalle ||
+                "Sin información disponible";
 
 
-                    const revision =
-                        fields.UltimaRevision ||
-                        fields["ÚltimaRevision"] ||
-                        fields.Fecha ||
-                        "--";
+            const latencia =
+                campos.Latencia;
 
 
-                    const estadoNormalizado =
-                        normalizarTexto(
-                            estado
-                        );
+            const estadoNormalizado =
+                normalizarEstado(
+                    estado
+                );
 
 
-                    let claseEstado =
-                        "neutral";
+            estados.push(
+                estadoNormalizado
+            );
 
 
-                    if (
-                        estadoNormalizado.includes(
-                            "operativo"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "online"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "conectado"
-                        )
-                    ) {
-
-                        claseEstado =
-                            "online";
-
-                        serviciosOnline++;
+            const tipoEstado =
+                clasificarEstado(
+                    estado
+                );
 
 
-                    } else if (
-                        estadoNormalizado.includes(
-                            "mantenimiento"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "advertencia"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "warning"
-                        )
-                    ) {
-
-                        claseEstado =
-                            "warning";
+            const icono =
+                obtenerIconoServicio(
+                    servicio
+                );
 
 
-                    } else if (
-                        estadoNormalizado.includes(
-                            "caido"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "offline"
-                        ) ||
-                        estadoNormalizado.includes(
-                            "desconectado"
-                        )
-                    ) {
-
-                        claseEstado =
-                            "offline";
-                    }
+            const latenciaTexto =
+                latencia !== undefined &&
+                latencia !== null &&
+                latencia !== ""
+                    ? `${latencia} ms`
+                    : "—";
 
 
-                    return `
-                        <article
-                            class="service-card ${claseEstado}"
-                        >
-
-                            <div class="service-main">
-
-                                <div class="service-icon">
-                                    🖥️
-                                </div>
-
-                                <div class="service-info">
-
-                                    <div class="service-heading">
-
-                                        <h3>
-                                            ${escaparHTML(
-                                                nombre
-                                            )}
-                                        </h3>
-
-                                        <span
-                                            class="service-status ${claseEstado}"
-                                        >
-
-                                            <span class="status-dot"></span>
-
-                                            ${escaparHTML(
-                                                estado
-                                            )}
-
-                                        </span>
-
-                                    </div>
-
-                                    <p>
-                                        ${escaparHTML(
-                                            descripcion
-                                        )}
-                                    </p>
-
-                                </div>
-
-                            </div>
+            const card =
+                document.createElement(
+                    "div"
+                );
 
 
-                            <div class="service-meta">
-
-                                <div class="service-latency">
-
-                                    <span>
-                                        Latencia
-                                    </span>
-
-                                    <strong>
-                                        ${escaparHTML(
-                                            latencia
-                                        )}
-                                    </strong>
-
-                                </div>
+            card.className =
+                `service-card ${tipoEstado}`;
 
 
-                                <div class="service-revision">
+            card.innerHTML = `
 
-                                    <span class="revision-icon">
-                                        🕐
-                                    </span>
+                <div class="service-icon">
+                    ${icono}
+                </div>
 
-                                    <div>
+                <div class="service-content">
 
-                                        <span>
-                                            Última revisión
-                                        </span>
+                    <div class="service-status ${tipoEstado}">
 
-                                        <strong>
-                                            ${escaparHTML(
-                                                revision
-                                            )}
-                                        </strong>
+                        <span class="status-dot"></span>
 
-                                    </div>
+                        ${estado}
 
-                                </div>
+                    </div>
 
-                            </div>
+                    <h3>
+                        ${servicio}
+                    </h3>
 
-                        </article>
-                    `;
-                }
-            )
-            .join("");
+                    <p>
+                        ${detalle}
+                    </p>
 
+                    <div class="service-latency">
+
+                        <span>
+                            Latencia
+                        </span>
+
+                        <strong>
+                            ${latenciaTexto}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            grid.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    /* =====================================
+       ESTADO GENERAL
+    ===================================== */
 
     if (
-        serviciosOnline ===
-        items.length
+        estadoGeneral
     ) {
 
-        estadoGeneral.textContent =
-            "● OPERATIVO";
-
-        estadoGeneral.className =
-            "section-status online";
-
-
-    } else if (
-        serviciosOnline > 0
-    ) {
-
-        estadoGeneral.textContent =
-            "● REVISAR";
-
-        estadoGeneral.className =
-            "section-status warning";
+        const estadosNormalizados =
+            estados.map(
+                estado =>
+                    String(
+                        estado
+                    )
+                    .trim()
+                    .toLowerCase()
+            );
 
 
-    } else {
+        const hayIncidencia =
+            estadosNormalizados.some(
+                estado =>
+                    [
+                        "incidencia",
+                        "error",
+                        "caido",
+                        "caído"
+                    ].includes(
+                        estado
+                    )
+            );
 
-        estadoGeneral.textContent =
-            "● NO DISPONIBLE";
 
-        estadoGeneral.className =
-            "section-status offline";
+        const hayAdvertencia =
+            estadosNormalizados.some(
+                estado =>
+                    [
+                        "advertencia",
+                        "warning",
+                        "pendiente"
+                    ].includes(
+                        estado
+                    )
+            );
+
+
+        const todosNoConfigurados =
+            estadosNormalizados.length > 0 &&
+            estadosNormalizados.every(
+                estado =>
+                    estado === "no configurado" ||
+                    estado === ""
+            );
+
+
+        const todosOperativos =
+            estadosNormalizados.length > 0 &&
+            estadosNormalizados.every(
+                estado =>
+                    [
+                        "operativo",
+                        "vigente",
+                        "activo",
+                        "responde"
+                    ].includes(
+                        estado
+                    )
+            );
+
+
+        if (
+            hayIncidencia
+        ) {
+
+            estadoGeneral.textContent =
+                "● INCIDENCIA";
+
+            estadoGeneral.className =
+                "section-status offline";
+
+        }
+
+        else if (
+            hayAdvertencia
+        ) {
+
+            estadoGeneral.textContent =
+                "● ADVERTENCIA";
+
+            estadoGeneral.className =
+                "section-status warning";
+
+        }
+
+        else if (
+            todosOperativos
+        ) {
+
+            estadoGeneral.textContent =
+                "● OPERATIVO";
+
+            estadoGeneral.className =
+                "section-status online";
+
+        }
+
+        else if (
+            todosNoConfigurados
+        ) {
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        }
+
+        else {
+
+            estadoGeneral.textContent =
+                "● NO CONFIGURADO";
+
+            estadoGeneral.className =
+                "section-status";
+
+        }
+
     }
+
 }
 
 
 /* =========================================
-   RESUMEN EQUIPOS
+   ACTUALIZAR RESUMEN
 ========================================= */
 
-function actualizarResumenEquipos() {
+function actualizarResumen(
+    datos
+) {
+
+    let activos =
+        0;
+
+    let advertencias =
+        0;
+
+    let incidencias =
+        0;
+
+
+    datos.forEach(
+        item => {
+
+            const fields =
+                obtenerCampos(
+                    item
+                );
+
+
+            const estado =
+                clasificarEstado(
+                    fields.Estado
+                );
+
+
+            if (
+                estado === "online"
+            ) {
+
+                activos++;
+
+            }
+
+            else if (
+                estado === "warning"
+            ) {
+
+                advertencias++;
+
+            }
+
+            else if (
+                estado === "offline"
+            ) {
+
+                incidencias++;
+
+            }
+
+        }
+    );
+
+
+    const activosElemento =
+        document.getElementById(
+            "serviciosActivos"
+        );
+
+
+    const advertenciasElemento =
+        document.getElementById(
+            "advertencias"
+        );
+
+
+    const incidenciasElemento =
+        document.getElementById(
+            "incidencias"
+        );
+
+
+    if (
+        activosElemento
+    ) {
+
+        activosElemento.textContent =
+            activos;
+
+    }
+
+
+    if (
+        advertenciasElemento
+    ) {
+
+        advertenciasElemento.textContent =
+            advertencias;
+
+    }
+
+
+    if (
+        incidenciasElemento
+    ) {
+
+        incidenciasElemento.textContent =
+            incidencias;
+
+    }
+
+}
+
+
+/* =========================================
+   ACTUALIZAR ESTADO GENERAL
+========================================= */
+
+function actualizarEstadoGeneral(
+    datos
+) {
+
+    const estadoGeneral =
+        document.getElementById(
+            "estadoMonitoreo"
+        );
+
+
+    if (
+        !estadoGeneral
+    ) return;
+
+
+    if (
+        !datos ||
+        datos.length === 0
+    ) {
+
+        estadoGeneral.textContent =
+            "No configurado";
+
+        estadoGeneral.className =
+            "status-badge neutral";
+
+        return;
+
+    }
+
+
+    const estados =
+        datos.map(
+            item => {
+
+                const campos =
+                    obtenerCampos(
+                        item
+                    );
+
+                return normalizarEstado(
+                    campos.Estado
+                )
+                .toLowerCase();
+
+            }
+        );
+
+
+    const tieneIncidencia =
+        estados.some(
+            estado =>
+                [
+                    "incidencia",
+                    "error",
+                    "caido",
+                    "caído"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    const tieneAdvertencia =
+        estados.some(
+            estado =>
+                [
+                    "advertencia",
+                    "warning",
+                    "pendiente"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    const todosNoConfigurados =
+        estados.every(
+            estado =>
+                estado === "no configurado" ||
+                estado === ""
+        );
+
+
+    const todosOperativos =
+        estados.every(
+            estado =>
+                [
+                    "operativo",
+                    "vigente",
+                    "activo",
+                    "responde"
+                ].includes(
+                    estado
+                )
+        );
+
+
+    if (
+        tieneIncidencia
+    ) {
+
+        estadoGeneral.textContent =
+            "Incidencia";
+
+        estadoGeneral.className =
+            "status-badge offline";
+
+    }
+
+    else if (
+        tieneAdvertencia
+    ) {
+
+        estadoGeneral.textContent =
+            "Advertencia";
+
+        estadoGeneral.className =
+            "status-badge warning";
+
+    }
+
+    else if (
+        todosNoConfigurados
+    ) {
+
+        estadoGeneral.textContent =
+            "No configurado";
+
+        estadoGeneral.className =
+            "status-badge neutral";
+
+    }
+
+    else if (
+        todosOperativos
+    ) {
+
+        estadoGeneral.textContent =
+            "Operativo";
+
+        estadoGeneral.className =
+            "status-badge online";
+
+    }
+
+    else {
+
+        estadoGeneral.textContent =
+            "No configurado";
+
+        estadoGeneral.className =
+            "status-badge neutral";
+
+    }
+
+}
+
+
+/* =========================================
+   ACTUALIZAR HORA
+========================================= */
+
+function actualizarHora() {
+
+    const elemento =
+        document.getElementById(
+            "lastUpdate"
+        );
+
+
+    if (
+        !elemento
+    ) return;
+
+
+    const ahora =
+        new Date();
+
+
+    elemento.textContent =
+        ahora.toLocaleTimeString(
+            "es-PE",
+            {
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit"
+
+            }
+        );
+
+}
+
+
+/* =========================================
+   EQUIPOS
+========================================= */
+
+
+/* =========================================
+   OBTENER EQUIPOS DESDE SHAREPOINT
+========================================= */
+
+async function obtenerEquipos() {
+
+    try {
+
+        console.log("🔄 Cargando inventario desde SharePoint...");
+
+        const TOKEN = await obtenerTokenInfraestructura();
+
+        if (!TOKEN) {
+            throw new Error("No se obtuvo el token de Microsoft Graph.");
+        }
+
+        // ============================================================
+        // 1. OBTENER SITIO SHAREPOINT
+        // ============================================================
+
+        const sitio = await obtenerSitioSharePoint(TOKEN);
+
+        console.log("🏢 Sitio SharePoint:", sitio);
+
+        if (!sitio || !sitio.id) {
+            throw new Error("No se pudo obtener el sitio de SharePoint.");
+        }
+
+        // ============================================================
+        // 2. OBTENER DRIVE
+        // ============================================================
+
+        const respuestaDrive = await fetch(
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`,
+                    Accept: "application/json"
+                }
+            }
+        );
+
+        if (!respuestaDrive.ok) {
+
+            const errorDrive = await respuestaDrive.text();
+
+            console.error(
+                "❌ Error obteniendo Drive:",
+                respuestaDrive.status,
+                errorDrive
+            );
+
+            throw new Error(
+                `No se pudo obtener el Drive (${respuestaDrive.status})`
+            );
+        }
+
+        const drive = await respuestaDrive.json();
+
+        console.log("💾 Drive encontrado:", drive);
+
+        if (!drive.id) {
+            throw new Error("El Drive no tiene un ID válido.");
+        }
+
+        // ============================================================
+        // 3. RUTA DEL EQUIPOS.JSON
+        // ============================================================
+
+        const rutaArchivo =
+    "Procedimientos T.I/equipos.json";
+
+        const urlArchivo =
+            `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
+
+        console.log("📂 Ruta del archivo:", rutaArchivo);
+        console.log("🌐 URL Graph:", urlArchivo);
+
+        // ============================================================
+        // 4. DESCARGAR EQUIPOS.JSON
+        // ============================================================
+
+        const respuestaArchivo = await fetch(
+            urlArchivo,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`,
+                    Accept: "application/json"
+                }
+            }
+        );
+
+        if (!respuestaArchivo.ok) {
+
+            const errorArchivo = await respuestaArchivo.text();
+
+            console.error(
+                "❌ Error obteniendo equipos.json:",
+                respuestaArchivo.status,
+                errorArchivo
+            );
+
+            throw new Error(
+                `No se pudo obtener equipos.json (${respuestaArchivo.status})`
+            );
+        }
+
+        // ============================================================
+        // 5. LEER JSON
+        // ============================================================
+
+        const datos = await respuestaArchivo.json();
+
+        console.log("📦 RESPUESTA COMPLETA DEL JSON:", datos);
+        console.log("📊 ¿Es un array?:", Array.isArray(datos));
+        console.log(
+            "🔢 Cantidad:",
+            Array.isArray(datos) ? datos.length : "NO ES ARRAY"
+        );
+
+        // ============================================================
+        // 6. VALIDAR ESTRUCTURA
+        // ============================================================
+
+        if (!Array.isArray(datos)) {
+
+            console.error(
+                "❌ equipos.json no contiene directamente un array:",
+                datos
+            );
+
+            throw new Error(
+                "El archivo equipos.json no tiene el formato esperado."
+            );
+        }
+
+        if (datos.length === 0) {
+
+            console.warn(
+                "⚠️ equipos.json fue cargado correctamente, pero está vacío."
+            );
+
+            return [];
+        }
+
+        // ============================================================
+        // 7. MOSTRAR PRIMER EQUIPO PARA COMPROBAR ESTRUCTURA
+        // ============================================================
+
+        console.log(
+            "🔍 Primer equipo del inventario:",
+            datos[0]
+        );
+
+        console.log(
+            "✅ Inventario cargado correctamente:",
+            datos.length,
+            "equipos"
+        );
+
+        return datos;
+
+    } catch (error) {
+
+        console.error(
+            "❌ Error cargando inventario desde SharePoint:",
+            error
+        );
+
+        const contenedor =
+            document.getElementById("equiposGrid");
+
+        if (contenedor) {
+
+            contenedor.innerHTML = `
+                <div class="error-inventario">
+                    ❌ No se pudo cargar
+                    <strong>el inventario desde SharePoint</strong>.
+                </div>
+            `;
+        }
+
+        return [];
+    }
+}
+/* =========================================
+   FORMATEAR FECHA
+========================================= */
+
+function formatearFechaEquipo(
+    fecha
+) {
+
+    if (
+        !fecha
+    ) {
+
+        return "—";
+
+    }
+
+
+    const fechaObjeto =
+        new Date(
+            fecha
+        );
+
+
+    if (
+        Number.isNaN(
+            fechaObjeto.getTime()
+        )
+    ) {
+
+        return String(
+            fecha
+        );
+
+    }
+
+
+    return fechaObjeto.toLocaleDateString(
+        "es-PE",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric"
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ESCAPAR HTML
+========================================= */
+
+function escaparHTML(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(
+        valor
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================
+   CLASIFICAR ESTADO DE EQUIPO
+========================================= */
+
+function clasificarEstadoEquipo(
+    estado
+) {
+
+    const valor =
+        String(
+            estado || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+        valor === "conectado"
+    ) {
+
+        return "online";
+
+    }
+
+
+    if (
+        valor === "desconectado"
+    ) {
+
+        return "offline";
+
+    }
+
+
+    return "neutral";
+
+}
+
+
+/* =========================================
+   RENDERIZAR TABLA DE EQUIPOS
+========================================= */
+
+function renderizarEquipos(
+    equipos
+) {
+
+    const tbody =
+        document.getElementById(
+            "equiposTableBody"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "equiposEmpty"
+        );
+
+
+    const resultados =
+        document.getElementById(
+            "equiposResultados"
+        );
+
+
+    if (
+        !tbody
+    ) return;
+
+
+    tbody.innerHTML =
+        "";
+
+
+    if (
+        !equipos ||
+        equipos.length === 0
+    ) {
+
+        if (
+            empty
+        ) {
+
+            empty.style.display =
+                "block";
+
+        }
+
+
+        if (
+            resultados
+        ) {
+
+            resultados.textContent =
+                "0";
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (
+        empty
+    ) {
+
+        empty.style.display =
+            "none";
+
+    }
+
+
+    if (
+        resultados
+    ) {
+
+        resultados.textContent =
+            equipos.length;
+
+    }
+
+
+    equipos.forEach(
+        equipo => {
+
+            const nombre =
+                equipo.Nombre ||
+                "Sin nombre";
+
+
+            const estado =
+                equipo.Estado ||
+                "No verificable";
+
+
+            const ip =
+                equipo.IP ||
+                "—";
+
+
+            const sistemaOperativo =
+                equipo.SistemaOperativo ||
+                "—";
+
+
+            const versionSO =
+                equipo.VersionSO ||
+                "";
+
+
+            const area =
+                equipo.Area ||
+                "Sin identificar";
+
+
+            const ultimoRegistro =
+                formatearFechaEquipo(
+                    equipo.UltimoRegistroAD
+                );
+
+
+            const tipoEstado =
+                clasificarEstadoEquipo(
+                    estado
+                );
+
+
+            const fila =
+                document.createElement(
+                    "tr"
+                );
+
+
+            fila.innerHTML = `
+
+                <td>
+
+                    <div class="equipo-name">
+
+                        <div class="equipo-icon">
+                            🖥️
+                        </div>
+
+                        <div>
+
+                            <strong
+                                title="${escaparHTML(nombre)}"
+                            >
+                                ${escaparHTML(nombre)}
+                            </strong>
+
+                            ${
+                                equipo.DNSHostName
+                                    ? `
+                                        <span
+                                            title="${escaparHTML(equipo.DNSHostName)}"
+                                        >
+                                            ${escaparHTML(equipo.DNSHostName)}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="equipo-status ${tipoEstado}"
+                    >
+
+                        <span
+                            class="equipo-status-dot"
+                        ></span>
+
+                        ${escaparHTML(estado)}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-ip">
+                        ${escaparHTML(ip)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-so">
+
+                        ${escaparHTML(
+                            sistemaOperativo
+                        )}
+
+                        ${
+                            versionSO
+                                ? `<br><small>${escaparHTML(versionSO)}</small>`
+                                : ""
+                        }
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-area">
+
+                        ${escaparHTML(
+                            area
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="equipo-date">
+
+                        ${escaparHTML(
+                            ultimoRegistro
+                        )}
+
+                    </span>
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                fila
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ACTUALIZAR RESUMEN DE EQUIPOS
+========================================= */
+
+function actualizarResumenEquipos(
+    equipos
+) {
 
     const total =
-        equiposData.length;
+        equipos.length;
 
 
     const conectados =
-        equiposData.filter(
+        equipos.filter(
             equipo =>
-                normalizarTexto(
-                    equipo.Estado
-                ) ===
+                String(
+                    equipo.Estado || ""
+                )
+                .toLowerCase()
+                .trim() ===
                 "conectado"
         ).length;
 
 
     const desconectados =
-        equiposData.filter(
+        equipos.filter(
             equipo =>
-                normalizarTexto(
-                    equipo.Estado
-                ) ===
+                String(
+                    equipo.Estado || ""
+                )
+                .toLowerCase()
+                .trim() ===
                 "desconectado"
         ).length;
 
 
-    totalEquipos.textContent =
-        total;
+    const totalElemento =
+        document.getElementById(
+            "totalEquipos"
+        );
 
 
-    equiposConectados.textContent =
-        conectados;
+    const conectadosElemento =
+        document.getElementById(
+            "equiposConectados"
+        );
 
 
-    equiposDesconectados.textContent =
-        desconectados;
+    const desconectadosElemento =
+        document.getElementById(
+            "equiposDesconectados"
+        );
+
+
+    if (
+        totalElemento
+    ) {
+
+        totalElemento.textContent =
+            total;
+
+    }
+
+
+    if (
+        conectadosElemento
+    ) {
+
+        conectadosElemento.textContent =
+            conectados;
+
+    }
+
+
+    if (
+        desconectadosElemento
+    ) {
+
+        desconectadosElemento.textContent =
+            desconectados;
+
+    }
+
 }
 
 
 /* =========================================
-   ÁREAS
+   CREAR FILTRO DE ÁREAS
 ========================================= */
 
-function actualizarFiltroAreas() {
+function cargarFiltroAreas(
+    equipos
+) {
+
+    const select =
+        document.getElementById(
+            "filtroAreaEquipo"
+        );
+
+
+    if (
+        !select
+    ) return;
+
 
     const areas =
         [
             ...new Set(
-                equiposData
+                equipos
                     .map(
                         equipo =>
-                            equipo.Area
+                            equipo.Area ||
+                            "Sin identificar"
                     )
-                    .filter(Boolean)
+                    .filter(
+                        area =>
+                            area
+                    )
             )
         ]
         .sort(
             (a, b) =>
-                String(a)
-                    .localeCompare(
-                        String(b),
-                        "es"
-                    )
+                String(a).localeCompare(
+                    String(b),
+                    "es"
+                )
         );
 
 
-    filtroAreaEquipo.innerHTML = `
+    select.innerHTML = `
+
         <option value="todos">
             Todas las áreas
         </option>
+
     `;
 
 
@@ -1521,1897 +2023,458 @@ function actualizarFiltroAreas() {
                 area;
 
 
-            filtroAreaEquipo.appendChild(
+            select.appendChild(
                 option
             );
+
         }
     );
+
 }
 
 
 /* =========================================
-   FILTRAR EQUIPOS
+   APLICAR FILTROS
 ========================================= */
 
 function aplicarFiltrosEquipos() {
 
-    const texto =
-        normalizarTexto(
-            buscarEquipo.value
+    const buscar =
+        document.getElementById(
+            "buscarEquipo"
         );
 
 
-    const estado =
-        filtroEstadoEquipo.value;
+    const filtroEstado =
+        document.getElementById(
+            "filtroEstadoEquipo"
+        );
 
 
-    const area =
-        filtroAreaEquipo.value;
+    const filtroArea =
+        document.getElementById(
+            "filtroAreaEquipo"
+        );
 
 
-    equiposFiltrados =
+    const texto =
+        buscar
+            ? buscar.value
+                .trim()
+                .toLowerCase()
+            : "";
+
+
+    const estadoSeleccionado =
+        filtroEstado
+            ? filtroEstado.value
+            : "todos";
+
+
+    const areaSeleccionada =
+        filtroArea
+            ? filtroArea.value
+            : "todos";
+
+
+    const filtrados =
         equiposData.filter(
             equipo => {
 
-                const coincideTexto =
+                const nombre =
+                    String(
+                        equipo.Nombre || ""
+                    )
+                    .toLowerCase();
+
+
+                const ip =
+                    String(
+                        equipo.IP || ""
+                    )
+                    .toLowerCase();
+
+
+                const dns =
+                    String(
+                        equipo.DNSHostName || ""
+                    )
+                    .toLowerCase();
+
+
+                const area =
+                    String(
+                        equipo.Area ||
+                        "Sin identificar"
+                    );
+
+
+                const estado =
+                    String(
+                        equipo.Estado || ""
+                    );
+
+
+                const coincideBusqueda =
                     !texto ||
-                    normalizarTexto(
-                        equipo.Nombre
-                    ).includes(texto) ||
-                    normalizarTexto(
-                        equipo.IP
-                    ).includes(texto) ||
-                    normalizarTexto(
-                        equipo.DNSHostName
-                    ).includes(texto);
+                    nombre.includes(
+                        texto
+                    ) ||
+                    ip.includes(
+                        texto
+                    ) ||
+                    dns.includes(
+                        texto
+                    );
 
 
                 const coincideEstado =
-                    estado === "todos" ||
-                    String(
-                        equipo.Estado || ""
-                    ) === estado;
+                    estadoSeleccionado ===
+                        "todos" ||
+                    estado ===
+                        estadoSeleccionado;
 
 
                 const coincideArea =
-                    area === "todos" ||
-                    String(
-                        equipo.Area || ""
-                    ) === area;
+                    areaSeleccionada ===
+                        "todos" ||
+                    area ===
+                        areaSeleccionada;
 
 
                 return (
-                    coincideTexto &&
+                    coincideBusqueda &&
                     coincideEstado &&
                     coincideArea
                 );
+
             }
         );
 
 
-    paginaActual =
-        1;
+    renderizarEquipos(
+        filtrados
+    );
 
-
-    renderizarTablaEquipos();
 }
 
 
 /* =========================================
-   CLASE ESTADO
+   CONFIGURAR FILTROS
 ========================================= */
 
-function obtenerClaseEstado(
-    estado
-) {
+function configurarFiltrosEquipos() {
 
-    const estadoNormalizado =
-        normalizarTexto(
-            estado
+    const buscar =
+        document.getElementById(
+            "buscarEquipo"
+        );
+
+
+    const filtroEstado =
+        document.getElementById(
+            "filtroEstadoEquipo"
+        );
+
+
+    const filtroArea =
+        document.getElementById(
+            "filtroAreaEquipo"
         );
 
 
     if (
-        estadoNormalizado ===
-        "conectado"
+        buscar
     ) {
 
-        return "online";
+        buscar.addEventListener(
+            "input",
+            aplicarFiltrosEquipos
+        );
+
     }
 
 
     if (
-        estadoNormalizado ===
-        "desconectado"
+        filtroEstado
     ) {
 
-        return "offline";
-    }
-
-
-    return "neutral";
-}
-
-
-/* =========================================
-   RENDER TABLA
-========================================= */
-
-function renderizarTablaEquipos() {
-
-    const totalResultados =
-        equiposFiltrados.length;
-
-
-    const totalPaginas =
-        Math.max(
-            1,
-            Math.ceil(
-                totalResultados /
-                EQUIPOS_POR_PAGINA
-            )
+        filtroEstado.addEventListener(
+            "change",
+            aplicarFiltrosEquipos
         );
 
-
-    if (
-        paginaActual >
-        totalPaginas
-    ) {
-
-        paginaActual =
-            totalPaginas;
-    }
-
-
-    const inicio =
-        (
-            paginaActual - 1
-        ) *
-        EQUIPOS_POR_PAGINA;
-
-
-    const fin =
-        inicio +
-        EQUIPOS_POR_PAGINA;
-
-
-    const equiposPagina =
-        equiposFiltrados.slice(
-            inicio,
-            fin
-        );
-
-
-    if (
-        equiposResultados
-    ) {
-
-        if (
-            totalResultados === 0
-        ) {
-
-            equiposResultados.textContent =
-                "0 equipos encontrados";
-
-        } else {
-
-            equiposResultados.textContent =
-                `Equipos encontrados: ${totalResultados}`;
-        }
     }
 
 
     if (
-        totalResultados === 0
+        filtroArea
     ) {
 
-        equiposTableBody.innerHTML =
-            "";
-
-        equiposEmpty.style.display =
-            "flex";
-
-
-        renderizarPaginacion(
-            0
+        filtroArea.addEventListener(
+            "change",
+            aplicarFiltrosEquipos
         );
 
-
-        return;
     }
 
-
-    equiposEmpty.style.display =
-        "none";
-
-
-    equiposTableBody.innerHTML =
-        equiposPagina
-            .map(
-                equipo => {
-
-                    const estado =
-                        equipo.Estado ||
-                        "No verificable";
-
-
-                    const claseEstado =
-                        obtenerClaseEstado(
-                            estado
-                        );
-
-
-                    /*
-                     * SOLO SE CONSULTA LA MEMORIA.
-                     *
-                     * No se hace ninguna petición
-                     * a SharePoint aquí.
-                     */
-
-                    const trabajador =
-                        obtenerTrabajadorEquipo(
-                            equipo.Nombre
-                        );
-
-
-                    const trabajadorHTML =
-                        trabajador
-                            ? `
-                                <span
-                                    class="trabajador-name"
-                                    title="${escaparHTML(
-                                        trabajador.nombre
-                                    )}"
-                                >
-                                    ${escaparHTML(
-                                        trabajador.nombre
-                                    )}
-                                </span>
-                            `
-                            : `
-                                <button
-                                    type="button"
-                                    class="registrar-trabajador"
-                                    data-equipo="${escaparHTML(
-                                        equipo.Nombre
-                                    )}"
-                                >
-                                    Registrar
-                                </button>
-                            `;
-
-
-                    return `
-                        <tr>
-
-                            <td>
-
-                                <div class="equipo-name">
-
-                                    <div class="equipo-icon">
-                                        🖥️
-                                    </div>
-
-                                    <div>
-
-                                        <strong
-                                            title="${escaparHTML(
-                                                equipo.Nombre
-                                            )}"
-                                        >
-                                            ${escaparHTML(
-                                                equipo.Nombre
-                                            )}
-                                        </strong>
-
-                                        <span
-                                            title="${escaparHTML(
-                                                equipo.DNSHostName
-                                            )}"
-                                        >
-                                            ${escaparHTML(
-                                                equipo.DNSHostName ||
-                                                "Sin DNS"
-                                            )}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    class="equipo-status ${claseEstado}"
-                                >
-
-                                    <span
-                                        class="equipo-status-dot"
-                                    ></span>
-
-                                    ${escaparHTML(
-                                        estado
-                                    )}
-
-                                </span>
-
-                            </td>
-
-
-                            <td class="trabajador-cell">
-
-                                ${trabajadorHTML}
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="equipo-ip">
-
-                                    ${escaparHTML(
-                                        equipo.IP ||
-                                        "--"
-                                    )}
-
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="equipo-so">
-
-                                    ${escaparHTML(
-                                        equipo.SistemaOperativo ||
-                                        "--"
-                                    )}
-
-                                    ${
-                                        equipo.VersionSO
-                                            ? `
-                                                <br>
-
-                                                <small>
-                                                    ${escaparHTML(
-                                                        equipo.VersionSO
-                                                    )}
-                                                </small>
-                                            `
-                                            : ""
-                                    }
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span
-                                    class="equipo-area"
-                                    title="${escaparHTML(
-                                        equipo.Area
-                                    )}"
-                                >
-                                    ${escaparHTML(
-                                        equipo.Area ||
-                                        "--"
-                                    )}
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="equipo-date">
-
-                                    ${escaparHTML(
-                                        equipo.UltimoRegistroAD ||
-                                        "--"
-                                    )}
-
-                                </span>
-
-                            </td>
-
-                        </tr>
-                    `;
-                }
-            )
-            .join("");
-
-
-    renderizarPaginacion(
-        totalPaginas
-    );
-}
-
-
-/* =========================================
-   PAGINACIÓN
-========================================= */
-
-function renderizarPaginacion(
-    totalPaginas
-) {
-
-    const existente =
-        document.querySelector(
-            ".equipos-pagination"
-        );
-
-
-    if (
-        existente
-    ) {
-
-        existente.remove();
-    }
-
-
-    if (
-        totalPaginas <= 1
-    ) {
-
-        return;
-    }
-
-
-    const contenedor =
-        document.createElement(
-            "div"
-        );
-
-
-    contenedor.className =
-        "equipos-pagination";
-
-
-    const botonAnterior =
-        document.createElement(
-            "button"
-        );
-
-
-    botonAnterior.type =
-        "button";
-
-
-    botonAnterior.className =
-        "pagination-btn pagination-prev";
-
-
-    botonAnterior.innerHTML =
-        "‹";
-
-
-    botonAnterior.disabled =
-        paginaActual === 1;
-
-
-    botonAnterior.addEventListener(
-        "click",
-        () => {
-
-            if (
-                paginaActual > 1
-            ) {
-
-                paginaActual--;
-
-                renderizarTablaEquipos();
-            }
-        }
-    );
-
-
-    contenedor.appendChild(
-        botonAnterior
-    );
-
-
-    const paginas =
-        generarPaginas(
-            paginaActual,
-            totalPaginas
-        );
-
-
-    paginas.forEach(
-        pagina => {
-
-            if (
-                pagina === "..."
-            ) {
-
-                const puntos =
-                    document.createElement(
-                        "span"
-                    );
-
-
-                puntos.className =
-                    "pagination-ellipsis";
-
-
-                puntos.textContent =
-                    "...";
-
-
-                contenedor.appendChild(
-                    puntos
-                );
-
-
-                return;
-            }
-
-
-            const boton =
-                document.createElement(
-                    "button"
-                );
-
-
-            boton.type =
-                "button";
-
-
-            boton.className =
-                "pagination-btn";
-
-
-            boton.textContent =
-                pagina;
-
-
-            if (
-                pagina === paginaActual
-            ) {
-
-                boton.classList.add(
-                    "active"
-                );
-            }
-
-
-            boton.addEventListener(
-                "click",
-                () => {
-
-                    paginaActual =
-                        pagina;
-
-
-                    renderizarTablaEquipos();
-                }
-            );
-
-
-            contenedor.appendChild(
-                boton
-            );
-        }
-    );
-
-
-    const botonSiguiente =
-        document.createElement(
-            "button"
-        );
-
-
-    botonSiguiente.type =
-        "button";
-
-
-    botonSiguiente.className =
-        "pagination-btn pagination-next";
-
-
-    botonSiguiente.innerHTML =
-        "›";
-
-
-    botonSiguiente.disabled =
-        paginaActual ===
-        totalPaginas;
-
-
-    botonSiguiente.addEventListener(
-        "click",
-        () => {
-
-            if (
-                paginaActual <
-                totalPaginas
-            ) {
-
-                paginaActual++;
-
-                renderizarTablaEquipos();
-            }
-        }
-    );
-
-
-    contenedor.appendChild(
-        botonSiguiente
-    );
-
-
-    const tableContainer =
-        document.querySelector(
-            ".equipos-table-container"
-        );
-
-
-    if (
-        tableContainer
-    ) {
-
-        tableContainer.parentNode.insertBefore(
-            contenedor,
-            tableContainer.nextSibling
-        );
-    }
-}
-
-
-/* =========================================
-   GENERAR PÁGINAS
-========================================= */
-
-function generarPaginas(
-    actual,
-    total
-) {
-
-    if (
-        total <= 7
-    ) {
-
-        return Array.from(
-            {
-                length: total
-            },
-            (_, index) =>
-                index + 1
-        );
-    }
-
-
-    const paginas =
-        [];
-
-
-    paginas.push(
-        1
-    );
-
-
-    if (
-        actual > 4
-    ) {
-
-        paginas.push(
-            "..."
-        );
-    }
-
-
-    const inicio =
-        Math.max(
-            2,
-            actual - 1
-        );
-
-
-    const fin =
-        Math.min(
-            total - 1,
-            actual + 1
-        );
-
-
-    for (
-        let i = inicio;
-        i <= fin;
-        i++
-    ) {
-
-        paginas.push(
-            i
-        );
-    }
-
-
-    if (
-        actual <
-        total - 3
-    ) {
-
-        paginas.push(
-            "..."
-        );
-    }
-
-
-    paginas.push(
-        total
-    );
-
-
-    return paginas;
-}
-
-
-/* =========================================
-   ABRIR MODAL
-========================================= */
-
-async function abrirModalTrabajador(
-    nombreEquipo
-) {
-
-    equipoSeleccionado =
-        nombreEquipo;
-
-
-    modalEquipoNombre.textContent =
-        nombreEquipo;
-
-
-    trabajadorNombre.value =
-        "";
-
-
-    trabajadorError.style.display =
-        "none";
-
-
-    trabajadorError.textContent =
-        "";
-
-
-    guardarTrabajador.disabled =
-        false;
-
-
-    guardarTrabajador.textContent =
-        "Guardar";
-
-
-    trabajadorModal.style.display =
-        "flex";
-
-
-    /*
-     * Si ya tenemos trabajadores cargados,
-     * mostramos inmediatamente la asignación.
-     */
-
-    const trabajador =
-        obtenerTrabajadorEquipo(
-            nombreEquipo
-        );
-
-
-    if (
-        trabajador
-    ) {
-
-        trabajadorNombre.value =
-            trabajador.nombre;
-
-    } else {
-
-        /*
-         * Si todavía no terminaron de cargar,
-         * intentamos cargar la información.
-         *
-         * Esto ocurre únicamente al abrir
-         * el modal, nunca durante el inventario.
-         */
-
-        if (
-            !trabajadoresCargados
-        ) {
-
-            trabajadorError.textContent =
-                "Consultando asignación...";
-
-            trabajadorError.style.display =
-                "block";
-
-
-            try {
-
-                await obtenerTrabajadores(
-                    tokenActual
-                );
-
-
-                const trabajadorActual =
-                    obtenerTrabajadorEquipo(
-                        nombreEquipo
-                    );
-
-
-                if (
-                    trabajadorActual
-                ) {
-
-                    trabajadorNombre.value =
-                        trabajadorActual.nombre;
-
-                    trabajadorError.style.display =
-                        "none";
-
-                } else {
-
-                    trabajadorError.style.display =
-                        "none";
-                }
-
-
-            } catch (error) {
-
-                console.warn(
-                    "Error consultando trabajador:",
-                    error
-                );
-
-
-                trabajadorError.textContent =
-                    "No se pudo consultar la asignación.";
-
-                trabajadorError.style.display =
-                    "block";
-            }
-        }
-    }
-
-
-    setTimeout(
-        () => {
-
-            trabajadorNombre.focus();
-
-        },
-        50
-    );
-}
-
-
-/* =========================================
-   CERRAR MODAL
-========================================= */
-
-function cerrarModalTrabajador() {
-
-    trabajadorModal.style.display =
-        "none";
-
-
-    equipoSeleccionado =
-        null;
-
-
-    trabajadorNombre.value =
-        "";
-
-
-    trabajadorError.textContent =
-        "";
-
-
-    trabajadorError.style.display =
-        "none";
-
-
-    guardarTrabajador.disabled =
-        false;
-
-
-    guardarTrabajador.textContent =
-        "Guardar";
-}
-
-
-/* =========================================
-   ERROR MODAL
-========================================= */
-
-function mostrarErrorTrabajador(
-    mensaje
-) {
-
-    trabajadorError.textContent =
-        mensaje;
-
-
-    trabajadorError.style.display =
-        "block";
-}
-
-
-/* =========================================
-   GUARDAR TRABAJADOR
-========================================= */
-
-async function guardarAsignacionTrabajador() {
-
-    const nombre =
-        trabajadorNombre.value.trim();
-
-
-    if (
-        !equipoSeleccionado
-    ) {
-
-        mostrarErrorTrabajador(
-            "No se seleccionó ningún equipo."
-        );
-
-        return;
-    }
-
-
-    if (
-        !nombre
-    ) {
-
-        mostrarErrorTrabajador(
-            "Ingrese el nombre del trabajador."
-        );
-
-
-        trabajadorNombre.focus();
-
-
-        return;
-    }
-
-
-    try {
-
-        guardarTrabajador.disabled =
-            true;
-
-
-        trabajadorError.style.display =
-            "none";
-
-
-        guardarTrabajador.textContent =
-            "Guardando...";
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                tokenActual
-            );
-
-
-        const lista =
-            await obtenerListaTrabajadores(
-                tokenActual
-            );
-
-
-        const columnas =
-            await obtenerColumnasTrabajadores(
-                tokenActual
-            );
-
-
-        const campoEquipo =
-            obtenerNombreInternoColumna(
-                columnas,
-                "Equipo1"
-            );
-
-
-        const campoTrabajador =
-            obtenerNombreInternoColumna(
-                columnas,
-                "Trabajador"
-            );
-
-
-        if (
-            !campoEquipo
-        ) {
-
-            throw new Error(
-                'No se encontró la columna "Equipo1".'
-            );
-        }
-
-
-        if (
-            !campoTrabajador
-        ) {
-
-            throw new Error(
-                'No se encontró la columna "Trabajador".'
-            );
-        }
-
-
-        /*
-         * Verificamos si ya existe una asignación.
-         */
-
-        const asignacionActual =
-            obtenerTrabajadorEquipo(
-                equipoSeleccionado
-            );
-
-
-        /*
-         * Si no estaba en memoria,
-         * hacemos una consulta antes de crear
-         * para evitar duplicados.
-         */
-
-        let asignacionFinal =
-            asignacionActual;
-
-
-        if (
-            !asignacionFinal &&
-            !trabajadoresCargados
-        ) {
-
-            await obtenerTrabajadores(
-                tokenActual
-            );
-
-
-            asignacionFinal =
-                obtenerTrabajadorEquipo(
-                    equipoSeleccionado
-                );
-        }
-
-
-        const fields = {};
-
-
-        fields[campoEquipo] =
-            equipoSeleccionado;
-
-
-        fields[campoTrabajador] =
-            nombre;
-
-
-        /*
-         * Title solo si es obligatorio.
-         */
-
-        const columnaTitle =
-            columnas.find(
-                columna =>
-                    normalizarTexto(
-                        columna.displayName
-                    ) === "title" ||
-                    columna.name === "Title"
-            );
-
-
-        if (
-            columnaTitle &&
-            columnaTitle.required === true
-        ) {
-
-            fields[
-                columnaTitle.name
-            ] =
-                equipoSeleccionado;
-        }
-
-
-        let response;
-
-
-        /* =====================================
-           ACTUALIZAR
-        ====================================== */
-
-        if (
-            asignacionFinal &&
-            asignacionFinal.itemId
-        ) {
-
-            const url =
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacionFinal.itemId}/fields`;
-
-
-            response =
-                await fetch(
-                    url,
-                    {
-
-                        method:
-                            "PATCH",
-
-                        headers: {
-
-                            Authorization:
-                                `Bearer ${tokenActual}`,
-
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify(
-                                fields
-                            )
-                    }
-                );
-
-
-        } else {
-
-            /* =====================================
-               CREAR
-            ====================================== */
-
-            const url =
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
-
-
-            response =
-                await fetch(
-                    url,
-                    {
-
-                        method:
-                            "POST",
-
-                        headers: {
-
-                            Authorization:
-                                `Bearer ${tokenActual}`,
-
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                fields:
-                                    fields
-                            })
-                    }
-                );
-        }
-
-
-        if (
-            !response.ok
-        ) {
-
-            const texto =
-                await response.text();
-
-
-            throw new Error(
-                `SharePoint respondió ${response.status}: ${texto}`
-            );
-        }
-
-
-        const resultado =
-            await response.json();
-
-
-        /*
-         * Actualizar memoria local.
-         */
-
-        trabajadoresPorEquipo[
-            normalizarTexto(
-                equipoSeleccionado
-            )
-        ] = {
-
-            nombre:
-                nombre,
-
-            itemId:
-                resultado.id ||
-                asignacionFinal?.itemId,
-
-            equipo:
-                equipoSeleccionado
-        };
-
-
-        trabajadoresCargados =
-            true;
-
-
-        cerrarModalTrabajador();
-
-
-        renderizarTablaEquipos();
-
-
-    } catch (error) {
-
-        console.error(
-            "Error guardando trabajador:",
-            error
-        );
-
-
-        mostrarErrorTrabajador(
-            obtenerMensajeError(
-                error
-            )
-        );
-
-
-    } finally {
-
-        guardarTrabajador.disabled =
-            false;
-
-
-        guardarTrabajador.textContent =
-            "Guardar";
-    }
-}
-
-
-/* =========================================
-   MENSAJES DE ERROR
-========================================= */
-
-function obtenerMensajeError(
-    error
-) {
-
-    const mensaje =
-        String(
-            error?.message ||
-            error ||
-            ""
-        );
-
-
-    if (
-        mensaje.includes(
-            "403"
-        )
-    ) {
-
-        return (
-            "No tienes permisos para modificar esta lista."
-        );
-    }
-
-
-    if (
-        mensaje.includes(
-            "401"
-        )
-    ) {
-
-        return (
-            "La sesión expiró. Recarga la página e inicia sesión nuevamente."
-        );
-    }
-
-
-    return (
-        mensaje ||
-        "No se pudo guardar la asignación."
-    );
-}
-
-
-/* =========================================
-   EVENTOS TABLA
-========================================= */
-
-if (
-    equiposTableBody
-) {
-
-    equiposTableBody.addEventListener(
-        "click",
-        event => {
-
-            const boton =
-                event.target.closest(
-                    ".registrar-trabajador"
-                );
-
-
-            if (
-                !boton
-            ) {
-                return;
-            }
-
-
-            const equipo =
-                boton.dataset.equipo;
-
-
-            if (
-                !equipo
-            ) {
-                return;
-            }
-
-
-            abrirModalTrabajador(
-                equipo
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   EVENTOS FILTROS
-========================================= */
-
-if (
-    buscarEquipo
-) {
-
-    buscarEquipo.addEventListener(
-        "input",
-        () => {
-
-            aplicarFiltrosEquipos();
-        }
-    );
-}
-
-
-if (
-    filtroEstadoEquipo
-) {
-
-    filtroEstadoEquipo.addEventListener(
-        "change",
-        () => {
-
-            aplicarFiltrosEquipos();
-        }
-    );
-}
-
-
-if (
-    filtroAreaEquipo
-) {
-
-    filtroAreaEquipo.addEventListener(
-        "change",
-        () => {
-
-            aplicarFiltrosEquipos();
-        }
-    );
-}
-
-
-/* =========================================
-   EVENTOS MODAL
-========================================= */
-
-if (
-    cerrarTrabajadorModal
-) {
-
-    cerrarTrabajadorModal.addEventListener(
-        "click",
-        cerrarModalTrabajador
-    );
-}
-
-
-if (
-    cancelarTrabajador
-) {
-
-    cancelarTrabajador.addEventListener(
-        "click",
-        cerrarModalTrabajador
-    );
-}
-
-
-if (
-    guardarTrabajador
-) {
-
-    guardarTrabajador.addEventListener(
-        "click",
-        guardarAsignacionTrabajador
-    );
-}
-
-
-if (
-    trabajadorNombre
-) {
-
-    trabajadorNombre.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                event.preventDefault();
-
-                guardarAsignacionTrabajador();
-            }
-
-
-            if (
-                event.key ===
-                "Escape"
-            ) {
-
-                cerrarModalTrabajador();
-            }
-        }
-    );
-}
-
-
-if (
-    trabajadorModal
-) {
-
-    trabajadorModal.addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target ===
-                trabajadorModal
-            ) {
-
-                cerrarModalTrabajador();
-            }
-        }
-    );
 }
 
 
 /* =========================================
    CARGAR EQUIPOS
-   -----------------------------------------
-   ESTA ES LA PARTE CRÍTICA.
-   
-   NO CARGA TRABAJADORES.
-   NO ESPERA TRABAJADORES.
-   NO CONSULTA LA LISTA.
 ========================================= */
 
 async function cargarEquipos() {
 
     try {
 
-        equiposEstado.textContent =
-            "● ACTUALIZANDO";
+        console.log(
+            "===================================="
+        );
 
+        console.log(
+            "🖥️ INICIANDO INVENTARIO DE EQUIPOS"
+        );
 
-        equiposEstado.className =
-            "section-status warning";
+        console.log(
+            "===================================="
+        );
 
-
-        /*
-         * SOLO OBTENEMOS equipos.json.
-         */
 
         const equipos =
-            await obtenerEquiposDesdeSharePoint(
-                tokenActual
-            );
-
-
-        if (
-            !Array.isArray(equipos)
-        ) {
-
-            throw new Error(
-                "equipos.json no contiene un arreglo válido."
-            );
-        }
+            await obtenerEquipos();
 
 
         equiposData =
             equipos;
 
 
-        equiposFiltrados =
-            [...equiposData];
-
-
-        paginaActual =
-            1;
-
-
-        /*
-         * Actualizar resumen.
-         */
-
-        actualizarResumenEquipos();
-
-
-        actualizarFiltroAreas();
-
-
-        /*
-         * PINTAR INMEDIATAMENTE.
-         */
-
-        renderizarTablaEquipos();
-
-
-        /*
-         * Fecha.
-         */
-
-        lastUpdate.textContent =
-            obtenerFechaActual();
-
-
-        equiposEstado.textContent =
-            "● ACTUALIZADO";
-
-
-        equiposEstado.className =
-            "section-status online";
-
-
-        console.log(
-            `Inventario cargado: ${equiposData.length} equipos`
+        actualizarResumenEquipos(
+            equiposData
         );
 
 
-    } catch (error) {
-
-        console.error(
-            "Error cargando equipos:",
-            error
+        cargarFiltroAreas(
+            equiposData
         );
 
 
-        equiposEstado.textContent =
-            "● ERROR";
+        renderizarEquipos(
+            equiposData
+        );
 
 
-        equiposEstado.className =
-            "section-status offline";
+        configurarFiltrosEquipos();
 
 
-        equiposTableBody.innerHTML = `
-            <tr>
-                <td
-                    colspan="7"
-                    class="equipos-loading"
-                >
-
-                    <div class="table-loading">
-
-                        <span>
-                            No se pudo cargar el inventario.
-                        </span>
-
-                    </div>
-
-                </td>
-            </tr>
-        `;
-
-
-        if (
-            equiposResultados
-        ) {
-
-            equiposResultados.textContent =
-                "Error al obtener los equipos.";
-        }
-    }
-}
-
-
-/* =========================================
-   CARGAR SERVICIOS
-========================================= */
-
-async function cargarServicios() {
-
-    try {
-
-        const servicios =
-            await obtenerMonitoreoTI(
-                tokenActual
+        const estado =
+            document.getElementById(
+                "equiposEstado"
             );
 
 
-        renderizarServicios(
-            servicios
+        if (
+            estado
+        ) {
+
+            estado.textContent =
+                "● ACTUALIZADO";
+
+            estado.className =
+                "section-status online";
+
+        }
+
+
+        console.log(
+            "✅ Inventario de equipos cargado correctamente."
         );
 
 
-    } catch (error) {
+    }
+
+    catch (
+        error
+    ) {
 
         console.error(
-            "Error cargando servicios:",
+            "❌ No se pudo cargar el inventario:",
             error
         );
 
 
-        serviciosGrid.innerHTML = `
-            <div
-                class="service-card offline"
-            >
-
-                <div class="service-main">
-
-                    <div class="service-icon">
-                        ⚠️
-                    </div>
-
-                    <div class="service-info">
-
-                        <div class="service-heading">
-
-                            <h3>
-                                Error de conexión
-                            </h3>
-
-                            <span
-                                class="service-status offline"
-                            >
-
-                                <span class="status-dot"></span>
-
-                                ERROR
-
-                            </span>
-
-                        </div>
-
-                        <p>
-                            No se pudieron obtener
-                            los servicios desde SharePoint.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-        `;
+        const tbody =
+            document.getElementById(
+                "equiposTableBody"
+            );
 
 
-        estadoGeneral.textContent =
-            "● ERROR";
+        if (
+            tbody
+        ) {
+
+            tbody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="equipos-loading"
+                    >
+
+                        ❌ No se pudo cargar
+                        <strong>el inventario desde SharePoint</strong>.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
 
 
-        estadoGeneral.className =
-            "section-status offline";
+        const estado =
+            document.getElementById(
+                "equiposEstado"
+            );
+
+
+        if (
+            estado
+        ) {
+
+            estado.textContent =
+                "● ERROR";
+
+            estado.className =
+                "section-status offline";
+
+        }
+
     }
+
 }
 
 
 /* =========================================
-   CARGA INICIAL
+   CARGAR MONITOREO
 ========================================= */
 
-async function cargarDashboard() {
+async function cargarMonitoreo() {
 
     try {
 
-        mostrarLoading(
-            "Iniciando sesión..."
-        );
-
-
-        await iniciarSesion();
-
-
-        mostrarLoading(
-            "Conectando con SharePoint..."
-        );
-
-
-        await obtenerSitioSharePoint(
-            tokenActual
-        );
-
-
-        /*
-         * =====================================
-         * SERVICIOS + INVENTARIO
-         * =====================================
-         *
-         * Se ejecutan en paralelo.
-         *
-         * Antes:
-         *
-         * servicios → esperar → equipos
-         *
-         * Ahora:
-         *
-         * servicios ┐
-         *           ├── simultáneamente
-         * equipos   ┘
-         *
-         * Esto reduce el tiempo total.
-         */
-
-        mostrarLoading(
+        mostrarCarga(
             "Cargando monitoreo..."
         );
 
 
-        await Promise.all([
-            cargarServicios(),
-            cargarEquipos()
-        ]);
+        /* =================================
+           SHAREPOINT
+        ================================= */
+
+        const datos =
+            await obtenerMonitoreoTI();
 
 
-        /*
-         * Ocultamos el loading apenas
-         * servicios + equipos están listos.
-         */
-
-        ocultarLoading();
-
-
-        /*
-         * =====================================
-         * TRABAJADORES EN SEGUNDO PLANO
-         * =====================================
-         *
-         * IMPORTANTE:
-         *
-         * NO usamos await.
-         *
-         * La página ya está funcionando.
-         *
-         * Si SharePoint tarda:
-         * NO importa.
-         *
-         * Si falla:
-         * NO afecta el inventario.
-         */
-
-        obtenerTrabajadores(
-            tokenActual
-        ).catch(
-            error => {
-
-                console.warn(
-                    "Carga secundaria de trabajadores falló:",
-                    error
-                );
-            }
+        renderizarServicios(
+            datos
         );
 
 
-    } catch (error) {
+        actualizarResumen(
+            datos
+        );
+
+
+        actualizarEstadoGeneral(
+            datos
+        );
+
+
+        /* =================================
+           EQUIPOS
+        ================================= */
+
+        cambiarMensaje(
+            "Cargando inventario de equipos..."
+        );
+
+
+        await cargarEquipos();
+
+
+        /* =================================
+           HORA
+        ================================= */
+
+        actualizarHora();
+
+
+        console.log(
+            "✅ Centro de Monitoreo TI actualizado."
+        );
+
+
+    }
+
+    catch (
+        error
+    ) {
 
         console.error(
-            "Error inicializando infraestructura:",
+            "❌ No se pudo cargar el monitoreo:",
             error
         );
 
 
+        const elemento =
+            document.getElementById(
+                "estadoGeneral"
+            );
+
+
         if (
-            loadingMessage
+            elemento
         ) {
 
-            loadingMessage.textContent =
-                "No se pudo cargar el monitoreo.";
+            elemento.textContent =
+                "● ERROR DE CONEXIÓN";
+
+            elemento.className =
+                "section-status offline";
+
         }
 
+
+        const estadoMonitoreo =
+            document.getElementById(
+                "estadoMonitoreo"
+            );
+
+
+        if (
+            estadoMonitoreo
+        ) {
+
+            estadoMonitoreo.textContent =
+                "Error";
+
+        }
+
+    }
+
+    finally {
 
         setTimeout(
-            () => {
-
-                ocultarLoading();
-
-            },
-            2500
+            ocultarCarga,
+            500
         );
+
     }
-}
 
-
-/* =========================================
-   ACTUALIZACIÓN AUTOMÁTICA
-========================================= */
-
-async function actualizarDashboard() {
-
-    try {
-
-        const cuentas =
-            msalInstanceInfraestructura
-                .getAllAccounts();
-
-
-        if (
-            !cuentas.length
-        ) {
-
-            return;
-        }
-
-
-        cuentaActual =
-            cuentas[0];
-
-
-        const tokenResponse =
-            await msalInstanceInfraestructura
-                .acquireTokenSilent({
-
-                    scopes: [
-                        "User.Read",
-                        "Sites.Read.All",
-                        "Sites.ReadWrite.All"
-                    ],
-
-                    account:
-                        cuentaActual
-                });
-
-
-        tokenActual =
-            tokenResponse.accessToken;
-
-
-        /*
-         * Solo actualizamos:
-         *
-         * - Servicios
-         * - equipos.json
-         *
-         * NO volvemos a descargar
-         * TrabajadoresEquipos.
-         */
-
-        await Promise.all([
-            cargarServicios(),
-            cargarEquipos()
-        ]);
-
-
-    } catch (error) {
-
-        console.error(
-            "Error en actualización automática:",
-            error
-        );
-    }
 }
 
 
@@ -3421,14 +2484,29 @@ async function actualizarDashboard() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
-        cargarDashboard();
-
-
-        setInterval(
-            actualizarDashboard,
-            INTERVALO_ACTUALIZACION
+        console.log(
+            "🚀 Iniciando Centro de Monitoreo TI..."
         );
+
+
+        cargarMonitoreo();
+
     }
+);
+
+
+/* =========================================
+   ACTUALIZACIÓN
+   CADA 5 MINUTOS
+========================================= */
+
+setInterval(
+    function () {
+
+        cargarMonitoreo();
+
+    },
+    300000
 );

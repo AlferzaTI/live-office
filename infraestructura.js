@@ -87,7 +87,6 @@ const loadingOverlay =
         "loadingOverlay"
     );
 
-
 const loadingMessage =
     document.getElementById(
         "loadingMessage"
@@ -95,32 +94,77 @@ const loadingMessage =
 
 
 /* =========================================
-   VARIABLES DE EQUIPOS
+   VARIABLES
 ========================================= */
 
 let equiposData = [];
 
+let paginaEquiposActual = 1;
 
-/* =========================================
-   PAGINACIÓN
-========================================= */
+let equiposFiltradosActuales = [];
 
-const EQUIPOS_POR_PAGINA =
-    40;
+const EQUIPOS_POR_PAGINA = 40;
 
-let paginaEquiposActual =
-    1;
-
-let equiposFiltradosActuales =
-    [];
+let actualizacionEnCurso = false;
 
 
 /* =========================================
-   CONTROL DE ACTUALIZACIÓN
+   FETCH CON TIMEOUT
 ========================================= */
 
-let actualizacionEnCurso =
-    false;
+async function fetchConTimeout(
+    url,
+    opciones = {},
+    tiempo = 20000
+) {
+
+    const controller =
+        new AbortController();
+
+    const timeout =
+        setTimeout(
+            () => controller.abort(),
+            tiempo
+        );
+
+    try {
+
+        return await fetch(
+            url,
+            {
+                ...opciones,
+                signal:
+                    controller.signal
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        if (
+            error.name === "AbortError"
+        ) {
+
+            throw new Error(
+                "La solicitud tardó demasiado en responder."
+            );
+
+        }
+
+        throw error;
+
+    }
+
+    finally {
+
+        clearTimeout(
+            timeout
+        );
+
+    }
+
+}
 
 
 /* =========================================
@@ -131,11 +175,16 @@ function cambiarMensaje(
     mensaje
 ) {
 
+    const elemento =
+        document.getElementById(
+            "loadingMessage"
+        );
+
     if (
-        loadingMessage
+        elemento
     ) {
 
-        loadingMessage.textContent =
+        elemento.textContent =
             mensaje;
 
     }
@@ -155,16 +204,20 @@ function mostrarCarga(
         mensaje
     );
 
+    const overlay =
+        document.getElementById(
+            "loadingOverlay"
+        );
 
     if (
-        loadingOverlay
+        overlay
     ) {
 
-        loadingOverlay.classList.remove(
+        overlay.classList.remove(
             "hidden"
         );
 
-        loadingOverlay.classList.remove(
+        overlay.classList.remove(
             "oculto"
         );
 
@@ -179,12 +232,21 @@ function mostrarCarga(
 
 function ocultarCarga() {
 
+    const overlay =
+        document.getElementById(
+            "loadingOverlay"
+        );
+
     if (
-        loadingOverlay
+        overlay
     ) {
 
-        loadingOverlay.classList.add(
+        overlay.classList.add(
             "hidden"
+        );
+
+        overlay.classList.add(
+            "oculto"
         );
 
     }
@@ -202,17 +264,14 @@ async function obtenerTokenInfraestructura() {
         "🔐 Buscando sesión Microsoft..."
     );
 
-
     const cuentas =
         msalInstanceInfraestructura
             .getAllAccounts();
-
 
     console.log(
         "Cuentas encontradas:",
         cuentas.length
     );
-
 
     if (
         !cuentas.length
@@ -224,22 +283,18 @@ async function obtenerTokenInfraestructura() {
 
     }
 
-
     const cuenta =
         cuentas[0];
-
 
     msalInstanceInfraestructura
         .setActiveAccount(
             cuenta
         );
 
-
     console.log(
         "👤 Cuenta activa:",
         cuenta.username
     );
-
 
     try {
 
@@ -247,17 +302,13 @@ async function obtenerTokenInfraestructura() {
             "Verificando permisos..."
         );
 
-
         const respuesta =
             await msalInstanceInfraestructura
                 .acquireTokenSilent({
 
                     scopes: [
-
                         "User.Read",
-
                         "Sites.Read.All"
-
                     ],
 
                     account:
@@ -265,11 +316,9 @@ async function obtenerTokenInfraestructura() {
 
                 });
 
-
         console.log(
             "✅ Token obtenido correctamente."
         );
-
 
         return respuesta.accessToken;
 
@@ -280,7 +329,7 @@ async function obtenerTokenInfraestructura() {
     ) {
 
         console.error(
-            "❌ Error obteniendo token silenciosamente:",
+            "❌ Error obteniendo token:",
             error
         );
 
@@ -303,12 +352,12 @@ async function obtenerSitioSharePoint(
         "🔎 Buscando sitio SharePoint..."
     );
 
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}`;
 
     const respuesta =
-        await fetch(
-
-            `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}`,
-
+        await fetchConTimeout(
+            url,
             {
 
                 method:
@@ -325,9 +374,7 @@ async function obtenerSitioSharePoint(
                 }
 
             }
-
         );
-
 
     if (
         !respuesta.ok
@@ -336,30 +383,25 @@ async function obtenerSitioSharePoint(
         const error =
             await respuesta.text();
 
-
         console.error(
-            "❌ Error obteniendo sitio SharePoint:",
+            "❌ Error SharePoint:",
             respuesta.status,
             error
         );
 
-
         throw new Error(
-            `SharePoint Site: HTTP ${respuesta.status}`
+            `SharePoint HTTP ${respuesta.status}`
         );
 
     }
 
-
     const sitio =
         await respuesta.json();
 
-
     console.log(
         "✅ SharePoint encontrado:",
-        sitio
+        sitio.id
     );
-
 
     return sitio;
 
@@ -367,25 +409,29 @@ async function obtenerSitioSharePoint(
 
 
 /* =========================================
-   OBTENER LISTA MONITOREOTI
-   USA TOKEN Y SITIO YA OBTENIDOS
+   OBTENER MONITOREO TI
 ========================================= */
 
-async function obtenerMonitoreoTI(
-    TOKEN,
-    sitio
-) {
+async function obtenerMonitoreoTI() {
 
     console.log(
-        "☁️ Consultando MonitoreoTI..."
+        "☁️ Cargando MonitoreoTI..."
     );
 
+    const TOKEN =
+        await obtenerTokenInfraestructura();
+
+    const sitio =
+        await obtenerSitioSharePoint(
+            TOKEN
+        );
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields&$top=999`;
 
     const respuesta =
-        await fetch(
-
-            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${SHAREPOINT_LIST}/items?expand=fields&$top=999`,
-
+        await fetchConTimeout(
+            url,
             {
 
                 method:
@@ -402,9 +448,7 @@ async function obtenerMonitoreoTI(
                 }
 
             }
-
         );
-
 
     if (
         !respuesta.ok
@@ -413,61 +457,26 @@ async function obtenerMonitoreoTI(
         const error =
             await respuesta.text();
 
-
         console.error(
-            "❌ Error obteniendo lista MonitoreoTI:",
+            "❌ Error MonitoreoTI:",
             respuesta.status,
             error
         );
 
-
         throw new Error(
-            `MonitoreoTI: HTTP ${respuesta.status}`
+            `MonitoreoTI HTTP ${respuesta.status}`
         );
 
     }
-
 
     const data =
         await respuesta.json();
 
-
     console.log(
-        "===================================="
+        "✅ MonitoreoTI:",
+        data.value?.length || 0,
+        "registros"
     );
-
-    console.log(
-        "✅ DATOS DE MONITOREO TI"
-    );
-
-    console.log(
-        "===================================="
-    );
-
-
-    console.log(
-        "📊 Registros encontrados:",
-        data.value?.length || 0
-    );
-
-
-    if (
-        data.value &&
-        data.value.length > 0
-    ) {
-
-        console.log(
-            "📅 Campos del primer servicio:",
-            data.value[0].fields
-        );
-
-        console.log(
-            "🕐 Ultimarevision:",
-            data.value[0].fields?.Ultimarevision
-        );
-
-    }
-
 
     return data.value || [];
 
@@ -475,49 +484,25 @@ async function obtenerMonitoreoTI(
 
 
 /* =========================================
-   OBTENER EQUIPOS DESDE SHAREPOINT
-   USA TOKEN Y SITIO YA OBTENIDOS
+   OBTENER EQUIPOS
 ========================================= */
 
-async function obtenerEquipos(
-    TOKEN,
-    sitio
-) {
+async function obtenerEquipos() {
 
     console.log(
         "🖥️ Cargando equipos.json..."
     );
 
+    const TOKEN =
+        await obtenerTokenInfraestructura();
 
-    if (
-        !TOKEN
-    ) {
-
-        throw new Error(
-            "No se obtuvo el token de Microsoft Graph."
+    const sitio =
+        await obtenerSitioSharePoint(
+            TOKEN
         );
-
-    }
-
-
-    if (
-        !sitio ||
-        !sitio.id
-    ) {
-
-        throw new Error(
-            "No se pudo obtener el sitio de SharePoint."
-        );
-
-    }
-
-
-    /* =====================================
-       OBTENER DRIVE
-    ===================================== */
 
     const respuestaDrive =
-        await fetch(
+        await fetchConTimeout(
 
             `https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive`,
 
@@ -540,74 +525,51 @@ async function obtenerEquipos(
 
         );
 
-
     if (
         !respuestaDrive.ok
     ) {
 
-        const errorDrive =
+        const error =
             await respuestaDrive.text();
 
-
         console.error(
-            "❌ Error obteniendo Drive:",
+            "❌ Error Drive:",
             respuestaDrive.status,
-            errorDrive
+            error
         );
 
-
         throw new Error(
-            `No se pudo obtener el Drive (${respuestaDrive.status})`
+            `Drive HTTP ${respuestaDrive.status}`
         );
 
     }
 
-
     const drive =
         await respuestaDrive.json();
-
 
     if (
         !drive.id
     ) {
 
         throw new Error(
-            "El Drive no tiene un ID válido."
+            "El Drive no tiene ID."
         );
 
     }
 
-
-    console.log(
-        "✅ Drive encontrado:",
-        drive.id
-    );
-
-
-    /* =====================================
-       RUTA EQUIPOS.JSON
-    ===================================== */
-
     const rutaArchivo =
         "Procedimientos T.I/equipos.json";
 
-
     const urlArchivo =
         `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
-
 
     console.log(
         "📂 Descargando:",
         rutaArchivo
     );
 
-
-    /* =====================================
-       DESCARGAR EQUIPOS.JSON
-    ===================================== */
-
     const respuestaArchivo =
-        await fetch(
+        await fetchConTimeout(
 
             urlArchivo,
 
@@ -630,82 +592,42 @@ async function obtenerEquipos(
 
         );
 
-
     if (
         !respuestaArchivo.ok
     ) {
 
-        const errorArchivo =
+        const error =
             await respuestaArchivo.text();
 
-
         console.error(
-            "❌ Error obteniendo equipos.json:",
+            "❌ Error equipos.json:",
             respuestaArchivo.status,
-            errorArchivo
+            error
         );
 
-
         throw new Error(
-            `No se pudo obtener equipos.json (${respuestaArchivo.status})`
+            `equipos.json HTTP ${respuestaArchivo.status}`
         );
 
     }
-
-
-    /* =====================================
-       LEER JSON
-    ===================================== */
 
     const datos =
         await respuestaArchivo.json();
 
-
-    console.log(
-        "📊 Equipos encontrados:",
-        Array.isArray(datos)
-            ? datos.length
-            : 0
-    );
-
-
-    /* =====================================
-       VALIDAR
-    ===================================== */
-
     if (
-        !Array.isArray(
-            datos
-        )
+        !Array.isArray(datos)
     ) {
 
         throw new Error(
-            "El archivo equipos.json no tiene el formato esperado."
+            "equipos.json no contiene un array."
         );
 
     }
-
-
-    if (
-        datos.length === 0
-    ) {
-
-        console.warn(
-            "⚠️ equipos.json está vacío."
-        );
-
-
-        return [];
-
-    }
-
 
     console.log(
-        "✅ Inventario cargado:",
-        datos.length,
-        "equipos"
+        "✅ Equipos encontrados:",
+        datos.length
     );
-
 
     return datos;
 
@@ -720,9 +642,7 @@ function obtenerCampos(
     item
 ) {
 
-    return (
-        item.fields || {}
-    );
+    return item?.fields || {};
 
 }
 
@@ -742,7 +662,6 @@ function normalizarEstado(
         return "No configurado";
 
     }
-
 
     return String(
         estado
@@ -764,7 +683,6 @@ function clasificarEstado(
             estado
         ).toLowerCase();
 
-
     if (
         valor.includes("operativo") ||
         valor.includes("vigente") ||
@@ -776,7 +694,6 @@ function clasificarEstado(
 
     }
 
-
     if (
         valor.includes("advertencia") ||
         valor.includes("warning") ||
@@ -786,7 +703,6 @@ function clasificarEstado(
         return "warning";
 
     }
-
 
     if (
         valor.includes("incidencia") ||
@@ -799,14 +715,13 @@ function clasificarEstado(
 
     }
 
-
     return "neutral";
 
 }
 
 
 /* =========================================
-   ICONO DEL SERVICIO
+   ICONO SERVICIO
 ========================================= */
 
 function obtenerIconoServicio(
@@ -818,7 +733,6 @@ function obtenerIconoServicio(
             servicio
         ).toLowerCase();
 
-
     if (
         nombre.includes("internet")
     ) {
@@ -826,7 +740,6 @@ function obtenerIconoServicio(
         return "🌐";
 
     }
-
 
     if (
         nombre.includes("microsoft")
@@ -836,7 +749,6 @@ function obtenerIconoServicio(
 
     }
 
-
     if (
         nombre.includes("certificado")
     ) {
@@ -844,7 +756,6 @@ function obtenerIconoServicio(
         return "🔒";
 
     }
-
 
     if (
         nombre.includes("servidor")
@@ -854,7 +765,6 @@ function obtenerIconoServicio(
 
     }
 
-
     if (
         nombre.includes("dns")
     ) {
@@ -863,14 +773,13 @@ function obtenerIconoServicio(
 
     }
 
-
     return "⚙️";
 
 }
 
 
 /* =========================================
-   FORMATEAR ÚLTIMA REVISIÓN
+   FORMATEAR FECHA
 ========================================= */
 
 function formatearUltimaRevision(
@@ -885,12 +794,10 @@ function formatearUltimaRevision(
 
     }
 
-
     const fechaObjeto =
         new Date(
             fecha
         );
-
 
     if (
         Number.isNaN(
@@ -903,7 +810,6 @@ function formatearUltimaRevision(
         );
 
     }
-
 
     return fechaObjeto.toLocaleString(
         "es-PE",
@@ -934,7 +840,7 @@ function formatearUltimaRevision(
 
 
 /* =========================================
-   ACTUALIZAR ÚLTIMA ACTUALIZACIÓN
+   ACTUALIZAR HORA
 ========================================= */
 
 function actualizarHora(
@@ -946,47 +852,24 @@ function actualizarHora(
             "lastUpdate"
         );
 
-
     if (
         !elemento
     ) return;
 
-
-    if (
-        !datos ||
-        datos.length === 0
-    ) {
-
-        elemento.textContent =
-            "Sin registro";
-
-        return;
-
-    }
-
-
     const fechas =
         datos
             .map(
-                item => {
-
-                    const campos =
-                        obtenerCampos(
-                            item
-                        );
-
-                    return campos.Ultimarevision;
-
-                }
+                item =>
+                    obtenerCampos(
+                        item
+                    ).Ultimarevision
             )
             .filter(
-                fecha =>
-                    fecha
+                Boolean
             );
 
-
     if (
-        fechas.length === 0
+        !fechas.length
     ) {
 
         elemento.textContent =
@@ -995,7 +878,6 @@ function actualizarHora(
         return;
 
     }
-
 
     const fechasValidas =
         fechas
@@ -1012,9 +894,8 @@ function actualizarHora(
                     )
             );
 
-
     if (
-        fechasValidas.length === 0
+        !fechasValidas.length
     ) {
 
         elemento.textContent =
@@ -1023,7 +904,6 @@ function actualizarHora(
         return;
 
     }
-
 
     const ultimaFecha =
         new Date(
@@ -1035,16 +915,53 @@ function actualizarHora(
             )
         );
 
-
     elemento.textContent =
         formatearUltimaRevision(
             ultimaFecha
         );
 
+}
 
-    console.log(
-        "🕐 Última revisión general:",
-        elemento.textContent
+
+/* =========================================
+   ESCAPAR HTML
+========================================= */
+
+function escaparHTML(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(
+        valor
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
     );
 
 }
@@ -1063,21 +980,17 @@ function renderizarServicios(
             "serviciosGrid"
         );
 
-
     const estadoGeneral =
         document.getElementById(
             "estadoGeneral"
         );
 
-
     if (
         !grid
     ) return;
 
-
     grid.innerHTML =
         "";
-
 
     if (
         !datos ||
@@ -1089,7 +1002,6 @@ function renderizarServicios(
                 No hay servicios registrados.
             </div>
         `;
-
 
         if (
             estadoGeneral
@@ -1103,14 +1015,11 @@ function renderizarServicios(
 
         }
 
-
         return;
 
     }
 
-
     const estados = [];
-
 
     datos.forEach(
         item => {
@@ -1120,52 +1029,39 @@ function renderizarServicios(
                     item
                 );
 
-
             const servicio =
                 campos.Servicio ||
                 "Servicio";
-
 
             const estado =
                 campos.Estado ||
                 "No configurado";
 
-
             const detalle =
                 campos.Detalle ||
                 "Sin información disponible";
 
-
             const latencia =
                 campos.Latencia;
-
 
             const ultimaRevision =
                 campos.Ultimarevision;
 
-
-            const estadoNormalizado =
+            estados.push(
                 normalizarEstado(
                     estado
-                );
-
-
-            estados.push(
-                estadoNormalizado
+                )
             );
-
 
             const tipoEstado =
                 clasificarEstado(
                     estado
                 );
 
-
             const icono =
                 obtenerIconoServicio(
                     servicio
                 );
-
 
             const latenciaTexto =
                 latencia !== undefined &&
@@ -1174,22 +1070,18 @@ function renderizarServicios(
                     ? `${latencia} ms`
                     : "—";
 
-
             const revisionTexto =
                 formatearUltimaRevision(
                     ultimaRevision
                 );
-
 
             const card =
                 document.createElement(
                     "div"
                 );
 
-
             card.className =
                 `service-card ${tipoEstado}`;
-
 
             card.innerHTML = `
 
@@ -1225,7 +1117,6 @@ function renderizarServicios(
 
                 </div>
 
-
                 <div class="service-meta">
 
                     <div class="service-latency">
@@ -1239,7 +1130,6 @@ function renderizarServicios(
                         </strong>
 
                     </div>
-
 
                     <div class="service-revision">
 
@@ -1265,144 +1155,12 @@ function renderizarServicios(
 
             `;
 
-
             grid.appendChild(
                 card
             );
 
         }
     );
-
-
-    /* =====================================
-       ESTADO GENERAL
-    ===================================== */
-
-    if (
-        estadoGeneral
-    ) {
-
-        const estadosNormalizados =
-            estados.map(
-                estado =>
-                    String(
-                        estado
-                    )
-                    .trim()
-                    .toLowerCase()
-            );
-
-
-        const hayIncidencia =
-            estadosNormalizados.some(
-                estado =>
-                    [
-                        "incidencia",
-                        "error",
-                        "caido",
-                        "caído"
-                    ].includes(
-                        estado
-                    )
-            );
-
-
-        const hayAdvertencia =
-            estadosNormalizados.some(
-                estado =>
-                    [
-                        "advertencia",
-                        "warning",
-                        "pendiente"
-                    ].includes(
-                        estado
-                    )
-            );
-
-
-        const todosNoConfigurados =
-            estadosNormalizados.length > 0 &&
-            estadosNormalizados.every(
-                estado =>
-                    estado === "no configurado" ||
-                    estado === ""
-            );
-
-
-        const todosOperativos =
-            estadosNormalizados.length > 0 &&
-            estadosNormalizados.every(
-                estado =>
-                    [
-                        "operativo",
-                        "vigente",
-                        "activo",
-                        "responde"
-                    ].includes(
-                        estado
-                    )
-            );
-
-
-        if (
-            hayIncidencia
-        ) {
-
-            estadoGeneral.textContent =
-                "● INCIDENCIA";
-
-            estadoGeneral.className =
-                "section-status offline";
-
-        }
-
-        else if (
-            hayAdvertencia
-        ) {
-
-            estadoGeneral.textContent =
-                "● ADVERTENCIA";
-
-            estadoGeneral.className =
-                "section-status warning";
-
-        }
-
-        else if (
-            todosOperativos
-        ) {
-
-            estadoGeneral.textContent =
-                "● OPERATIVO";
-
-            estadoGeneral.className =
-                "section-status online";
-
-        }
-
-        else if (
-            todosNoConfigurados
-        ) {
-
-            estadoGeneral.textContent =
-                "● NO CONFIGURADO";
-
-            estadoGeneral.className =
-                "section-status";
-
-        }
-
-        else {
-
-            estadoGeneral.textContent =
-                "● NO CONFIGURADO";
-
-            estadoGeneral.className =
-                "section-status";
-
-        }
-
-    }
 
 }
 
@@ -1415,30 +1173,19 @@ function actualizarResumen(
     datos
 ) {
 
-    let activos =
-        0;
-
-    let advertencias =
-        0;
-
-    let incidencias =
-        0;
-
+    let activos = 0;
+    let advertencias = 0;
+    let incidencias = 0;
 
     datos.forEach(
         item => {
 
-            const fields =
-                obtenerCampos(
-                    item
-                );
-
-
             const estado =
                 clasificarEstado(
-                    fields.Estado
+                    obtenerCampos(
+                        item
+                    ).Estado
                 );
-
 
             if (
                 estado === "online"
@@ -1467,24 +1214,20 @@ function actualizarResumen(
         }
     );
 
-
     const activosElemento =
         document.getElementById(
             "serviciosActivos"
         );
-
 
     const advertenciasElemento =
         document.getElementById(
             "advertencias"
         );
 
-
     const incidenciasElemento =
         document.getElementById(
             "incidencias"
         );
-
 
     if (
         activosElemento
@@ -1495,7 +1238,6 @@ function actualizarResumen(
 
     }
 
-
     if (
         advertenciasElemento
     ) {
@@ -1504,7 +1246,6 @@ function actualizarResumen(
             advertencias;
 
     }
-
 
     if (
         incidenciasElemento
@@ -1519,57 +1260,47 @@ function actualizarResumen(
 
 
 /* =========================================
-   ACTUALIZAR ESTADO GENERAL
+   ESTADO GENERAL
 ========================================= */
 
 function actualizarEstadoGeneral(
     datos
 ) {
 
-    const estadoGeneral =
+    const elemento =
         document.getElementById(
             "estadoMonitoreo"
         );
 
-
     if (
-        !estadoGeneral
+        !elemento
     ) return;
-
 
     if (
         !datos ||
         datos.length === 0
     ) {
 
-        estadoGeneral.textContent =
+        elemento.textContent =
             "No configurado";
 
-        estadoGeneral.className =
+        elemento.className =
             "status-badge neutral";
 
         return;
 
     }
 
-
     const estados =
         datos.map(
-            item => {
-
-                const campos =
+            item =>
+                normalizarEstado(
                     obtenerCampos(
                         item
-                    );
-
-                return normalizarEstado(
-                    campos.Estado
+                    ).Estado
                 )
-                .toLowerCase();
-
-            }
+                .toLowerCase()
         );
-
 
     const tieneIncidencia =
         estados.some(
@@ -1584,7 +1315,6 @@ function actualizarEstadoGeneral(
                 )
         );
 
-
     const tieneAdvertencia =
         estados.some(
             estado =>
@@ -1596,15 +1326,6 @@ function actualizarEstadoGeneral(
                     estado
                 )
         );
-
-
-    const todosNoConfigurados =
-        estados.every(
-            estado =>
-                estado === "no configurado" ||
-                estado === ""
-        );
-
 
     const todosOperativos =
         estados.every(
@@ -1619,15 +1340,14 @@ function actualizarEstadoGeneral(
                 )
         );
 
-
     if (
         tieneIncidencia
     ) {
 
-        estadoGeneral.textContent =
+        elemento.textContent =
             "Incidencia";
 
-        estadoGeneral.className =
+        elemento.className =
             "status-badge offline";
 
     }
@@ -1636,23 +1356,11 @@ function actualizarEstadoGeneral(
         tieneAdvertencia
     ) {
 
-        estadoGeneral.textContent =
+        elemento.textContent =
             "Advertencia";
 
-        estadoGeneral.className =
+        elemento.className =
             "status-badge warning";
-
-    }
-
-    else if (
-        todosNoConfigurados
-    ) {
-
-        estadoGeneral.textContent =
-            "No configurado";
-
-        estadoGeneral.className =
-            "status-badge neutral";
 
     }
 
@@ -1660,20 +1368,20 @@ function actualizarEstadoGeneral(
         todosOperativos
     ) {
 
-        estadoGeneral.textContent =
+        elemento.textContent =
             "Operativo";
 
-        estadoGeneral.className =
+        elemento.className =
             "status-badge online";
 
     }
 
     else {
 
-        estadoGeneral.textContent =
+        elemento.textContent =
             "No configurado";
 
-        estadoGeneral.className =
+        elemento.className =
             "status-badge neutral";
 
     }
@@ -1682,7 +1390,43 @@ function actualizarEstadoGeneral(
 
 
 /* =========================================
-   FORMATEAR FECHA EQUIPO
+   ESTADO EQUIPO
+========================================= */
+
+function clasificarEstadoEquipo(
+    estado
+) {
+
+    const valor =
+        String(
+            estado || ""
+        )
+        .trim()
+        .toLowerCase();
+
+    if (
+        valor === "conectado"
+    ) {
+
+        return "online";
+
+    }
+
+    if (
+        valor === "desconectado"
+    ) {
+
+        return "offline";
+
+    }
+
+    return "neutral";
+
+}
+
+
+/* =========================================
+   FECHA EQUIPO
 ========================================= */
 
 function formatearFechaEquipo(
@@ -1697,12 +1441,10 @@ function formatearFechaEquipo(
 
     }
 
-
     const fechaObjeto =
         new Date(
             fecha
         );
-
 
     if (
         Number.isNaN(
@@ -1715,7 +1457,6 @@ function formatearFechaEquipo(
         );
 
     }
-
 
     return fechaObjeto.toLocaleDateString(
         "es-PE",
@@ -1737,534 +1478,11 @@ function formatearFechaEquipo(
 
 
 /* =========================================
-   ESCAPAR HTML
-========================================= */
-
-function escaparHTML(
-    valor
-) {
-
-    if (
-        valor === null ||
-        valor === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(
-        valor
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-/* =========================================
-   CLASIFICAR ESTADO EQUIPO
-========================================= */
-
-function clasificarEstadoEquipo(
-    estado
-) {
-
-    const valor =
-        String(
-            estado || ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-    if (
-        valor === "conectado"
-    ) {
-
-        return "online";
-
-    }
-
-
-    if (
-        valor === "desconectado"
-    ) {
-
-        return "offline";
-
-    }
-
-
-    return "neutral";
-
-}
-
-
-/* =========================================
-   CREAR CONTENEDOR PAGINACIÓN
-========================================= */
-
-function obtenerContenedorPaginacion() {
-
-    let contenedor =
-        document.getElementById(
-            "equiposPagination"
-        );
-
-
-    if (
-        contenedor
-    ) {
-
-        return contenedor;
-
-    }
-
-
-    const tableContainer =
-        document.querySelector(
-            ".equipos-table-container"
-        );
-
-
-    if (
-        !tableContainer
-    ) {
-
-        return null;
-
-    }
-
-
-    contenedor =
-        document.createElement(
-            "div"
-        );
-
-
-    contenedor.id =
-        "equiposPagination";
-
-
-    contenedor.className =
-        "equipos-pagination";
-
-
-    tableContainer.insertAdjacentElement(
-        "afterend",
-        contenedor
-    );
-
-
-    return contenedor;
-
-}
-
-
-/* =========================================
-   RENDERIZAR PAGINACIÓN
-========================================= */
-
-function renderizarPaginacion(
-    totalEquipos
-) {
-
-    const contenedor =
-        obtenerContenedorPaginacion();
-
-
-    if (
-        !contenedor
-    ) return;
-
-
-    contenedor.innerHTML =
-        "";
-
-
-    const totalPaginas =
-        Math.ceil(
-            totalEquipos /
-            EQUIPOS_POR_PAGINA
-        );
-
-
-    if (
-        totalPaginas <= 1
-    ) {
-
-        contenedor.style.display =
-            "none";
-
-        return;
-
-    }
-
-
-    contenedor.style.display =
-        "flex";
-
-
-    const botonAnterior =
-        document.createElement(
-            "button"
-        );
-
-
-    botonAnterior.type =
-        "button";
-
-
-    botonAnterior.className =
-        "pagination-btn pagination-prev";
-
-
-    botonAnterior.innerHTML =
-        "‹";
-
-
-    botonAnterior.title =
-        "Página anterior";
-
-
-    botonAnterior.disabled =
-        paginaEquiposActual === 1;
-
-
-    botonAnterior.addEventListener(
-        "click",
-        function () {
-
-            if (
-                paginaEquiposActual > 1
-            ) {
-
-                paginaEquiposActual--;
-
-                renderizarEquipos(
-                    equiposFiltradosActuales,
-                    false
-                );
-
-            }
-
-        }
-    );
-
-
-    contenedor.appendChild(
-        botonAnterior
-    );
-
-
-    const paginas =
-        obtenerPaginasVisibles(
-            totalPaginas,
-            paginaEquiposActual
-        );
-
-
-    paginas.forEach(
-        pagina => {
-
-            if (
-                pagina === "..."
-            ) {
-
-                const separador =
-                    document.createElement(
-                        "span"
-                    );
-
-
-                separador.className =
-                    "pagination-ellipsis";
-
-
-                separador.textContent =
-                    "…";
-
-
-                contenedor.appendChild(
-                    separador
-                );
-
-
-                return;
-
-            }
-
-
-            const boton =
-                document.createElement(
-                    "button"
-                );
-
-
-            boton.type =
-                "button";
-
-
-            boton.className =
-                "pagination-btn";
-
-
-            if (
-                pagina === paginaEquiposActual
-            ) {
-
-                boton.classList.add(
-                    "active"
-                );
-
-            }
-
-
-            boton.textContent =
-                pagina;
-
-
-            boton.addEventListener(
-                "click",
-                function () {
-
-                    paginaEquiposActual =
-                        pagina;
-
-                    renderizarEquipos(
-                        equiposFiltradosActuales,
-                        false
-                    );
-
-                }
-            );
-
-
-            contenedor.appendChild(
-                boton
-            );
-
-        }
-    );
-
-
-    const botonSiguiente =
-        document.createElement(
-            "button"
-        );
-
-
-    botonSiguiente.type =
-        "button";
-
-
-    botonSiguiente.className =
-        "pagination-btn pagination-next";
-
-
-    botonSiguiente.innerHTML =
-        "›";
-
-
-    botonSiguiente.title =
-        "Página siguiente";
-
-
-    botonSiguiente.disabled =
-        paginaEquiposActual === totalPaginas;
-
-
-    botonSiguiente.addEventListener(
-        "click",
-        function () {
-
-            if (
-                paginaEquiposActual <
-                totalPaginas
-            ) {
-
-                paginaEquiposActual++;
-
-                renderizarEquipos(
-                    equiposFiltradosActuales,
-                    false
-                );
-
-            }
-
-        }
-    );
-
-
-    contenedor.appendChild(
-        botonSiguiente
-    );
-
-}
-
-
-/* =========================================
-   PÁGINAS VISIBLES
-========================================= */
-
-function obtenerPaginasVisibles(
-    totalPaginas,
-    paginaActual
-) {
-
-    if (
-        totalPaginas <= 7
-    ) {
-
-        return Array.from(
-            {
-                length:
-                    totalPaginas
-            },
-            (
-                _,
-                indice
-            ) =>
-                indice + 1
-        );
-
-    }
-
-
-    const paginas = [];
-
-
-    paginas.push(
-        1
-    );
-
-
-    if (
-        paginaActual > 4
-    ) {
-
-        paginas.push(
-            "..."
-        );
-
-    }
-
-
-    const inicio =
-        Math.max(
-            2,
-            paginaActual - 1
-        );
-
-
-    const fin =
-        Math.min(
-            totalPaginas - 1,
-            paginaActual + 1
-        );
-
-
-    for (
-        let pagina = inicio;
-        pagina <= fin;
-        pagina++
-    ) {
-
-        paginas.push(
-            pagina
-        );
-
-    }
-
-
-    if (
-        paginaActual <
-        totalPaginas - 3
-    ) {
-
-        paginas.push(
-            "..."
-        );
-
-    }
-
-
-    paginas.push(
-        totalPaginas
-    );
-
-
-    return paginas;
-
-}
-
-
-/* =========================================
-   ACTUALIZAR TEXTO DE RESULTADOS
-========================================= */
-
-function actualizarTextoResultados(
-    totalEquipos,
-    inicio,
-    fin
-) {
-
-    const resultados =
-        document.getElementById(
-            "equiposResultados"
-        );
-
-
-    if (
-        !resultados
-    ) return;
-
-
-    if (
-        totalEquipos === 0
-    ) {
-
-        resultados.textContent =
-            "0 equipos";
-
-        return;
-
-    }
-
-
-    resultados.textContent =
-        `Mostrando ${inicio}–${fin} de ${totalEquipos} equipos`;
-
-}
-
-
-/* =========================================
-   RENDERIZAR TABLA EQUIPOS
+   RENDERIZAR EQUIPOS
 ========================================= */
 
 function renderizarEquipos(
-    equipos,
-    actualizarPaginacion = true
+    equipos
 ) {
 
     const tbody =
@@ -2272,29 +1490,20 @@ function renderizarEquipos(
             "equiposTableBody"
         );
 
-
     const empty =
         document.getElementById(
             "equiposEmpty"
         );
 
-
     if (
         !tbody
     ) return;
 
-
     equiposFiltradosActuales =
         equipos || [];
 
-
     tbody.innerHTML =
         "";
-
-
-    /* =====================================
-       SIN RESULTADOS
-    ===================================== */
 
     if (
         !equipos ||
@@ -2310,32 +1519,23 @@ function renderizarEquipos(
 
         }
 
-
-        actualizarTextoResultados(
-            0,
-            0,
-            0
-        );
-
-
-        const paginacion =
-            obtenerContenedorPaginacion();
-
+        const resultados =
+            document.getElementById(
+                "equiposResultados"
+            );
 
         if (
-            paginacion
+            resultados
         ) {
 
-            paginacion.style.display =
-                "none";
+            resultados.textContent =
+                "0 equipos";
 
         }
-
 
         return;
 
     }
-
 
     if (
         empty
@@ -2346,17 +1546,11 @@ function renderizarEquipos(
 
     }
 
-
-    /* =====================================
-       VALIDAR PÁGINA
-    ===================================== */
-
     const totalPaginas =
         Math.ceil(
             equipos.length /
             EQUIPOS_POR_PAGINA
         );
-
 
     if (
         paginaEquiposActual >
@@ -2368,7 +1562,6 @@ function renderizarEquipos(
 
     }
 
-
     if (
         paginaEquiposActual < 1
     ) {
@@ -2378,18 +1571,12 @@ function renderizarEquipos(
 
     }
 
-
-    /* =====================================
-       CALCULAR RANGO
-    ===================================== */
-
     const inicioIndice =
         (
             paginaEquiposActual -
             1
         ) *
         EQUIPOS_POR_PAGINA;
-
 
     const finIndice =
         Math.min(
@@ -2398,32 +1585,25 @@ function renderizarEquipos(
             equipos.length
         );
 
-
     const equiposPagina =
         equipos.slice(
             inicioIndice,
             finIndice
         );
 
+    const resultados =
+        document.getElementById(
+            "equiposResultados"
+        );
 
-    const inicioVisible =
-        inicioIndice + 1;
+    if (
+        resultados
+    ) {
 
+        resultados.textContent =
+            `Mostrando ${inicioIndice + 1}–${finIndice} de ${equipos.length} equipos`;
 
-    const finVisible =
-        finIndice;
-
-
-    actualizarTextoResultados(
-        equipos.length,
-        inicioVisible,
-        finVisible
-    );
-
-
-    /* =====================================
-       RENDERIZAR FILAS
-    ===================================== */
+    }
 
     equiposPagina.forEach(
         equipo => {
@@ -2432,49 +1612,40 @@ function renderizarEquipos(
                 equipo.Nombre ||
                 "Sin nombre";
 
-
             const estado =
                 equipo.Estado ||
                 "No verificable";
-
 
             const ip =
                 equipo.IP ||
                 "—";
 
-
             const sistemaOperativo =
                 equipo.SistemaOperativo ||
                 "—";
-
 
             const versionSO =
                 equipo.VersionSO ||
                 "";
 
-
             const area =
                 equipo.Area ||
                 "Sin identificar";
-
 
             const ultimoRegistro =
                 formatearFechaEquipo(
                     equipo.UltimoRegistroAD
                 );
 
-
             const tipoEstado =
                 clasificarEstadoEquipo(
                     estado
                 );
 
-
             const fila =
                 document.createElement(
                     "tr"
                 );
-
 
             fila.innerHTML = `
 
@@ -2529,11 +1700,6 @@ function renderizarEquipos(
 
                 </td>
 
-
-                <!-- TRABAJADOR
-                     Se mantiene la columna del HTML.
-                     La asignación se integrará desde
-                     TrabajadoresEquipos. -->
 
                 <td>
 
@@ -2599,7 +1765,6 @@ function renderizarEquipos(
 
             `;
 
-
             tbody.appendChild(
                 fila
             );
@@ -2607,20 +1772,11 @@ function renderizarEquipos(
         }
     );
 
-
-    /* =====================================
-       PAGINACIÓN
-    ===================================== */
-
-    renderizarPaginacion(
-        equipos.length
-    );
-
 }
 
 
 /* =========================================
-   ACTUALIZAR RESUMEN EQUIPOS
+   RESUMEN EQUIPOS
 ========================================= */
 
 function actualizarResumenEquipos(
@@ -2630,18 +1786,16 @@ function actualizarResumenEquipos(
     const total =
         equipos.length;
 
-
     const conectados =
         equipos.filter(
             equipo =>
                 String(
                     equipo.Estado || ""
                 )
-                .toLowerCase()
-                .trim() ===
+                .trim()
+                .toLowerCase() ===
                 "conectado"
         ).length;
-
 
     const desconectados =
         equipos.filter(
@@ -2649,29 +1803,25 @@ function actualizarResumenEquipos(
                 String(
                     equipo.Estado || ""
                 )
-                .toLowerCase()
-                .trim() ===
+                .trim()
+                .toLowerCase() ===
                 "desconectado"
         ).length;
-
 
     const totalElemento =
         document.getElementById(
             "totalEquipos"
         );
 
-
     const conectadosElemento =
         document.getElementById(
             "equiposConectados"
         );
 
-
     const desconectadosElemento =
         document.getElementById(
             "equiposDesconectados"
         );
-
 
     if (
         totalElemento
@@ -2682,7 +1832,6 @@ function actualizarResumenEquipos(
 
     }
 
-
     if (
         conectadosElemento
     ) {
@@ -2691,7 +1840,6 @@ function actualizarResumenEquipos(
             conectados;
 
     }
-
 
     if (
         desconectadosElemento
@@ -2706,7 +1854,7 @@ function actualizarResumenEquipos(
 
 
 /* =========================================
-   CREAR FILTRO ÁREAS
+   FILTRO ÁREAS
 ========================================= */
 
 function cargarFiltroAreas(
@@ -2718,11 +1866,9 @@ function cargarFiltroAreas(
             "filtroAreaEquipo"
         );
 
-
     if (
         !select
     ) return;
-
 
     const areas =
         [
@@ -2732,10 +1878,6 @@ function cargarFiltroAreas(
                         equipo =>
                             equipo.Area ||
                             "Sin identificar"
-                    )
-                    .filter(
-                        area =>
-                            area
                     )
             )
         ]
@@ -2747,7 +1889,6 @@ function cargarFiltroAreas(
                 )
         );
 
-
     select.innerHTML = `
 
         <option value="todos">
@@ -2755,7 +1896,6 @@ function cargarFiltroAreas(
         </option>
 
     `;
-
 
     areas.forEach(
         area => {
@@ -2765,14 +1905,11 @@ function cargarFiltroAreas(
                     "option"
                 );
 
-
             option.value =
                 area;
 
-
             option.textContent =
                 area;
-
 
             select.appendChild(
                 option
@@ -2785,7 +1922,7 @@ function cargarFiltroAreas(
 
 
 /* =========================================
-   APLICAR FILTROS
+   FILTROS
 ========================================= */
 
 function aplicarFiltrosEquipos() {
@@ -2795,18 +1932,15 @@ function aplicarFiltrosEquipos() {
             "buscarEquipo"
         );
 
-
     const filtroEstado =
         document.getElementById(
             "filtroEstadoEquipo"
         );
 
-
     const filtroArea =
         document.getElementById(
             "filtroAreaEquipo"
         );
-
 
     const texto =
         buscar
@@ -2815,18 +1949,15 @@ function aplicarFiltrosEquipos() {
                 .toLowerCase()
             : "";
 
-
     const estadoSeleccionado =
         filtroEstado
             ? filtroEstado.value
             : "todos";
 
-
     const areaSeleccionada =
         filtroArea
             ? filtroArea.value
             : "todos";
-
 
     const filtrados =
         equiposData.filter(
@@ -2838,13 +1969,11 @@ function aplicarFiltrosEquipos() {
                     )
                     .toLowerCase();
 
-
                 const ip =
                     String(
                         equipo.IP || ""
                     )
                     .toLowerCase();
-
 
                 const dns =
                     String(
@@ -2852,19 +1981,16 @@ function aplicarFiltrosEquipos() {
                     )
                     .toLowerCase();
 
-
                 const area =
                     String(
                         equipo.Area ||
                         "Sin identificar"
                     );
 
-
                 const estado =
                     String(
                         equipo.Estado || ""
                     );
-
 
                 const coincideBusqueda =
                     !texto ||
@@ -2878,20 +2004,17 @@ function aplicarFiltrosEquipos() {
                         texto
                     );
 
-
                 const coincideEstado =
                     estadoSeleccionado ===
                         "todos" ||
                     estado ===
                         estadoSeleccionado;
 
-
                 const coincideArea =
                     areaSeleccionada ===
                         "todos" ||
                     area ===
                         areaSeleccionada;
-
 
                 return (
                     coincideBusqueda &&
@@ -2902,10 +2025,8 @@ function aplicarFiltrosEquipos() {
             }
         );
 
-
     paginaEquiposActual =
         1;
-
 
     renderizarEquipos(
         filtrados
@@ -2925,18 +2046,15 @@ function configurarFiltrosEquipos() {
             "buscarEquipo"
         );
 
-
     const filtroEstado =
         document.getElementById(
             "filtroEstadoEquipo"
         );
 
-
     const filtroArea =
         document.getElementById(
             "filtroAreaEquipo"
         );
-
 
     if (
         buscar &&
@@ -2948,12 +2066,10 @@ function configurarFiltrosEquipos() {
             aplicarFiltrosEquipos
         );
 
-
         buscar.dataset.configurado =
             "true";
 
     }
-
 
     if (
         filtroEstado &&
@@ -2965,12 +2081,10 @@ function configurarFiltrosEquipos() {
             aplicarFiltrosEquipos
         );
 
-
         filtroEstado.dataset.configurado =
             "true";
 
     }
-
 
     if (
         filtroArea &&
@@ -2982,7 +2096,6 @@ function configurarFiltrosEquipos() {
             aplicarFiltrosEquipos
         );
 
-
         filtroArea.dataset.configurado =
             "true";
 
@@ -2992,90 +2105,266 @@ function configurarFiltrosEquipos() {
 
 
 /* =========================================
-   CARGAR EQUIPOS
-   RECIBE TOKEN Y SITIO
+   PAGINACIÓN
 ========================================= */
 
-async function cargarEquipos(
-    TOKEN = null,
-    sitio = null
+function obtenerContenedorPaginacion() {
+
+    let contenedor =
+        document.getElementById(
+            "equiposPagination"
+        );
+
+    if (
+        contenedor
+    ) {
+
+        return contenedor;
+
+    }
+
+    const tableContainer =
+        document.querySelector(
+            ".equipos-table-container"
+        );
+
+    if (
+        !tableContainer
+    ) {
+
+        return null;
+
+    }
+
+    contenedor =
+        document.createElement(
+            "div"
+        );
+
+    contenedor.id =
+        "equiposPagination";
+
+    contenedor.className =
+        "equipos-pagination";
+
+    tableContainer.insertAdjacentElement(
+        "afterend",
+        contenedor
+    );
+
+    return contenedor;
+
+}
+
+
+function renderizarPaginacion(
+    totalEquipos
 ) {
+
+    const contenedor =
+        obtenerContenedorPaginacion();
+
+    if (
+        !contenedor
+    ) return;
+
+    contenedor.innerHTML =
+        "";
+
+    const totalPaginas =
+        Math.ceil(
+            totalEquipos /
+            EQUIPOS_POR_PAGINA
+        );
+
+    if (
+        totalPaginas <= 1
+    ) {
+
+        contenedor.style.display =
+            "none";
+
+        return;
+
+    }
+
+    contenedor.style.display =
+        "flex";
+
+    const anterior =
+        document.createElement(
+            "button"
+        );
+
+    anterior.type =
+        "button";
+
+    anterior.className =
+        "pagination-btn pagination-prev";
+
+    anterior.textContent =
+        "‹";
+
+    anterior.disabled =
+        paginaEquiposActual === 1;
+
+    anterior.addEventListener(
+        "click",
+        () => {
+
+            if (
+                paginaEquiposActual > 1
+            ) {
+
+                paginaEquiposActual--;
+
+                renderizarEquipos(
+                    equiposFiltradosActuales
+                );
+
+            }
+
+        }
+    );
+
+    contenedor.appendChild(
+        anterior
+    );
+
+    for (
+        let pagina = 1;
+        pagina <= totalPaginas;
+        pagina++
+    ) {
+
+        const boton =
+            document.createElement(
+                "button"
+            );
+
+        boton.type =
+            "button";
+
+        boton.className =
+            "pagination-btn";
+
+        if (
+            pagina === paginaEquiposActual
+        ) {
+
+            boton.classList.add(
+                "active"
+            );
+
+        }
+
+        boton.textContent =
+            pagina;
+
+        boton.addEventListener(
+            "click",
+            () => {
+
+                paginaEquiposActual =
+                    pagina;
+
+                renderizarEquipos(
+                    equiposFiltradosActuales
+                );
+
+            }
+        );
+
+        contenedor.appendChild(
+            boton
+        );
+
+    }
+
+    const siguiente =
+        document.createElement(
+            "button"
+        );
+
+    siguiente.type =
+        "button";
+
+    siguiente.className =
+        "pagination-btn pagination-next";
+
+    siguiente.textContent =
+        "›";
+
+    siguiente.disabled =
+        paginaEquiposActual ===
+        totalPaginas;
+
+    siguiente.addEventListener(
+        "click",
+        () => {
+
+            if (
+                paginaEquiposActual <
+                totalPaginas
+            ) {
+
+                paginaEquiposActual++;
+
+                renderizarEquipos(
+                    equiposFiltradosActuales
+                );
+
+            }
+
+        }
+    );
+
+    contenedor.appendChild(
+        siguiente
+    );
+
+}
+
+
+/* =========================================
+   CARGAR EQUIPOS
+========================================= */
+
+async function cargarEquipos() {
 
     try {
 
         console.log(
-            "===================================="
+            "🖥️ INICIANDO INVENTARIO..."
         );
-
-        console.log(
-            "🖥️ INICIANDO INVENTARIO DE EQUIPOS"
-        );
-
-        console.log(
-            "===================================="
-        );
-
-
-        if (
-            !TOKEN
-        ) {
-
-            TOKEN =
-                await obtenerTokenInfraestructura();
-
-        }
-
-
-        if (
-            !sitio
-        ) {
-
-            sitio =
-                await obtenerSitioSharePoint(
-                    TOKEN
-                );
-
-        }
-
 
         const equipos =
-            await obtenerEquipos(
-                TOKEN,
-                sitio
-            );
-
+            await obtenerEquipos();
 
         equiposData =
             equipos;
-
 
         actualizarResumenEquipos(
             equiposData
         );
 
-
         cargarFiltroAreas(
             equiposData
         );
 
-
         paginaEquiposActual =
             1;
-
 
         renderizarEquipos(
             equiposData
         );
 
-
         configurarFiltrosEquipos();
-
 
         const estado =
             document.getElementById(
                 "equiposEstado"
             );
-
 
         if (
             estado
@@ -3089,15 +2378,12 @@ async function cargarEquipos(
 
         }
 
-
         console.log(
-            "✅ Inventario de equipos cargado:",
-            equiposData.length,
-            "equipos"
+            "✅ INVENTARIO CARGADO:",
+            equiposData.length
         );
 
-
-        return equiposData;
+        return true;
 
     }
 
@@ -3106,16 +2392,14 @@ async function cargarEquipos(
     ) {
 
         console.error(
-            "❌ No se pudo cargar el inventario:",
+            "❌ ERROR INVENTARIO:",
             error
         );
-
 
         const tbody =
             document.getElementById(
                 "equiposTableBody"
             );
-
 
         if (
             tbody
@@ -3143,12 +2427,10 @@ async function cargarEquipos(
 
         }
 
-
         const estado =
             document.getElementById(
                 "equiposEstado"
             );
-
 
         if (
             estado
@@ -3162,8 +2444,7 @@ async function cargarEquipos(
 
         }
 
-
-        return [];
+        return false;
 
     }
 
@@ -3172,55 +2453,41 @@ async function cargarEquipos(
 
 /* =========================================
    CARGAR SERVICIOS
-   RECIBE TOKEN Y SITIO
 ========================================= */
 
-async function cargarServicios(
-    TOKEN,
-    sitio
-) {
+async function cargarServicios() {
 
     try {
 
         console.log(
-            "☁️ Cargando servicios..."
+            "☁️ INICIANDO SERVICIOS..."
         );
 
-
         const datos =
-            await obtenerMonitoreoTI(
-                TOKEN,
-                sitio
-            );
-
+            await obtenerMonitoreoTI();
 
         renderizarServicios(
             datos
         );
 
-
         actualizarResumen(
             datos
         );
-
 
         actualizarEstadoGeneral(
             datos
         );
 
-
         actualizarHora(
             datos
         );
 
-
         console.log(
-            "✅ Servicios cargados:",
+            "✅ SERVICIOS CARGADOS:",
             datos.length
         );
 
-
-        return datos;
+        return true;
 
     }
 
@@ -3229,16 +2496,14 @@ async function cargarServicios(
     ) {
 
         console.error(
-            "❌ Error cargando servicios:",
+            "❌ ERROR SERVICIOS:",
             error
         );
-
 
         const grid =
             document.getElementById(
                 "serviciosGrid"
             );
-
 
         if (
             grid
@@ -3257,27 +2522,7 @@ async function cargarServicios(
 
         }
 
-
-        const estado =
-            document.getElementById(
-                "estadoGeneral"
-            );
-
-
-        if (
-            estado
-        ) {
-
-            estado.textContent =
-                "● ERROR";
-
-            estado.className =
-                "section-status offline";
-
-        }
-
-
-        return [];
+        return false;
 
     }
 
@@ -3286,10 +2531,24 @@ async function cargarServicios(
 
 /* =========================================
    CARGAR MONITOREO
-   OPTIMIZADO
 ========================================= */
 
 async function cargarMonitoreo() {
+
+    if (
+        actualizacionEnCurso
+    ) {
+
+        console.log(
+            "⏳ Ya hay una actualización ejecutándose."
+        );
+
+        return;
+
+    }
+
+    actualizacionEnCurso =
+        true;
 
     console.log(
         "===================================="
@@ -3303,97 +2562,46 @@ async function cargarMonitoreo() {
         "===================================="
     );
 
-
     mostrarCarga(
-        "Conectando con Microsoft..."
+        "Cargando monitoreo..."
     );
-
-
-    const inicio =
-        performance.now();
-
 
     try {
 
-        /* =================================
-           TOKEN - UNA SOLA VEZ
-        ================================= */
-
-        const TOKEN =
-            await obtenerTokenInfraestructura();
-
-
-        console.log(
-            "🔐 Token listo."
-        );
-
-
-        /* =================================
-           SHAREPOINT - UNA SOLA VEZ
-        ================================= */
+        /*
+         * IMPORTANTE:
+         *
+         * No hacemos que equipos dependa
+         * de MonitoreoTI.
+         *
+         * Cada sección intenta cargar
+         * independientemente.
+         */
 
         cambiarMensaje(
-            "Conectando con SharePoint..."
+            "Cargando servicios..."
         );
 
+        await cargarServicios();
 
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
-            );
-
-
-        console.log(
-            "📍 Sitio listo:",
-            sitio.id
-        );
-
-
-        /* =================================
-           SERVICIOS + EQUIPOS EN PARALELO
-        ================================= */
 
         cambiarMensaje(
-            "Cargando monitoreo..."
+            "Cargando inventario de equipos..."
         );
 
-
-        const resultados =
-            await Promise.allSettled([
-
-                cargarServicios(
-                    TOKEN,
-                    sitio
-                ),
-
-                cargarEquipos(
-                    TOKEN,
-                    sitio
-                )
-
-            ]);
+        await cargarEquipos();
 
 
         console.log(
-            "📊 Resultado de cargas:",
-            resultados
+            "===================================="
         );
 
-
-        const tiempo =
-            (
-                performance.now() -
-                inicio
-            ) / 1000;
-
-
         console.log(
-            `⚡ Dashboard cargado en ${tiempo.toFixed(2)} segundos`
+            "✅ CENTRO DE MONITOREO CARGADO"
         );
 
-
         console.log(
-            "✅ Centro de Monitoreo TI actualizado."
+            "===================================="
         );
 
     }
@@ -3403,146 +2611,20 @@ async function cargarMonitoreo() {
     ) {
 
         console.error(
-            "❌ Error general del dashboard:",
+            "❌ ERROR GENERAL:",
             error
         );
-
-
-        cambiarMensaje(
-            "No se pudo conectar con Microsoft."
-        );
-
-
-        const estadoGeneral =
-            document.getElementById(
-                "estadoGeneral"
-            );
-
-
-        if (
-            estadoGeneral
-        ) {
-
-            estadoGeneral.textContent =
-                "● ERROR DE CONEXIÓN";
-
-            estadoGeneral.className =
-                "section-status offline";
-
-        }
-
-
-        const estadoMonitoreo =
-            document.getElementById(
-                "estadoMonitoreo"
-            );
-
-
-        if (
-            estadoMonitoreo
-        ) {
-
-            estadoMonitoreo.textContent =
-                "Error";
-
-            estadoMonitoreo.className =
-                "status-badge offline";
-
-        }
 
     }
 
     finally {
 
         /*
-         * Importante:
-         * El overlay se oculta siempre,
-         * incluso si SharePoint o el JSON fallan.
+         * Nunca dejar el overlay bloqueando
+         * la página.
          */
 
-        setTimeout(
-            ocultarCarga,
-            300
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   ACTUALIZACIÓN AUTOMÁTICA
-========================================= */
-
-async function actualizarDashboard() {
-
-    if (
-        actualizacionEnCurso
-    ) {
-
-        console.log(
-            "⏳ Ya existe una actualización en curso."
-        );
-
-        return;
-
-    }
-
-
-    actualizacionEnCurso =
-        true;
-
-
-    try {
-
-        console.log(
-            "🔄 Actualización automática..."
-        );
-
-
-        const TOKEN =
-            await obtenerTokenInfraestructura();
-
-
-        const sitio =
-            await obtenerSitioSharePoint(
-                TOKEN
-            );
-
-
-        await Promise.allSettled([
-
-            cargarServicios(
-                TOKEN,
-                sitio
-            ),
-
-            cargarEquipos(
-                TOKEN,
-                sitio
-            )
-
-        ]);
-
-
-        console.log(
-            "✅ Actualización automática terminada."
-        );
-
-    }
-
-    catch (
-        error
-    ) {
-
-        console.error(
-            "❌ Error en actualización automática:",
-            error
-        );
-
-    }
-
-    finally {
+        ocultarCarga();
 
         actualizacionEnCurso =
             false;
@@ -3561,9 +2643,8 @@ document.addEventListener(
     function () {
 
         console.log(
-            "🚀 DOM listo."
+            "🚀 DOM LISTO"
         );
-
 
         cargarMonitoreo();
 
@@ -3572,11 +2653,18 @@ document.addEventListener(
 
 
 /* =========================================
-   ACTUALIZACIÓN
-   CADA 2 MINUTOS
+   ACTUALIZACIÓN CADA 2 MINUTOS
 ========================================= */
 
 setInterval(
-    actualizarDashboard,
+    function () {
+
+        console.log(
+            "🔄 ACTUALIZACIÓN AUTOMÁTICA"
+        );
+
+        cargarMonitoreo();
+
+    },
     120000
 );

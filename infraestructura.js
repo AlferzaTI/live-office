@@ -310,6 +310,120 @@ function normalizarTexto(valor) {
    AUTENTICACIÓN
 ========================================= */
 
+/* =========================================
+   DIAGNÓSTICO EN PANTALLA
+   Muestra el error real y qué revisar.
+   (Estilos en línea: no depende del CSS.)
+========================================= */
+
+function ayudaError(texto) {
+    const t = String(texto);
+    const ayudas = [
+        [/AADSTS65001|consent_required/i,
+            "Falta consentimiento de administrador. En Azure AD → Registros de aplicaciones → ALFERZA Live Office → Permisos de API, agrega Sites.Read.All y Sites.ReadWrite.All (delegados) y pulsa «Conceder consentimiento de administrador»."],
+        [/AADSTS70011|invalid_scope/i,
+            "Un permiso (scope) no existe o no está configurado en la app de Azure AD."],
+        [/AADSTS50011|redirect_uri/i,
+            "La URL de redirección no coincide. Registra " + msalConfigInfraestructura.auth.redirectUri + " como tipo SPA en Azure AD y abre la página desde ese mismo dominio."],
+        [/AADSTS700054|AADSTS9002326|cross-origin/i,
+            "La URL de redirección debe estar registrada como plataforma «Aplicación de página única (SPA)», no «Web»."],
+        [/popup_window_error|empty_window_error|user_cancelled|monitor_window_timeout/i,
+            "El navegador bloqueó o cerró la ventana de inicio de sesión. Permite las ventanas emergentes para este sitio e inténtalo de nuevo."],
+        [/crypto_nonexistent|insecure/i,
+            "MSAL solo funciona en https:// o http://localhost. No abras el archivo con doble clic (file://) ni por IP."],
+        [/ 401 |InvalidAuthenticationToken/i,
+            "Graph rechazó el token (401). Cierra sesión, recarga y vuelve a iniciar sesión."],
+        [/ 403 |accessDenied|Access denied/i,
+            "Tu usuario no tiene acceso a ese sitio/archivo de SharePoint (403). Debe tener permiso de lectura sobre el OneDrive soporte1_alferza_pe."],
+        [/ 404 |itemNotFound|Invalid hostname/i,
+            "No se encontró el sitio, la lista o el archivo (404). Revisa SHAREPOINT_SITE, el nombre de la lista y la ruta «Procedimientos T.I/equipos.json»."],
+        [/Failed to fetch|NetworkError|AbortError/i,
+            "Sin respuesta de Microsoft Graph (red, VPN, bloqueador de anuncios o tiempo agotado)."]
+    ];
+    const hallada = ayudas.find(a => a[0].test(t));
+    return hallada ? hallada[1] : "";
+}
+
+const diagnosticoLineas = [];
+
+function mostrarDiagnostico(paso, error) {
+    try {
+        const mensaje = String(
+            (error && (error.errorCode ? error.errorCode + ": " : "") +
+            (error.errorMessage || error.message)) || error || ""
+        ).slice(0, 700);
+        diagnosticoLineas.push({ paso, mensaje, ayuda: ayudaError(mensaje + " " + (error && error.errorCode || "")) });
+
+        let panel = document.getElementById("panelDiagnostico");
+        if (!panel) {
+            panel = document.createElement("div");
+            panel.id = "panelDiagnostico";
+            panel.style.cssText =
+                "position:fixed;right:16px;bottom:16px;z-index:99999;max-width:520px;max-height:70vh;" +
+                "overflow:auto;background:#fff;color:#172033;border:2px solid #c0392b;border-radius:12px;" +
+                "box-shadow:0 10px 40px rgba(0,0,0,.35);padding:14px 16px;font:12px/1.5 Arial,sans-serif;";
+            document.body.appendChild(panel);
+        }
+        panel.textContent = "";
+
+        const titulo = document.createElement("strong");
+        titulo.textContent = "Diagnóstico de carga";
+        titulo.style.cssText = "display:block;margin-bottom:6px;color:#c0392b;font-size:13px;";
+        panel.appendChild(titulo);
+
+        const contexto = document.createElement("div");
+        contexto.style.cssText = "color:#667085;margin-bottom:8px;";
+        let origenRedirect = "";
+        try { origenRedirect = new URL(msalConfigInfraestructura.auth.redirectUri).origin; } catch (e) {}
+        contexto.textContent =
+            "Página: " + location.origin +
+            " | MSAL: " + (msalInstanceInfraestructura ? "cargado" : "NO cargó") +
+            " | Sesiones: " + (msalInstanceInfraestructura ? msalInstanceInfraestructura.getAllAccounts().length : 0) +
+            " | Token: " + (tokenActual ? "sí" : "no");
+        panel.appendChild(contexto);
+
+        if (origenRedirect && location.origin.toLowerCase() !== origenRedirect.toLowerCase()) {
+            const aviso = document.createElement("div");
+            aviso.style.cssText = "background:#fff4e5;border:1px solid #f0b36b;border-radius:8px;padding:8px;margin-bottom:8px;";
+            aviso.textContent =
+                "Ojo: la página se abre desde " + location.origin + " pero el redirectUri del código es " + origenRedirect +
+                ". Deben ser el mismo dominio o el inicio de sesión por popup no puede completarse.";
+            panel.appendChild(aviso);
+        }
+
+        diagnosticoLineas.forEach(l => {
+            const bloque = document.createElement("div");
+            bloque.style.cssText = "border-top:1px solid #e4e7ec;padding:7px 0;";
+            const p = document.createElement("strong");
+            p.textContent = l.paso;
+            const m = document.createElement("div");
+            m.textContent = l.mensaje;
+            m.style.cssText = "font-family:Consolas,monospace;font-size:11px;word-break:break-word;color:#344054;";
+            bloque.appendChild(p);
+            bloque.appendChild(m);
+            if (l.ayuda) {
+                const a = document.createElement("div");
+                a.textContent = "→ " + l.ayuda;
+                a.style.cssText = "margin-top:3px;color:#0a4da2;font-weight:700;";
+                bloque.appendChild(a);
+            }
+            panel.appendChild(bloque);
+        });
+
+        const cerrar = document.createElement("button");
+        cerrar.type = "button";
+        cerrar.textContent = "Cerrar";
+        cerrar.style.cssText = "margin-top:8px;padding:5px 12px;border:1px solid #cbd5e1;border-radius:7px;background:#f8fafc;cursor:pointer;";
+        cerrar.addEventListener("click", () => panel.remove());
+        panel.appendChild(cerrar);
+    } catch (e) {
+        console.error("No se pudo mostrar el diagnóstico:", e);
+    }
+}
+
+window.addEventListener("unhandledrejection", e => mostrarDiagnostico("Error no controlado", e.reason));
+window.addEventListener("error", e => mostrarDiagnostico("Error de script", e.error || e.message));
+
 const SCOPES_GRAPH = ["User.Read", "Sites.Read.All", "Sites.ReadWrite.All"];
 const CACHE_PREFIJO = "alferza_ti_";
 
@@ -352,6 +466,7 @@ async function obtenerTokenSilencioso() {
         return tokenActual;
     } catch (error) {
         console.warn("Token silencioso no disponible:", error);
+        mostrarDiagnostico("Token silencioso (se pedirá iniciar sesión)", error);
         return null;
     }
 }
@@ -2722,6 +2837,7 @@ async function cargarEquipos() {
         equiposEstado.className = "section-status online";
     } catch (error) {
         console.error("Error cargando equipos:", error);
+        mostrarDiagnostico("Inventario (equipos.json)", error);
         if (equiposData.length > 0) {
             equiposEstado.textContent = "● SIN ACTUALIZAR";
             equiposEstado.className = "section-status warning";
@@ -2765,6 +2881,8 @@ async function cargarServicios() {
             "Error cargando servicios:",
             error
         );
+
+        mostrarDiagnostico("Servicios (lista " + SHAREPOINT_LIST_SERVICIOS + ")", error);
 
 
         serviciosGrid.innerHTML = `
@@ -2843,6 +2961,7 @@ function mostrarBotonLogin(mensaje) {
             }
         } catch (error) {
             console.error("Error de inicio de sesión:", error);
+            mostrarDiagnostico("Inicio de sesión", error);
             loadingMessage.textContent = "No se pudo iniciar sesión. Permite las ventanas emergentes e inténtalo de nuevo.";
         } finally {
             boton.disabled = false;
@@ -2887,6 +3006,7 @@ async function cargarDashboard() {
         iniciarCargas();
     } catch (error) {
         console.error("Error inicializando infraestructura:", error);
+        mostrarDiagnostico("Inicialización", error);
         mostrarBotonLogin("No se pudo cargar el monitoreo.");
     }
 }
@@ -2914,6 +3034,17 @@ async function actualizarDashboard() {
 
 function iniciarInfraestructura() {
     cargarDashboard();
+
+    /* Si a los 20 s no hay datos ni errores visibles, lo decimos en pantalla. */
+    setTimeout(() => {
+        if (equiposData.length === 0 && !document.getElementById("panelDiagnostico")) {
+            mostrarDiagnostico(
+                "Sin respuesta tras 20 s",
+                new Error("Aún no llegan datos. Si ves el botón «Iniciar sesión con Microsoft», púlsalo. Si no, abre F12 → Consola y envíame el primer error en rojo.")
+            );
+        }
+    }, 20000);
+
     setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden && Date.now() - ultimaActualizacion > 30000) {

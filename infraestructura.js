@@ -100,6 +100,20 @@ let equiposData = [];
 
 
 /* =========================================
+   PAGINACIÓN
+========================================= */
+
+const EQUIPOS_POR_PAGINA =
+    40;
+
+let paginaEquiposActual =
+    1;
+
+let equiposFiltradosActuales =
+    [];
+
+
+/* =========================================
    MENSAJE DE CARGA
 ========================================= */
 
@@ -328,7 +342,7 @@ async function obtenerSitioSharePoint(
 
 
     console.log(
-        "✅ Sitio SharePoint encontrado:",
+        "✅ SharePoint encontrado:",
         sitio
     );
 
@@ -461,17 +475,13 @@ async function obtenerMonitoreoTI() {
         );
 
 
-        /* =================================
-           COMPROBAR CAMPOS
-        ================================= */
-
         if (
             data.value &&
             data.value.length > 0
         ) {
 
             console.log(
-                "📅 CAMPOS DEL PRIMER SERVICIO:",
+                "📅 Campos del primer servicio:",
                 data.value[0].fields
             );
 
@@ -727,7 +737,6 @@ function formatearUltimaRevision(
 
 /* =========================================
    ACTUALIZAR ÚLTIMA ACTUALIZACIÓN
-   BASADA EN ULTIMAREVISION DE SHAREPOINT
 ========================================= */
 
 function actualizarHora(
@@ -844,7 +853,7 @@ function actualizarHora(
 
 
 /* =========================================
-   RENDERIZAR SERVICIOS PRINCIPALES
+   RENDERIZAR SERVICIOS
 ========================================= */
 
 function renderizarServicios(
@@ -871,10 +880,6 @@ function renderizarServicios(
     grid.innerHTML =
         "";
 
-
-    /* =====================================
-       SIN DATOS
-    ===================================== */
 
     if (
         !datos ||
@@ -905,10 +910,6 @@ function renderizarServicios(
 
     }
 
-
-    /* =====================================
-       ESTADOS
-    ===================================== */
 
     const estados = [];
 
@@ -943,12 +944,6 @@ function renderizarServicios(
 
             const ultimaRevision =
                 campos.Ultimarevision;
-
-
-            console.log(
-                `🕐 ${servicio} - Última revisión:`,
-                ultimaRevision
-            );
 
 
             const estadoNormalizado =
@@ -998,29 +993,51 @@ function renderizarServicios(
                 `service-card ${tipoEstado}`;
 
 
+            /*
+             * ESTRUCTURA HORIZONTAL:
+             *
+             * ICONO | INFORMACIÓN
+             *
+             * Esto permite que la tarjeta sea
+             * mucho más compacta.
+             */
+
             card.innerHTML = `
 
-                <div class="service-icon">
-                    ${icono}
-                </div>
+                <div class="service-main">
 
-                <div class="service-content">
+                    <div class="service-icon">
+                        ${icono}
+                    </div>
 
-                    <div class="service-status ${tipoEstado}">
+                    <div class="service-info">
 
-                        <span class="status-dot"></span>
+                        <div class="service-heading">
 
-                        ${estado}
+                            <h3>
+                                ${escaparHTML(servicio)}
+                            </h3>
+
+                            <div class="service-status ${tipoEstado}">
+
+                                <span class="status-dot"></span>
+
+                                ${escaparHTML(estado)}
+
+                            </div>
+
+                        </div>
+
+                        <p>
+                            ${escaparHTML(detalle)}
+                        </p>
 
                     </div>
 
-                    <h3>
-                        ${servicio}
-                    </h3>
+                </div>
 
-                    <p>
-                        ${detalle}
-                    </p>
+
+                <div class="service-meta">
 
                     <div class="service-latency">
 
@@ -1029,14 +1046,15 @@ function renderizarServicios(
                         </span>
 
                         <strong>
-                            ${latenciaTexto}
+                            ${escaparHTML(latenciaTexto)}
                         </strong>
 
                     </div>
 
+
                     <div class="service-revision">
 
-                        <span>
+                        <span class="revision-icon">
                             🕐
                         </span>
 
@@ -1047,7 +1065,7 @@ function renderizarServicios(
                             </span>
 
                             <strong>
-                                ${revisionTexto}
+                                ${escaparHTML(revisionTexto)}
                             </strong>
 
                         </div>
@@ -1517,12 +1535,6 @@ async function obtenerEquipos() {
             );
 
 
-        console.log(
-            "🏢 Sitio SharePoint:",
-            sitio
-        );
-
-
         if (
             !sitio ||
             !sitio.id
@@ -1590,12 +1602,6 @@ async function obtenerEquipos() {
             await respuestaDrive.json();
 
 
-        console.log(
-            "💾 Drive encontrado:",
-            drive
-        );
-
-
         if (
             !drive.id
         ) {
@@ -1617,18 +1623,6 @@ async function obtenerEquipos() {
 
         const urlArchivo =
             `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${encodeURI(rutaArchivo)}:/content`;
-
-
-        console.log(
-            "📂 Ruta del archivo:",
-            rutaArchivo
-        );
-
-
-        console.log(
-            "🌐 URL Graph:",
-            urlArchivo
-        );
 
 
         /* =====================================
@@ -1691,26 +1685,10 @@ async function obtenerEquipos() {
 
 
         console.log(
-            "📦 RESPUESTA COMPLETA DEL JSON:",
-            datos
-        );
-
-
-        console.log(
-            "📊 ¿Es un array?:",
-            Array.isArray(
-                datos
-            )
-        );
-
-
-        console.log(
-            "🔢 Cantidad:",
-            Array.isArray(
-                datos
-            )
+            "📊 Equipos encontrados:",
+            Array.isArray(datos)
                 ? datos.length
-                : "NO ES ARRAY"
+                : 0
         );
 
 
@@ -1724,12 +1702,6 @@ async function obtenerEquipos() {
             )
         ) {
 
-            console.error(
-                "❌ equipos.json no contiene directamente un array:",
-                datos
-            );
-
-
             throw new Error(
                 "El archivo equipos.json no tiene el formato esperado."
             );
@@ -1742,7 +1714,7 @@ async function obtenerEquipos() {
         ) {
 
             console.warn(
-                "⚠️ equipos.json fue cargado correctamente, pero está vacío."
+                "⚠️ equipos.json está vacío."
             );
 
 
@@ -1751,18 +1723,8 @@ async function obtenerEquipos() {
         }
 
 
-        /* =====================================
-           7. PRIMER EQUIPO
-        ===================================== */
-
         console.log(
-            "🔍 Primer equipo del inventario:",
-            datos[0]
-        );
-
-
-        console.log(
-            "✅ Inventario cargado correctamente:",
+            "✅ Inventario cargado:",
             datos.length,
             "equipos"
         );
@@ -1780,26 +1742,6 @@ async function obtenerEquipos() {
             "❌ Error cargando inventario desde SharePoint:",
             error
         );
-
-
-        const contenedor =
-            document.getElementById(
-                "equiposGrid"
-            );
-
-
-        if (
-            contenedor
-        ) {
-
-            contenedor.innerHTML = `
-                <div class="error-inventario">
-                    ❌ No se pudo cargar
-                    <strong>el inventario desde SharePoint</strong>.
-                </div>
-            `;
-
-        }
 
 
         return [];
@@ -1949,11 +1891,457 @@ function clasificarEstadoEquipo(
 
 
 /* =========================================
+   CREAR CONTENEDOR PAGINACIÓN
+========================================= */
+
+function obtenerContenedorPaginacion() {
+
+    let contenedor =
+        document.getElementById(
+            "equiposPagination"
+        );
+
+
+    if (
+        contenedor
+    ) {
+
+        return contenedor;
+
+    }
+
+
+    const tableContainer =
+        document.querySelector(
+            ".equipos-table-container"
+        );
+
+
+    if (
+        !tableContainer
+    ) {
+
+        return null;
+
+    }
+
+
+    contenedor =
+        document.createElement(
+            "div"
+        );
+
+
+    contenedor.id =
+        "equiposPagination";
+
+
+    contenedor.className =
+        "equipos-pagination";
+
+
+    tableContainer.insertAdjacentElement(
+        "afterend",
+        contenedor
+    );
+
+
+    return contenedor;
+
+}
+
+
+/* =========================================
+   RENDERIZAR PAGINACIÓN
+========================================= */
+
+function renderizarPaginacion(
+    totalEquipos
+) {
+
+    const contenedor =
+        obtenerContenedorPaginacion();
+
+
+    if (
+        !contenedor
+    ) return;
+
+
+    contenedor.innerHTML =
+        "";
+
+
+    const totalPaginas =
+        Math.ceil(
+            totalEquipos /
+            EQUIPOS_POR_PAGINA
+        );
+
+
+    if (
+        totalPaginas <= 1
+    ) {
+
+        contenedor.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    contenedor.style.display =
+        "flex";
+
+
+    const botonAnterior =
+        document.createElement(
+            "button"
+        );
+
+
+    botonAnterior.type =
+        "button";
+
+
+    botonAnterior.className =
+        "pagination-btn pagination-prev";
+
+
+    botonAnterior.innerHTML =
+        "‹";
+
+
+    botonAnterior.title =
+        "Página anterior";
+
+
+    botonAnterior.disabled =
+        paginaEquiposActual === 1;
+
+
+    botonAnterior.addEventListener(
+        "click",
+        function () {
+
+            if (
+                paginaEquiposActual > 1
+            ) {
+
+                paginaEquiposActual--;
+
+                renderizarEquipos(
+                    equiposFiltradosActuales,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+
+    contenedor.appendChild(
+        botonAnterior
+    );
+
+
+    /*
+     * Generamos páginas visibles.
+     *
+     * Con muchos resultados no mostramos
+     * 50 botones de golpe.
+     */
+
+    const paginas =
+        obtenerPaginasVisibles(
+            totalPaginas,
+            paginaEquiposActual
+        );
+
+
+    paginas.forEach(
+        pagina => {
+
+            if (
+                pagina === "..."
+            ) {
+
+                const separador =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                separador.className =
+                    "pagination-ellipsis";
+
+
+                separador.textContent =
+                    "…";
+
+
+                contenedor.appendChild(
+                    separador
+                );
+
+
+                return;
+
+            }
+
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "pagination-btn";
+
+
+            if (
+                pagina === paginaEquiposActual
+            ) {
+
+                boton.classList.add(
+                    "active"
+                );
+
+            }
+
+
+            boton.textContent =
+                pagina;
+
+
+            boton.addEventListener(
+                "click",
+                function () {
+
+                    paginaEquiposActual =
+                        pagina;
+
+                    renderizarEquipos(
+                        equiposFiltradosActuales,
+                        false
+                    );
+
+                }
+            );
+
+
+            contenedor.appendChild(
+                boton
+            );
+
+        }
+    );
+
+
+    const botonSiguiente =
+        document.createElement(
+            "button"
+        );
+
+
+    botonSiguiente.type =
+        "button";
+
+
+    botonSiguiente.className =
+        "pagination-btn pagination-next";
+
+
+    botonSiguiente.innerHTML =
+        "›";
+
+
+    botonSiguiente.title =
+        "Página siguiente";
+
+
+    botonSiguiente.disabled =
+        paginaEquiposActual === totalPaginas;
+
+
+    botonSiguiente.addEventListener(
+        "click",
+        function () {
+
+            if (
+                paginaEquiposActual <
+                totalPaginas
+            ) {
+
+                paginaEquiposActual++;
+
+                renderizarEquipos(
+                    equiposFiltradosActuales,
+                    false
+                );
+
+            }
+
+        }
+    );
+
+
+    contenedor.appendChild(
+        botonSiguiente
+    );
+
+}
+
+
+/* =========================================
+   PÁGINAS VISIBLES
+========================================= */
+
+function obtenerPaginasVisibles(
+    totalPaginas,
+    paginaActual
+) {
+
+    if (
+        totalPaginas <= 7
+    ) {
+
+        return Array.from(
+            {
+                length:
+                    totalPaginas
+            },
+            (
+                _,
+                indice
+            ) =>
+                indice + 1
+        );
+
+    }
+
+
+    const paginas = [];
+
+
+    paginas.push(
+        1
+    );
+
+
+    if (
+        paginaActual > 4
+    ) {
+
+        paginas.push(
+            "..."
+        );
+
+    }
+
+
+    const inicio =
+        Math.max(
+            2,
+            paginaActual - 1
+        );
+
+
+    const fin =
+        Math.min(
+            totalPaginas - 1,
+            paginaActual + 1
+        );
+
+
+    for (
+        let pagina = inicio;
+        pagina <= fin;
+        pagina++
+    ) {
+
+        paginas.push(
+            pagina
+        );
+
+    }
+
+
+    if (
+        paginaActual <
+        totalPaginas - 3
+    ) {
+
+        paginas.push(
+            "..."
+        );
+
+    }
+
+
+    paginas.push(
+        totalPaginas
+    );
+
+
+    return paginas;
+
+}
+
+
+/* =========================================
+   ACTUALIZAR TEXTO DE RESULTADOS
+========================================= */
+
+function actualizarTextoResultados(
+    totalEquipos,
+    inicio,
+    fin
+) {
+
+    const resultados =
+        document.getElementById(
+            "equiposResultados"
+        );
+
+
+    if (
+        !resultados
+    ) return;
+
+
+    if (
+        totalEquipos === 0
+    ) {
+
+        resultados.textContent =
+            "0 equipos";
+
+        return;
+
+    }
+
+
+    resultados.textContent =
+        `Mostrando ${inicio}–${fin} de ${totalEquipos} equipos`;
+
+}
+
+
+/* =========================================
    RENDERIZAR TABLA EQUIPOS
 ========================================= */
 
 function renderizarEquipos(
-    equipos
+    equipos,
+    actualizarPaginacion = true
 ) {
 
     const tbody =
@@ -1968,20 +2356,27 @@ function renderizarEquipos(
         );
 
 
-    const resultados =
-        document.getElementById(
-            "equiposResultados"
-        );
-
-
     if (
         !tbody
     ) return;
 
 
+    /*
+     * Guardamos los resultados actuales
+     * para poder cambiar de página.
+     */
+
+    equiposFiltradosActuales =
+        equipos || [];
+
+
     tbody.innerHTML =
         "";
 
+
+    /* =====================================
+       SIN RESULTADOS
+    ===================================== */
 
     if (
         !equipos ||
@@ -1998,12 +2393,23 @@ function renderizarEquipos(
         }
 
 
+        actualizarTextoResultados(
+            0,
+            0,
+            0
+        );
+
+
+        const paginacion =
+            obtenerContenedorPaginacion();
+
+
         if (
-            resultados
+            paginacion
         ) {
 
-            resultados.textContent =
-                "0";
+            paginacion.style.display =
+                "none";
 
         }
 
@@ -2023,17 +2429,85 @@ function renderizarEquipos(
     }
 
 
+    /* =====================================
+       VALIDAR PÁGINA
+    ===================================== */
+
+    const totalPaginas =
+        Math.ceil(
+            equipos.length /
+            EQUIPOS_POR_PAGINA
+        );
+
+
     if (
-        resultados
+        paginaEquiposActual >
+        totalPaginas
     ) {
 
-        resultados.textContent =
-            equipos.length;
+        paginaEquiposActual =
+            totalPaginas;
 
     }
 
 
-    equipos.forEach(
+    if (
+        paginaEquiposActual < 1
+    ) {
+
+        paginaEquiposActual =
+            1;
+
+    }
+
+
+    /* =====================================
+       CALCULAR RANGO
+    ===================================== */
+
+    const inicioIndice =
+        (
+            paginaEquiposActual -
+            1
+        ) *
+        EQUIPOS_POR_PAGINA;
+
+
+    const finIndice =
+        Math.min(
+            inicioIndice +
+            EQUIPOS_POR_PAGINA,
+            equipos.length
+        );
+
+
+    const equiposPagina =
+        equipos.slice(
+            inicioIndice,
+            finIndice
+        );
+
+
+    const inicioVisible =
+        inicioIndice + 1;
+
+
+    const finVisible =
+        finIndice;
+
+
+    actualizarTextoResultados(
+        equipos.length,
+        inicioVisible,
+        finVisible
+    );
+
+
+    /* =====================================
+       RENDERIZAR FILAS
+    ===================================== */
+
+    equiposPagina.forEach(
         equipo => {
 
             const nombre =
@@ -2200,6 +2674,29 @@ function renderizarEquipos(
 
         }
     );
+
+
+    /* =====================================
+       PAGINACIÓN
+    ===================================== */
+
+    if (
+        actualizarPaginacion
+    ) {
+
+        renderizarPaginacion(
+            equipos.length
+        );
+
+    }
+
+    else {
+
+        renderizarPaginacion(
+            equipos.length
+        );
+
+    }
 
 }
 
@@ -2488,6 +2985,15 @@ function aplicarFiltrosEquipos() {
         );
 
 
+    /*
+     * Cada vez que cambia un filtro,
+     * volvemos a la primera página.
+     */
+
+    paginaEquiposActual =
+        1;
+
+
     renderizarEquipos(
         filtrados
     );
@@ -2520,7 +3026,8 @@ function configurarFiltrosEquipos() {
 
 
     if (
-        buscar
+        buscar &&
+        !buscar.dataset.configurado
     ) {
 
         buscar.addEventListener(
@@ -2528,11 +3035,16 @@ function configurarFiltrosEquipos() {
             aplicarFiltrosEquipos
         );
 
+
+        buscar.dataset.configurado =
+            "true";
+
     }
 
 
     if (
-        filtroEstado
+        filtroEstado &&
+        !filtroEstado.dataset.configurado
     ) {
 
         filtroEstado.addEventListener(
@@ -2540,17 +3052,26 @@ function configurarFiltrosEquipos() {
             aplicarFiltrosEquipos
         );
 
+
+        filtroEstado.dataset.configurado =
+            "true";
+
     }
 
 
     if (
-        filtroArea
+        filtroArea &&
+        !filtroArea.dataset.configurado
     ) {
 
         filtroArea.addEventListener(
             "change",
             aplicarFiltrosEquipos
         );
+
+
+        filtroArea.dataset.configurado =
+            "true";
 
     }
 
@@ -2594,6 +3115,14 @@ async function cargarEquipos() {
         cargarFiltroAreas(
             equiposData
         );
+
+
+        /*
+         * Primera página.
+         */
+
+        paginaEquiposActual =
+            1;
 
 
         renderizarEquipos(
@@ -2846,6 +3375,7 @@ setInterval(
         console.log(
             "🔄 Actualización automática de monitoreo..."
         );
+
 
         cargarMonitoreo();
 

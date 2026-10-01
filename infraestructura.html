@@ -1,799 +1,729 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Monitoreo TI | ALFERZA LIVE OFFICE
-    </title>
-
-
-    <!-- ==========================================
-         COMPROBAR ACCESO
-         ========================================== -->
-
-    <script>
-
-        if (
-            sessionStorage.getItem(
-                "alferza_login"
-            ) !== "true"
-        ) {
-
-            window.location.replace(
-                "login.html"
-            );
-
-        }
-
-    </script>
-
-
-    <!-- ==========================================
-         ESTILOS
-         ========================================== -->
+    <title>Infraestructura TI | ALFERZA LIVE OFFICE</title>
 
     <link
         rel="stylesheet"
         href="infraestructura.css"
     >
 
+    <!-- MSAL -->
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+    ></script>
 </head>
-
 
 <body>
 
+    <!-- =========================================
+         LOADING
+    ========================================== -->
 
-<!-- ==========================================
-     PANTALLA DE CARGA
-     ========================================== -->
+    <div
+        id="loadingOverlay"
+        class="loading-overlay"
+    >
 
-<div
-    id="loadingOverlay"
-    class="loading-overlay"
->
+        <div class="loading-card">
 
-    <div class="loading-content">
+            <div class="loading-spinner"></div>
 
-        <div class="gear-spinner">
-            ⚙️
+            <strong>
+                ALFERZA LIVE OFFICE
+            </strong>
+
+            <span id="loadingMessage">
+                Cargando monitoreo...
+            </span>
+
         </div>
 
-        <p id="loadingMessage">
-            Cargando monitoreo...
-        </p>
-
-        <span>
-            ALFERZA LIVE OFFICE
-        </span>
-
-    </div>
-
-</div>
-
-
-<!-- ==========================================
-     BARRA SUPERIOR
-     ========================================== -->
-
-<header class="topbar">
-
-    <div class="logo">
-
-        <h1>
-            ALFERZA LIVE OFFICE
-        </h1>
-
-        <span>
-            Monitoreo en tiempo real
-        </span>
-
     </div>
 
 
-    <div class="live-status">
+    <!-- =========================================
+         TOPBAR
+    ========================================== -->
 
-        <span class="live-status-dot"></span>
+    <header class="topbar">
 
-        <span>
-            EN VIVO
-        </span>
+        <div class="topbar-brand">
 
-    </div>
+            <div class="brand-mark">
+                A
+            </div>
 
-</header>
+            <div class="brand-text">
 
+                <strong>
+                    ALFERZA LIVE OFFICE
+                </strong>
 
-<!-- ==========================================
-     CONTENEDOR PRINCIPAL
-     ========================================== -->
-
-<div class="container">
-
-
-    <!-- ======================================
-         MENÚ LATERAL
-         ====================================== -->
-
-    <aside class="sidebar">
-
-        <h2>
-            MENÚ
-        </h2>
-
-
-        <ul>
-
-            <li>
-                🏢 Oficina
-            </li>
-
-
-            <li
-                onclick="window.location.href='personal.html'"
-            >
-                👥 Personal
-            </li>
-
-
-            <li
-                onclick="window.location.href='reserva.html'"
-            >
-                📝 Reservas
-            </li>
-
-
-            <li
-                onclick="window.location.href='salas/salas.html'"
-            >
-                📅 Salas
-            </li>
-
-
-            <li
-                onclick="window.location.href='comunicados.html'"
-            >
-                📢 Comunicados
-            </li>
-
-
-            <li
-                onclick="window.location.href='seguridad.html'"
-            >
-                🔐 Seguridad
-            </li>
-
-
-            <li
-                onclick="window.location.href='infraestructura.html'"
-            >
-                🏗️ Infraestructura
-            </li>
-
-
-            <li
-                onclick="window.location.href='configuracion.html'"
-            >
-                ⚙️ Configuración
-            </li>
-
-        </ul>
-
-    </aside>
-
-
-    <!-- ======================================
-         CONTENIDO
-         ====================================== -->
-
-    <main class="content">
-
-
-        <!-- ==================================
-             ENCABEZADO PRINCIPAL
-             ================================== -->
-
-        <section class="page-header">
-
-            <div>
-
-                <span class="page-label">
-                    INFRAESTRUCTURA TI
+                <span>
+                    Monitoreo en tiempo real
                 </span>
 
+            </div>
 
-                <h2>
-                    Centro de Monitoreo TI
-                </h2>
+        </div>
 
 
-                <p>
-                    Supervisión centralizada del estado,
-                    disponibilidad y conectividad de la
-                    infraestructura tecnológica de ALFERZA.
-                </p>
+        <div class="topbar-status">
+
+            <span class="live-dot"></span>
+
+            <span>
+                EN VIVO
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================
+         CONTENEDOR PRINCIPAL
+    ========================================== -->
+
+    <div class="container">
+
+
+        <!-- =====================================
+             SIDEBAR
+        ====================================== -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-header">
+
+                <span class="sidebar-title">
+                    OFICINA
+                </span>
 
             </div>
 
 
-            <div class="last-update">
-
-                <span class="update-dot"></span>
-
-                <div>
-
-                    <small>
-                        ÚLTIMA ACTUALIZACIÓN
-                    </small>
-
-                    <strong id="lastUpdate">
-                        --
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
+            <nav class="sidebar-nav">
 
 
-        <!-- ==================================
-             RESUMEN GENERAL
-             ================================== -->
+                <a
+                    href="index.html"
+                    class="nav-item"
+                >
 
-        <section class="monitor-summary">
-
-
-            <div class="summary-card">
-
-                <div class="summary-icon green">
-                    ✓
-                </div>
-
-                <div>
+                    <span class="nav-icon">
+                        🏢
+                    </span>
 
                     <span>
-                        Servicios activos
+                        Oficina
                     </span>
 
-                    <strong id="serviciosActivos">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
+                </a>
 
 
-            <div class="summary-card">
+                <a
+                    href="personal.html"
+                    class="nav-item"
+                >
 
-                <div class="summary-icon yellow">
-                    !
-                </div>
-
-                <div>
+                    <span class="nav-icon">
+                        👥
+                    </span>
 
                     <span>
-                        Advertencias
+                        Personal
                     </span>
 
-                    <strong id="advertencias">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
+                </a>
 
 
-            <div class="summary-card">
+                <a
+                    href="reservas.html"
+                    class="nav-item"
+                >
 
-                <div class="summary-icon red">
-                    ×
-                </div>
-
-                <div>
+                    <span class="nav-icon">
+                        📅
+                    </span>
 
                     <span>
-                        Incidencias
+                        Reservas
                     </span>
 
-                    <strong id="incidencias">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
+                </a>
 
 
-            <div class="summary-card">
+                <a
+                    href="salas.html"
+                    class="nav-item"
+                >
 
-                <div class="summary-icon blue">
-                    ↻
-                </div>
-
-                <div>
+                    <span class="nav-icon">
+                        🚪
+                    </span>
 
                     <span>
-                        Monitoreo
+                        Salas
                     </span>
 
-                    <strong id="estadoMonitoreo">
-                        Activo
-                    </strong>
+                </a>
 
-                </div>
+
+                <a
+                    href="comunicados.html"
+                    class="nav-item"
+                >
+
+                    <span class="nav-icon">
+                        📢
+                    </span>
+
+                    <span>
+                        Comunicados
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="seguridad.html"
+                    class="nav-item"
+                >
+
+                    <span class="nav-icon">
+                        🔐
+                    </span>
+
+                    <span>
+                        Seguridad
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="infraestructura.html"
+                    class="nav-item active"
+                >
+
+                    <span class="nav-icon">
+                        🖥️
+                    </span>
+
+                    <span>
+                        Infraestructura
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="configuracion.html"
+                    class="nav-item"
+                >
+
+                    <span class="nav-icon">
+                        ⚙️
+                    </span>
+
+                    <span>
+                        Configuración
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="sidebar-footer-line"></div>
+
+                <span>
+                    ALFERZA HOLDING
+                </span>
+
+                <small>
+                    Área de Tecnología de la Información
+                </small>
 
             </div>
 
-        </section>
+        </aside>
 
 
-        <!-- ==================================
-             SERVICIOS MONITOREADOS
-             ================================== -->
+        <!-- =====================================
+             CONTENIDO
+        ====================================== -->
 
-        <section
-            class="monitor-section services-section"
-        >
+        <main class="content">
 
 
-            <div class="section-heading">
+            <!-- =================================
+                 HEADER DE PÁGINA
+            ================================== -->
 
+            <section class="page-header">
 
-                <div class="section-title-group">
+                <div class="page-header-main">
 
-                    <span class="section-label">
-                        SERVICIOS MONITOREADOS
+                    <span class="page-label">
+                        INFRAESTRUCTURA TI
                     </span>
 
+                    <h1>
+                        Centro de Monitoreo TI
+                    </h1>
 
-                    <h3>
-                        Estado de infraestructura
-                    </h3>
-
-
-                    <p class="section-description">
-                        Supervisión del estado y disponibilidad
-                        de los servicios críticos.
+                    <p>
+                        Supervisión de servicios tecnológicos
+                        e inventario de equipos de la organización.
                     </p>
 
                 </div>
 
 
-                <!-- ==================================
-                     ESTADO GENERAL
-                     ================================== -->
+                <!-- =================================
+                     ÚLTIMA REVISIÓN
+                ================================== -->
 
-                <div
-                    id="estadoGeneral"
-                    class="section-status online"
-                >
+                <div class="last-update">
 
-                    <span
-                        class="status-indicator"
-                    ></span>
+                    <div class="update-icon">
+                        🕐
+                    </div>
 
+                    <div class="update-content">
 
-                    <div
-                        class="status-general-content"
-                    >
+                        <span class="update-label">
+                            ÚLTIMA REVISIÓN
+                        </span>
 
-                        <strong>
-                            CONSULTANDO
+                        <strong id="lastUpdate">
+                            --
                         </strong>
 
                         <small>
-                            Estado general
+                            Datos obtenidos desde SharePoint
                         </small>
 
                     </div>
 
+                    <div class="update-indicator">
+
+                        <span class="update-dot"></span>
+
+                        <span>
+                            Actualizado
+                        </span>
+
+                    </div>
+
                 </div>
 
-            </div>
+            </section>
 
 
-            <!-- ==================================
-                 GRID DE SERVICIOS
-                 ================================== -->
+            <!-- =================================
+                 MONITOREO DE SERVICIOS
+            ================================== -->
 
-            <div
-                id="serviciosGrid"
-                class="service-grid"
-            >
+            <section class="monitor-section services-section">
+
+
+                <div class="section-heading">
+
+                    <div class="section-title-group">
+
+                        <span class="section-kicker">
+                            SERVICIOS
+                        </span>
+
+                        <h2>
+                            Estado de servicios
+                        </h2>
+
+                        <p>
+                            Estado actual de los servicios
+                            tecnológicos monitoreados.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="estadoGeneral"
+                        class="section-status online"
+                    >
+                        ● OPERATIVO
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="serviciosGrid"
+                    class="service-grid"
+                >
+
+                    <div class="service-card service-loading">
+
+                        <div class="loading-spinner small"></div>
+
+                        <span>
+                            Cargando servicios...
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 EQUIPOS
+            ================================== -->
+
+            <section class="monitor-section equipos-section">
+
+
+                <div class="section-heading">
+
+                    <div class="section-title-group">
+
+                        <span class="section-kicker">
+                            INVENTARIO TI
+                        </span>
+
+                        <h2>
+                            Equipos registrados
+                        </h2>
+
+                        <p>
+                            Inventario de equipos obtenido
+                            desde Active Directory.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="equiposEstado"
+                        class="section-status online"
+                    >
+                        ● ACTUALIZADO
+                    </div>
+
+                </div>
+
+
+                <!-- =================================
+                     RESUMEN EQUIPOS
+                ================================== -->
+
+                <div class="equipos-summary">
+
+
+                    <div class="equipment-stat">
+
+                        <div class="equipment-stat-icon total">
+                            🖥️
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Total
+                            </span>
+
+                            <strong id="totalEquipos">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="equipment-stat">
+
+                        <div class="equipment-stat-icon online">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Conectados
+                            </span>
+
+                            <strong id="equiposConectados">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="equipment-stat">
+
+                        <div class="equipment-stat-icon offline">
+                            !
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Desconectados
+                            </span>
+
+                            <strong id="equiposDesconectados">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- =================================
+                     FILTROS
+                ================================== -->
+
+                <div class="equipos-controls">
+
+
+                    <div class="search-wrapper">
+
+                        <span class="search-icon">
+                            🔎
+                        </span>
+
+                        <input
+                            type="text"
+                            id="buscarEquipo"
+                            placeholder="Buscar por equipo, IP o DNS..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div class="filter-wrapper">
+
+                        <label for="filtroEstadoEquipo">
+                            Estado
+                        </label>
+
+                        <select id="filtroEstadoEquipo">
+
+                            <option value="todos">
+                                Todos los estados
+                            </option>
+
+                            <option value="Conectado">
+                                Conectado
+                            </option>
+
+                            <option value="Desconectado">
+                                Desconectado
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="filter-wrapper">
+
+                        <label for="filtroAreaEquipo">
+                            Área
+                        </label>
+
+                        <select id="filtroAreaEquipo">
+
+                            <option value="todos">
+                                Todas las áreas
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================
+                     RESULTADOS
+                ================================== -->
+
+                <div class="equipos-results">
+
+                    <span id="equiposResultados">
+                        Cargando equipos...
+                    </span>
+
+                </div>
+
+
+                <!-- =================================
+                     TABLA
+                ================================== -->
+
+                <div class="equipos-table-container">
+
+                    <table class="equipos-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    EQUIPO
+                                </th>
+
+                                <th>
+                                    ESTADO
+                                </th>
+
+                                <th>
+                                    IP
+                                </th>
+
+                                <th>
+                                    SISTEMA OPERATIVO
+                                </th>
+
+                                <th>
+                                    ÁREA / OU
+                                </th>
+
+                                <th>
+                                    ÚLTIMO REGISTRO AD
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="equiposTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="equipos-loading"
+                                >
+
+                                    <div class="table-loading">
+
+                                        <div class="loading-spinner small"></div>
+
+                                        <span>
+                                            Cargando inventario...
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+
+                    <!-- =================================
+                         ESTADO VACÍO
+                    ================================== -->
+
+                    <div
+                        id="equiposEmpty"
+                        class="equipos-empty"
+                        style="display:none;"
+                    >
+
+                        <div class="empty-icon">
+                            🖥️
+                        </div>
+
+                        <strong>
+                            No se encontraron equipos
+                        </strong>
+
+                        <span>
+                            Prueba cambiando los filtros
+                            de búsqueda.
+                        </span>
+
+                    </div>
+
+                </div>
+
 
                 <!--
-                    Las tarjetas se generan
-                    dinámicamente desde SharePoint.
+                    La paginación es creada automáticamente
+                    por infraestructura.js.
                 -->
 
-            </div>
+            </section>
 
-        </section>
 
+            <!-- =================================
+                 FOOTER
+            ================================== -->
 
-        <!-- ==================================
-             EQUIPOS
-             ================================== -->
-
-        <section
-            class="monitor-section equipos-section"
-        >
-
-
-            <!-- ==================================
-                 ENCABEZADO EQUIPOS
-                 ================================== -->
-
-            <div class="section-heading">
-
-
-                <div>
-
-                    <span class="section-label">
-                        INVENTARIO
-                    </span>
-
-
-                    <h3>
-                        Equipos
-                    </h3>
-
-
-                    <p class="section-description">
-                        Estado de los equipos registrados
-                        en la infraestructura tecnológica.
-                    </p>
-
-                </div>
-
-
-                <span
-                    id="equiposEstado"
-                    class="section-status online"
-                >
-                    ● ACTUALIZADO
-                </span>
-
-            </div>
-
-
-            <!-- ==================================
-                 RESUMEN DE EQUIPOS
-                 ================================== -->
-
-            <div class="equipos-summary">
-
-
-                <div class="equipo-summary-card">
-
-                    <div
-                        class="equipo-summary-icon blue"
-                    >
-                        🖥️
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Total de equipos
-                        </span>
-
-
-                        <strong id="totalEquipos">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="equipo-summary-card">
-
-                    <div
-                        class="equipo-summary-icon green"
-                    >
-                        ✓
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Conectados
-                        </span>
-
-
-                        <strong id="equiposConectados">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="equipo-summary-card">
-
-                    <div
-                        class="equipo-summary-icon red"
-                    >
-                        ×
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            Desconectados
-                        </span>
-
-
-                        <strong id="equiposDesconectados">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ==================================
-                 FILTROS
-                 ================================== -->
-
-            <div class="equipos-filters">
-
-
-                <div class="equipos-search">
-
-                    <span>
-                        🔎
-                    </span>
-
-
-                    <input
-                        type="text"
-                        id="buscarEquipo"
-                        placeholder="Buscar por nombre o IP..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-
-                <select
-                    id="filtroEstadoEquipo"
-                    class="equipos-select"
-                >
-
-                    <option value="todos">
-                        Todos los estados
-                    </option>
-
-
-                    <option value="Conectado">
-                        Conectados
-                    </option>
-
-
-                    <option value="Desconectado">
-                        Desconectados
-                    </option>
-
-
-                    <option value="No verificable">
-                        No verificables
-                    </option>
-
-                </select>
-
-
-                <select
-                    id="filtroAreaEquipo"
-                    class="equipos-select"
-                >
-
-                    <option value="todos">
-                        Todas las áreas
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- ==================================
-                 CONTADOR DE RESULTADOS
-                 ================================== -->
-
-            <div class="equipos-results">
+            <footer class="page-footer">
 
                 <span>
-                    Equipos encontrados:
+                    ALFERZA LIVE OFFICE
                 </span>
-
-
-                <strong id="equiposResultados">
-                    0
-                </strong>
-
-            </div>
-
-
-            <!-- ==================================
-                 TABLA DE EQUIPOS
-                 ================================== -->
-
-            <div
-                class="equipos-table-container"
-            >
-
-                <table class="equipos-table">
-
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                EQUIPO
-                            </th>
-
-
-                            <th>
-                                ESTADO
-                            </th>
-
-
-                            <th>
-                                IP
-                            </th>
-
-
-                            <th>
-                                SISTEMA OPERATIVO
-                            </th>
-
-
-                            <th>
-                                ÁREA / OU
-                            </th>
-
-
-                            <th>
-                                ÚLTIMO REGISTRO AD
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody
-                        id="equiposTableBody"
-                    >
-
-                        <tr>
-
-                            <td
-                                colspan="6"
-                                class="equipos-loading"
-                            >
-                                Cargando equipos...
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- ==================================
-                 MENSAJE SIN RESULTADOS
-                 ================================== -->
-
-            <div
-                id="equiposEmpty"
-                class="equipos-empty"
-                style="display: none;"
-            >
-
-                <div>
-                    🔎
-                </div>
-
-
-                <strong>
-                    No se encontraron equipos
-                </strong>
-
 
                 <span>
-                    Prueba con otro nombre, IP, estado o área.
+                    Infraestructura TI
                 </span>
 
-            </div>
+                <span>
+                    © 2026 ALFERZA HOLDING
+                </span>
 
-        </section>
-
-
-    </main>
-
-</div>
+            </footer>
 
 
-<!-- ==========================================
-     PIE DE PÁGINA
-     ========================================== -->
+        </main>
 
-<footer>
-
-    ALFERZA LIVE OFFICE · Centro de Monitoreo TI
-
-</footer>
+    </div>
 
 
-<!-- ==========================================
-     MICROSOFT MSAL
-     ========================================== -->
+    <!-- =========================================
+         MSAL
+    ========================================== -->
 
-<script
-    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
-></script>
-
-
-<!-- ==========================================
-     COMPROBAR MSAL
-     ========================================== -->
-
-<script>
-
-    if (
-        typeof msal === "undefined"
-    ) {
-
-        console.error(
-            "❌ Microsoft MSAL no pudo cargarse."
-        );
-
-    } else {
-
-        console.log(
-            "✅ Microsoft MSAL cargado correctamente."
-        );
-
-    }
-
-</script>
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+    ></script>
 
 
-<!-- ==========================================
-     JAVASCRIPT INFRAESTRUCTURA
-     ========================================== -->
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================== -->
 
-<script
-    src="infraestructura.js"
-></script>
-
+    <script src="infraestructura.js"></script>
 
 </body>
-
 </html>

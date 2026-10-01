@@ -2330,7 +2330,7 @@ async function cargarEquipos() {
 
 
         /* =====================================
-           OBTENER EQUIPOS
+           OBTENER EQUIPOS DESDE SHAREPOINT
         ====================================== */
 
         const equipos =
@@ -2339,9 +2339,7 @@ async function cargarEquipos() {
             );
 
 
-        if (
-            !Array.isArray(equipos)
-        ) {
+        if (!Array.isArray(equipos)) {
 
             throw new Error(
                 "equipos.json no contiene un arreglo válido."
@@ -2349,26 +2347,36 @@ async function cargarEquipos() {
         }
 
 
-        equiposData =
-            equipos;
+        /* =====================================
+           GUARDAR INVENTARIO
+        ====================================== */
+
+        equiposData = equipos;
+
+        equiposFiltrados = [...equiposData];
+
+        paginaActual = 1;
 
 
         /* =====================================
-           MOSTRAR EQUIPOS INMEDIATAMENTE
+           ACTUALIZAR RESUMEN
         ====================================== */
 
         actualizarResumenEquipos();
 
         actualizarFiltroAreas();
 
-        equiposFiltrados =
-            [...equiposData];
 
-        paginaActual =
-            1;
+        /* =====================================
+           PINTAR TABLA
+        ====================================== */
 
         renderizarTablaEquipos();
 
+
+        /* =====================================
+           FECHA / ESTADO
+        ====================================== */
 
         lastUpdate.textContent =
             obtenerFechaActual();
@@ -2380,43 +2388,15 @@ async function cargarEquipos() {
             "section-status online";
 
 
-        /*
-         * IMPORTANTE:
-         * Ya no esperamos a TrabajadoresEquipos.
-         *
-         * Se carga después, en segundo plano.
-         */
-
-        obtenerTrabajadores(
-            tokenActual
-        )
-            .then(
-                () => {
-
-                    console.log(
-                        "Asignaciones de trabajadores cargadas."
-                    );
-
-                    renderizarTablaEquipos();
-
-                }
-            )
-            .catch(
-                error => {
-
-                    console.error(
-                        "Error cargando TrabajadoresEquipos:",
-                        error
-                    );
-
-                }
-            );
+        console.log(
+            `Inventario cargado: ${equiposData.length} equipos`
+        );
 
 
     } catch (error) {
 
         console.error(
-            "ERROR CARGANDO INVENTARIO:",
+            "Error cargando equipos:",
             error
         );
 
@@ -2430,22 +2410,16 @@ async function cargarEquipos() {
 
         equiposTableBody.innerHTML = `
             <tr>
-
                 <td
                     colspan="7"
                     class="equipos-loading"
                 >
-
                     <div class="table-loading">
-
                         <span>
                             No se pudo cargar el inventario.
                         </span>
-
                     </div>
-
                 </td>
-
             </tr>
         `;
 
@@ -2454,10 +2428,10 @@ async function cargarEquipos() {
 
             equiposResultados.textContent =
                 "Error al obtener los equipos.";
+
         }
     }
 }
-
 /* =========================================
    CARGAR SERVICIOS
 ========================================= */

@@ -335,6 +335,10 @@ function ayudaError(texto) {
             "Graph rechazó el token (401). Cierra sesión, recarga y vuelve a iniciar sesión."],
         [/ 403 |accessDenied|Access denied/i,
             "Tu usuario no tiene acceso a ese sitio/archivo de SharePoint (403). Debe tener permiso de lectura sobre el OneDrive soporte1_alferza_pe."],
+        [/No se encontró ".*equipos/i,
+            "El archivo no está en la ruta configurada. Abajo se lista lo que hay en la raíz del OneDrive: ajusta RUTA_EQUIPOS al inicio de infraestructura.js."],
+        [/no es un JSON válido|no contiene un arreglo/i,
+            "El archivo se descargó pero su contenido no tiene el formato esperado (un arreglo JSON de equipos)."],
         [/ 404 |itemNotFound|Invalid hostname/i,
             "No se encontró el sitio, la lista o el archivo (404). Revisa SHAREPOINT_SITE, el nombre de la lista y la ruta «Procedimientos T.I/equipos.json»."],
         [/Failed to fetch|NetworkError|AbortError/i,
@@ -457,6 +461,7 @@ let etagEquipos = null;
 let promesaSitio = null;
 let promesaDrive = null;
 let promesaTrabajadores = null;
+let trabajadoresListos = false;
 let cargandoEquipos = false;
 let ultimaActualizacion = 0;
 
@@ -594,28 +599,122 @@ function obtenerDriveSharePoint() {
 ========================================= */
 
 /* Devuelve null si equipos.json no cambió (no se vuelve a descargar). */
+let ubicacionEquipos = null;
+
+/* Si el archivo no está en RUTA_EQUIPOS, lo busca por nombre en el drive. */
+async function buscarEquiposJson(raiz) {
+    const nombre = RUTA_EQUIPOS.split("/").pop();
+    const r = await graphFetch(
+        `${raiz}/root/search(q='${encodeURIComponent(nombre)}')?$select=id,name,eTag,parentReference&$top=25`
+    );
+    if (r.ok) {
+        const items = ((await r.json()).value || [])
+            .filter(i => normalizarTexto(i.name) === normalizarTexto(nombre));
+        if (items.length > 0) {
+            const it = items[0];
+            console.warn(
+                `"${nombre}" no estaba en "${RUTA_EQUIPOS}". Se encontró en: ` +
+                `${(it.parentReference && it.parentReference.path) || "(ruta desconocida)"}. ` +
+                `Puedes actualizar RUTA_EQUIPOS en infraestructura.js.`
+            );
+            return {
+                meta: `${raiz}/items/${it.id}`,
+                contenido: `${raiz}/items/${it.id}/content`,
+                etag: it.eTag || null
+            };
+        }
+    }
+
+    let contenidoRaiz = "";
+    try {
+        const l = await graphFetch(`${raiz}/root/children?$select=name,folder&$top=50`);
+        if (l.ok) {
+            contenidoRaiz = ((await l.json()).value || [])
+                .map(x => (x.folder ? "[carpeta] " : "") + x.name)
+                .join(", ");
+        }
+    } catch (e) { /* solo informativo */ }
+
+    throw new Error(
+        `No se encontró "${RUTA_EQUIPOS}" en el OneDrive/sitio configurado. ` +
+        `Contenido de la raíz: ${contenidoRaiz || "(no se pudo listar)"}`
+    );
+}
+
+/* Acepta UTF-8 y UTF-16 (PowerShell suele exportar en UTF-16), y arreglo u objeto contenedor. */
+async function leerJsonEquipos(response) {
+    const buffer = await response.arrayBuffer();
+    const b = new Uint8Array(buffer);
+    let codificacion = "utf-8";
+    if (b[0] === 0xFF && b[1] === 0xFE) codificacion = "utf-16le";
+    else if (b[0] === 0xFE && b[1] === 0xFF) codificacion = "utf-16be";
+
+    const texto = new TextDecoder(codificacion).decode(buffer).replace(/^\uFEFF/, "");
+
+    let datos;
+    try {
+        datos = JSON.parse(texto);
+    } catch (e) {
+        throw new Error(`equipos.json no es un JSON válido: ${e.message}. Inicio del archivo: ${texto.slice(0, 60)}`);
+    }
+
+    if (Array.isArray(datos)) return datos;
+
+    if (datos && typeof datos === "object") {
+        for (const clave of ["value", "equipos", "Equipos", "data", "items"]) {
+            if (Array.isArray(datos[clave])) return datos[clave];
+        }
+        if (datos.Nombre) return [datos];   /* un solo equipo exportado como objeto */
+    }
+
+    throw new Error(
+        "equipos.json no contiene un arreglo de equipos. Claves encontradas: " +
+        Object.keys(datos || {}).slice(0, 10).join(", ")
+    );
+}
+
+/* Devuelve null si equipos.json no cambió (no se vuelve a descargar). */
 async function obtenerEquiposDesdeSharePoint() {
     const drive = await obtenerDriveSharePoint();
+    const raiz = `https://graph.microsoft.com/v1.0/drives/${drive.id}`;
     const ruta = RUTA_EQUIPOS.split("/").map(p => encodeURIComponent(p)).join("/");
-    const base = `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${ruta}`;
 
+    const candidatos = [];
+    if (ubicacionEquipos) candidatos.push(ubicacionEquipos);
+    candidatos.push({
+        meta: `${raiz}/root:/${ruta}`,
+        contenido: `${raiz}/root:/${ruta}:/content`
+    });
+
+    let ubicacion = null;
     let etag = null;
-    try {
-        const meta = await graphFetch(`${base}?$select=eTag`);
-        if (meta.ok) etag = (await meta.json()).eTag || null;
-    } catch (e) {
-        console.warn("No se pudo consultar la versión de equipos.json:", e);
+
+    for (const c of candidatos) {
+        const r = await graphFetch(`${c.meta}?$select=eTag`);
+        if (r.ok) {
+            etag = (await r.json()).eTag || null;
+            ubicacion = c;
+            break;
+        }
+        if (r.status !== 404) {
+            throw new Error(`No se pudo consultar equipos.json. ${r.status} ${await r.text()}`);
+        }
     }
+
+    if (!ubicacion) {
+        ubicacion = await buscarEquiposJson(raiz);
+        etag = ubicacion.etag;
+    }
+    ubicacionEquipos = ubicacion;
+
     if (etag && etag === etagEquipos && equiposData.length > 0) return null;
 
-    const response = await graphFetch(`${base}:/content`, { timeoutMs: 90000 });
+    const response = await graphFetch(ubicacion.contenido, { timeoutMs: 90000 });
     if (!response.ok) {
         throw new Error(`No se pudo descargar equipos.json. ${response.status} ${await response.text()}`);
     }
-    const datos = await response.json();
-    if (!Array.isArray(datos)) {
-        throw new Error("El archivo equipos.json no contiene un arreglo válido.");
-    }
+
+    const datos = await leerJsonEquipos(response);
     etagEquipos = etag;
     return datos;
 }
@@ -851,11 +950,14 @@ async function cargarTrabajadoresDesdeSharePoint() {
         }
 
         trabajadoresCargados = true;
+        trabajadoresListos = true;
         console.log(`Asignaciones de trabajadores cargadas: ${Object.keys(trabajadoresPorEquipo).length}`);
         if (equiposData.length > 0) renderizarTablaEquipos();
         return trabajadoresPorEquipo;
     } catch (error) {
         console.warn("No se pudieron cargar las asignaciones de trabajadores:", error);
+        trabajadoresListos = true;   /* se habilita «Registrar»; el modal reintentará la consulta */
+        if (equiposData.length > 0) renderizarTablaEquipos();
         return trabajadoresPorEquipo;
     }
 }
@@ -1590,6 +1692,8 @@ function renderizarTablaEquipos() {
                                     )}
                                 </span>
                             `
+                            : !trabajadoresListos
+                            ? `<span style="color:#98a2b3;font-size:12px;">Cargando…</span>`
                             : `
                                 <button
                                     type="button"
@@ -2086,8 +2190,12 @@ async function abrirModalTrabajador(
         nombreEquipo;
 
 
+    const equipoInfo = equiposData.find(e => e.Nombre === nombreEquipo);
+
     modalEquipoNombre.textContent =
-        nombreEquipo;
+        (equipoInfo && equipoInfo.IP)
+            ? `${nombreEquipo} — ${equipoInfo.IP}`
+            : nombreEquipo;
 
 
     trabajadorNombre.value =
@@ -3001,8 +3109,13 @@ function mostrarBotonLogin(mensaje) {
 function iniciarCargas() {
     ultimaActualizacion = Date.now();
     cargarServicios();
-    cargarEquipos();
-    obtenerTrabajadores().catch(error => console.warn("Carga de trabajadores falló:", error));
+
+    /* 1.º se llena la tabla con equipos.json; 2.º se consultan las asignaciones. */
+    cargarEquipos().then(() => {
+        if (equiposData.length > 0) {
+            return obtenerTrabajadores();
+        }
+    }).catch(error => console.warn("Carga de trabajadores falló:", error));
 }
 
 async function cargarDashboard() {

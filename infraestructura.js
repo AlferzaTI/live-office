@@ -2330,7 +2330,7 @@ async function cargarEquipos() {
 
 
         /* =====================================
-           1. OBTENER EQUIPOS
+           OBTENER EQUIPOS
         ====================================== */
 
         const equipos =
@@ -2339,12 +2339,22 @@ async function cargarEquipos() {
             );
 
 
+        if (
+            !Array.isArray(equipos)
+        ) {
+
+            throw new Error(
+                "equipos.json no contiene un arreglo válido."
+            );
+        }
+
+
         equiposData =
             equipos;
 
 
         /* =====================================
-           2. MOSTRAR INVENTARIO INMEDIATAMENTE
+           MOSTRAR EQUIPOS INMEDIATAMENTE
         ====================================== */
 
         actualizarResumenEquipos();
@@ -2370,9 +2380,12 @@ async function cargarEquipos() {
             "section-status online";
 
 
-        /* =====================================
-           3. CARGAR TRABAJADORES EN SEGUNDO PLANO
-        ====================================== */
+        /*
+         * IMPORTANTE:
+         * Ya no esperamos a TrabajadoresEquipos.
+         *
+         * Se carga después, en segundo plano.
+         */
 
         obtenerTrabajadores(
             tokenActual
@@ -2380,11 +2393,9 @@ async function cargarEquipos() {
             .then(
                 () => {
 
-                    /*
-                     * Cuando SharePoint termine de
-                     * devolver las asignaciones,
-                     * actualizamos solamente la tabla.
-                     */
+                    console.log(
+                        "Asignaciones de trabajadores cargadas."
+                    );
 
                     renderizarTablaEquipos();
 
@@ -2394,14 +2405,9 @@ async function cargarEquipos() {
                 error => {
 
                     console.error(
-                        "Error cargando asignaciones de trabajadores:",
+                        "Error cargando TrabajadoresEquipos:",
                         error
                     );
-
-                    /*
-                     * El inventario sigue funcionando
-                     * aunque falle TrabajadoresEquipos.
-                     */
 
                 }
             );
@@ -2410,7 +2416,7 @@ async function cargarEquipos() {
     } catch (error) {
 
         console.error(
-            "Error cargando equipos:",
+            "ERROR CARGANDO INVENTARIO:",
             error
         );
 
@@ -2448,12 +2454,9 @@ async function cargarEquipos() {
 
             equiposResultados.textContent =
                 "Error al obtener los equipos.";
-
         }
-
     }
 }
-
 
 /* =========================================
    CARGAR SERVICIOS
@@ -2542,7 +2545,6 @@ async function cargarDashboard() {
             "Iniciando sesión..."
         );
 
-
         await iniciarSesion();
 
 
@@ -2550,26 +2552,31 @@ async function cargarDashboard() {
             "Conectando con SharePoint..."
         );
 
-
         await obtenerSitioSharePoint(
             tokenActual
         );
 
 
-        /*
-         * Servicios e inventario se cargan
-         * simultáneamente.
-         */
+        /* =====================================
+           SERVICIOS
+        ====================================== */
 
         mostrarLoading(
-            "Cargando información de TI..."
+            "Cargando servicios..."
         );
 
+        await cargarServicios();
 
-        await Promise.allSettled([
-            cargarServicios(),
-            cargarEquipos()
-        ]);
+
+        /* =====================================
+           INVENTARIO
+        ====================================== */
+
+        mostrarLoading(
+            "Cargando inventario de equipos..."
+        );
+
+        await cargarEquipos();
 
 
         ocultarLoading();
@@ -2599,10 +2606,8 @@ async function cargarDashboard() {
             },
             2500
         );
-
     }
 }
-
 
 /* =========================================
    ACTUALIZACIÓN AUTOMÁTICA

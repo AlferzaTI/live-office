@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -117,7 +118,6 @@
                     href="index.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         🏢
                     </span>
@@ -125,7 +125,6 @@
                     <span>
                         Oficina
                     </span>
-
                 </a>
 
 
@@ -133,7 +132,6 @@
                     href="personal.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         👥
                     </span>
@@ -141,7 +139,6 @@
                     <span>
                         Personal
                     </span>
-
                 </a>
 
 
@@ -149,7 +146,6 @@
                     href="reservas.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         📅
                     </span>
@@ -157,7 +153,6 @@
                     <span>
                         Reservas
                     </span>
-
                 </a>
 
 
@@ -165,7 +160,6 @@
                     href="salas.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         🚪
                     </span>
@@ -173,7 +167,6 @@
                     <span>
                         Salas
                     </span>
-
                 </a>
 
 
@@ -181,7 +174,6 @@
                     href="comunicados.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         📢
                     </span>
@@ -189,7 +181,6 @@
                     <span>
                         Comunicados
                     </span>
-
                 </a>
 
 
@@ -197,7 +188,6 @@
                     href="seguridad.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         🔐
                     </span>
@@ -205,7 +195,6 @@
                     <span>
                         Seguridad
                     </span>
-
                 </a>
 
 
@@ -213,7 +202,6 @@
                     href="infraestructura.html"
                     class="nav-item active"
                 >
-
                     <span class="nav-icon">
                         🖥️
                     </span>
@@ -221,7 +209,6 @@
                     <span>
                         Infraestructura
                     </span>
-
                 </a>
 
 
@@ -229,7 +216,6 @@
                     href="configuracion.html"
                     class="nav-item"
                 >
-
                     <span class="nav-icon">
                         ⚙️
                     </span>
@@ -237,7 +223,6 @@
                     <span>
                         Configuración
                     </span>
-
                 </a>
 
             </nav>
@@ -268,7 +253,7 @@
 
 
             <!-- =================================
-                 HEADER DE PÁGINA
+                 HEADER
             ================================== -->
 
             <section class="page-header">
@@ -290,10 +275,6 @@
 
                 </div>
 
-
-                <!-- =================================
-                     ÚLTIMA REVISIÓN
-                ================================== -->
 
                 <div class="last-update">
 
@@ -333,11 +314,10 @@
 
 
             <!-- =================================
-                 MONITOREO DE SERVICIOS
+                 SERVICIOS
             ================================== -->
 
             <section class="monitor-section services-section">
-
 
                 <div class="section-heading">
 
@@ -395,7 +375,6 @@
 
             <section class="monitor-section equipos-section">
 
-
                 <div class="section-heading">
 
                     <div class="section-title-group">
@@ -427,11 +406,10 @@
 
 
                 <!-- =================================
-                     RESUMEN EQUIPOS
+                     RESUMEN
                 ================================== -->
 
                 <div class="equipos-summary">
-
 
                     <div class="equipment-stat">
 
@@ -495,7 +473,6 @@
 
                     </div>
 
-
                 </div>
 
 
@@ -504,7 +481,6 @@
                 ================================== -->
 
                 <div class="equipos-controls">
-
 
                     <div class="search-wrapper">
 
@@ -540,6 +516,10 @@
 
                             <option value="Desconectado">
                                 Desconectado
+                            </option>
+
+                            <option value="No verificable">
+                                No verificable
                             </option>
 
                         </select>
@@ -600,6 +580,10 @@
                                 </th>
 
                                 <th>
+                                    TRABAJADOR
+                                </th>
+
+                                <th>
                                     IP
                                 </th>
 
@@ -625,7 +609,7 @@
                             <tr>
 
                                 <td
-                                    colspan="6"
+                                    colspan="7"
                                     class="equipos-loading"
                                 >
 
@@ -647,10 +631,6 @@
 
                     </table>
 
-
-                    <!-- =================================
-                         ESTADO VACÍO
-                    ================================== -->
 
                     <div
                         id="equiposEmpty"
@@ -674,12 +654,6 @@
                     </div>
 
                 </div>
-
-
-                <!--
-                    La paginación es creada automáticamente
-                    por infraestructura.js.
-                -->
 
             </section>
 
@@ -711,12 +685,106 @@
 
 
     <!-- =========================================
-         MSAL
+         MODAL TRABAJADOR
     ========================================== -->
 
-    <script
-        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
-    ></script>
+    <div
+        id="trabajadorModal"
+        class="modal-overlay"
+        style="display:none;"
+    >
+
+        <div class="trabajador-modal">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span class="modal-kicker">
+                        ASIGNACIÓN
+                    </span>
+
+                    <h3>
+                        Registrar trabajador
+                    </h3>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="cerrarTrabajadorModal"
+                    class="modal-close"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="modal-equipo">
+
+                    <span>
+                        EQUIPO
+                    </span>
+
+                    <strong id="modalEquipoNombre">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <label
+                    for="trabajadorNombre"
+                    class="modal-label"
+                >
+                    Trabajador
+                </label>
+
+                <input
+                    type="text"
+                    id="trabajadorNombre"
+                    class="modal-input"
+                    placeholder="Ingrese nombre y apellido"
+                    autocomplete="off"
+                    maxlength="150"
+                >
+
+                <div
+                    id="trabajadorError"
+                    class="modal-error"
+                    style="display:none;"
+                ></div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="cancelarTrabajador"
+                    class="modal-btn secondary"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    id="guardarTrabajador"
+                    class="modal-btn primary"
+                >
+                    Guardar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 
 
     <!-- =========================================

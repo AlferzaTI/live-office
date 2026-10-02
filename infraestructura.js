@@ -1120,7 +1120,24 @@ async function obtenerMonitoreoTI() {
     return (await response.json()).value || [];
 }
 
+function obtenerCampo(fields, nombres, defecto) {
+    const limpiar = texto =>
+        String(texto)
+            .replace(/_x([0-9a-f]{4})_/gi, (m, h) => String.fromCharCode(parseInt(h, 16)))
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
 
+    const mapa = {};
+    Object.keys(fields).forEach(clave => { mapa[limpiar(clave)] = fields[clave]; });
+
+    for (const nombre of nombres) {
+        const valor = mapa[limpiar(nombre)];
+        if (valor !== undefined && valor !== null && valor !== "") return valor;
+    }
+    return defecto;
+}
 /* =========================================
    RENDER SERVICIOS
 ========================================= */

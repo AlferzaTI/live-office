@@ -2,47 +2,39 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Infraestructura TI | ALFERZA LIVE OFFICE</title>
 
+    <script>
+        if (sessionStorage.getItem("alferza_login") !== "true") {
+            window.location.replace("login.html");
+        }
+    </script>
+
     <link rel="preconnect" href="https://graph.microsoft.com">
     <link rel="preconnect" href="https://login.microsoftonline.com">
-
     <link rel="stylesheet" href="infraestructura.css?v=5">
 
-    <!-- MSAL -->
-    <script
-        defer
-        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
-    ></script>
+    <script defer src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 </head>
 
 <body>
 
-    <!-- =========================================
-         LOADING
-    ========================================== -->
+    <!-- LOADING -->
 
-    <div
-        id="loadingOverlay"
-        class="loading-overlay"
-    >
+    <div id="loadingOverlay" class="loading-overlay">
 
-        <div class="loading-card">
+        <div class="loading-content">
 
-            <div class="loading-spinner"></div>
+            <div class="gear-spinner">⚙️</div>
 
-            <strong>
-                ALFERZA LIVE OFFICE
-            </strong>
-
-            <span id="loadingMessage">
+            <p id="loadingMessage">
                 Cargando monitoreo...
+            </p>
+
+            <span class="loading-subtitle">
+                ALFERZA LIVE OFFICE
             </span>
 
         </div>
@@ -50,36 +42,25 @@
     </div>
 
 
-    <!-- =========================================
-         TOPBAR
-    ========================================== -->
+    <!-- TOPBAR -->
 
     <header class="topbar">
 
-        <div class="topbar-brand">
+        <div class="logo">
 
-            <div class="brand-mark">
-                A
-            </div>
+            <h1>
+                ALFERZA LIVE OFFICE
+            </h1>
 
-            <div class="brand-text">
-
-                <strong>
-                    ALFERZA LIVE OFFICE
-                </strong>
-
-                <span>
-                    Monitoreo en tiempo real
-                </span>
-
-            </div>
+            <span>
+                Monitoreo en tiempo real
+            </span>
 
         </div>
 
+        <div class="live-status">
 
-        <div class="topbar-status">
-
-            <span class="live-dot"></span>
+            <span class="live-status-dot"></span>
 
             <span>
                 EN VIVO
@@ -90,169 +71,60 @@
     </header>
 
 
-    <!-- =========================================
-         CONTENEDOR PRINCIPAL
-    ========================================== -->
+    <!-- CONTENEDOR -->
 
     <div class="container">
 
-        <!-- =====================================
-             SIDEBAR
-        ====================================== -->
+        <!-- SIDEBAR -->
 
         <aside class="sidebar">
 
-            <div class="sidebar-header">
+            <h2>MENÚ</h2>
 
-                <span class="sidebar-title">
-                    OFICINA
-                </span>
+            <ul>
 
-            </div>
+                <li onclick="window.location.href='index.html'">
+                    🏢 Oficina
+                </li>
 
+                <li onclick="window.location.href='personal.html'">
+                    👥 Personal
+                </li>
 
-            <nav class="sidebar-nav">
+                <li onclick="window.location.href='reserva.html'">
+                    📝 Reservas
+                </li>
 
-                <a
-                    href="index.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        🏢
-                    </span>
+                <li onclick="window.location.href='salas/salas.html'">
+                    📅 Salas
+                </li>
 
-                    <span>
-                        Oficina
-                    </span>
-                </a>
+                <li onclick="window.location.href='comunicados.html'">
+                    📢 Comunicados
+                </li>
 
+                <li onclick="window.location.href='seguridad.html'">
+                    🔐 Seguridad
+                </li>
 
-                <a
-                    href="personal.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        👥
-                    </span>
+                <li class="active">
+                    🏗️ Infraestructura
+                </li>
 
-                    <span>
-                        Personal
-                    </span>
-                </a>
+                <li onclick="window.location.href='configuracion.html'">
+                    ⚙️ Configuración
+                </li>
 
-
-                <a
-                    href="reservas.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        📅
-                    </span>
-
-                    <span>
-                        Reservas
-                    </span>
-                </a>
-
-
-                <a
-                    href="salas.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        🚪
-                    </span>
-
-                    <span>
-                        Salas
-                    </span>
-                </a>
-
-
-                <a
-                    href="comunicados.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        📢
-                    </span>
-
-                    <span>
-                        Comunicados
-                    </span>
-                </a>
-
-
-                <a
-                    href="seguridad.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        🔐
-                    </span>
-
-                    <span>
-                        Seguridad
-                    </span>
-                </a>
-
-
-                <a
-                    href="infraestructura.html"
-                    class="nav-item active"
-                >
-                    <span class="nav-icon">
-                        🖥️
-                    </span>
-
-                    <span>
-                        Infraestructura
-                    </span>
-                </a>
-
-
-                <a
-                    href="configuracion.html"
-                    class="nav-item"
-                >
-                    <span class="nav-icon">
-                        ⚙️
-                    </span>
-
-                    <span>
-                        Configuración
-                    </span>
-                </a>
-
-            </nav>
-
-
-            <div class="sidebar-footer">
-
-                <div class="sidebar-footer-line"></div>
-
-                <span>
-                    ALFERZA HOLDING
-                </span>
-
-                <small>
-                    Área de Tecnología de la Información
-                </small>
-
-            </div>
+            </ul>
 
         </aside>
 
 
-        <!-- =====================================
-             CONTENIDO
-        ====================================== -->
+        <!-- CONTENIDO -->
 
         <main class="content">
 
-            <!-- =================================
-                 HEADER
-            ================================== -->
+            <!-- HEADER DE INFRAESTRUCTURA -->
 
             <section class="page-header">
 
@@ -311,9 +183,7 @@
             </section>
 
 
-            <!-- =================================
-                 SERVICIOS
-            ================================== -->
+            <!-- SERVICIOS -->
 
             <section class="monitor-section services-section">
 
@@ -335,7 +205,6 @@
                         </p>
 
                     </div>
-
 
                     <div
                         id="estadoGeneral"
@@ -367,9 +236,7 @@
             </section>
 
 
-            <!-- =================================
-                 EQUIPOS
-            ================================== -->
+            <!-- EQUIPOS -->
 
             <section class="monitor-section equipos-section">
 
@@ -392,7 +259,6 @@
 
                     </div>
 
-
                     <div
                         id="equiposEstado"
                         class="section-status online"
@@ -403,9 +269,7 @@
                 </div>
 
 
-                <!-- =================================
-                     RESUMEN
-                ================================== -->
+                <!-- RESUMEN -->
 
                 <div class="equipos-summary">
 
@@ -474,9 +338,7 @@
                 </div>
 
 
-                <!-- =================================
-                     FILTROS
-                ================================== -->
+                <!-- FILTROS -->
 
                 <div class="equipos-controls">
 
@@ -544,9 +406,7 @@
                 </div>
 
 
-                <!-- =================================
-                     RESULTADOS
-                ================================== -->
+                <!-- RESULTADOS -->
 
                 <div class="equipos-results">
 
@@ -557,9 +417,7 @@
                 </div>
 
 
-                <!-- =================================
-                     TABLA
-                ================================== -->
+                <!-- TABLA -->
 
                 <div class="equipos-table-container">
 
@@ -569,38 +427,17 @@
 
                             <tr>
 
-                                <th>
-                                    EQUIPO
-                                </th>
-
-                                <th>
-                                    ESTADO
-                                </th>
-
-                                <th>
-                                    TRABAJADOR
-                                </th>
-
-                                <th>
-                                    IP
-                                </th>
-
-                                <th>
-                                    SISTEMA OPERATIVO
-                                </th>
-
-                                <th>
-                                    ÁREA / OU
-                                </th>
-
-                                <th>
-                                    ÚLTIMO REGISTRO AD
-                                </th>
+                                <th>EQUIPO</th>
+                                <th>ESTADO</th>
+                                <th>TRABAJADOR</th>
+                                <th>IP</th>
+                                <th>SISTEMA OPERATIVO</th>
+                                <th>ÁREA / OU</th>
+                                <th>ÚLTIMO REGISTRO AD</th>
 
                             </tr>
 
                         </thead>
-
 
                         <tbody id="equiposTableBody">
 
@@ -653,22 +490,10 @@
 
                 </div>
 
-
-                <!-- =================================
-                     PAGINACIÓN
-                ================================== -->
-
-                <div
-                    id="equiposPagination"
-                    class="equipos-pagination"
-                ></div>
-
             </section>
 
 
-            <!-- =================================
-                 FOOTER
-            ================================== -->
+            <!-- FOOTER -->
 
             <footer class="page-footer">
 
@@ -691,9 +516,7 @@
     </div>
 
 
-    <!-- =========================================
-         MODAL TRABAJADOR
-    ========================================== -->
+    <!-- MODAL -->
 
     <div
         id="trabajadorModal"
@@ -794,14 +617,7 @@
     </div>
 
 
-    <!-- =========================================
-         JAVASCRIPT
-    ========================================== -->
-
-    <script
-        defer
-        src="infraestructura.js?v=5"
-    ></script>
+    <script defer src="infraestructura.js?v=4"></script>
 
 </body>
 </html>

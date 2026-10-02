@@ -14,20 +14,28 @@
 
     <link rel="preconnect" href="https://graph.microsoft.com">
     <link rel="preconnect" href="https://login.microsoftonline.com">
+
     <link rel="stylesheet" href="infraestructura.css?v=5">
 
-    <script defer src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+    <script
+        defer
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js">
+    </script>
 </head>
 
 <body>
 
-    <!-- LOADING -->
+    <!-- =====================================================
+         LOADING
+         ===================================================== -->
 
     <div id="loadingOverlay" class="loading-overlay">
 
         <div class="loading-content">
 
-            <div class="gear-spinner">⚙️</div>
+            <div class="gear-spinner">
+                ⚙️
+            </div>
 
             <p id="loadingMessage">
                 Cargando monitoreo...
@@ -42,7 +50,9 @@
     </div>
 
 
-    <!-- TOPBAR -->
+    <!-- =====================================================
+         TOPBAR
+         ===================================================== -->
 
     <header class="topbar">
 
@@ -71,15 +81,21 @@
     </header>
 
 
-    <!-- CONTENEDOR -->
+    <!-- =====================================================
+         CONTENEDOR PRINCIPAL
+         ===================================================== -->
 
     <div class="container">
 
-        <!-- SIDEBAR -->
+        <!-- =================================================
+             SIDEBAR
+             ================================================= -->
 
         <aside class="sidebar">
 
-            <h2>MENÚ</h2>
+            <h2>
+                MENÚ
+            </h2>
 
             <ul>
 
@@ -120,11 +136,16 @@
         </aside>
 
 
-        <!-- CONTENIDO -->
+        <!-- =================================================
+             CONTENIDO
+             ================================================= -->
 
         <main class="content">
 
-            <!-- HEADER DE INFRAESTRUCTURA -->
+
+            <!-- =================================================
+                 HEADER INFRAESTRUCTURA
+                 ================================================= -->
 
             <section class="page-header">
 
@@ -183,7 +204,9 @@
             </section>
 
 
-            <!-- SERVICIOS -->
+            <!-- =================================================
+                 SERVICIOS
+                 ================================================= -->
 
             <section class="monitor-section services-section">
 
@@ -206,6 +229,7 @@
 
                     </div>
 
+
                     <div
                         id="estadoGeneral"
                         class="section-status online"
@@ -216,18 +240,76 @@
                 </div>
 
 
+                <!--
+                    IMPORTANTE:
+                    Este contenedor mantiene el ID "serviciosGrid"
+                    porque infraestructura.js lo utiliza para
+                    insertar las tarjetas reales.
+                -->
+
                 <div
                     id="serviciosGrid"
                     class="service-grid"
+                    aria-live="polite"
+                    aria-label="Servicios tecnológicos monitoreados"
                 >
+
+                    <!-- TARJETA DE CARGA -->
 
                     <div class="service-card service-loading">
 
-                        <div class="loading-spinner small"></div>
+                        <div class="service-card-main">
 
-                        <span>
-                            Cargando servicios...
-                        </span>
+                            <div class="service-card-icon">
+                                ⚙️
+                            </div>
+
+                            <div class="service-card-title">
+
+                                <h3>
+                                    Servicios TI
+                                </h3>
+
+                            </div>
+
+                            <div class="service-status">
+
+                                <span>
+                                    CARGANDO
+                                </span>
+
+                            </div>
+
+                            <div class="service-description">
+
+                                <span>
+                                    Obteniendo estado de los servicios...
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="service-info">
+
+                            <div class="service-info-item">
+
+                                <span class="service-latency">
+                                    --
+                                </span>
+
+                            </div>
+
+                            <div class="service-info-item">
+
+                                <span class="service-last-check">
+                                    Esperando datos...
+                                </span>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -236,7 +318,9 @@
             </section>
 
 
-            <!-- EQUIPOS -->
+            <!-- =================================================
+                 EQUIPOS
+                 ================================================= -->
 
             <section class="monitor-section equipos-section">
 
@@ -259,6 +343,7 @@
 
                     </div>
 
+
                     <div
                         id="equiposEstado"
                         class="section-status online"
@@ -269,7 +354,9 @@
                 </div>
 
 
-                <!-- RESUMEN -->
+                <!-- =================================================
+                     RESUMEN
+                     ================================================= -->
 
                 <div class="equipos-summary">
 
@@ -338,7 +425,9 @@
                 </div>
 
 
-                <!-- FILTROS -->
+                <!-- =================================================
+                     FILTROS
+                     ================================================= -->
 
                 <div class="equipos-controls">
 
@@ -406,7 +495,9 @@
                 </div>
 
 
-                <!-- RESULTADOS -->
+                <!-- =================================================
+                     RESULTADOS
+                     ================================================= -->
 
                 <div class="equipos-results">
 
@@ -417,7 +508,9 @@
                 </div>
 
 
-                <!-- TABLA -->
+                <!-- =================================================
+                     TABLA DE EQUIPOS
+                     ================================================= -->
 
                 <div class="equipos-table-container">
 
@@ -427,17 +520,38 @@
 
                             <tr>
 
-                                <th>EQUIPO</th>
-                                <th>ESTADO</th>
-                                <th>TRABAJADOR</th>
-                                <th>IP</th>
-                                <th>SISTEMA OPERATIVO</th>
-                                <th>ÁREA / OU</th>
-                                <th>ÚLTIMO REGISTRO AD</th>
+                                <th>
+                                    EQUIPO
+                                </th>
+
+                                <th>
+                                    ESTADO
+                                </th>
+
+                                <th>
+                                    TRABAJADOR
+                                </th>
+
+                                <th>
+                                    IP
+                                </th>
+
+                                <th>
+                                    SISTEMA OPERATIVO
+                                </th>
+
+                                <th>
+                                    ÁREA / OU
+                                </th>
+
+                                <th>
+                                    ÚLTIMO REGISTRO AD
+                                </th>
 
                             </tr>
 
                         </thead>
+
 
                         <tbody id="equiposTableBody">
 
@@ -467,6 +581,8 @@
                     </table>
 
 
+                    <!-- ESTADO VACÍO -->
+
                     <div
                         id="equiposEmpty"
                         class="equipos-empty"
@@ -493,7 +609,9 @@
             </section>
 
 
-            <!-- FOOTER -->
+            <!-- =================================================
+                 FOOTER
+                 ================================================= -->
 
             <footer class="page-footer">
 
@@ -516,7 +634,9 @@
     </div>
 
 
-    <!-- MODAL -->
+    <!-- =====================================================
+         MODAL TRABAJADOR
+         ===================================================== -->
 
     <div
         id="trabajadorModal"
@@ -539,6 +659,7 @@
                     </h3>
 
                 </div>
+
 
                 <button
                     type="button"
@@ -583,6 +704,7 @@
                     maxlength="150"
                 >
 
+
                 <div
                     id="trabajadorError"
                     class="modal-error"
@@ -617,7 +739,14 @@
     </div>
 
 
-    <script defer src="infraestructura.js?v=4"></script>
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script
+        defer
+        src="infraestructura.js?v=4">
+    </script>
 
 </body>
 </html>

@@ -3,7 +3,6 @@
    INFRAESTRUCTURA TI
    ========================================================= */
 
-
 /* =========================================================
    BASE
    ========================================================= */
@@ -26,7 +25,6 @@ body {
     min-height: 100vh;
 }
 
-
 /* =========================================================
    BARRA SUPERIOR
    ========================================================= */
@@ -43,7 +41,6 @@ body {
     padding: 0 30px;
     overflow: hidden;
 }
-
 
 /* =========================================================
    LOGO CENTRAL
@@ -64,8 +61,7 @@ body {
     font-size: 24px;
     font-weight: 800;
     letter-spacing: 0.8px;
-    animation:
-        logoTitleAnimation 1.2s ease-in-out infinite;
+    animation: logoTitleAnimation 1.2s ease-in-out infinite;
 }
 
 .logo span {
@@ -75,10 +71,8 @@ body {
     font-weight: 500;
     color: #cbd5e1;
     letter-spacing: 0.5px;
-    animation:
-        logoSubtitleAnimation 1.2s ease-in-out infinite;
+    animation: logoSubtitleAnimation 1.2s ease-in-out infinite;
 }
-
 
 /* =========================================================
    EN VIVO
@@ -109,17 +103,14 @@ body {
     background: #22c55e;
     box-shadow:
         0 0 0 4px rgba(34, 197, 94, 0.12);
-    animation:
-        pulseLive 2s infinite;
+    animation: pulseLive 2s infinite;
 }
-
 
 /* =========================================================
    ANIMACIÓN LOGO
    ========================================================= */
 
 @keyframes logoTitleAnimation {
-
     0% {
         opacity: 0.75;
         transform: translateY(2px);
@@ -140,11 +131,9 @@ body {
         text-shadow:
             0 0 0 rgba(255, 255, 255, 0);
     }
-
 }
 
 @keyframes logoSubtitleAnimation {
-
     0%,
     100% {
         opacity: 0.55;
@@ -153,11 +142,9 @@ body {
     50% {
         opacity: 1;
     }
-
 }
 
 @keyframes pulseLive {
-
     0% {
         box-shadow:
             0 0 0 0 rgba(34, 197, 94, 0.35);
@@ -172,9 +159,7 @@ body {
         box-shadow:
             0 0 0 0 rgba(34, 197, 94, 0);
     }
-
 }
-
 
 /* =========================================================
    CONTENEDOR PRINCIPAL
@@ -185,7 +170,6 @@ body {
     width: 100%;
     min-height: calc(100vh - 130px);
 }
-
 
 /* =========================================================
    SIDEBAR
@@ -231,7 +215,6 @@ body {
         inset 4px 0 #3b82f6;
 }
 
-
 /* =========================================================
    CONTENIDO
    ========================================================= */
@@ -243,7 +226,6 @@ body {
     box-sizing: border-box;
     min-width: 0;
 }
-
 
 /* =========================================================
    ENCABEZADO PRINCIPAL
@@ -276,7 +258,6 @@ body {
         headerContentIn 0.75s ease 0.12s both;
 }
 
-
 /* =========================================================
    DECORACIÓN DEL ENCABEZADO
    ========================================================= */
@@ -307,7 +288,6 @@ body {
         headerCircleFloat 8s ease-in-out infinite;
 }
 
-
 /* =========================================================
    PARTE IZQUIERDA
    ========================================================= */
@@ -317,7 +297,6 @@ body {
     z-index: 2;
     max-width: 650px;
 }
-
 
 /* =========================================================
    BREADCRUMB
@@ -341,7 +320,6 @@ body {
     margin-left: 0;
 }
 
-
 /* =========================================================
    TÍTULO
    ========================================================= */
@@ -355,7 +333,6 @@ body {
     letter-spacing: -1px;
 }
 
-
 /* =========================================================
    DESCRIPCIÓN
    ========================================================= */
@@ -367,7 +344,6 @@ body {
     font-size: 13px;
     line-height: 1.45;
 }
-
 
 /* =========================================================
    BLOQUE ÚLTIMA REVISIÓN
@@ -389,7 +365,6 @@ body {
         headerDateIn 0.75s ease 0.2s both;
 }
 
-
 /* =========================================================
    ICONO ÚLTIMA REVISIÓN
    ========================================================= */
@@ -405,7 +380,6 @@ body {
     background: rgba(255, 255, 255, 0.10);
     font-size: 17px;
 }
-
 
 /* =========================================================
    CONTENIDO ÚLTIMA REVISIÓN
@@ -440,7 +414,6 @@ body {
     font-size: 9px;
 }
 
-
 /* =========================================================
    INDICADOR ACTUALIZADO
    ========================================================= */
@@ -466,13 +439,11 @@ body {
         0 0 0 3px rgba(34, 197, 94, 0.15);
 }
 
-
 /* =========================================================
    ANIMACIONES DEL HEADER
    ========================================================= */
 
 @keyframes headerCircleFloat {
-
     0%,
     100% {
         transform: translateY(0);
@@ -483,11 +454,9 @@ body {
         transform: translateY(-8px);
         opacity: 1;
     }
-
 }
 
 @keyframes headerContentIn {
-
     from {
         opacity: 0;
         transform: translateX(-15px);
@@ -497,11 +466,9 @@ body {
         opacity: 1;
         transform: translateX(0);
     }
-
 }
 
 @keyframes headerDateIn {
-
     from {
         opacity: 0;
         transform: translateX(15px);
@@ -511,9 +478,7 @@ body {
         opacity: 1;
         transform: translateX(0);
     }
-
 }
-
 
 /* =========================================================
    SECCIONES DE MONITOREO
@@ -528,7 +493,6 @@ body {
     box-shadow:
         0 4px 15px rgba(15, 23, 42, 0.06);
 }
-
 
 /* =========================================================
    ENCABEZADO DE SECCIÓN
@@ -568,7 +532,6 @@ body {
     font-size: 13px;
 }
 
-
 /* =========================================================
    ESTADO DE SECCIÓN
    ========================================================= */
@@ -594,7 +557,6 @@ body {
     border: 1px solid #fecaca;
 }
 
-
 /* =========================================================
    SERVICIOS
    DISEÑO CORPORATIVO
@@ -608,7 +570,6 @@ body {
     align-items: stretch;
 }
 
-
 /* =========================================================
    TARJETA DEL SERVICIO
    DISTRIBUCIÓN INTERNA CORREGIDA
@@ -619,33 +580,24 @@ body {
     width: 100%;
     min-width: 0;
     height: 178px;
-
     padding: 14px 16px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 15px;
-
     overflow: hidden;
-
     box-shadow:
         0 3px 10px rgba(15, 23, 42, 0.035);
-
     opacity: 0;
-
     animation:
         serviceCardIn 0.45s ease forwards;
-
     transition:
         transform 0.22s ease,
         box-shadow 0.22s ease,
         border-color 0.22s ease;
 }
-
 
 /* =========================================================
    ENTRADA ESCALONADA
@@ -683,7 +635,6 @@ body {
     animation-delay: 0.46s;
 }
 
-
 /* =========================================================
    BARRA LATERAL DE ESTADO
    ========================================================= */
@@ -695,14 +646,10 @@ body {
     left: 0;
     width: 3px;
     height: 100%;
-
     background: #22c55e;
-
     transform: scaleY(0.55);
     transform-origin: center;
-
     border-radius: 0 3px 3px 0;
-
     transition:
         transform 0.25s ease,
         box-shadow 0.25s ease;
@@ -712,7 +659,6 @@ body {
     background: #ef4444;
 }
 
-
 /* =========================================================
    DECORACIÓN SUPERIOR
    ========================================================= */
@@ -720,15 +666,11 @@ body {
 .service-card::after {
     content: "";
     position: absolute;
-
     width: 150px;
     height: 150px;
-
     top: -105px;
     right: -90px;
-
     border-radius: 50%;
-
     background:
         radial-gradient(
             circle,
@@ -736,10 +678,8 @@ body {
             rgba(37, 99, 235, 0.025) 45%,
             transparent 72%
         );
-
     pointer-events: none;
 }
-
 
 /* =========================================================
    HOVER
@@ -747,9 +687,7 @@ body {
 
 .service-card:hover {
     transform: translateY(-4px);
-
     border-color: #bfdbfe;
-
     box-shadow:
         0 12px 26px rgba(15, 23, 42, 0.08),
         0 3px 8px rgba(37, 99, 235, 0.05);
@@ -757,11 +695,9 @@ body {
 
 .service-card:hover::before {
     transform: scaleY(1);
-
     box-shadow:
         0 0 12px rgba(34, 197, 94, 0.30);
 }
-
 
 /* =========================================================
    CONTENIDO INTERNO
@@ -772,7 +708,6 @@ body {
     z-index: 1;
     min-width: 0;
 }
-
 
 /* =========================================================
    CABECERA DE TARJETA
@@ -787,17 +722,13 @@ body {
     width: 100%;
     min-width: 0;
     min-height: auto;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-
     gap: 4px;
-
     text-align: center;
 }
-
 
 /* =========================================================
    ICONO
@@ -806,22 +737,15 @@ body {
 .service-card-icon {
     width: 34px;
     height: 34px;
-
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 9px;
-
     background: #eff6ff;
     border: 1px solid #dbeafe;
-
     color: #2563eb;
-
     font-size: 16px;
-
     transition:
         transform 0.22s ease,
         background 0.22s ease,
@@ -830,13 +754,10 @@ body {
 
 .service-card:hover .service-card-icon {
     transform: scale(1.05);
-
     background: #dbeafe;
-
     box-shadow:
         0 5px 12px rgba(37, 99, 235, 0.12);
 }
-
 
 /* =========================================================
    CONTENEDOR TÍTULO
@@ -845,34 +766,25 @@ body {
 .service-card-title {
     width: 100%;
     min-width: 0;
-
     display: flex;
     justify-content: center;
-
     text-align: center;
 }
 
 .service-card-title h3,
 .service-card h3 {
     min-width: 0;
-
     margin: 0;
-
     color: #0f172a;
-
     font-size: 14px;
     line-height: 1.2;
     font-weight: 800;
-
     letter-spacing: -0.15px;
-
     text-align: center;
-
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 /* =========================================================
    ESTADO
@@ -880,49 +792,31 @@ body {
 
 .service-status {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
-
     gap: 5px;
-
     min-height: 22px;
-
     padding: 4px 9px;
-
     border-radius: 999px;
-
     background: #ecfdf5;
-
     border: 1px solid #bbf7d0;
-
     color: #15803d;
-
     font-size: 8px;
     font-weight: 800;
-
     letter-spacing: 0.45px;
-
     text-transform: uppercase;
-
     white-space: nowrap;
 }
 
 .service-status::before {
     content: "";
-
     width: 5px;
     height: 5px;
-
     flex-shrink: 0;
-
     border-radius: 50%;
-
     background: #22c55e;
-
     box-shadow:
         0 0 0 3px rgba(34, 197, 94, 0.09);
-
     animation:
         serviceStatusPulse 2s ease-in-out infinite;
 }
@@ -935,13 +829,10 @@ body {
 
 .service-status.offline::before {
     background: #ef4444;
-
     box-shadow:
         0 0 0 3px rgba(239, 68, 68, 0.09);
-
     animation: none;
 }
-
 
 /* =========================================================
    DESCRIPCIÓN
@@ -951,40 +842,26 @@ body {
 .service-description {
     position: relative;
     z-index: 1;
-
     width: 100%;
     min-width: 0;
-
     min-height: 32px;
-
     margin-top: 8px;
-
     padding: 7px 10px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 8px;
-
     background: #f8fafc;
-
     border: 1px solid #f1f5f9;
-
     color: #64748b;
-
     font-size: 10px;
     line-height: 1.3;
-
     text-align: center;
-
     overflow: hidden;
-
     transition:
         background 0.2s ease,
         border-color 0.2s ease;
 }
-
 
 /* =========================================================
    CONTROL DE TEXTO DE DESCRIPCIÓN
@@ -1005,20 +882,16 @@ body {
     border-color: #e0e7ff;
 }
 
-
 /* =========================================================
    TEXTO GENERAL DE LA TARJETA
    ========================================================= */
 
 .service-card p {
     margin: 0;
-
     color: #64748b;
-
     font-size: 10px;
     line-height: 1.3;
 }
-
 
 /* =========================================================
    INFORMACIÓN INFERIOR
@@ -1028,27 +901,18 @@ body {
 .service-info {
     position: relative;
     z-index: 1;
-
     width: 100%;
     min-width: 0;
-
     margin-top: auto;
-
     padding-top: 8px;
-
     display: grid;
-
     grid-template-columns:
         minmax(0, 0.8fr)
         minmax(0, 1.2fr);
-
     align-items: center;
-
     gap: 10px;
-
     border-top: 1px solid #e2e8f0;
 }
-
 
 /* =========================================================
    ITEM DE INFORMACIÓN
@@ -1056,13 +920,10 @@ body {
 
 .service-info-item {
     min-width: 0;
-
     display: flex;
     align-items: center;
-
     gap: 5px;
 }
-
 
 /* =========================================================
    LABEL
@@ -1070,19 +931,13 @@ body {
 
 .service-info-label {
     color: #94a3b8;
-
     font-size: 8px;
     font-weight: 800;
-
     letter-spacing: 0.6px;
-
     text-transform: uppercase;
-
     line-height: 1;
-
     white-space: nowrap;
 }
-
 
 /* =========================================================
    VALOR
@@ -1090,17 +945,12 @@ body {
 
 .service-info-value {
     min-width: 0;
-
     color: #334155;
-
     font-size: 10px;
     font-weight: 700;
-
     line-height: 1.2;
-
     overflow: hidden;
 }
-
 
 /* =========================================================
    LATENCIA
@@ -1108,16 +958,11 @@ body {
 
 .service-latency {
     display: inline-flex;
-
     align-items: center;
-
     gap: 4px;
-
     color: #2563eb;
-
     font-size: 10px;
     font-weight: 800;
-
     white-space: nowrap;
 }
 
@@ -1126,51 +971,37 @@ body {
     font-size: 10px;
 }
 
-
 /* =========================================================
    ÚLTIMA REVISIÓN
    ========================================================= */
 
 .service-last-check {
     min-width: 0;
-
     display: flex;
     align-items: center;
-
     gap: 4px;
-
     color: #64748b;
-
     font-size: 8.5px;
     font-weight: 600;
-
     line-height: 1.2;
-
     white-space: nowrap;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
 }
 
 .service-last-check::before {
     content: "🕐";
-
     flex-shrink: 0;
-
     font-size: 10px;
 }
-
 
 /* =========================================================
    ANIMACIÓN TARJETAS
    ========================================================= */
 
 @keyframes serviceCardIn {
-
     from {
         opacity: 0;
-
         transform:
             translateY(12px)
             scale(0.985);
@@ -1178,26 +1009,21 @@ body {
 
     to {
         opacity: 1;
-
         transform:
             translateY(0)
             scale(1);
     }
-
 }
-
 
 /* =========================================================
    ANIMACIÓN ESTADO
    ========================================================= */
 
 @keyframes serviceStatusPulse {
-
     0%,
     100% {
         transform: scale(1);
         opacity: 1;
-
         box-shadow:
             0 0 0 3px rgba(34, 197, 94, 0.09);
     }
@@ -1205,13 +1031,10 @@ body {
     50% {
         transform: scale(1.12);
         opacity: 0.75;
-
         box-shadow:
             0 0 0 5px rgba(34, 197, 94, 0.03);
     }
-
 }
-
 
 /* =========================================================
    CARGANDO SERVICIOS
@@ -1219,18 +1042,13 @@ body {
 
 .service-loading {
     min-height: 140px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     gap: 10px;
-
     color: #64748b;
-
     font-size: 12px;
 }
-
 
 /* =========================================================
    SPINNER
@@ -1239,12 +1057,9 @@ body {
 .loading-spinner {
     width: 28px;
     height: 28px;
-
     border-radius: 50%;
-
     border: 3px solid #dbeafe;
     border-top-color: #2563eb;
-
     animation:
         spin 0.8s linear infinite;
 }
@@ -1256,13 +1071,10 @@ body {
 }
 
 @keyframes spin {
-
     to {
         transform: rotate(360deg);
     }
-
 }
-
 
 /* =========================================================
    RESUMEN DE EQUIPOS
@@ -1270,27 +1082,19 @@ body {
 
 .equipos-summary {
     display: grid;
-
     grid-template-columns:
         repeat(3, minmax(0, 1fr));
-
     gap: 16px;
-
     margin-bottom: 20px;
 }
 
 .equipment-stat {
     display: flex;
     align-items: center;
-
     gap: 13px;
-
     padding: 17px;
-
     background: #f8fafc;
-
     border: 1px solid #e2e8f0;
-
     border-radius: 14px;
 }
 
@@ -1302,14 +1106,12 @@ body {
 
 .equipment-stat span {
     color: #64748b;
-
     font-size: 11px;
     font-weight: 700;
 }
 
 .equipment-stat strong {
     color: #0f172a;
-
     font-size: 24px;
     line-height: 1;
 }
@@ -1317,15 +1119,11 @@ body {
 .equipment-stat-icon {
     width: 42px;
     height: 42px;
-
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 12px;
-
     font-size: 18px;
     font-weight: 800;
 }
@@ -1345,7 +1143,6 @@ body {
     color: #dc2626;
 }
 
-
 /* =========================================================
    CONTROLES
    ========================================================= */
@@ -1353,51 +1150,37 @@ body {
 .equipos-controls {
     display: flex;
     align-items: flex-end;
-
     gap: 14px;
-
     margin-bottom: 15px;
 }
 
 .search-wrapper {
     position: relative;
-
     flex: 1;
     min-width: 220px;
 }
 
 .search-icon {
     position: absolute;
-
     left: 13px;
     top: 50%;
-
     transform: translateY(-50%);
-
     color: #64748b;
-
     font-size: 14px;
-
     pointer-events: none;
 }
 
 .search-wrapper input {
     width: 100%;
     height: 42px;
-
     padding: 0 14px 0 38px;
-
     border: 1px solid #cbd5e1;
     border-radius: 10px;
-
     background: white;
     color: #0f172a;
-
     font-family: inherit;
     font-size: 13px;
-
     outline: none;
-
     transition:
         border-color 0.2s ease,
         box-shadow 0.2s ease;
@@ -1405,7 +1188,6 @@ body {
 
 .search-wrapper input:focus {
     border-color: #2563eb;
-
     box-shadow:
         0 0 0 3px rgba(37, 99, 235, 0.10);
 }
@@ -1413,48 +1195,36 @@ body {
 .filter-wrapper {
     display: flex;
     flex-direction: column;
-
     gap: 5px;
 }
 
 .filter-wrapper label {
     color: #475569;
-
     font-size: 10px;
     font-weight: 800;
-
     text-transform: uppercase;
-
     letter-spacing: 0.5px;
 }
 
 .filter-wrapper select {
     min-width: 170px;
     height: 42px;
-
     padding: 0 12px;
-
     border: 1px solid #cbd5e1;
     border-radius: 10px;
-
     background: white;
     color: #0f172a;
-
     font-family: inherit;
     font-size: 13px;
-
     outline: none;
-
     cursor: pointer;
 }
 
 .filter-wrapper select:focus {
     border-color: #2563eb;
-
     box-shadow:
         0 0 0 3px rgba(37, 99, 235, 0.10);
 }
-
 
 /* =========================================================
    RESULTADOS
@@ -1462,13 +1232,10 @@ body {
 
 .equipos-results {
     margin-bottom: 12px;
-
     color: #64748b;
-
     font-size: 12px;
     font-weight: 600;
 }
-
 
 /* =========================================================
    TABLA
@@ -1476,50 +1243,35 @@ body {
 
 .equipos-table-container {
     width: 100%;
-
     overflow-x: auto;
-
     border: 1px solid #e2e8f0;
-
     border-radius: 14px;
-
     background: white;
 }
 
 .equipos-table {
     width: 100%;
     min-width: 950px;
-
     border-collapse: collapse;
 }
 
 .equipos-table th {
     padding: 13px 14px;
-
     background: #f8fafc;
     color: #475569;
-
     border-bottom: 1px solid #e2e8f0;
-
     font-size: 10px;
     font-weight: 800;
-
     text-align: left;
-
     letter-spacing: 0.4px;
-
     white-space: nowrap;
 }
 
 .equipos-table td {
     padding: 13px 14px;
-
     color: #334155;
-
     border-bottom: 1px solid #f1f5f9;
-
     font-size: 12px;
-
     vertical-align: middle;
 }
 
@@ -1536,28 +1288,22 @@ body {
     border-bottom: none;
 }
 
-
 /* =========================================================
    LOADING TABLA
    ========================================================= */
 
 .equipos-loading {
     padding: 35px !important;
-
     text-align: center;
 }
 
 .table-loading {
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     gap: 10px;
-
     color: #64748b;
 }
-
 
 /* =========================================================
    SIN RESULTADOS
@@ -1565,32 +1311,25 @@ body {
 
 .equipos-empty {
     padding: 45px 20px;
-
     text-align: center;
-
     color: #64748b;
 }
 
 .empty-icon {
     margin-bottom: 10px;
-
     font-size: 34px;
 }
 
 .equipos-empty strong {
     display: block;
-
     margin-bottom: 5px;
-
     color: #334155;
-
     font-size: 15px;
 }
 
 .equipos-empty span {
     font-size: 12px;
 }
-
 
 /* =========================================================
    MODAL
@@ -1600,37 +1339,27 @@ body {
     position: fixed;
     inset: 0;
     z-index: 9999;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     padding: 20px;
-
     background: rgba(15, 23, 42, 0.65);
-
     backdrop-filter: blur(4px);
 }
 
 .trabajador-modal {
     width: 100%;
     max-width: 460px;
-
     background: white;
-
     border-radius: 18px;
-
     overflow: hidden;
-
     box-shadow:
         0 25px 70px rgba(15, 23, 42, 0.25);
-
     animation:
         modalIn 0.25s ease both;
 }
 
 @keyframes modalIn {
-
     from {
         opacity: 0;
         transform: translateY(12px) scale(0.98);
@@ -1640,53 +1369,40 @@ body {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
-
 }
 
 .modal-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-
     padding: 22px 22px 16px;
-
     border-bottom: 1px solid #e2e8f0;
 }
 
 .modal-kicker {
     display: block;
-
     margin-bottom: 4px;
-
     color: #2563eb;
-
     font-size: 9px;
     font-weight: 800;
-
     letter-spacing: 0.8px;
 }
 
 .modal-header h3 {
     margin: 0;
-
     color: #0f172a;
-
     font-size: 20px;
 }
 
 .modal-close {
     width: 32px;
     height: 32px;
-
     border: none;
     border-radius: 8px;
-
     background: #f1f5f9;
     color: #475569;
-
     font-size: 22px;
     line-height: 1;
-
     cursor: pointer;
 }
 
@@ -1701,42 +1417,30 @@ body {
 .modal-equipo {
     display: flex;
     flex-direction: column;
-
     gap: 3px;
-
     padding: 12px 14px;
-
     margin-bottom: 18px;
-
     background: #f8fafc;
-
     border: 1px solid #e2e8f0;
-
     border-radius: 10px;
 }
 
 .modal-equipo span {
     color: #64748b;
-
     font-size: 9px;
     font-weight: 800;
-
     letter-spacing: 0.6px;
 }
 
 .modal-equipo strong {
     color: #0f172a;
-
     font-size: 14px;
 }
 
 .modal-label {
     display: block;
-
     margin-bottom: 6px;
-
     color: #334155;
-
     font-size: 11px;
     font-weight: 700;
 }
@@ -1744,64 +1448,45 @@ body {
 .modal-input {
     width: 100%;
     height: 42px;
-
     padding: 0 12px;
-
     border: 1px solid #cbd5e1;
     border-radius: 10px;
-
     outline: none;
-
     font-family: inherit;
     font-size: 13px;
 }
 
 .modal-input:focus {
     border-color: #2563eb;
-
     box-shadow:
         0 0 0 3px rgba(37, 99, 235, 0.10);
 }
 
 .modal-error {
     margin-top: 8px;
-
     padding: 9px 11px;
-
     border-radius: 8px;
-
     background: #fee2e2;
     color: #b91c1c;
-
     font-size: 11px;
 }
 
 .modal-footer {
     display: flex;
-
     justify-content: flex-end;
-
     gap: 10px;
-
     padding: 15px 22px;
-
     border-top: 1px solid #e2e8f0;
-
     background: #f8fafc;
 }
 
 .modal-btn {
     padding: 9px 15px;
-
     border-radius: 9px;
-
     border: none;
-
     font-family: inherit;
-
     font-size: 12px;
     font-weight: 700;
-
     cursor: pointer;
 }
 
@@ -1819,29 +1504,21 @@ body {
     background: #1d4ed8;
 }
 
-
 /* =========================================================
    FOOTER
    ========================================================= */
 
 .page-footer {
     display: flex;
-
     justify-content: space-between;
     align-items: center;
-
     gap: 15px;
-
     margin-top: 10px;
-
     padding: 16px 4px;
-
     color: #64748b;
-
     font-size: 10px;
     font-weight: 600;
 }
-
 
 /* =========================================================
    LOADING OVERLAY
@@ -1851,11 +1528,9 @@ body {
     position: fixed;
     inset: 0;
     z-index: 10000;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background:
         linear-gradient(
             135deg,
@@ -1863,7 +1538,6 @@ body {
             #07377f 48%,
             #0a84ff 100%
         );
-
     transition:
         opacity 0.35s ease,
         visibility 0.35s ease;
@@ -1877,51 +1551,36 @@ body {
 
 .loading-card {
     min-width: 260px;
-
     padding: 28px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     gap: 10px;
-
     color: white;
-
     text-align: center;
-
     border-radius: 18px;
-
     background: rgba(255, 255, 255, 0.10);
-
     border: 1px solid rgba(255, 255, 255, 0.18);
-
     backdrop-filter: blur(10px);
-
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
 .loading-card strong {
     font-size: 15px;
-
     letter-spacing: 0.5px;
 }
 
 .loading-card span {
     color: rgba(255, 255, 255, 0.70);
-
     font-size: 11px;
 }
 
 .loading-card .loading-spinner {
     border-color: rgba(255, 255, 255, 0.25);
-
     border-top-color: white;
-
     margin-bottom: 5px;
 }
-
 
 /* =========================================================
    RESPONSIVE — 1100
@@ -1944,16 +1603,13 @@ body {
     .service-grid {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-
         gap: 15px;
     }
 
     .service-card {
         height: 178px;
     }
-
 }
-
 
 /* =========================================================
    RESPONSIVE — 900
@@ -1994,9 +1650,7 @@ body {
     .service-card {
         height: 178px;
     }
-
 }
-
 
 /* =========================================================
    RESPONSIVE — 700
@@ -2037,10 +1691,8 @@ body {
 
     .sidebar ul {
         display: grid;
-
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-
         gap: 6px;
     }
 
@@ -2093,9 +1745,7 @@ body {
         flex-direction: column;
         align-items: flex-start;
     }
-
 }
-
 
 /* =========================================================
    RESPONSIVE — 500
@@ -2188,16 +1838,13 @@ body {
         grid-template-columns:
             minmax(0, 1fr)
             minmax(0, 1fr);
-
         gap: 8px;
     }
 
     .service-last-check {
         white-space: normal;
     }
-
 }
-
 
 /* =========================================================
    REDUCCIÓN DE MOVIMIENTO
@@ -2208,12 +1855,8 @@ body {
     *,
     *::before,
     *::after {
-
         animation-duration: 0.01ms !important;
-
         animation-iteration-count: 1 !important;
-
         transition-duration: 0.01ms !important;
     }
-
 }

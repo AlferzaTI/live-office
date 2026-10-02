@@ -1198,6 +1198,7 @@ function renderizarServicios(
 
 
                     const revision =
+                        fields.Ultimarevision ||
                         fields.UltimaRevision ||
                         fields["ÚltimaRevision"] ||
                         fields.Fecha ||

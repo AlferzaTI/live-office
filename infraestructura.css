@@ -609,7 +609,7 @@ body {
     padding: 16px 17px;
     display: grid;
     grid-template-rows: auto minmax(38px, 1fr) auto;
-    gap: 11px;
+    gap: 15px;
 
     background: #ffffff;
     border: 1px solid #e2e8f0;

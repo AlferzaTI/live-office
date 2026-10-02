@@ -3,6 +3,7 @@
    INFRAESTRUCTURA TI
    ========================================================= */
 
+
 /* =========================================================
    BASE
    ========================================================= */
@@ -25,6 +26,7 @@ body {
     min-height: 100vh;
 }
 
+
 /* =========================================================
    BARRA SUPERIOR
    ========================================================= */
@@ -41,6 +43,7 @@ body {
     padding: 0 30px;
     overflow: hidden;
 }
+
 
 /* =========================================================
    LOGO CENTRAL
@@ -76,6 +79,7 @@ body {
         logoSubtitleAnimation 1.2s ease-in-out infinite;
 }
 
+
 /* =========================================================
    EN VIVO
    ========================================================= */
@@ -108,6 +112,7 @@ body {
     animation:
         pulseLive 2s infinite;
 }
+
 
 /* =========================================================
    ANIMACIÓN LOGO
@@ -164,6 +169,7 @@ body {
     }
 }
 
+
 /* =========================================================
    CONTENEDOR PRINCIPAL
    ========================================================= */
@@ -173,6 +179,7 @@ body {
     width: 100%;
     min-height: calc(100vh - 130px);
 }
+
 
 /* =========================================================
    SIDEBAR
@@ -218,6 +225,7 @@ body {
         inset 4px 0 #3b82f6;
 }
 
+
 /* =========================================================
    CONTENIDO
    ========================================================= */
@@ -229,6 +237,7 @@ body {
     box-sizing: border-box;
     min-width: 0;
 }
+
 
 /* =========================================================
    ENCABEZADO PRINCIPAL
@@ -261,6 +270,7 @@ body {
         headerContentIn 0.75s ease 0.12s both;
 }
 
+
 /* =========================================================
    DECORACIÓN DEL ENCABEZADO
    ========================================================= */
@@ -291,6 +301,7 @@ body {
         headerCircleFloat 8s ease-in-out infinite;
 }
 
+
 /* =========================================================
    PARTE IZQUIERDA
    ========================================================= */
@@ -300,6 +311,7 @@ body {
     z-index: 2;
     max-width: 650px;
 }
+
 
 /* =========================================================
    BREADCRUMB
@@ -323,6 +335,7 @@ body {
     margin-left: 0;
 }
 
+
 /* =========================================================
    TÍTULO
    ========================================================= */
@@ -336,6 +349,7 @@ body {
     letter-spacing: -1px;
 }
 
+
 /* =========================================================
    DESCRIPCIÓN
    ========================================================= */
@@ -347,6 +361,7 @@ body {
     font-size: 13px;
     line-height: 1.45;
 }
+
 
 /* =========================================================
    BLOQUE ÚLTIMA REVISIÓN
@@ -368,6 +383,7 @@ body {
         headerDateIn 0.75s ease 0.2s both;
 }
 
+
 /* =========================================================
    ICONO ÚLTIMA REVISIÓN
    ========================================================= */
@@ -383,6 +399,7 @@ body {
     background: rgba(255, 255, 255, 0.10);
     font-size: 17px;
 }
+
 
 /* =========================================================
    CONTENIDO ÚLTIMA REVISIÓN
@@ -417,6 +434,7 @@ body {
     font-size: 9px;
 }
 
+
 /* =========================================================
    INDICADOR ACTUALIZADO
    ========================================================= */
@@ -441,6 +459,7 @@ body {
     box-shadow:
         0 0 0 3px rgba(34, 197, 94, 0.15);
 }
+
 
 /* =========================================================
    ANIMACIONES DEL HEADER
@@ -483,6 +502,7 @@ body {
     }
 }
 
+
 /* =========================================================
    SECCIONES DE MONITOREO
    ========================================================= */
@@ -497,6 +517,7 @@ body {
         0 4px 15px rgba(15, 23, 42, 0.06);
 }
 
+
 /* =========================================================
    ENCABEZADO DE SECCIÓN
    ========================================================= */
@@ -506,7 +527,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     gap: 20px;
-    margin-bottom: 26px;
+    margin-bottom: 22px;
 }
 
 .section-title-group {
@@ -515,7 +536,7 @@ body {
 
 .section-kicker {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     color: #2563eb;
     font-size: 10px;
     font-weight: 800;
@@ -530,11 +551,11 @@ body {
 }
 
 .section-title-group p {
-    margin: 6px 0 0;
+    margin: 5px 0 0;
     color: #64748b;
     font-size: 13px;
-    line-height: 1.5;
 }
+
 
 /* =========================================================
    ESTADO DE SECCIÓN
@@ -561,18 +582,20 @@ body {
     border: 1px solid #fecaca;
 }
 
+
 /* =========================================================
    SERVICIOS
-   DISEÑO PROFESIONAL
+   DISEÑO CORPORATIVO
    ========================================================= */
 
 .service-grid {
+    width: 100%;
     display: grid;
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-    gap: 22px;
-    margin-top: 4px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
 }
+
 
 /* =========================================================
    TARJETA DEL SERVICIO
@@ -580,56 +603,70 @@ body {
 
 .service-card {
     position: relative;
-    min-height: 235px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 20px;
+    width: 100%;
+    min-width: 0;
+    height: 178px;
+    padding: 16px 17px;
+    display: grid;
+    grid-template-rows: auto minmax(38px, 1fr) auto;
+    gap: 11px;
+
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 18px;
+    border-radius: 15px;
+
     overflow: hidden;
+
     box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.04),
-        0 1px 3px rgba(15, 23, 42, 0.04);
+        0 3px 10px rgba(15, 23, 42, 0.035);
+
     opacity: 0;
     animation:
-        serviceCardIn 0.55s ease forwards;
+        serviceCardIn 0.45s ease forwards;
+
     transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        border-color 0.25s ease,
-        background 0.25s ease;
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
 }
+
 
 /* =========================================================
    ENTRADA ESCALONADA
    ========================================================= */
 
 .service-card:nth-child(1) {
-    animation-delay: 0.05s;
+    animation-delay: 0.04s;
 }
 
 .service-card:nth-child(2) {
-    animation-delay: 0.12s;
+    animation-delay: 0.10s;
 }
 
 .service-card:nth-child(3) {
-    animation-delay: 0.19s;
+    animation-delay: 0.16s;
 }
 
 .service-card:nth-child(4) {
-    animation-delay: 0.26s;
+    animation-delay: 0.22s;
 }
 
 .service-card:nth-child(5) {
-    animation-delay: 0.33s;
+    animation-delay: 0.28s;
 }
 
 .service-card:nth-child(6) {
+    animation-delay: 0.34s;
+}
+
+.service-card:nth-child(7) {
     animation-delay: 0.40s;
 }
+
+.service-card:nth-child(8) {
+    animation-delay: 0.46s;
+}
+
 
 /* =========================================================
    BARRA LATERAL DE ESTADO
@@ -640,16 +677,22 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    bottom: 0;
-    width: 4px;
+    width: 3px;
+    height: 100%;
     background: #22c55e;
     transform: scaleY(0.55);
     transform-origin: center;
-    border-radius: 0 5px 5px 0;
+    border-radius: 0 3px 3px 0;
+
     transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
 }
+
+.service-card.offline::before {
+    background: #ef4444;
+}
+
 
 /* =========================================================
    DECORACIÓN SUPERIOR
@@ -658,184 +701,181 @@ body {
 .service-card::after {
     content: "";
     position: absolute;
-    width: 170px;
-    height: 170px;
-    right: -95px;
-    top: -95px;
+    width: 150px;
+    height: 150px;
+    top: -105px;
+    right: -90px;
     border-radius: 50%;
+
     background:
         radial-gradient(
             circle,
-            rgba(37, 99, 235, 0.07) 0%,
+            rgba(37, 99, 235, 0.08) 0%,
             rgba(37, 99, 235, 0.025) 45%,
-            transparent 70%
+            transparent 72%
         );
+
     pointer-events: none;
 }
+
 
 /* =========================================================
    HOVER
    ========================================================= */
 
 .service-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     border-color: #bfdbfe;
-    background: #ffffff;
+
     box-shadow:
-        0 20px 40px rgba(15, 23, 42, 0.09),
-        0 6px 15px rgba(37, 99, 235, 0.06);
+        0 12px 26px rgba(15, 23, 42, 0.08),
+        0 3px 8px rgba(37, 99, 235, 0.05);
 }
 
 .service-card:hover::before {
     transform: scaleY(1);
     box-shadow:
-        0 0 15px rgba(34, 197, 94, 0.35);
+        0 0 12px rgba(34, 197, 94, 0.30);
 }
 
-/* =========================================================
-   ESTRUCTURA INTERNA AUTOMÁTICA
-   ========================================================= */
 
-/*
-   Estas reglas permiten organizar el contenido actual
-   sin obligar a modificar el HTML/JS.
-*/
+/* =========================================================
+   CONTENIDO INTERNO
+   ========================================================= */
 
 .service-card > div {
     position: relative;
     z-index: 1;
+    min-width: 0;
 }
 
+
 /* =========================================================
-   PRIMER BLOQUE
+   CABECERA DE TARJETA
+   ICONO + NOMBRE + ESTADO
    ========================================================= */
 
 .service-card > div:first-child {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
+    min-width: 0;
+    min-height: 42px;
+
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+
+    gap: 10px;
 }
 
-/* =========================================================
-   TÍTULOS
-   ========================================================= */
-
-.service-card h3 {
-    margin: 0;
-    color: #0f172a;
-    font-size: 17px;
-    line-height: 1.25;
-    font-weight: 800;
-    letter-spacing: -0.2px;
-}
 
 /* =========================================================
-   PÁRRAFOS
-   ========================================================= */
-
-.service-card p {
-    margin: 0;
-    color: #64748b;
-    font-size: 12px;
-    line-height: 1.55;
-}
-
-/* =========================================================
-   TEXTO SECUNDARIO
-   ========================================================= */
-
-.service-card span {
-    color: #64748b;
-}
-
-/* =========================================================
-   ICONO DEL SERVICIO
+   ICONO
    ========================================================= */
 
 .service-card-icon {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 13px;
+
+    border-radius: 11px;
+
     background: #eff6ff;
     border: 1px solid #dbeafe;
+
     color: #2563eb;
-    font-size: 19px;
+    font-size: 17px;
+
     transition:
-        transform 0.25s ease,
-        background 0.25s ease,
-        box-shadow 0.25s ease;
+        transform 0.22s ease,
+        background 0.22s ease,
+        box-shadow 0.22s ease;
 }
 
 .service-card:hover .service-card-icon {
-    transform: translateY(-2px) scale(1.04);
+    transform: scale(1.05);
     background: #dbeafe;
     box-shadow:
-        0 7px 16px rgba(37, 99, 235, 0.12);
+        0 5px 12px rgba(37, 99, 235, 0.12);
 }
 
+
 /* =========================================================
-   TÍTULO DEL SERVICIO
+   CONTENEDOR TÍTULO
    ========================================================= */
 
 .service-card-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     min-width: 0;
+    display: block;
 }
 
-.service-card-title h3 {
+.service-card-title h3,
+.service-card h3 {
     min-width: 0;
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 15px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: -0.15px;
+
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+
 /* =========================================================
-   ESTADO DEL SERVICIO
+   ESTADO
    ========================================================= */
 
 .service-status {
     flex-shrink: 0;
+
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 9px;
+    justify-content: center;
+    gap: 5px;
+
+    min-height: 25px;
+    padding: 5px 8px;
+
     border-radius: 999px;
+
     background: #ecfdf5;
     border: 1px solid #bbf7d0;
+
     color: #15803d;
-    font-size: 9px;
+
+    font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.45px;
+
     text-transform: uppercase;
     white-space: nowrap;
 }
 
-/* =========================================================
-   PUNTO DEL ESTADO
-   ========================================================= */
-
 .service-status::before {
     content: "";
-    width: 6px;
-    height: 6px;
+
+    width: 5px;
+    height: 5px;
     flex-shrink: 0;
+
     border-radius: 50%;
     background: #22c55e;
+
     box-shadow:
-        0 0 0 3px rgba(34, 197, 94, 0.10);
+        0 0 0 3px rgba(34, 197, 94, 0.09);
+
     animation:
         serviceStatusPulse 2s ease-in-out infinite;
 }
-
-/* =========================================================
-   ESTADO OFFLINE
-   ========================================================= */
 
 .service-status.offline {
     background: #fef2f2;
@@ -845,31 +885,63 @@ body {
 
 .service-status.offline::before {
     background: #ef4444;
+
     box-shadow:
-        0 0 0 3px rgba(239, 68, 68, 0.10);
+        0 0 0 3px rgba(239, 68, 68, 0.09);
+
     animation: none;
 }
 
+
 /* =========================================================
    DESCRIPCIÓN
+   BLOQUE CENTRAL
    ========================================================= */
 
 .service-description {
     position: relative;
     z-index: 1;
-    min-height: 45px;
-    padding: 13px 14px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+
+    padding: 9px 11px;
+
     display: flex;
     align-items: center;
-    border-radius: 11px;
+
+    border-radius: 9px;
+
     background: #f8fafc;
     border: 1px solid #f1f5f9;
+
     color: #64748b;
-    font-size: 12px;
-    line-height: 1.5;
+
+    font-size: 10.5px;
+    line-height: 1.4;
+
+    overflow: hidden;
+
     transition:
-        background 0.25s ease,
-        border-color 0.25s ease;
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+/* =========================================================
+   CONTROL DE TEXTO DE DESCRIPCIÓN
+   ========================================================= */
+
+.service-description,
+.service-description p,
+.service-card > p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+
+    overflow: hidden;
 }
 
 .service-card:hover .service-description {
@@ -877,54 +949,92 @@ body {
     border-color: #e0e7ff;
 }
 
+
 /* =========================================================
-   INFORMACIÓN DEL SERVICIO
+   TEXTO GENERAL DE LA TARJETA
+   ========================================================= */
+
+.service-card p {
+    margin: 0;
+    color: #64748b;
+    font-size: 10.5px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   INFORMACIÓN INFERIOR
+   LATENCIA + ÚLTIMA REVISIÓN
    ========================================================= */
 
 .service-info {
     position: relative;
     z-index: 1;
+
+    width: 100%;
+    min-width: 0;
+
     display: grid;
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    padding-top: 16px;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+
+    gap: 10px;
+
+    padding-top: 10px;
+
     border-top: 1px solid #e2e8f0;
 }
 
+
 /* =========================================================
-   CADA DATO
+   ITEM DE INFORMACIÓN
    ========================================================= */
 
 .service-info-item {
     min-width: 0;
+
     display: flex;
     flex-direction: column;
-    gap: 5px;
+
+    justify-content: center;
+
+    gap: 3px;
 }
 
+
 /* =========================================================
-   ETIQUETA
+   LABEL
    ========================================================= */
 
 .service-info-label {
     color: #94a3b8;
-    font-size: 9px;
+
+    font-size: 8px;
     font-weight: 800;
-    letter-spacing: 0.65px;
+
+    letter-spacing: 0.6px;
     text-transform: uppercase;
+
+    line-height: 1;
 }
+
 
 /* =========================================================
    VALOR
    ========================================================= */
 
 .service-info-value {
+    min-width: 0;
+
     color: #334155;
-    font-size: 12px;
+
+    font-size: 10.5px;
     font-weight: 700;
-    line-height: 1.35;
+
+    line-height: 1.25;
+
+    overflow: hidden;
 }
+
 
 /* =========================================================
    LATENCIA
@@ -933,83 +1043,114 @@ body {
 .service-latency {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+
     color: #2563eb;
-    font-size: 13px;
+
+    font-size: 11px;
     font-weight: 800;
+
+    white-space: nowrap;
 }
 
 .service-latency::before {
     content: "⚡";
-    font-size: 12px;
+    font-size: 10px;
 }
+
 
 /* =========================================================
    ÚLTIMA REVISIÓN
    ========================================================= */
 
 .service-last-check {
+    min-width: 0;
+
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+
     color: #64748b;
-    font-size: 11px;
+
+    font-size: 9.5px;
     font-weight: 600;
-    line-height: 1.35;
+
+    line-height: 1.2;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .service-last-check::before {
     content: "🕐";
-    font-size: 11px;
+    flex-shrink: 0;
+    font-size: 10px;
 }
 
+
 /* =========================================================
-   ANIMACIONES DE SERVICIOS
+   ANIMACIÓN TARJETAS
    ========================================================= */
 
 @keyframes serviceCardIn {
     from {
         opacity: 0;
-        transform: translateY(18px);
+        transform:
+            translateY(12px)
+            scale(0.985);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform:
+            translateY(0)
+            scale(1);
     }
 }
+
+
+/* =========================================================
+   ANIMACIÓN ESTADO
+   ========================================================= */
 
 @keyframes serviceStatusPulse {
     0%,
     100% {
         transform: scale(1);
         opacity: 1;
+
         box-shadow:
-            0 0 0 3px rgba(34, 197, 94, 0.10);
+            0 0 0 3px rgba(34, 197, 94, 0.09);
     }
 
     50% {
-        transform: scale(1.15);
+        transform: scale(1.12);
         opacity: 0.75;
+
         box-shadow:
-            0 0 0 5px rgba(34, 197, 94, 0.04);
+            0 0 0 5px rgba(34, 197, 94, 0.03);
     }
 }
+
 
 /* =========================================================
    CARGANDO SERVICIOS
    ========================================================= */
 
 .service-loading {
-    min-height: 180px;
+    min-height: 140px;
+
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+
+    gap: 10px;
+
     color: #64748b;
     font-size: 12px;
 }
+
 
 /* =========================================================
    SPINNER
@@ -1018,9 +1159,12 @@ body {
 .loading-spinner {
     width: 28px;
     height: 28px;
+
     border-radius: 50%;
+
     border: 3px solid #dbeafe;
     border-top-color: #2563eb;
+
     animation:
         spin 0.8s linear infinite;
 }
@@ -1036,6 +1180,7 @@ body {
         transform: rotate(360deg);
     }
 }
+
 
 /* =========================================================
    RESUMEN DE EQUIPOS
@@ -1103,6 +1248,7 @@ body {
     background: #fee2e2;
     color: #dc2626;
 }
+
 
 /* =========================================================
    CONTROLES
@@ -1187,6 +1333,7 @@ body {
         0 0 0 3px rgba(37, 99, 235, 0.10);
 }
 
+
 /* =========================================================
    RESULTADOS
    ========================================================= */
@@ -1197,6 +1344,7 @@ body {
     font-size: 12px;
     font-weight: 600;
 }
+
 
 /* =========================================================
    TABLA
@@ -1249,6 +1397,7 @@ body {
     border-bottom: none;
 }
 
+
 /* =========================================================
    LOADING TABLA
    ========================================================= */
@@ -1265,6 +1414,7 @@ body {
     gap: 10px;
     color: #64748b;
 }
+
 
 /* =========================================================
    SIN RESULTADOS
@@ -1291,6 +1441,7 @@ body {
 .equipos-empty span {
     font-size: 12px;
 }
+
 
 /* =========================================================
    MODAL
@@ -1465,6 +1616,7 @@ body {
     background: #1d4ed8;
 }
 
+
 /* =========================================================
    FOOTER
    ========================================================= */
@@ -1481,6 +1633,7 @@ body {
     font-weight: 600;
 }
 
+
 /* =========================================================
    LOADING OVERLAY
    ========================================================= */
@@ -1492,6 +1645,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+
     background:
         linear-gradient(
             135deg,
@@ -1499,6 +1653,7 @@ body {
             #07377f 48%,
             #0a84ff 100%
         );
+
     transition:
         opacity 0.35s ease,
         visibility 0.35s ease;
@@ -1513,16 +1668,23 @@ body {
 .loading-card {
     min-width: 260px;
     padding: 28px;
+
     display: flex;
     flex-direction: column;
     align-items: center;
+
     gap: 10px;
+
     color: white;
     text-align: center;
+
     border-radius: 18px;
+
     background: rgba(255, 255, 255, 0.10);
     border: 1px solid rgba(255, 255, 255, 0.18);
+
     backdrop-filter: blur(10px);
+
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.25);
 }
@@ -1542,6 +1704,7 @@ body {
     border-top-color: white;
     margin-bottom: 5px;
 }
+
 
 /* =========================================================
    RESPONSIVE — 1100
@@ -1564,14 +1727,14 @@ body {
     .service-grid {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        gap: 15px;
     }
 
     .service-card {
-        min-height: 225px;
-        padding: 21px;
+        height: 178px;
     }
 }
+
 
 /* =========================================================
    RESPONSIVE — 900
@@ -1605,13 +1768,14 @@ body {
     }
 
     .service-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .service-card {
-        min-height: 215px;
+        height: 178px;
     }
 }
+
 
 /* =========================================================
    RESPONSIVE — 700
@@ -1682,40 +1846,12 @@ body {
 
     .service-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 14px;
     }
 
     .service-card {
-        min-height: 0;
-        padding: 20px;
-    }
-
-    .service-card > div:first-child {
-        gap: 12px;
-    }
-
-    .service-card-title {
-        gap: 9px;
-    }
-
-    .service-card-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 11px;
-        font-size: 17px;
-    }
-
-    .service-card h3 {
-        font-size: 16px;
-    }
-
-    .service-info {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .service-info-item {
-        padding: 8px 0;
+        height: 174px;
+        padding: 15px;
     }
 
     .equipos-summary {
@@ -1735,6 +1871,7 @@ body {
         align-items: flex-start;
     }
 }
+
 
 /* =========================================================
    RESPONSIVE — 500
@@ -1789,25 +1926,48 @@ body {
     }
 
     .service-card {
-        padding: 18px;
-        border-radius: 16px;
-        gap: 17px;
+        height: auto;
+        min-height: 174px;
+        padding: 15px;
     }
 
     .service-card > div:first-child {
-        align-items: flex-start;
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+
+    .service-card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .service-card h3 {
+        font-size: 14px;
     }
 
     .service-status {
-        padding: 5px 7px;
-        font-size: 8px;
+        padding: 4px 7px;
+        min-height: 23px;
+        font-size: 7px;
     }
 
     .service-description {
-        min-height: 42px;
-        padding: 11px 12px;
+        min-height: 38px;
+        padding: 8px 10px;
+    }
+
+    .service-info {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .service-last-check {
+        white-space: normal;
     }
 }
+
 
 /* =========================================================
    REDUCCIÓN DE MOVIMIENTO

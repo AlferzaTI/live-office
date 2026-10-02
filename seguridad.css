@@ -1,6 +1,6 @@
 /* =========================================================
    RESET
-========================================================= */
+   ========================================================= */
 
 * {
     margin: 0;
@@ -18,7 +18,7 @@ body {
 
 /* =========================================================
    TOPBAR
-========================================================= */
+   ========================================================= */
 
 .topbar {
     position: relative;
@@ -35,7 +35,7 @@ body {
 
 /* =========================================================
    LOGO
-========================================================= */
+   ========================================================= */
 
 .logo {
     position: absolute;
@@ -65,7 +65,6 @@ body {
 }
 
 @keyframes logoTitleAnimation {
-
     0% {
         opacity: .75;
         transform: translateY(2px);
@@ -83,11 +82,9 @@ body {
         transform: translateY(2px);
         text-shadow: 0 0 0 rgba(255, 255, 255, 0);
     }
-
 }
 
 @keyframes logoSubtitleAnimation {
-
     0%,
     100% {
         opacity: .55;
@@ -96,13 +93,12 @@ body {
     50% {
         opacity: 1;
     }
-
 }
 
 
 /* =========================================================
    LIVE
-========================================================= */
+   ========================================================= */
 
 .live-status {
     margin-left: auto;
@@ -131,7 +127,6 @@ body {
 }
 
 @keyframes pulseLive {
-
     0%,
     100% {
         opacity: 1;
@@ -140,13 +135,12 @@ body {
     50% {
         opacity: .45;
     }
-
 }
 
 
 /* =========================================================
    LAYOUT
-========================================================= */
+   ========================================================= */
 
 .container {
     display: flex;
@@ -156,7 +150,7 @@ body {
 
 /* =========================================================
    SIDEBAR
-========================================================= */
+   ========================================================= */
 
 .sidebar {
     width: 250px;
@@ -188,76 +182,285 @@ body {
 
 .sidebar li.active {
     background: #334155;
-    box-shadow: inset 3px 0 0 #3b82f6;
+    box-shadow: inset 4px 0 #3b82f6;
 }
 
 
 /* =========================================================
    CONTENT
-========================================================= */
+   ========================================================= */
 
 .content {
     flex: 1;
-    padding: 25px;
+    padding: 28px 38px 35px;
     min-width: 0;
 }
 
 
 /* =========================================================
    PAGE HEADER
-========================================================= */
+   MISMO FORMATO QUE COMUNICADOS
+   ========================================================= */
 
 .page-header {
+    position: relative;
+
+    min-height: 190px;
+
+    padding: 30px 34px;
+
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
+
+    gap: 25px;
+
+    overflow: hidden;
+
     margin-bottom: 25px;
-}
 
-.page-header h2 {
-    font-size: 24px;
-    font-weight: 800;
-    color: #0f172a;
-}
+    border-radius: 22px;
 
-.page-header p {
-    margin-top: 5px;
-    color: #64748b;
-    font-size: 13px;
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00205c 0%,
+            #07377f 48%,
+            #0a84ff 100%
+        );
+
+    box-shadow:
+        0 18px 40px rgba(0, 32, 92, 0.20);
+
+    animation:
+        headerContentIn .75s ease .12s both;
 }
 
 
 /* =========================================================
-   REFRESH
-========================================================= */
+   DECORACIÓN AZUL
+   ========================================================= */
+
+.page-header::before {
+    content: "";
+
+    position: absolute;
+
+    width: 240px;
+    height: 240px;
+
+    right: 120px;
+    bottom: -170px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    border-radius: 50%;
+
+    animation:
+        headerCircleFloat 8s ease-in-out infinite;
+}
+
+.page-header::after {
+    content: "";
+
+    position: absolute;
+
+    width: 310px;
+    height: 310px;
+
+    right: -40px;
+    bottom: -230px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    border-radius: 50%;
+
+    animation:
+        headerCircleFloat 8s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   CONTENIDO DEL HEADER
+   ========================================================= */
+
+.page-header > div:first-child {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
+
+.page-header h2::before {
+    content: "OFICINA / SEGURIDAD";
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: rgba(255,255,255,0.68);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: .7px;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   TÍTULO
+   ========================================================= */
+
+.page-header h2 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 38px;
+
+    line-height: 1;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+}
+
+
+/* =========================================================
+   DESCRIPCIÓN
+   ========================================================= */
+
+.page-header p {
+    margin-top: 9px;
+
+    max-width: 580px;
+
+    color: rgba(255,255,255,0.70);
+
+    font-size: 13px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   BOTÓN ACTUALIZAR
+   ========================================================= */
 
 .refresh-button {
-    border: none;
-    background: #0f172a;
+    position: relative;
+
+    z-index: 3;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    min-width: 125px;
+
+    padding: 13px 16px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.10);
+
+    border: 1px solid rgba(255,255,255,0.16);
+
     color: white;
-    padding: 11px 16px;
-    border-radius: 9px;
+
+    backdrop-filter: blur(8px);
+
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: .2s ease;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        border-color .2s ease;
+
+    animation:
+        headerDateIn .75s ease .2s both;
 }
 
 .refresh-button:hover {
-    background: #1e293b;
-    transform: translateY(-1px);
+    background: rgba(255,255,255,0.17);
+
+    border-color: rgba(255,255,255,0.25);
+
+    transform: translateY(-2px);
 }
 
 .refresh-button:disabled {
     opacity: .65;
+
     cursor: wait;
+
     transform: none;
 }
 
 
 /* =========================================================
+   ANIMACIONES HEADER
+   ========================================================= */
+
+@keyframes headerCircleFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: .65;
+    }
+
+    50% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+@keyframes headerContentIn {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes headerDateIn {
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* =========================================================
    ESTADÍSTICAS
-========================================================= */
+   ========================================================= */
 
 .stats {
     display: flex;
@@ -305,11 +508,12 @@ body {
 
 /* =========================================================
    FILTROS
-========================================================= */
+   ========================================================= */
 
 .filter-card {
     cursor: pointer;
     user-select: none;
+
     transition:
         transform .2s ease,
         box-shadow .2s ease,
@@ -318,7 +522,9 @@ body {
 
 .filter-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, .18);
+
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, .18);
 }
 
 .filter-card:focus {
@@ -332,6 +538,7 @@ body {
 
 .filter-card.filter-active {
     transform: translateY(-2px);
+
     box-shadow:
         0 0 0 3px rgba(59, 130, 246, .25),
         0 10px 24px rgba(15, 23, 42, .18);
@@ -351,7 +558,7 @@ body {
 
 /* =========================================================
    BUSCADOR DE TRABAJADORES
-========================================================= */
+   ========================================================= */
 
 .worker-search {
     width: 100%;
@@ -361,25 +568,31 @@ body {
     background: #b8860b;
 
     border: 1px solid #9a7208;
+
     border-radius: 12px;
 
     padding: 12px 14px;
+
     margin: 0 0 18px 0;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, .08);
 }
 
 .worker-search h3 {
     margin: 0 0 9px 0;
+
     color: #ffffff;
+
     font-size: 14px;
+
     font-weight: 700;
 }
 
 
 /* =========================================================
    CAJA DE BÚSQUEDA
-========================================================= */
+   ========================================================= */
 
 .search-box {
     position: relative;
@@ -398,11 +611,13 @@ body {
     padding: 0 42px 0 38px;
 
     border: 1px solid #d6dbe3;
+
     border-radius: 8px;
 
     outline: none;
 
     background: #ffffff;
+
     color: #0f172a;
 
     font-size: 12px;
@@ -414,7 +629,9 @@ body {
 
 .search-box input:focus {
     border-color: #64748b;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, .25);
+
+    box-shadow:
+        0 0 0 2px rgba(255, 255, 255, .25);
 }
 
 .search-icon {
@@ -428,6 +645,7 @@ body {
     font-size: 14px;
 
     pointer-events: none;
+
     z-index: 2;
 }
 
@@ -443,12 +661,15 @@ body {
     height: 27px;
 
     border: none;
+
     border-radius: 6px;
 
     background: transparent;
+
     color: #64748b;
 
     font-size: 19px;
+
     line-height: 1;
 
     cursor: pointer;
@@ -462,7 +683,7 @@ body {
 
 /* =========================================================
    RESULTADOS DEL BUSCADOR
-========================================================= */
+   ========================================================= */
 
 .worker-search-result {
     width: 100%;
@@ -475,7 +696,9 @@ body {
     box-sizing: border-box;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     padding: 7px 2px;
@@ -493,15 +716,18 @@ body {
     padding: 0 6px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     border-radius: 20px;
 
     background: #ffffff;
+
     color: #8a6500;
 
     font-size: 10px;
+
     font-weight: 800;
 }
 
@@ -509,6 +735,7 @@ body {
     width: 100%;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 7px;
@@ -519,6 +746,7 @@ body {
     box-sizing: border-box;
 
     display: flex;
+
     align-items: center;
 
     gap: 12px;
@@ -526,6 +754,7 @@ body {
     padding: 10px 12px;
 
     border: 1px solid #e2e8f0;
+
     border-radius: 8px;
 
     background: #ffffff;
@@ -537,7 +766,9 @@ body {
 
 .search-user:hover {
     border-color: #94a3b8;
+
     background: #f8fafc;
+
     transform: translateY(-1px);
 }
 
@@ -550,10 +781,13 @@ body {
     display: block;
 
     color: #0f172a;
+
     font-size: 11px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -563,10 +797,13 @@ body {
     margin-top: 3px;
 
     color: #64748b;
+
     font-size: 9px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -588,6 +825,7 @@ body {
     display: block;
 
     color: #94a3b8;
+
     font-size: 8px;
 
     margin-bottom: 2px;
@@ -597,10 +835,13 @@ body {
     display: block;
 
     color: #475569;
+
     font-size: 10px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -617,6 +858,7 @@ body {
     box-sizing: border-box;
 
     display: flex;
+
     align-items: center;
 
     gap: 10px;
@@ -635,6 +877,7 @@ body {
     height: 32px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -649,6 +892,7 @@ body {
     display: block;
 
     color: #475569;
+
     font-size: 11px;
 }
 
@@ -656,6 +900,7 @@ body {
     display: block;
 
     color: #94a3b8;
+
     font-size: 9px;
 
     margin-top: 2px;
@@ -664,11 +909,12 @@ body {
 
 /* =========================================================
    GRID PRINCIPAL
-========================================================= */
+   ========================================================= */
 
 .dashboard-grid {
     width: 100%;
     max-width: none;
+
     margin: 0;
 
     display: grid;
@@ -690,8 +936,8 @@ body {
 
 
 /* =========================================================
-   POSICIONES EXACTAS
-========================================================= */
+   POSICIONES
+   ========================================================= */
 
 .dashboard-grid > .dashboard-card:nth-child(1) {
     grid-column: 1;
@@ -731,14 +977,16 @@ body {
 
 /* =========================================================
    MODO FILTRO
-========================================================= */
+   ========================================================= */
 
 .content.filter-mode .dashboard-grid {
     width: 100%;
     max-width: none;
     margin: 0;
 
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns:
+        minmax(0, 1fr);
+
     grid-template-rows: auto;
 }
 
@@ -768,7 +1016,7 @@ body {
 
 /* =========================================================
    CARDS
-========================================================= */
+   ========================================================= */
 
 .dashboard-card {
     background: white;
@@ -777,21 +1025,24 @@ body {
 
     padding: 22px;
 
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, .07);
 
     min-width: 0;
 
-    border: 1px solid rgba(226, 232, 240, .7);
+    border:
+        1px solid rgba(226, 232, 240, .7);
 }
 
 .content.filter-mode .dashboard-card {
-    box-shadow: 0 8px 25px rgba(15, 23, 42, .08);
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, .08);
 }
 
 
 /* =========================================================
    CARDS COMPACTOS
-========================================================= */
+   ========================================================= */
 
 .content:not(.filter-mode) .dashboard-card {
     padding: 17px 18px;
@@ -829,11 +1080,13 @@ body {
 
 /* =========================================================
    CARD HEADER
-========================================================= */
+   ========================================================= */
 
 .card-header {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     margin-bottom: 20px;
@@ -845,6 +1098,7 @@ body {
     color: #3b82f6;
 
     font-size: 10px;
+
     font-weight: 800;
 
     letter-spacing: 1px;
@@ -863,7 +1117,7 @@ body {
 
 /* =========================================================
    LOADING
-========================================================= */
+   ========================================================= */
 
 .loading {
     padding: 25px 10px;
@@ -886,7 +1140,7 @@ body {
 
 /* =========================================================
    COUNTERS
-========================================================= */
+   ========================================================= */
 
 .counter {
     padding: 6px 10px;
@@ -923,7 +1177,7 @@ body {
 
 /* =========================================================
    TABLAS
-========================================================= */
+   ========================================================= */
 
 .table-container {
     width: 100%;
@@ -998,7 +1252,7 @@ tbody tr:hover td {
 
 /* =========================================================
    TABLA DE USUARIOS
-========================================================= */
+   ========================================================= */
 
 .directory-table {
     width: 100%;
@@ -1023,6 +1277,7 @@ tbody tr:hover td {
 
 .user-cell {
     display: flex;
+
     align-items: center;
 
     gap: 11px;
@@ -1087,7 +1342,7 @@ tbody tr:hover td {
 
 /* =========================================================
    AVATAR
-========================================================= */
+   ========================================================= */
 
 .avatar {
     width: 36px;
@@ -1098,6 +1353,7 @@ tbody tr:hover td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-size: 10px;
@@ -1120,7 +1376,7 @@ tbody tr:hover td {
 
 /* =========================================================
    ESTADOS
-========================================================= */
+   ========================================================= */
 
 .status-badge {
     display: inline-flex;
@@ -1170,7 +1426,7 @@ tbody tr:hover td {
 
 /* =========================================================
    DEPARTAMENTOS
-========================================================= */
+   ========================================================= */
 
 .department-table {
     width: 100%;
@@ -1246,7 +1502,7 @@ tbody tr:hover td {
 
 /* =========================================================
    AUDIT SUMMARY
-========================================================= */
+   ========================================================= */
 
 .audit-summary {
     display: flex;
@@ -1285,6 +1541,7 @@ tbody tr:hover td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-size: 14px;
@@ -1327,10 +1584,11 @@ tbody tr:hover td {
 
 /* =========================================================
    AUDITORÍA
-========================================================= */
+   ========================================================= */
 
 .audit-table {
     width: 100%;
+
     min-width: 1000px;
 }
 
@@ -1371,6 +1629,7 @@ tbody tr:hover td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     flex-shrink: 0;
@@ -1439,7 +1698,7 @@ tbody tr:hover td {
 
 /* =========================================================
    PAGINACIÓN
-========================================================= */
+   ========================================================= */
 
 .pagination {
     display: flex;
@@ -1473,6 +1732,7 @@ tbody tr:hover td {
 
 .pagination-button {
     min-width: 32px;
+
     height: 32px;
 
     padding: 0 9px;
@@ -1529,10 +1789,11 @@ tbody tr:hover td {
 
 /* =========================================================
    CUENTAS BLOQUEADAS
-========================================================= */
+   ========================================================= */
 
 .blocked-table {
     width: 100%;
+
     min-width: 900px;
 }
 
@@ -1559,7 +1820,7 @@ tbody tr:hover td {
 
 /* =========================================================
    DIRECTORIO SUMMARY
-========================================================= */
+   ========================================================= */
 
 .directory-summary {
     display: flex;
@@ -1594,6 +1855,7 @@ tbody tr:hover td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-size: 16px;
@@ -1638,7 +1900,7 @@ tbody tr:hover td {
 
 /* =========================================================
    INFORMATION BOX
-========================================================= */
+   ========================================================= */
 
 .information-box {
     display: flex;
@@ -1669,6 +1931,7 @@ tbody tr:hover td {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     font-weight: 800;
@@ -1697,7 +1960,7 @@ tbody tr:hover td {
 
 /* =========================================================
    FOOTER
-========================================================= */
+   ========================================================= */
 
 footer {
     height: 50px;
@@ -1718,7 +1981,7 @@ footer {
 
 /* =========================================================
    ERROR
-========================================================= */
+   ========================================================= */
 
 .security-error {
     margin-bottom: 20px;
@@ -1738,8 +2001,8 @@ footer {
 
 
 /* =========================================================
-   RESPONSIVE
-========================================================= */
+   RESPONSIVE 1100
+   ========================================================= */
 
 @media (max-width: 1100px) {
 
@@ -1757,9 +2020,12 @@ footer {
         width: 100%;
         max-width: none;
     }
-
 }
 
+
+/* =========================================================
+   RESPONSIVE 900
+   ========================================================= */
 
 @media (max-width: 900px) {
 
@@ -1797,8 +2063,23 @@ footer {
         gap: 10px;
     }
 
+    .page-header {
+        padding: 28px 30px;
+    }
+
+    .page-header h2 {
+        font-size: 34px;
+    }
+
+    .refresh-button {
+        min-width: 115px;
+    }
 }
 
+
+/* =========================================================
+   RESPONSIVE 700
+   ========================================================= */
 
 @media (max-width: 700px) {
 
@@ -1814,9 +2095,12 @@ footer {
     .department-progress {
         min-width: 150px;
     }
-
 }
 
+
+/* =========================================================
+   RESPONSIVE 600
+   ========================================================= */
 
 @media (max-width: 600px) {
 
@@ -1865,8 +2149,29 @@ footer {
 
     .page-header {
         align-items: flex-start;
+
         flex-direction: column;
-        gap: 15px;
+
+        gap: 18px;
+
+        padding: 25px;
+
+        min-height: auto;
+
+        border-radius: 0 20px 20px 20px;
+    }
+
+    .page-header h2 {
+        font-size: 32px;
+    }
+
+    .page-header p {
+        font-size: 12px;
+    }
+
+    .refresh-button {
+        width: 100%;
+        justify-content: center;
     }
 
     .stats {
@@ -1916,9 +2221,12 @@ footer {
     .search-user-data {
         grid-template-columns: 1fr;
     }
-
 }
 
+
+/* =========================================================
+   RESPONSIVE 430
+   ========================================================= */
 
 @media (max-width: 430px) {
 
@@ -1937,4 +2245,11 @@ footer {
         font-size: 9px;
     }
 
+    .page-header h2 {
+        font-size: 29px;
+    }
+
+    .page-header {
+        padding: 23px;
+    }
 }

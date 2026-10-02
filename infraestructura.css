@@ -1027,46 +1027,357 @@ body {
 }
 
 /* =========================================================
-   TABLA
+   TABLA DE EQUIPOS (REDISEÑADA)
    ========================================================= */
 
 .equipos-table-container {
     width: 100%;
     overflow-x: auto;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: white;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
 }
 
 .equipos-table {
     width: 100%;
-    min-width: 950px;
-    border-collapse: collapse;
+    min-width: 1050px;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
+/* ---------- ENCABEZADO ---------- */
+
 .equipos-table th {
-    padding: 13px 14px;
-    background: #f8fafc;
-    color: #475569;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 15px 18px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
     font-size: 10px;
     font-weight: 800;
     text-align: left;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
+/* ---------- FILAS ---------- */
+
 .equipos-table td {
-    padding: 13px 14px;
+    padding: 14px 18px;
     color: #334155;
     border-bottom: 1px solid #f1f5f9;
     font-size: 12px;
     vertical-align: middle;
 }
 
-.equipos-table tbody tr { transition: background 0.15s ease; }
-.equipos-table tbody tr:hover { background: #f8fafc; }
-.equipos-table tbody tr:last-child td { border-bottom: none; }
+.equipos-table tbody tr {
+    transition: background 0.18s ease;
+}
+
+.equipos-table tbody tr:nth-child(even) {
+    background: #fbfcfe;
+}
+
+.equipos-table tbody tr:hover {
+    background: #eff6ff;
+}
+
+.equipos-table tbody tr:hover td:first-child {
+    box-shadow: inset 4px 0 0 #3b82f6;
+}
+
+.equipos-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ---------- EQUIPO (icono + nombre + DNS) ---------- */
+
+.equipo-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.equipo-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    font-size: 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.equipos-table tbody tr:hover .equipo-icon {
+    transform: scale(1.07);
+    box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
+.equipo-name > div:last-child {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.equipo-name strong {
+    max-width: 230px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.equipo-name span {
+    max-width: 230px;
+    color: #94a3b8;
+    font-size: 10.5px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- ESTADO (PILL) ---------- */
+
+.equipo-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.equipo-status-dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #94a3b8;
+}
+
+.equipo-status.online {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+
+.equipo-status.online .equipo-status-dot {
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+    animation: serviceStatusPulse 2s ease-in-out infinite;
+}
+
+.equipo-status.offline {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.equipo-status.offline .equipo-status-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ---------- TRABAJADOR ---------- */
+
+.trabajador-name {
+    max-width: 210px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #3730a3;
+    font-size: 11.5px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trabajador-name::before {
+    content: "👤";
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.registrar-trabajador {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    border: 1px dashed #93c5fd;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.registrar-trabajador::before {
+    content: "+";
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.registrar-trabajador:hover {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+}
+
+/* ---------- IP ---------- */
+
+.equipo-ip {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ---------- SISTEMA OPERATIVO ---------- */
+
+.equipo-so {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.equipo-so small {
+    display: block;
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+/* ---------- ÁREA / OU ---------- */
+
+.equipo-area {
+    max-width: 200px;
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 8px;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    color: #6d28d9;
+    font-size: 11px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* ---------- ÚLTIMO REGISTRO AD ---------- */
+
+.equipo-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.equipo-date::before {
+    content: "🕐";
+    font-size: 11px;
+}
+
+/* ---------- PAGINACIÓN ---------- */
+
+.equipos-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 20px;
+}
+
+.pagination-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #475569;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #2563eb 0%, #0a84ff 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.30);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-prev,
+.pagination-next {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.pagination-ellipsis {
+    padding: 0 4px;
+    color: #94a3b8;
+    font-weight: 700;
+}
 
 /* LOADING TABLA */
 
@@ -1086,7 +1397,10 @@ body {
 /* SIN RESULTADOS */
 
 .equipos-empty {
-    padding: 45px 20px;
+    padding: 50px 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     color: #64748b;
 }

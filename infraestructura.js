@@ -1138,6 +1138,19 @@ function obtenerCampo(fields, nombres, defecto) {
     }
     return defecto;
 }
+
+/* Respaldo: el texto más largo que no sea nombre ni estado */
+function adivinarDescripcion(fields, excluir) {
+    let mejor = "";
+    Object.entries(fields).forEach(([clave, valor]) => {
+        if (clave.startsWith("@") || clave.startsWith("_")) return;
+        if (typeof valor !== "string") return;
+        if (excluir.includes(valor)) return;
+        if (/^\d{4}-\d{2}-\d{2}T/.test(valor)) return;   /* fechas ISO */
+        if (valor.length > mejor.length) mejor = valor;
+    });
+    return mejor.length > 15 ? mejor : "";
+}
 /* =========================================
    RENDER SERVICIOS
 ========================================= */

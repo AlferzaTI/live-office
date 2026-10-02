@@ -16,9 +16,10 @@ html {
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: #f4f4f4;
-    color: #222;
+    color: #222222;
     min-height: 100vh;
 }
+
 
 /* =========================================================
    VARIABLES
@@ -57,6 +58,7 @@ body {
     --radius: 10px;
 }
 
+
 /* =========================================================
    SCROLLBAR
 ========================================================= */
@@ -79,9 +81,9 @@ body {
     background: #8d8d8d;
 }
 
+
 /* =========================================================
    TOPBAR
-   MISMO ESTILO GENERAL DE ALFERZA LIVE OFFICE
 ========================================================= */
 
 .topbar {
@@ -89,6 +91,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
+
     height: 70px;
 
     background: #111111;
@@ -104,6 +107,7 @@ body {
 
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
+
 
 /* =========================================================
    MARCA
@@ -128,6 +132,8 @@ body {
     background: #222222;
     border: 1px solid #333333;
 
+    color: #ffffff;
+
     font-size: 17px;
     font-weight: 800;
 }
@@ -139,14 +145,16 @@ body {
 }
 
 .brand-text strong {
+    color: #ffffff;
     font-size: 14px;
     letter-spacing: 0.3px;
 }
 
 .brand-text span {
-    font-size: 10px;
     color: #999999;
+    font-size: 10px;
 }
+
 
 /* =========================================================
    ESTADO EN VIVO
@@ -158,8 +166,10 @@ body {
     gap: 8px;
 
     color: #ffffff;
+
     font-size: 10px;
     font-weight: 700;
+
     letter-spacing: 0.8px;
 }
 
@@ -171,16 +181,19 @@ body {
 
     background: #35d477;
 
-    box-shadow: 0 0 0 3px rgba(53, 212, 119, 0.15);
+    box-shadow:
+        0 0 0 3px rgba(53, 212, 119, 0.15);
 }
 
+
 /* =========================================================
-   LAYOUT
+   CONTENEDOR
 ========================================================= */
 
 .container {
     min-height: 100vh;
 }
+
 
 /* =========================================================
    SIDEBAR
@@ -188,6 +201,7 @@ body {
 
 .sidebar {
     position: fixed;
+
     top: 70px;
     left: 0;
     bottom: 0;
@@ -195,6 +209,7 @@ body {
     width: 220px;
 
     background: #ffffff;
+
     border-right: 1px solid #dddddd;
 
     display: flex;
@@ -204,6 +219,7 @@ body {
 
     overflow-y: auto;
 }
+
 
 /* =========================================================
    CABECERA SIDEBAR
@@ -218,8 +234,10 @@ body {
 
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 1.2px;
 }
+
 
 /* =========================================================
    NAVEGACIÓN
@@ -230,6 +248,7 @@ body {
     flex-direction: column;
 
     padding: 8px 11px;
+
     gap: 3px;
 }
 
@@ -242,6 +261,7 @@ body {
 
     display: flex;
     align-items: center;
+
     gap: 11px;
 
     text-decoration: none;
@@ -277,6 +297,7 @@ body {
     font-size: 16px;
 }
 
+
 /* =========================================================
    FOOTER SIDEBAR
 ========================================================= */
@@ -288,6 +309,7 @@ body {
 
     display: flex;
     flex-direction: column;
+
     gap: 5px;
 }
 
@@ -304,6 +326,7 @@ body {
 
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 0.7px;
 }
 
@@ -311,8 +334,10 @@ body {
     color: #999999;
 
     font-size: 9px;
+
     line-height: 1.4;
 }
+
 
 /* =========================================================
    CONTENIDO
@@ -326,6 +351,7 @@ body {
     min-height: 100vh;
 }
 
+
 /* =========================================================
    PAGE HEADER
 ========================================================= */
@@ -336,6 +362,7 @@ body {
     padding: 35px 38px;
 
     background: #ffffff;
+
     color: #222222;
 
     display: flex;
@@ -360,11 +387,13 @@ body {
 
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 1.4px;
 }
 
 .page-header h1 {
     font-size: 29px;
+
     line-height: 1.15;
 
     margin-bottom: 9px;
@@ -378,8 +407,10 @@ body {
     color: #777777;
 
     font-size: 13px;
+
     line-height: 1.6;
 }
+
 
 /* =========================================================
    ÚLTIMA REVISIÓN
@@ -390,12 +421,15 @@ body {
 
     display: flex;
     align-items: center;
+
     gap: 13px;
 
     padding: 15px 17px;
 
     background: #f7f7f7;
+
     border: 1px solid #dddddd;
+
     border-radius: 9px;
 }
 
@@ -421,6 +455,7 @@ body {
 
     display: flex;
     flex-direction: column;
+
     gap: 3px;
 }
 
@@ -429,6 +464,7 @@ body {
 
     font-size: 9px;
     font-weight: 800;
+
     letter-spacing: 1px;
 }
 
@@ -452,6 +488,7 @@ body {
 
     display: flex;
     align-items: center;
+
     gap: 5px;
 
     color: var(--green);
@@ -471,6 +508,7 @@ body {
     background: #35d477;
 }
 
+
 /* =========================================================
    SECCIONES
 ========================================================= */
@@ -481,6 +519,7 @@ body {
     background: #ffffff;
 
     border: 1px solid #dddddd;
+
     border-radius: 10px;
 
     box-shadow: var(--shadow-sm);
@@ -513,6 +552,7 @@ body {
 
     font-size: 9px;
     font-weight: 800;
+
     letter-spacing: 1.1px;
 }
 
@@ -520,6 +560,7 @@ body {
     color: #222222;
 
     font-size: 19px;
+
     line-height: 1.2;
 
     margin-bottom: 5px;
@@ -529,8 +570,10 @@ body {
     color: #777777;
 
     font-size: 12px;
+
     line-height: 1.5;
 }
+
 
 /* =========================================================
    ESTADO SECCIÓN
@@ -565,6 +608,7 @@ body {
     color: var(--red);
 }
 
+
 /* =========================================================
    SERVICIOS
 ========================================================= */
@@ -574,7 +618,8 @@ body {
 
     display: grid;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
 
     gap: 14px;
 }
@@ -585,12 +630,14 @@ body {
     padding: 17px 18px;
 
     border: 1px solid #dddddd;
+
     border-radius: 9px;
 
     background: #ffffff;
 
     display: flex;
     flex-direction: column;
+
     justify-content: space-between;
 
     gap: 14px;
@@ -639,6 +686,7 @@ body {
     border-color: #cfcfcf;
 }
 
+
 /* =========================================================
    SERVICIO
 ========================================================= */
@@ -671,6 +719,7 @@ body {
 
 .service-info {
     min-width: 0;
+
     flex: 1;
 }
 
@@ -690,7 +739,9 @@ body {
     font-weight: 800;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -743,6 +794,7 @@ body {
     color: #777777;
 
     font-size: 11px;
+
     line-height: 1.45;
 
     margin: 0;
@@ -750,10 +802,12 @@ body {
     display: -webkit-box;
 
     -webkit-line-clamp: 2;
+
     -webkit-box-orient: vertical;
 
     overflow: hidden;
 }
+
 
 /* =========================================================
    METADATA SERVICIO
@@ -812,6 +866,7 @@ body {
     gap: 2px;
 }
 
+
 /* =========================================================
    CARGA
 ========================================================= */
@@ -834,6 +889,7 @@ body {
     height: 31px;
 
     border: 3px solid #dddddd;
+
     border-top-color: var(--blue);
 
     border-radius: 50%;
@@ -846,6 +902,7 @@ body {
     height: 22px;
 
     border: 2px solid #dddddd;
+
     border-top-color: var(--blue);
 }
 
@@ -854,6 +911,7 @@ body {
         transform: rotate(360deg);
     }
 }
+
 
 /* =========================================================
    EQUIPOS - RESUMEN
@@ -864,7 +922,8 @@ body {
 
     display: grid;
 
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
 
     gap: 12px;
 }
@@ -877,6 +936,7 @@ body {
     background: #fafafa;
 
     border: 1px solid #dddddd;
+
     border-radius: 9px;
 
     display: flex;
@@ -936,6 +996,7 @@ body {
     font-size: 19px;
 }
 
+
 /* =========================================================
    CONTROLES
 ========================================================= */
@@ -973,15 +1034,19 @@ body {
 .search-wrapper input,
 .filter-wrapper select {
     width: 100%;
+
     height: 39px;
 
     border: 1px solid #d8d8d8;
+
     border-radius: 7px;
 
     background: #ffffff;
+
     color: #444444;
 
     font-family: inherit;
+
     font-size: 11px;
 
     outline: none;
@@ -1003,7 +1068,8 @@ body {
 .filter-wrapper select:focus {
     border-color: #999999;
 
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 .search-wrapper input::placeholder {
@@ -1021,6 +1087,7 @@ body {
     display: none;
 }
 
+
 /* =========================================================
    RESULTADOS
 ========================================================= */
@@ -1033,6 +1100,7 @@ body {
     font-size: 11px;
     font-weight: 600;
 }
+
 
 /* =========================================================
    TABLA
@@ -1071,6 +1139,7 @@ body {
 
     font-size: 10px;
     font-weight: 800;
+
     letter-spacing: 0.3px;
 
     white-space: nowrap;
@@ -1097,6 +1166,7 @@ body {
 .equipos-table tbody tr:hover {
     background: #fafafa;
 }
+
 
 /* =========================================================
    ANCHOS COLUMNAS
@@ -1136,6 +1206,7 @@ body {
 .equipos-table td:nth-child(7) {
     width: 10%;
 }
+
 
 /* =========================================================
    EQUIPO
@@ -1183,7 +1254,9 @@ body {
     font-weight: 800;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -1193,9 +1266,12 @@ body {
     font-size: 10px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
+
 
 /* =========================================================
    ESTADO EQUIPO
@@ -1241,6 +1317,7 @@ body {
     background: currentColor;
 }
 
+
 /* =========================================================
    TRABAJADOR
 ========================================================= */
@@ -1258,12 +1335,15 @@ body {
     font-weight: 700;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
 .registrar-trabajador {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1272,9 +1352,11 @@ body {
     padding: 0 11px;
 
     border: 1px solid #cccccc;
+
     border-radius: 7px;
 
     background: #ffffff;
+
     color: #333333;
 
     font-family: inherit;
@@ -1298,12 +1380,16 @@ body {
     transform: translateY(-1px);
 }
 
+
 /* =========================================================
    DATOS EQUIPO
 ========================================================= */
 
 .equipo-ip {
-    font-family: Consolas, "Courier New", monospace;
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
 
     color: #444444;
 
@@ -1314,6 +1400,7 @@ body {
     color: #444444;
 
     font-size: 12px;
+
     line-height: 1.4;
 }
 
@@ -1331,7 +1418,9 @@ body {
     display: block;
 
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
 }
 
@@ -1342,6 +1431,7 @@ body {
 
     white-space: nowrap;
 }
+
 
 /* =========================================================
    LOADING TABLA
@@ -1357,12 +1447,14 @@ body {
 
 .table-loading {
     display: inline-flex;
+
     align-items: center;
 
     gap: 10px;
 
     font-size: 12px;
 }
+
 
 /* =========================================================
    EMPTY STATE
@@ -1377,6 +1469,7 @@ body {
 
     display: flex;
     flex-direction: column;
+
     align-items: center;
 
     gap: 7px;
@@ -1409,6 +1502,7 @@ body {
     font-size: 11px;
 }
 
+
 /* =========================================================
    PAGINACIÓN
 ========================================================= */
@@ -1419,6 +1513,7 @@ body {
     padding: 12px 20px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1436,9 +1531,11 @@ body {
     padding: 0 8px;
 
     border: 1px solid #dddddd;
+
     border-radius: 7px;
 
     background: #ffffff;
+
     color: #555555;
 
     font-family: inherit;
@@ -1458,6 +1555,7 @@ body {
     border-color: #aaaaaa;
 
     background: #f1f1f1;
+
     color: #222222;
 }
 
@@ -1465,6 +1563,7 @@ body {
     border-color: #111111;
 
     background: #111111;
+
     color: #ffffff;
 }
 
@@ -1491,6 +1590,7 @@ body {
     font-size: 13px;
 }
 
+
 /* =========================================================
    MODAL
 ========================================================= */
@@ -1503,6 +1603,7 @@ body {
     z-index: 5000;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1519,9 +1620,11 @@ body {
     background: #ffffff;
 
     border: 1px solid #dddddd;
+
     border-radius: 11px;
 
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.22);
 
     overflow: hidden;
 
@@ -1531,12 +1634,18 @@ body {
 @keyframes modalIn {
     from {
         opacity: 0;
-        transform: translateY(8px) scale(0.98);
+
+        transform:
+            translateY(8px)
+            scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+
+        transform:
+            translateY(0)
+            scale(1);
     }
 }
 
@@ -1544,7 +1653,9 @@ body {
     padding: 19px 20px 16px;
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     border-bottom: 1px solid #eeeeee;
@@ -1559,6 +1670,7 @@ body {
 
     font-size: 9px;
     font-weight: 800;
+
     letter-spacing: 1.1px;
 }
 
@@ -1573,12 +1685,15 @@ body {
     height: 30px;
 
     border: none;
+
     border-radius: 7px;
 
     background: #eeeeee;
+
     color: #555555;
 
     font-size: 22px;
+
     line-height: 1;
 
     cursor: pointer;
@@ -1594,6 +1709,7 @@ body {
 
 .modal-equipo {
     display: flex;
+
     flex-direction: column;
 
     gap: 5px;
@@ -1614,6 +1730,7 @@ body {
 
     font-size: 9px;
     font-weight: 800;
+
     letter-spacing: 0.8px;
 }
 
@@ -1642,12 +1759,15 @@ body {
     padding: 0 12px;
 
     border: 1px solid #d8d8d8;
+
     border-radius: 7px;
 
     color: #444444;
+
     background: #ffffff;
 
     font-family: inherit;
+
     font-size: 12px;
 
     outline: none;
@@ -1656,7 +1776,8 @@ body {
 .modal-input:focus {
     border-color: #999999;
 
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 .modal-error {
@@ -1667,9 +1788,11 @@ body {
     border-radius: 7px;
 
     background: var(--red-soft);
+
     color: var(--red);
 
     font-size: 10px;
+
     line-height: 1.4;
 }
 
@@ -1677,6 +1800,7 @@ body {
     padding: 14px 20px;
 
     display: flex;
+
     justify-content: flex-end;
 
     gap: 8px;
@@ -1705,6 +1829,7 @@ body {
     border: 1px solid #dddddd;
 
     background: #ffffff;
+
     color: #555555;
 }
 
@@ -1716,6 +1841,7 @@ body {
     border: 1px solid #111111;
 
     background: #111111;
+
     color: #ffffff;
 }
 
@@ -1729,6 +1855,7 @@ body {
     cursor: not-allowed;
 }
 
+
 /* =========================================================
    FOOTER
 ========================================================= */
@@ -1739,7 +1866,9 @@ body {
     padding: 17px 5px;
 
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 
     color: #999999;
@@ -1753,11 +1882,13 @@ body {
     color: #555555;
 
     font-weight: 800;
+
     letter-spacing: 0.5px;
 }
 
+
 /* =========================================================
-   OVERLAY DE CARGA / LOGIN
+   OVERLAY DE CARGA
 ========================================================= */
 
 .loading-overlay {
@@ -1779,27 +1910,40 @@ body {
 
 .loading-card {
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
 
     gap: 12px;
 
     min-width: 280px;
+
     max-width: 380px;
 
     padding: 28px 34px;
 
     background: #111111;
+
     color: #ffffff;
 
     border-radius: 10px;
 
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.25);
 
     text-align: center;
 }
 
+.loading-card strong {
+    color: #ffffff;
+
+    font-size: 14px;
+}
+
 .loading-card span {
+    color: #ffffff;
+
     font-size: 13px;
 
     opacity: 0.9;
@@ -1811,12 +1955,15 @@ body {
     padding: 10px 18px;
 
     border: 0;
+
     border-radius: 7px;
 
     background: #ffffff;
+
     color: #111111;
 
     font-size: 13px;
+
     font-weight: 700;
 
     font-family: inherit;
@@ -1830,11 +1977,13 @@ body {
     cursor: wait;
 }
 
+
 /* =========================================================
    RESPONSIVE 1500
 ========================================================= */
 
 @media (max-width: 1500px) {
+
     .page-header {
         padding-left: 32px;
         padding-right: 32px;
@@ -1851,11 +2000,13 @@ body {
     }
 }
 
+
 /* =========================================================
    RESPONSIVE 1200
 ========================================================= */
 
 @media (max-width: 1200px) {
+
     .last-update {
         min-width: 290px;
     }
@@ -1868,11 +2019,13 @@ body {
     }
 }
 
+
 /* =========================================================
    RESPONSIVE 1100
 ========================================================= */
 
 @media (max-width: 1100px) {
+
     .sidebar {
         width: 200px;
     }
@@ -1887,6 +2040,7 @@ body {
 
     .page-header {
         align-items: flex-start;
+
         flex-direction: column;
 
         min-height: auto;
@@ -1894,15 +2048,18 @@ body {
 
     .last-update {
         width: 100%;
+
         max-width: 500px;
     }
 }
+
 
 /* =========================================================
    RESPONSIVE 900
 ========================================================= */
 
 @media (max-width: 900px) {
+
     .sidebar {
         width: 180px;
     }
@@ -1939,11 +2096,13 @@ body {
     }
 }
 
+
 /* =========================================================
    RESPONSIVE 800
 ========================================================= */
 
 @media (max-width: 800px) {
+
     .sidebar {
         width: 65px;
     }
@@ -2005,11 +2164,13 @@ body {
     }
 }
 
+
 /* =========================================================
    RESPONSIVE 600
 ========================================================= */
 
 @media (max-width: 600px) {
+
     .topbar {
         height: 65px;
     }
@@ -2081,6 +2242,7 @@ body {
 
     .service-meta {
         flex-direction: column;
+
         align-items: flex-start;
 
         gap: 8px;
@@ -2115,6 +2277,7 @@ body {
         margin: 17px 12px;
 
         flex-direction: column;
+
         align-items: flex-start;
 
         gap: 6px;
@@ -2125,11 +2288,13 @@ body {
     }
 }
 
+
 /* =========================================================
    RESPONSIVE 450
 ========================================================= */
 
 @media (max-width: 450px) {
+
     .topbar {
         padding: 0 12px;
     }

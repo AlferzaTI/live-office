@@ -16,7 +16,7 @@
 
     <link
         rel="stylesheet"
-        href="tickets.css?v=20261005-2"
+        href="tickets.css?v=20261005-3"
     >
 
     <link
@@ -591,13 +591,26 @@
                     </div>
 
 
-                    <button
-                        type="button"
-                        id="actualizarTickets"
-                        class="refresh-button"
-                    >
-                        ↻ Actualizar
-                    </button>
+                    <div class="list-header-actions">
+
+                        <button
+                            type="button"
+                            id="actualizarTickets"
+                            class="refresh-button"
+                        >
+                            ↻ Actualizar
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="abrirReporte"
+                            class="report-button"
+                        >
+                            🧾 Generar reporte
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1038,6 +1051,138 @@
 
 
     <!-- ==========================================
+         MODAL GENERAR REPORTE
+    =========================================== -->
+
+    <div
+        id="reporteModal"
+        class="ticket-modal"
+    >
+
+        <div class="ticket-modal-content reporte-modal-content">
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="cerrarReporteModal"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-ticket-header">
+
+                <span class="reporte-modal-kicker">
+                    REPORTES TI
+                </span>
+
+                <span class="reporte-modal-icon">
+                    🧾
+                </span>
+
+            </div>
+
+
+            <h3>
+                Generar reporte mensual
+            </h3>
+
+
+            <p class="reporte-help">
+                Selecciona el mes que deseas incluir en el
+                informe. Se generará un PDF con el resumen y
+                el detalle de las atenciones registradas.
+            </p>
+
+
+            <!-- MES -->
+
+            <div class="form-group reporte-month-group">
+
+                <label for="reporteMes">
+                    Mes del reporte
+                </label>
+
+                <input
+                    type="month"
+                    id="reporteMes"
+                >
+
+            </div>
+
+
+            <!-- PREVISUALIZACIÓN -->
+
+            <div class="reporte-preview-box">
+
+                <div>
+
+                    <span>
+                        ATENCIONES EN EL MES
+                    </span>
+
+                    <strong id="reporteCantidad">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        PERIODO
+                    </span>
+
+                    <strong id="reportePeriodo">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- MENSAJE -->
+
+            <div
+                id="reporteMensaje"
+                class="ticket-message"
+            ></div>
+
+
+            <!-- BOTONES -->
+
+            <div class="form-actions reporte-form-actions">
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    id="cancelarReporte"
+                >
+                    Cancelar
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-button report-modal-button"
+                    id="generarReportePDF"
+                >
+                    🧾 Generar PDF
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
          FOOTER
     =========================================== -->
 
@@ -1049,9 +1194,17 @@
 
 
 
+    <!-- ==========================================
+         LIBRERÍAS
+    =========================================== -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
-    <script src="tickets.js?v=20261005-2"></script>
+    <script src="tickets.js?v=20261005-3"></script>
 
     <script src="auth.js"></script>
 

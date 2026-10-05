@@ -52,14 +52,21 @@
     color: white;
 
     background:
+
         linear-gradient(
+
             135deg,
+
             #00205c 0%,
+
             #07377f 48%,
+
             #0a84ff 100%
+
         );
 
     box-shadow:
+
         0 18px 40px rgba(0, 32, 92, 0.20);
 
 }
@@ -426,6 +433,7 @@
 ========================================================= */
 
 .ticket-form-card,
+
 .tickets-list-card {
 
     padding: 25px;
@@ -469,6 +477,7 @@
 
 
 .section-heading h3,
+
 .list-header h3 {
 
     margin: 0;
@@ -539,7 +548,9 @@
 
 
 .form-group input,
+
 .form-group select,
+
 .form-group textarea {
 
     width: 100%;
@@ -580,7 +591,9 @@
 
 
 .form-group input:focus,
+
 .form-group select:focus,
+
 .form-group textarea:focus {
 
     background: white;
@@ -754,8 +767,12 @@
 
 
 .btn-primary,
+
 .btn-secondary,
-.refresh-button {
+
+.refresh-button,
+
+.report-button {
 
     border: 0;
 
@@ -822,7 +839,9 @@
 }
 
 
-.btn-primary:disabled {
+.btn-primary:disabled,
+
+.report-button:disabled {
 
     opacity: 0.6;
 
@@ -852,6 +871,21 @@
 }
 
 
+.list-header-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 9px;
+
+    flex-shrink: 0;
+
+}
+
+
 .refresh-button {
 
     color: #334155;
@@ -864,6 +898,49 @@
 .refresh-button:hover {
 
     background: #e2e8f0;
+
+}
+
+
+/* =========================================================
+   BOTÓN ROJO REPORTE
+========================================================= */
+
+.report-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    color: white;
+
+    background: #dc2626;
+
+    box-shadow:
+        0 5px 14px rgba(220, 38, 38, 0.18);
+
+}
+
+
+.report-button:hover {
+
+    transform: translateY(-2px);
+
+    background: #b91c1c;
+
+    box-shadow:
+        0 8px 18px rgba(220, 38, 38, 0.24);
+
+}
+
+
+.report-modal-button {
+
+    min-width: 145px;
 
 }
 
@@ -887,6 +964,7 @@
 
 
 .ticket-filters input,
+
 .ticket-filters select {
 
     width: 100%;
@@ -913,6 +991,7 @@
 
 
 .ticket-filters input:focus,
+
 .ticket-filters select:focus {
 
     border-color: #0a84ff;
@@ -1010,6 +1089,7 @@
 ========================================================= */
 
 .tickets-table th:last-child,
+
 .tickets-table td:last-child {
 
     width: 125px;
@@ -1181,6 +1261,7 @@
 
 
 .estado-badge,
+
 .prioridad-badge {
 
     display: inline-flex;
@@ -1507,6 +1588,7 @@
 
 
 .modal-info-grid span,
+
 .modal-description > span {
 
     display: block;
@@ -1646,6 +1728,7 @@
 
 
 #resolverEstado,
+
 #resolverDescripcion {
 
     width: 100%;
@@ -1730,6 +1813,196 @@
 
 
 /* =========================================================
+   MODAL REPORTE
+========================================================= */
+
+.reporte-modal-content {
+
+    width: min(580px, 100%);
+
+}
+
+
+.reporte-modal-kicker {
+
+    display: block;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+
+}
+
+
+.reporte-modal-icon {
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #fee2e2;
+
+    font-size: 18px;
+
+}
+
+
+.reporte-modal-content h3 {
+
+    margin: 5px 0 8px;
+
+    color: #0f172a;
+
+    font-size: 23px;
+
+    font-weight: 800;
+
+}
+
+
+.reporte-help {
+
+    margin: 0 0 22px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+}
+
+
+.reporte-month-group {
+
+    margin-bottom: 18px;
+
+}
+
+
+#reporteMes {
+
+    width: 100%;
+
+    min-height: 44px;
+
+    padding: 10px 12px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 10px;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+#reporteMes:focus {
+
+    background: white;
+
+    border-color: #dc2626;
+
+    box-shadow:
+        0 0 0 3px rgba(220,38,38,0.10);
+
+}
+
+
+.reporte-preview-box {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+}
+
+
+.reporte-preview-box > div {
+
+    min-height: 75px;
+
+    padding: 14px 16px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+}
+
+
+.reporte-preview-box span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+
+}
+
+
+.reporte-preview-box strong {
+
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+}
+
+
+.reporte-form-actions {
+
+    margin-top: 20px;
+
+}
+
+
+/* =========================================================
    ANIMACIONES
 ========================================================= */
 
@@ -1743,6 +2016,7 @@
             translateX(-15px);
 
     }
+
 
     to {
 
@@ -1766,6 +2040,28 @@
 
         grid-template-columns:
             repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 850px) {
+
+    .list-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .list-header-actions {
+
+        width: 100%;
+
+        justify-content: flex-end;
 
     }
 
@@ -1859,9 +2155,34 @@
 
 
     .ticket-form-card,
+
     .tickets-list-card {
 
         padding: 18px;
+
+    }
+
+
+    .list-header-actions {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .refresh-button,
+
+    .report-button {
+
+        flex: 1 1 auto;
+
+    }
+
+
+    .reporte-preview-box {
+
+        grid-template-columns:
+            1fr;
 
     }
 
@@ -1894,7 +2215,10 @@
 
 
     .btn-primary,
-    .btn-secondary {
+
+    .btn-secondary,
+
+    .report-button {
 
         width: 100%;
 
@@ -1921,6 +2245,24 @@
     .ticket-modal-content {
 
         padding: 22px;
+
+    }
+
+
+    .list-header-actions {
+
+        flex-direction: column;
+
+        width: 100%;
+
+    }
+
+
+    .refresh-button,
+
+    .report-button {
+
+        width: 100%;
 
     }
 

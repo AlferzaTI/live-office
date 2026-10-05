@@ -106,20 +106,6 @@ let ticketsData = [];
 
 let ticketSeleccionadoResolver = null;
 
-
-/*
- * Aquí guardaremos el nombre INTERNO real
- * de la columna que visualmente se llama
- * TipoSolucion.
- *
- * Ejemplos:
- *
- * TipoSolucion
- * ConfirmarResolve
- * Tipo_x005f_Solucion
- *
- */
-
 let nombreCampoSolucion = null;
 
 
@@ -203,6 +189,10 @@ const actualizarTickets =
     document.getElementById("actualizarTickets");
 
 
+const abrirReporte =
+    document.getElementById("abrirReporte");
+
+
 const ticketModal =
     document.getElementById("ticketModal");
 
@@ -248,6 +238,42 @@ const resolverMensaje =
 
 
 /* =========================================================
+   DOM - MODAL REPORTE
+========================================================= */
+
+const reporteModal =
+    document.getElementById("reporteModal");
+
+
+const cerrarReporteModal =
+    document.getElementById("cerrarReporteModal");
+
+
+const cancelarReporte =
+    document.getElementById("cancelarReporte");
+
+
+const generarReportePDFBtn =
+    document.getElementById("generarReportePDF");
+
+
+const reporteMes =
+    document.getElementById("reporteMes");
+
+
+const reporteCantidad =
+    document.getElementById("reporteCantidad");
+
+
+const reportePeriodo =
+    document.getElementById("reportePeriodo");
+
+
+const reporteMensaje =
+    document.getElementById("reporteMensaje");
+
+
+/* =========================================================
    UTILIDADES
 ========================================================= */
 
@@ -282,7 +308,9 @@ function escaparHTML(valor) {
    NORMALIZAR NOMBRES DE COLUMNAS
 ========================================================= */
 
-function normalizarNombreColumna(valor) {
+function normalizarNombreColumna(
+    valor
+) {
 
     return String(valor || "")
 
@@ -292,7 +320,7 @@ function normalizarNombreColumna(valor) {
 
         .replace(/[\u0300-\u036f]/g, "")
 
-        .replace(/[\s_\-]/g, "")
+        .replace(/[\s_-]/g, "")
 
         .trim();
 
@@ -316,8 +344,10 @@ async function obtenerToken() {
                 "No existe una sesión de Microsoft."
             );
 
+
         e.codigo =
             "SIN_SESION";
+
 
         throw e;
 
@@ -612,16 +642,6 @@ async function obtenerNombreCampoSolucion() {
     );
 
 
-    /*
-     * Primero buscamos por nombre visible.
-     *
-     * Esto cubre el caso:
-     *
-     * displayName = TipoSolucion
-     * name = ConfirmarResolve
-     *
-     */
-
     let columna =
         columnas.find(
 
@@ -629,15 +649,11 @@ async function obtenerNombreCampoSolucion() {
 
                 normalizarNombreColumna(
                     columnaActual.displayName
-                ) === "tiposolucion"
+                ) ===
+                "tiposolucion"
 
         );
 
-
-    /*
-     * Si no existe por displayName,
-     * buscamos directamente por nombre interno.
-     */
 
     if (!columna) {
 
@@ -654,9 +670,11 @@ async function obtenerNombreCampoSolucion() {
 
                     return (
 
-                        nombre === "tiposolucion" ||
+                        nombre ===
+                            "tiposolucion" ||
 
-                        nombre === "confirmarresolve"
+                        nombre ===
+                            "confirmarresolve"
 
                     );
 
@@ -669,17 +687,12 @@ async function obtenerNombreCampoSolucion() {
 
     if (!columna) {
 
-        console.error(
-            "No se encontró la columna TipoSolucion. " +
-            "Columnas disponibles:",
-            columnas
-        );
-
-
         throw new Error(
 
             "No se encontró la columna de solución " +
+
             "en Microsoft Lists. Revisa que exista una " +
+
             "columna cuyo nombre visible sea TipoSolucion."
 
         );
@@ -692,14 +705,19 @@ async function obtenerNombreCampoSolucion() {
 
 
     console.log(
+
         "Campo de solución detectado:",
+
         {
+
             displayName:
                 columna.displayName,
 
             name:
                 columna.name
+
         }
+
     );
 
 
@@ -709,7 +727,7 @@ async function obtenerNombreCampoSolucion() {
 
 
 /* =========================================================
-   OBTENER SOLUCIÓN DESDE LOS CAMPOS
+   OBTENER SOLUCIÓN
 ========================================================= */
 
 function obtenerSolucion(
@@ -723,25 +741,20 @@ function obtenerSolucion(
     }
 
 
-    /*
-     * Primero usamos el nombre interno detectado.
-     */
-
     if (
+
         nombreCampoSolucion &&
+
         fields[nombreCampoSolucion] !== undefined &&
+
         fields[nombreCampoSolucion] !== null
+
     ) {
 
         return fields[nombreCampoSolucion];
 
     }
 
-
-    /*
-     * Compatibilidad con los nombres que
-     * ya venías utilizando.
-     */
 
     const posiblesNombres = [
 
@@ -757,8 +770,11 @@ function obtenerSolucion(
     ) {
 
         if (
+
             fields[nombre] !== undefined &&
+
             fields[nombre] !== null
+
         ) {
 
             return fields[nombre];
@@ -767,11 +783,6 @@ function obtenerSolucion(
 
     }
 
-
-    /*
-     * Búsqueda adicional por equivalencia
-     * del nombre interno o visible.
-     */
 
     const claves =
         Object.keys(fields);
@@ -790,9 +801,11 @@ function obtenerSolucion(
 
                 return (
 
-                    normalizada === "tiposolucion" ||
+                    normalizada ===
+                        "tiposolucion" ||
 
-                    normalizada === "confirmarresolve"
+                    normalizada ===
+                        "confirmarresolve"
 
                 );
 
@@ -914,14 +927,6 @@ async function cargarTickets() {
             await obtenerListaTickets();
 
 
-        /*
-         * Intentamos detectar la columna de solución
-         * desde el inicio.
-         *
-         * Esto no afecta la carga si la columna
-         * está correctamente creada.
-         */
-
         try {
 
             await obtenerNombreCampoSolucion();
@@ -931,8 +936,11 @@ async function cargarTickets() {
         catch (error) {
 
             console.warn(
+
                 "No se pudo detectar inicialmente la columna de solución:",
+
                 error
+
             );
 
         }
@@ -962,6 +970,9 @@ async function cargarTickets() {
 
         actualizarResumen();
 
+
+        actualizarCantidadReporte();
+
     }
 
     catch (error) {
@@ -986,10 +997,12 @@ async function cargarTickets() {
                     <br>
 
                     <small>
+
                         ${escaparHTML(
                             String(error.message)
                                 .slice(0, 500)
                         )}
+
                     </small>
 
                 </td>
@@ -1017,9 +1030,13 @@ function obtenerCampo(
     ) {
 
         if (
+
             fields &&
+
             fields[nombre] !== undefined &&
+
             fields[nombre] !== null
+
         ) {
 
             return fields[nombre];
@@ -1054,7 +1071,9 @@ function formatearFecha(
 
 
     if (
-        Number.isNaN(date.getTime())
+        Number.isNaN(
+            date.getTime()
+        )
     ) {
 
         return fecha;
@@ -1084,6 +1103,37 @@ function formatearFecha(
                 "2-digit"
 
         }
+
+    );
+
+}
+
+
+/* =========================================================
+   OBTENER FECHA DEL TICKET
+========================================================= */
+
+function obtenerFechaTicket(
+    item
+) {
+
+    const fields =
+        item.fields || {};
+
+
+    return (
+
+        obtenerCampo(
+            fields,
+            [
+                "FechaCreacion",
+                "FechaCreación"
+            ]
+        ) ||
+
+        item.createdDateTime ||
+
+        ""
 
     );
 
@@ -1331,6 +1381,7 @@ function renderizarTickets() {
 
 
     ticketsTableBody.innerHTML =
+
         filtrados.map(
 
             item => {
@@ -1401,14 +1452,6 @@ function renderizarTickets() {
                     );
 
 
-                /*
-                 * Resuelto y Cerrado no muestran
-                 * el botón de gestión.
-                 *
-                 * Pendiente, En proceso y Sin resolver
-                 * sí pueden volver a gestionarse.
-                 */
-
                 const accion =
 
                     estado === "Resuelto" ||
@@ -1444,19 +1487,25 @@ function renderizarTickets() {
                         <td>
 
                             <span class="ticket-id">
+
                                 ${escaparHTML(ticketId)}
+
                             </span>
 
                         </td>
 
 
                         <td>
+
                             ${escaparHTML(titulo)}
+
                         </td>
 
 
                         <td>
+
                             ${escaparHTML(categoria)}
+
                         </td>
 
 
@@ -1465,7 +1514,9 @@ function renderizarTickets() {
                             <span
                                 class="prioridad-badge ${clasePrioridad(prioridad)}"
                             >
+
                                 ${escaparHTML(prioridad)}
+
                             </span>
 
                         </td>
@@ -1476,14 +1527,18 @@ function renderizarTickets() {
                             <span
                                 class="estado-badge ${claseEstado(estado)}"
                             >
+
                                 ${escaparHTML(estado)}
+
                             </span>
 
                         </td>
 
 
                         <td>
+
                             ${formatearFecha(fecha)}
+
                         </td>
 
 
@@ -1628,10 +1683,15 @@ async function crearTicket(
 
 
     if (
+
         !titulo ||
+
         !categoria ||
+
         !prioridad ||
+
         !descripcion
+
     ) {
 
         mostrarMensaje(
@@ -1641,6 +1701,7 @@ async function crearTicket(
             "error"
 
         );
+
 
         return;
 
@@ -1715,13 +1776,6 @@ async function crearTicket(
 
         };
 
-
-        /*
-         * Buscamos el nombre interno real
-         * de TipoSolucion.
-         *
-         * Si existe, inicializamos el campo.
-         */
 
         try {
 
@@ -1801,8 +1855,11 @@ async function crearTicket(
     catch (error) {
 
         console.error(
+
             "Error creando ticket:",
+
             error
+
         );
 
 
@@ -1810,8 +1867,10 @@ async function crearTicket(
 
             "No se pudo crear el ticket. " +
 
-            String(error.message || error)
-                .slice(0, 300),
+            String(
+                error.message ||
+                error
+            ).slice(0, 400),
 
             "error"
 
@@ -1870,7 +1929,7 @@ function mostrarMensaje(
 
 
 /* =========================================================
-   MOSTRAR DETALLE DEL TICKET
+   MOSTRAR DETALLE
 ========================================================= */
 
 function mostrarDetalleTicket(
@@ -2032,10 +2091,6 @@ function mostrarDetalleTicket(
         descripcion || "—";
 
 
-    /*
-     * RESULTADO / SOLUCIÓN
-     */
-
     const solucionBox =
         document.getElementById(
             "modalTicketSolucionBox"
@@ -2108,11 +2163,6 @@ function abrirResolverTicket(
     itemId
 ) {
 
-    /*
-     * Evita que el click del botón
-     * abra también el detalle del ticket.
-     */
-
     if (event) {
 
         event.stopPropagation();
@@ -2172,14 +2222,6 @@ function abrirResolverTicket(
     resolverTicketId.textContent =
         ticketId;
 
-
-    /*
-     * Si ya estaba Sin resolver,
-     * mantenemos esa opción.
-     *
-     * Para cualquier otro estado
-     * se propone Resuelto.
-     */
 
     resolverEstado.value =
 
@@ -2247,7 +2289,7 @@ function cerrarResolverTicket() {
 
 
 /* =========================================================
-   MENSAJE MODAL RESOLVER
+   MENSAJE RESOLVER
 ========================================================= */
 
 function mostrarResolverMensaje(
@@ -2266,7 +2308,7 @@ function mostrarResolverMensaje(
 
 
 /* =========================================================
-   GUARDAR RESULTADO DEL TICKET
+   GUARDAR RESULTADO
 ========================================================= */
 
 async function guardarResultadoTicket() {
@@ -2295,6 +2337,7 @@ async function guardarResultadoTicket() {
             "error"
 
         );
+
 
         return;
 
@@ -2338,11 +2381,6 @@ async function guardarResultadoTicket() {
             await obtenerListaTickets();
 
 
-        /*
-         * Detectamos el nombre interno REAL
-         * de la columna TipoSolucion.
-         */
-
         const campoSolucion =
             await obtenerNombreCampoSolucion();
 
@@ -2357,17 +2395,6 @@ async function guardarResultadoTicket() {
             `${itemId}/fields`;
 
 
-        /*
-         * NO usamos directamente:
-         *
-         * TipoSolucion: descripcion
-         *
-         * porque TipoSolucion puede ser solo
-         * el nombre visible.
-         *
-         * Usamos el nombre interno detectado.
-         */
-
         const body = {
 
             Estado:
@@ -2381,8 +2408,11 @@ async function guardarResultadoTicket() {
 
 
         console.log(
+
             "Actualizando ticket:",
+
             {
+
                 itemId:
                     itemId,
 
@@ -2394,7 +2424,9 @@ async function guardarResultadoTicket() {
 
                 descripcion:
                     descripcion
+
             }
+
         );
 
 
@@ -2414,11 +2446,6 @@ async function guardarResultadoTicket() {
 
         );
 
-
-        /*
-         * Actualizar los datos locales
-         * inmediatamente.
-         */
 
         if (
             ticketSeleccionadoResolver.fields
@@ -2445,10 +2472,6 @@ async function guardarResultadoTicket() {
         );
 
 
-        /*
-         * Cerramos y recargamos la información.
-         */
-
         setTimeout(
 
             async () => {
@@ -2458,6 +2481,8 @@ async function guardarResultadoTicket() {
                 renderizarTickets();
 
                 actualizarResumen();
+
+                actualizarCantidadReporte();
 
                 await cargarTickets();
 
@@ -2480,21 +2505,19 @@ async function guardarResultadoTicket() {
         );
 
 
-        /*
-         * Mostramos el error real de Graph
-         * para saber exactamente qué está fallando
-         * si Microsoft rechaza el PATCH.
-         */
-
         mostrarResolverMensaje(
 
             "No se pudo guardar el resultado. " +
 
             String(
+
                 error?.message ||
+
                 error ||
+
                 "Error desconocido"
-            ).slice(0, 500),
+
+            ).slice(0, 600),
 
             "error"
 
@@ -2517,6 +2540,1804 @@ async function guardarResultadoTicket() {
 
 
 /* =========================================================
+   REPORTE - MES ACTUAL
+========================================================= */
+
+function establecerMesReporteActual() {
+
+    const fecha =
+        new Date();
+
+
+    const anio =
+        fecha.getFullYear();
+
+
+    const mes =
+        String(
+            fecha.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    reporteMes.value =
+        `${anio}-${mes}`;
+
+}
+
+
+/* =========================================================
+   REPORTE - NOMBRE DEL MES
+========================================================= */
+
+function obtenerNombreMesReporte(
+    valorMes
+) {
+
+    if (!valorMes) {
+
+        return "";
+
+    }
+
+
+    const partes =
+        valorMes.split("-");
+
+
+    if (
+        partes.length !== 2
+    ) {
+
+        return "";
+
+    }
+
+
+    const anio =
+        Number(partes[0]);
+
+
+    const mes =
+        Number(partes[1]);
+
+
+    if (
+        !anio ||
+        !mes
+    ) {
+
+        return "";
+
+    }
+
+
+    const fecha =
+        new Date(
+            anio,
+            mes - 1,
+            1
+        );
+
+
+    const nombre =
+        fecha.toLocaleDateString(
+
+            "es-PE",
+
+            {
+                month:
+                    "long",
+
+                year:
+                    "numeric"
+
+            }
+
+        );
+
+
+    return (
+
+        nombre.charAt(0).toUpperCase() +
+
+        nombre.slice(1)
+
+    );
+
+}
+
+
+/* =========================================================
+   REPORTE - FECHA EN RANGO
+========================================================= */
+
+function obtenerTicketsDelMes(
+    valorMes
+) {
+
+    if (!valorMes) {
+
+        return [];
+
+    }
+
+
+    const partes =
+        valorMes.split("-");
+
+
+    if (
+        partes.length !== 2
+    ) {
+
+        return [];
+
+    }
+
+
+    const anio =
+        Number(partes[0]);
+
+
+    const mes =
+        Number(partes[1]);
+
+
+    if (
+        !anio ||
+        !mes
+    ) {
+
+        return [];
+
+    }
+
+
+    return ticketsData.filter(
+
+        item => {
+
+            const fecha =
+                obtenerFechaTicket(item);
+
+
+            if (!fecha) {
+
+                return false;
+
+            }
+
+
+            const date =
+                new Date(fecha);
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            return (
+
+                date.getFullYear() ===
+                    anio &&
+
+                date.getMonth() + 1 ===
+                    mes
+
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   REPORTE - CANTIDAD
+========================================================= */
+
+function actualizarCantidadReporte() {
+
+    if (!reporteMes) {
+
+        return;
+
+    }
+
+
+    const tickets =
+        obtenerTicketsDelMes(
+            reporteMes.value
+        );
+
+
+    reporteCantidad.textContent =
+        tickets.length;
+
+
+    reportePeriodo.textContent =
+        obtenerNombreMesReporte(
+            reporteMes.value
+        ) || "—";
+
+}
+
+
+/* =========================================================
+   REPORTE - MENSAJE
+========================================================= */
+
+function mostrarReporteMensaje(
+    mensaje,
+    tipo
+) {
+
+    reporteMensaje.textContent =
+        mensaje;
+
+
+    reporteMensaje.className =
+        `ticket-message ${tipo}`;
+
+}
+
+
+/* =========================================================
+   REPORTE - AGRUPAR
+========================================================= */
+
+function agruparTicketsPorCampo(
+    tickets,
+    nombresCampo
+) {
+
+    const conteo = {};
+
+
+    tickets.forEach(
+
+        item => {
+
+            const valor =
+                obtenerCampo(
+                    item.fields || {},
+                    nombresCampo
+                ) || "Sin especificar";
+
+
+            const clave =
+                String(valor);
+
+
+            if (
+                !conteo[clave]
+            ) {
+
+                conteo[clave] =
+                    0;
+
+            }
+
+
+            conteo[clave]++;
+
+        }
+
+    );
+
+
+    return Object.entries(conteo)
+
+        .sort(
+            (a, b) =>
+                b[1] - a[1]
+        );
+
+}
+
+
+/* =========================================================
+   REPORTE - LIMPIAR TEXTO
+========================================================= */
+
+function textoPDF(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined ||
+        valor === ""
+    ) {
+
+        return "—";
+
+    }
+
+
+    return String(valor);
+
+}
+
+
+/* =========================================================
+   REPORTE - PIE DE PÁGINA
+========================================================= */
+
+function agregarPiePagina(
+    doc,
+    anchoPagina,
+    altoPagina
+) {
+
+    const paginas =
+        doc.internal.getNumberOfPages();
+
+
+    for (
+        let pagina = 1;
+        pagina <= paginas;
+        pagina++
+    ) {
+
+        doc.setPage(
+            pagina
+        );
+
+
+        doc.setDrawColor(
+            220,
+            220,
+            220
+        );
+
+
+        doc.line(
+            10,
+            altoPagina - 13,
+            anchoPagina - 10,
+            altoPagina - 13
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.setFontSize(
+            7
+        );
+
+
+        doc.setTextColor(
+            110
+        );
+
+
+        doc.text(
+
+            "ALFERZA LIVE OFFICE - Mesa de ayuda TI",
+
+            10,
+
+            altoPagina - 7
+
+        );
+
+
+        doc.text(
+
+            `Página ${pagina} de ${paginas}`,
+
+            anchoPagina - 10,
+
+            altoPagina - 7,
+
+            {
+                align:
+                    "right"
+            }
+
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REPORTE - GENERAR PDF
+========================================================= */
+
+function generarInformePDF() {
+
+    if (
+        typeof window.jspdf === "undefined"
+    ) {
+
+        mostrarReporteMensaje(
+
+            "No se pudo cargar la librería PDF.",
+
+            "error"
+
+        );
+
+
+        return;
+
+    }
+
+
+    const jsPDF =
+        window.jspdf.jsPDF;
+
+
+    if (
+        typeof jsPDF !== "function"
+    ) {
+
+        mostrarReporteMensaje(
+
+            "La librería jsPDF no está disponible.",
+
+            "error"
+
+        );
+
+
+        return;
+
+    }
+
+
+    const valorMes =
+        reporteMes.value;
+
+
+    if (!valorMes) {
+
+        mostrarReporteMensaje(
+
+            "Selecciona el mes del reporte.",
+
+            "error"
+
+        );
+
+
+        reporteMes.focus();
+
+
+        return;
+
+    }
+
+
+    const tickets =
+        obtenerTicketsDelMes(
+            valorMes
+        );
+
+
+    if (!tickets.length) {
+
+        mostrarReporteMensaje(
+
+            "No existen atenciones registradas durante el mes seleccionado.",
+
+            "error"
+
+        );
+
+
+        return;
+
+    }
+
+
+    try {
+
+        generarReportePDFBtn.disabled =
+            true;
+
+
+        generarReportePDFBtn.innerHTML =
+            "⏳ Generando...";
+
+
+        const doc =
+            new jsPDF({
+
+                orientation:
+                    "landscape",
+
+                unit:
+                    "mm",
+
+                format:
+                    "a4"
+
+            });
+
+
+        const anchoPagina =
+            doc.internal.pageSize.getWidth();
+
+
+        const altoPagina =
+            doc.internal.pageSize.getHeight();
+
+
+        const nombreMes =
+            obtenerNombreMesReporte(
+                valorMes
+            );
+
+
+        const fechaGeneracion =
+            new Date()
+                .toLocaleString(
+
+                    "es-PE",
+
+                    {
+
+                        day:
+                            "2-digit",
+
+                        month:
+                            "2-digit",
+
+                        year:
+                            "numeric",
+
+                        hour:
+                            "2-digit",
+
+                        minute:
+                            "2-digit"
+
+                    }
+
+                );
+
+
+        /* =================================================
+           PORTADA / ENCABEZADO
+        ================================================= */
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            20
+        );
+
+
+        doc.setTextColor(
+            0,
+            32,
+            92
+        );
+
+
+        doc.text(
+            "ALFERZA LIVE OFFICE",
+            14,
+            16
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            90
+        );
+
+
+        doc.text(
+            "Mesa de ayuda TI",
+            14,
+            23
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            16
+        );
+
+
+        doc.setTextColor(
+            0,
+            32,
+            92
+        );
+
+
+        doc.text(
+
+            "INFORME MENSUAL DE ATENCIONES",
+
+            anchoPagina - 14,
+
+            16,
+
+            {
+                align:
+                    "right"
+            }
+
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            70
+        );
+
+
+        doc.text(
+
+            nombreMes,
+
+            anchoPagina - 14,
+
+            23,
+
+            {
+                align:
+                    "right"
+            }
+
+        );
+
+
+        doc.text(
+
+            `Generado: ${fechaGeneracion}`,
+
+            anchoPagina - 14,
+
+            29,
+
+            {
+                align:
+                    "right"
+            }
+
+        );
+
+
+        doc.setDrawColor(
+            215,
+            215,
+            215
+        );
+
+
+        doc.line(
+            14,
+            34,
+            anchoPagina - 14,
+            34
+        );
+
+
+        /* =================================================
+           RESUMEN DE ESTADOS
+        ================================================= */
+
+        const total =
+            tickets.length;
+
+
+        const pendientes =
+            tickets.filter(
+
+                item =>
+
+                    obtenerCampo(
+                        item.fields,
+                        ["Estado"]
+                    ) ===
+                    "Pendiente"
+
+            ).length;
+
+
+        const proceso =
+            tickets.filter(
+
+                item =>
+
+                    obtenerCampo(
+                        item.fields,
+                        ["Estado"]
+                    ) ===
+                    "En proceso"
+
+            ).length;
+
+
+        const resueltos =
+            tickets.filter(
+
+                item => {
+
+                    const estado =
+                        obtenerCampo(
+                            item.fields,
+                            ["Estado"]
+                        );
+
+
+                    return (
+
+                        estado === "Resuelto" ||
+
+                        estado === "Cerrado"
+
+                    );
+
+                }
+
+            ).length;
+
+
+        const sinResolver =
+            tickets.filter(
+
+                item =>
+
+                    obtenerCampo(
+                        item.fields,
+                        ["Estado"]
+                    ) ===
+                    "Sin resolver"
+
+            ).length;
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            35
+        );
+
+
+        doc.text(
+            "RESUMEN DE ATENCIONES",
+            14,
+            43
+        );
+
+
+        doc.autoTable({
+
+            startY:
+                46,
+
+            margin: {
+
+                left:
+                    14,
+
+                right:
+                    14
+
+            },
+
+            head: [[
+
+                "Total",
+
+                "Pendientes",
+
+                "En proceso",
+
+                "Resueltos / Cerrados",
+
+                "Sin resolver"
+
+            ]],
+
+            body: [[
+
+                total,
+
+                pendientes,
+
+                proceso,
+
+                resueltos,
+
+                sinResolver
+
+            ]],
+
+            theme:
+                "grid",
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    9,
+
+                cellPadding:
+                    3,
+
+                halign:
+                    "center",
+
+                valign:
+                    "middle"
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    32,
+                    92
+                ],
+
+                textColor:
+                    255,
+
+                fontStyle:
+                    "bold"
+
+            }
+
+        });
+
+
+        /* =================================================
+           RESUMEN POR CATEGORÍA
+        ================================================= */
+
+        const categorias =
+            agruparTicketsPorCampo(
+
+                tickets,
+
+                [
+                    "Categoria",
+                    "Categoría"
+                ]
+
+            );
+
+
+        const prioridades =
+            agruparTicketsPorCampo(
+
+                tickets,
+
+                ["Prioridad"]
+
+            );
+
+
+        const inicioResumen =
+            doc.lastAutoTable.finalY + 8;
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            35
+        );
+
+
+        doc.text(
+            "ATENCIONES POR CATEGORÍA",
+            14,
+            inicioResumen
+        );
+
+
+        doc.autoTable({
+
+            startY:
+                inicioResumen + 3,
+
+            margin: {
+
+                left:
+                    14
+
+            },
+
+            tableWidth:
+                95,
+
+            head: [[
+                "Categoría",
+                "Cantidad"
+            ]],
+
+            body:
+                categorias.map(
+
+                    fila => [
+                        textoPDF(fila[0]),
+                        fila[1]
+                    ]
+
+                ),
+
+            theme:
+                "grid",
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    8,
+
+                cellPadding:
+                    2.5
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    32,
+                    92
+                ],
+
+                textColor:
+                    255,
+
+                fontStyle:
+                    "bold"
+
+            }
+
+        });
+
+
+        const segundaTablaX =
+            125;
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            10
+        );
+
+
+        doc.setTextColor(
+            35
+        );
+
+
+        doc.text(
+            "ATENCIONES POR PRIORIDAD",
+            segundaTablaX,
+            inicioResumen
+        );
+
+
+        doc.autoTable({
+
+            startY:
+                inicioResumen + 3,
+
+            margin: {
+
+                left:
+                    segundaTablaX
+
+            },
+
+            tableWidth:
+                90,
+
+            head: [[
+                "Prioridad",
+                "Cantidad"
+            ]],
+
+            body:
+                prioridades.map(
+
+                    fila => [
+                        textoPDF(fila[0]),
+                        fila[1]
+                    ]
+
+                ),
+
+            theme:
+                "grid",
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    8,
+
+                cellPadding:
+                    2.5
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    32,
+                    92
+                ],
+
+                textColor:
+                    255,
+
+                fontStyle:
+                    "bold"
+
+            }
+
+        });
+
+
+        /* =================================================
+           NUEVA PÁGINA - DETALLE GENERAL
+        ================================================= */
+
+        doc.addPage();
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            13
+        );
+
+
+        doc.setTextColor(
+            0,
+            32,
+            92
+        );
+
+
+        doc.text(
+            "DETALLE DE ATENCIONES",
+            14,
+            16
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.setFontSize(
+            9
+        );
+
+
+        doc.setTextColor(
+            90
+        );
+
+
+        doc.text(
+
+            `Periodo: ${nombreMes} | Total de atenciones: ${total}`,
+
+            14,
+
+            22
+
+        );
+
+
+        const filasGenerales =
+            tickets.map(
+
+                item => {
+
+                    const fields =
+                        item.fields || {};
+
+
+                    const ticketId =
+                        obtenerCampo(
+                            fields,
+                            ["TicketID"]
+                        ) ||
+
+                        `TKT-${String(item.id)
+                            .padStart(
+                                6,
+                                "0"
+                            )}`;
+
+
+                    const asunto =
+                        obtenerCampo(
+                            fields,
+                            [
+                                "Title",
+                                "Título"
+                            ]
+                        );
+
+
+                    const categoria =
+                        obtenerCampo(
+                            fields,
+                            [
+                                "Categoria",
+                                "Categoría"
+                            ]
+                        );
+
+
+                    const prioridad =
+                        obtenerCampo(
+                            fields,
+                            ["Prioridad"]
+                        );
+
+
+                    const estado =
+                        obtenerCampo(
+                            fields,
+                            ["Estado"]
+                        ) ||
+                        "Pendiente";
+
+
+                    const fecha =
+                        obtenerFechaTicket(
+                            item
+                        );
+
+
+                    const usuario =
+                        obtenerCampo(
+                            fields,
+                            ["Usuario"]
+                        );
+
+
+                    const asignado =
+                        obtenerCampo(
+                            fields,
+                            ["AsignadoA"]
+                        );
+
+
+                    return [
+
+                        textoPDF(ticketId),
+
+                        textoPDF(asunto),
+
+                        textoPDF(categoria),
+
+                        textoPDF(prioridad),
+
+                        textoPDF(estado),
+
+                        formatearFecha(fecha),
+
+                        textoPDF(usuario),
+
+                        textoPDF(asignado)
+
+                    ];
+
+                }
+
+            );
+
+
+        doc.autoTable({
+
+            startY:
+                27,
+
+            margin: {
+
+                top:
+                    15,
+
+                right:
+                    8,
+
+                bottom:
+                    18,
+
+                left:
+                    8
+
+            },
+
+            head: [[
+
+                "Ticket",
+
+                "Asunto",
+
+                "Categoría",
+
+                "Prioridad",
+
+                "Estado",
+
+                "Fecha",
+
+                "Solicitante",
+
+                "Asignado"
+
+            ]],
+
+            body:
+                filasGenerales,
+
+            theme:
+                "striped",
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    7,
+
+                cellPadding:
+                    2,
+
+                overflow:
+                    "linebreak",
+
+                valign:
+                    "middle"
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    32,
+                    92
+                ],
+
+                textColor:
+                    255,
+
+                fontStyle:
+                    "bold",
+
+                halign:
+                    "center",
+
+                valign:
+                    "middle"
+
+            },
+
+            columnStyles: {
+
+                0: {
+                    cellWidth:
+                        22
+                },
+
+                1: {
+                    cellWidth:
+                        43
+                },
+
+                2: {
+                    cellWidth:
+                        28
+                },
+
+                3: {
+                    cellWidth:
+                        20,
+
+                    halign:
+                        "center"
+                },
+
+                4: {
+                    cellWidth:
+                        25,
+
+                    halign:
+                        "center"
+                },
+
+                5: {
+                    cellWidth:
+                        31,
+
+                    halign:
+                        "center"
+                },
+
+                6: {
+                    cellWidth:
+                        42
+                },
+
+                7: {
+                    cellWidth:
+                        28
+                }
+
+            }
+
+        });
+
+
+        /* =================================================
+           PÁGINAS DE DESCRIPCIONES Y SOLUCIONES
+        ================================================= */
+
+        doc.addPage();
+
+
+        doc.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        doc.setFontSize(
+            13
+        );
+
+
+        doc.setTextColor(
+            0,
+            32,
+            92
+        );
+
+
+        doc.text(
+            "DETALLE DE ATENCIÓN Y RESULTADO",
+            14,
+            16
+        );
+
+
+        doc.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        doc.setFontSize(
+            9
+        );
+
+
+        doc.setTextColor(
+            90
+        );
+
+
+        doc.text(
+
+            "Descripción reportada y resultado registrado por soporte TI.",
+
+            14,
+
+            22
+
+        );
+
+
+        const filasDetalle =
+            tickets.map(
+
+                item => {
+
+                    const fields =
+                        item.fields || {};
+
+
+                    const ticketId =
+                        obtenerCampo(
+                            fields,
+                            ["TicketID"]
+                        ) ||
+
+                        `TKT-${String(item.id)
+                            .padStart(
+                                6,
+                                "0"
+                            )}`;
+
+
+                    const descripcion =
+                        obtenerCampo(
+                            fields,
+                            [
+                                "Descripcion",
+                                "Descripción"
+                            ]
+                        );
+
+
+                    const solucion =
+                        obtenerSolucion(
+                            fields
+                        );
+
+
+                    return [
+
+                        textoPDF(ticketId),
+
+                        textoPDF(
+                            descripcion
+                        ),
+
+                        textoPDF(
+                            solucion
+                        )
+
+                    ];
+
+                }
+
+            );
+
+
+        doc.autoTable({
+
+            startY:
+                27,
+
+            margin: {
+
+                top:
+                    15,
+
+                right:
+                    10,
+
+                bottom:
+                    18,
+
+                left:
+                    10
+
+            },
+
+            head: [[
+
+                "Ticket",
+
+                "Descripción de la atención / solicitud",
+
+                "Resultado / Solución"
+
+            ]],
+
+            body:
+                filasDetalle,
+
+            theme:
+                "striped",
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    7.5,
+
+                cellPadding:
+                    2.5,
+
+                overflow:
+                    "linebreak",
+
+                valign:
+                    "top"
+
+            },
+
+            headStyles: {
+
+                fillColor: [
+                    0,
+                    32,
+                    92
+                ],
+
+                textColor:
+                    255,
+
+                fontStyle:
+                    "bold",
+
+                halign:
+                    "center"
+
+            },
+
+            columnStyles: {
+
+                0: {
+                    cellWidth:
+                        25
+                },
+
+                1: {
+                    cellWidth:
+                        115
+                },
+
+                2: {
+                    cellWidth:
+                        115
+                }
+
+            }
+
+        });
+
+
+        /* =================================================
+           GENERAR PIE DE PÁGINA
+        ================================================= */
+
+        agregarPiePagina(
+
+            doc,
+
+            anchoPagina,
+
+            altoPagina
+
+        );
+
+
+        /* =================================================
+           DESCARGA
+        ================================================= */
+
+        const nombreArchivo =
+            `Informe_Atenciones_${valorMes}.pdf`;
+
+
+        doc.save(
+            nombreArchivo
+        );
+
+
+        mostrarReporteMensaje(
+
+            "Informe PDF generado correctamente.",
+
+            "success"
+
+        );
+
+
+        setTimeout(
+
+            () => {
+
+                cerrarReporte();
+
+            },
+
+            1000
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Error generando informe PDF:",
+
+            error
+
+        );
+
+
+        mostrarReporteMensaje(
+
+            "No se pudo generar el PDF: " +
+
+            String(
+                error?.message ||
+                error ||
+                "Error desconocido"
+            ).slice(0, 500),
+
+            "error"
+
+        );
+
+    }
+
+    finally {
+
+        generarReportePDFBtn.disabled =
+            false;
+
+
+        generarReportePDFBtn.innerHTML =
+            "🧾 Generar PDF";
+
+    }
+
+}
+
+
+/* =========================================================
+   ABRIR REPORTE
+========================================================= */
+
+function abrirModalReporte() {
+
+    establecerMesReporteActual();
+
+
+    actualizarCantidadReporte();
+
+
+    reporteMensaje.textContent =
+        "";
+
+
+    reporteMensaje.className =
+        "ticket-message";
+
+
+    reporteModal.classList.add(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    setTimeout(
+
+        () => {
+
+            reporteMes.focus();
+
+        },
+
+        100
+
+    );
+
+}
+
+
+/* =========================================================
+   CERRAR REPORTE
+========================================================= */
+
+function cerrarReporte() {
+
+    reporteModal.classList.remove(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+
+    reporteMensaje.textContent =
+        "";
+
+
+    reporteMensaje.className =
+        "ticket-message";
+
+}
+
+
+/* =========================================================
    EVENTOS
 ========================================================= */
 
@@ -2529,6 +4350,12 @@ ticketForm.addEventListener(
 actualizarTickets.addEventListener(
     "click",
     cargarTickets
+);
+
+
+abrirReporte.addEventListener(
+    "click",
+    abrirModalReporte
 );
 
 
@@ -2621,7 +4448,54 @@ resolverModal.addEventListener(
 
 
 /* =========================================================
-   TECLA ESCAPE
+   EVENTOS MODAL REPORTE
+========================================================= */
+
+cerrarReporteModal.addEventListener(
+    "click",
+    cerrarReporte
+);
+
+
+cancelarReporte.addEventListener(
+    "click",
+    cerrarReporte
+);
+
+
+generarReportePDFBtn.addEventListener(
+    "click",
+    generarInformePDF
+);
+
+
+reporteMes.addEventListener(
+    "change",
+    actualizarCantidadReporte
+);
+
+
+reporteModal.addEventListener(
+
+    "click",
+
+    event => {
+
+        if (
+            event.target === reporteModal
+        ) {
+
+            cerrarReporte();
+
+        }
+
+    }
+
+);
+
+
+/* =========================================================
+   ESCAPE
 ========================================================= */
 
 document.addEventListener(
@@ -2633,6 +4507,17 @@ document.addEventListener(
         if (
             event.key !== "Escape"
         ) {
+
+            return;
+
+        }
+
+
+        if (
+            reporteModal.classList.contains("show")
+        ) {
+
+            cerrarReporte();
 
             return;
 
@@ -2664,7 +4549,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   INICIALIZACIÓN
+   ESPERAR CUENTA
 ========================================================= */
 
 async function esperarCuenta(
@@ -2817,8 +4702,11 @@ function mostrarBotonLogin(
                     "No se pudo iniciar sesión: " +
 
                     String(
+
                         error.message ||
+
                         error
+
                     ).slice(0, 300);
 
             }
@@ -2837,13 +4725,6 @@ function mostrarBotonLogin(
 async function iniciarTickets() {
 
     try {
-
-        /*
-         * auth.js se carga después de tickets.js.
-         *
-         * Esperamos a que MSAL restaure
-         * la cuenta existente.
-         */
 
         if (
             !(await esperarCuenta())
@@ -2907,8 +4788,11 @@ async function iniciarTickets() {
         usuarioCorreo.textContent =
 
             String(
+
                 error.message ||
+
                 error
+
             ).slice(0, 300);
 
     }
@@ -2931,6 +4815,10 @@ window.mostrarDetalleTicket =
 /* =========================================================
    ARRANQUE
 ========================================================= */
+
+establecerMesReporteActual();
+
+actualizarCantidadReporte();
 
 iniciarTickets();
 

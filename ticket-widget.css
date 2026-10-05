@@ -734,3 +734,16 @@ body.ticket-modal-open {
         width: 100%;
     }
 }
+
+.ticket-widget {
+    width: 150px !important;
+    height: 150px !important;
+}
+
+.ticket-widget img {
+    width: 150px !important;
+    height: 150px !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}

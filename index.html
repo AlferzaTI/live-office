@@ -21,21 +21,11 @@
 
     <script>
 
-        /*
-         * Si todavía no se ha iniciado sesión,
-         * primero vamos al login.
-         *
-         * Si ya inició sesión, el dashboard
-         * continúa normalmente.
-         */
-
         if (
             sessionStorage.getItem("alferza_login") !== "true"
         ) {
 
-            window.location.replace(
-                "login.html"
-            );
+            window.location.replace("login.html");
 
         }
 
@@ -50,8 +40,6 @@
         rel="stylesheet"
         href="styles.css"
     >
-
-    <!-- Widget de tickets -->
 
     <link
         rel="stylesheet"
@@ -125,7 +113,7 @@
 
 
 <!-- ==========================================
-     BUSCADOR DE PERSONAL
+     BUSCADOR
      ========================================== -->
 
 <div class="search-container">
@@ -141,7 +129,7 @@
 
 
 <!-- ==========================================
-     CONTENIDO PRINCIPAL
+     CONTENIDO
      ========================================== -->
 
 <div class="container">
@@ -226,7 +214,7 @@
 
 
     <!-- ======================================
-         CONTENIDO
+         CONTENIDO PRINCIPAL
          ====================================== -->
 
     <main class="content">
@@ -344,23 +332,7 @@
 
 
 <!-- ==========================================
-     WIDGET FLOTANTE DE TICKETS
-     ========================================== -->
-
-<div
-    class="ticket-widget"
-    onclick="abrirTicketWidget()"
-    title="Registrar ticket"
->
-    <img
-        src="img/ticket.gif"
-        alt="Registrar ticket"
-    >
-</div>
-
-
-<!-- ==========================================
-     MICROSOFT AUTHENTICATION LIBRARY
+     MICROSOFT AUTHENTICATION
      ========================================== -->
 
 <script
@@ -376,7 +348,7 @@
 
 
 <!-- ==========================================
-     WIDGET DE TICKETS
+     WIDGET GLOBAL DE TICKETS
      ========================================== -->
 
 <script src="js/ticket-widget.js"></script>

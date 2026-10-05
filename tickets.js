@@ -1,12 +1,10 @@
+/* =========================================================
+ALFERZA LIVE OFFICE
+TICKETS
+========================================================= */
 
 /* =========================================================
-   ALFERZA LIVE OFFICE
-   TICKETS
-   ========================================================= */
-
-
-/* =========================================================
-   CONFIGURACIÓN MICROSOFT
+CONFIGURACIÓN MICROSOFT
 ========================================================= */
 
 const MSAL_CONFIG = {
@@ -34,25 +32,21 @@ const MSAL_CONFIG = {
 
 };
 
-
 /* =========================================================
-   MICROSOFT LIST
+MICROSOFT LIST
 ========================================================= */
 
 const SHAREPOINT_HOST =
     "alferzaholding-my.sharepoint.com";
 
-
 const SHAREPOINT_SITE_PATH =
     "/personal/soporte1_alferza_pe";
-
 
 const TICKETS_LIST_NAME =
     "TicketsTI";
 
-
 /* =========================================================
-   SCOPES
+SCOPES
 ========================================================= */
 
 const SCOPES_GRAPH = [
@@ -65,9 +59,8 @@ const SCOPES_GRAPH = [
 
 ];
 
-
 /* =========================================================
-   MSAL
+MSAL
 ========================================================= */
 
 const msalInstance =
@@ -75,9 +68,8 @@ const msalInstance =
         MSAL_CONFIG
     );
 
-
 /* =========================================================
-   VARIABLES
+VARIABLES
 ========================================================= */
 
 let cuentaActual = null;
@@ -90,133 +82,105 @@ let ticketsData = [];
 
 let ticketSeleccionadoResolver = null;
 
+let campoTipoSolucion = null;
 
 /* =========================================================
-   DOM
+DOM
 ========================================================= */
 
 const ticketForm =
     document.getElementById("ticketForm");
 
-
 const ticketTitulo =
     document.getElementById("ticketTitulo");
-
 
 const ticketCategoria =
     document.getElementById("ticketCategoria");
 
-
 const ticketPrioridad =
     document.getElementById("ticketPrioridad");
-
 
 const ticketDescripcion =
     document.getElementById("ticketDescripcion");
 
-
 const crearTicketBtn =
     document.getElementById("crearTicketBtn");
-
 
 const ticketMensaje =
     document.getElementById("ticketMensaje");
 
-
 const usuarioNombre =
     document.getElementById("usuarioNombre");
-
 
 const usuarioCorreo =
     document.getElementById("usuarioCorreo");
 
-
 const ticketsTableBody =
     document.getElementById("ticketsTableBody");
-
 
 const ticketsEmpty =
     document.getElementById("ticketsEmpty");
 
-
 const totalTickets =
     document.getElementById("totalTickets");
-
 
 const ticketsPendientes =
     document.getElementById("ticketsPendientes");
 
-
 const ticketsProceso =
     document.getElementById("ticketsProceso");
-
 
 const ticketsResueltos =
     document.getElementById("ticketsResueltos");
 
-
 const buscarTicket =
     document.getElementById("buscarTicket");
-
 
 const filtroEstado =
     document.getElementById("filtroEstado");
 
-
 const filtroPrioridad =
     document.getElementById("filtroPrioridad");
-
 
 const actualizarTickets =
     document.getElementById("actualizarTickets");
 
-
 const ticketModal =
     document.getElementById("ticketModal");
-
 
 const cerrarModal =
     document.getElementById("cerrarModal");
 
-
 /* =========================================================
-   DOM - MODAL RESOLVER
+MODAL RESOLVER
 ========================================================= */
 
 const resolverModal =
     document.getElementById("resolverModal");
 
-
 const cerrarResolverModal =
     document.getElementById("cerrarResolverModal");
-
 
 const cancelarResolver =
     document.getElementById("cancelarResolver");
 
-
 const confirmarResolver =
     document.getElementById("confirmarResolver");
-
 
 const resolverTicketId =
     document.getElementById("resolverTicketId");
 
-
 const resolverEstado =
     document.getElementById("resolverEstado");
-
 
 const resolverDescripcion =
     document.getElementById("resolverDescripcion");
 
-
 const resolverMensaje =
     document.getElementById("resolverMensaje");
 
-
 /* =========================================================
-   UTILIDADES
+ESCAPAR HTML
 ========================================================= */
 
 function escaparHTML(valor) {
@@ -229,7 +193,6 @@ function escaparHTML(valor) {
         return "";
 
     }
-
 
     return String(valor)
 
@@ -245,16 +208,29 @@ function escaparHTML(valor) {
 
 }
 
+/* =========================================================
+NORMALIZAR TEXTO
+========================================================= */
+
+function normalizarTexto(valor) {
+
+    return String(valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+}
 
 /* =========================================================
-   TOKEN
+TOKEN
 ========================================================= */
 
 async function obtenerToken() {
 
     const cuentas =
         msalInstance.getAllAccounts();
-
 
     if (!cuentas.length) {
 
@@ -264,10 +240,8 @@ async function obtenerToken() {
 
     }
 
-
     cuentaActual =
         cuentas[0];
-
 
     try {
 
@@ -279,7 +253,6 @@ async function obtenerToken() {
                 account: cuentaActual
 
             });
-
 
         return resultado.accessToken;
 
@@ -294,16 +267,14 @@ async function obtenerToken() {
 
             });
 
-
         return resultado.accessToken;
 
     }
 
 }
 
-
 /* =========================================================
-   GRAPH
+GRAPH
 ========================================================= */
 
 async function graphFetch(
@@ -313,7 +284,6 @@ async function graphFetch(
 
     const token =
         await obtenerToken();
-
 
     const headers = {
 
@@ -326,7 +296,6 @@ async function graphFetch(
         ...(opciones.headers || {})
 
     };
-
 
     const respuesta =
         await fetch(
@@ -343,21 +312,16 @@ async function graphFetch(
 
         );
 
-
     if (!respuesta.ok) {
 
         const texto =
             await respuesta.text();
 
-
         throw new Error(
-
             `Graph ${respuesta.status}: ${texto}`
-
         );
 
     }
-
 
     if (
         respuesta.status === 204
@@ -367,14 +331,12 @@ async function graphFetch(
 
     }
 
-
     return respuesta.json();
 
 }
 
-
 /* =========================================================
-   OBTENER SITIO SHAREPOINT
+OBTENER SITIO SHAREPOINT
 ========================================================= */
 
 async function obtenerSitioSharePoint() {
@@ -385,23 +347,19 @@ async function obtenerSitioSharePoint() {
 
     }
 
-
     const url =
         `https://graph.microsoft.com/v1.0/sites/` +
         `${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`;
 
-
     sitioSharePoint =
         await graphFetch(url);
-
 
     return sitioSharePoint;
 
 }
 
-
 /* =========================================================
-   OBTENER LISTA
+OBTENER LISTA
 ========================================================= */
 
 async function obtenerListaTickets() {
@@ -412,20 +370,16 @@ async function obtenerListaTickets() {
 
     }
 
-
     const sitio =
         await obtenerSitioSharePoint();
-
 
     const url =
         `https://graph.microsoft.com/v1.0/sites/` +
         `${sitio.id}/lists` +
         `?$filter=displayName eq '${TICKETS_LIST_NAME}'`;
 
-
     const resultado =
         await graphFetch(url);
-
 
     if (
         !resultado.value ||
@@ -433,32 +387,104 @@ async function obtenerListaTickets() {
     ) {
 
         throw new Error(
-
             `No se encontró la lista "${TICKETS_LIST_NAME}".`
-
         );
 
     }
 
-
     listaTickets =
         resultado.value[0];
-
 
     return listaTickets;
 
 }
 
+/* =========================================================
+OBTENER COLUMNA TIPO SOLUCIÓN
+========================================================= */
+
+async function obtenerCampoTipoSolucion() {
+
+    if (campoTipoSolucion) {
+
+        return campoTipoSolucion;
+
+    }
+
+    const sitio =
+        await obtenerSitioSharePoint();
+
+    const lista =
+        await obtenerListaTickets();
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/` +
+        `${sitio.id}/lists/${lista.id}/columns` +
+        `?$select=id,name,displayName`;
+
+    const resultado =
+        await graphFetch(url);
+
+    const columnas =
+        resultado.value || [];
+
+    const columna =
+        columnas.find(
+            columna => {
+
+                const nombre =
+                    normalizarTexto(
+                        columna.name
+                    );
+
+                const displayName =
+                    normalizarTexto(
+                        columna.displayName
+                    );
+
+                return (
+
+                    nombre === "tiposolucion" ||
+
+                    nombre === "tiposolución" ||
+
+                    displayName === "tiposolucion" ||
+
+                    displayName === "tiposolucion"
+
+                );
+
+            }
+        );
+
+    if (!columna) {
+
+        throw new Error(
+            "No se encontró la columna 'Tipo solución' en la lista TicketsTI."
+        );
+
+    }
+
+    campoTipoSolucion =
+        columna.name;
+
+    console.log(
+        "Columna Tipo solución detectada:",
+        campoTipoSolucion
+    );
+
+    return campoTipoSolucion;
+
+}
 
 /* =========================================================
-   OBTENER USUARIO
+OBTENER USUARIO
 ========================================================= */
 
 async function obtenerUsuarioActual() {
 
     const token =
         await obtenerToken();
-
 
     const respuesta =
         await fetch(
@@ -478,7 +504,6 @@ async function obtenerUsuarioActual() {
 
         );
 
-
     if (!respuesta.ok) {
 
         throw new Error(
@@ -487,34 +512,28 @@ async function obtenerUsuarioActual() {
 
     }
 
-
     const usuario =
         await respuesta.json();
 
-
     cuentaActual =
         msalInstance.getAllAccounts()[0];
-
 
     usuarioNombre.textContent =
         usuario.displayName ||
         cuentaActual?.name ||
         "Usuario";
 
-
     usuarioCorreo.textContent =
         usuario.mail ||
         usuario.userPrincipalName ||
         "Sin correo";
 
-
     return usuario;
 
 }
 
-
 /* =========================================================
-   CARGAR TICKETS
+CARGAR TICKETS
 ========================================================= */
 
 async function cargarTickets() {
@@ -536,33 +555,29 @@ async function cargarTickets() {
 
         `;
 
+        ticketsEmpty.style.display =
+            "none";
 
         const sitio =
             await obtenerSitioSharePoint();
 
-
         const lista =
             await obtenerListaTickets();
-
 
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
             `${sitio.id}/lists/${lista.id}/items` +
             `?expand=fields&$top=999`;
 
-
         const resultado =
             await graphFetch(url);
-
 
         ticketsData =
             resultado.value || [];
 
-
         renderizarTickets();
 
         actualizarResumen();
-
 
     }
 
@@ -572,7 +587,6 @@ async function cargarTickets() {
             "Error cargando tickets:",
             error
         );
-
 
         ticketsTableBody.innerHTML = `
 
@@ -593,9 +607,8 @@ async function cargarTickets() {
 
 }
 
-
 /* =========================================================
-   OBTENER CAMPO
+OBTENER CAMPO
 ========================================================= */
 
 function obtenerCampo(
@@ -619,19 +632,15 @@ function obtenerCampo(
 
     }
 
-
     return "";
 
 }
 
-
 /* =========================================================
-   FORMATEAR FECHA
+FORMATEAR FECHA
 ========================================================= */
 
-function formatearFecha(
-    fecha
-) {
+function formatearFecha(fecha) {
 
     if (!fecha) {
 
@@ -639,10 +648,8 @@ function formatearFecha(
 
     }
 
-
     const date =
         new Date(fecha);
-
 
     if (
         Number.isNaN(date.getTime())
@@ -651,7 +658,6 @@ function formatearFecha(
         return fecha;
 
     }
-
 
     return date.toLocaleString(
         "es-PE",
@@ -672,20 +678,16 @@ function formatearFecha(
 
 }
 
-
 /* =========================================================
-   CLASE ESTADO
+CLASE ESTADO
 ========================================================= */
 
-function claseEstado(
-    estado
-) {
+function claseEstado(estado) {
 
     const valor =
         String(estado)
             .toLowerCase()
             .trim();
-
 
     if (
         valor === "en proceso"
@@ -695,7 +697,6 @@ function claseEstado(
 
     }
 
-
     if (
         valor === "resuelto"
     ) {
@@ -703,7 +704,6 @@ function claseEstado(
         return "estado-resuelto";
 
     }
-
 
     if (
         valor === "sin resolver"
@@ -713,7 +713,6 @@ function claseEstado(
 
     }
 
-
     if (
         valor === "cerrado"
     ) {
@@ -722,25 +721,20 @@ function claseEstado(
 
     }
 
-
     return "estado-pendiente";
 
 }
 
-
 /* =========================================================
-   CLASE PRIORIDAD
+CLASE PRIORIDAD
 ========================================================= */
 
-function clasePrioridad(
-    prioridad
-) {
+function clasePrioridad(prioridad) {
 
     const valor =
         String(prioridad)
             .toLowerCase()
             .trim();
-
 
     if (
         valor === "baja"
@@ -750,7 +744,6 @@ function clasePrioridad(
 
     }
 
-
     if (
         valor === "alta"
     ) {
@@ -758,7 +751,6 @@ function clasePrioridad(
         return "prioridad-alta";
 
     }
-
 
     if (
         valor === "crítica" ||
@@ -769,14 +761,12 @@ function clasePrioridad(
 
     }
 
-
     return "prioridad-media";
 
 }
 
-
 /* =========================================================
-   RENDERIZAR TICKETS
+RENDERIZAR TICKETS
 ========================================================= */
 
 function renderizarTickets() {
@@ -786,14 +776,11 @@ function renderizarTickets() {
             .toLowerCase()
             .trim();
 
-
     const estadoFiltro =
         filtroEstado.value;
 
-
     const prioridadFiltro =
         filtroPrioridad.value;
-
 
     const filtrados =
         ticketsData.filter(
@@ -801,7 +788,6 @@ function renderizarTickets() {
 
                 const fields =
                     item.fields || {};
-
 
                 const titulo =
                     obtenerCampo(
@@ -812,7 +798,6 @@ function renderizarTickets() {
                         ]
                     );
 
-
                 const ticketId =
                     obtenerCampo(
                         fields,
@@ -820,7 +805,6 @@ function renderizarTickets() {
                             "TicketID"
                         ]
                     );
-
 
                 const categoria =
                     obtenerCampo(
@@ -831,7 +815,6 @@ function renderizarTickets() {
                         ]
                     );
 
-
                 const prioridad =
                     obtenerCampo(
                         fields,
@@ -840,7 +823,6 @@ function renderizarTickets() {
                         ]
                     );
 
-
                 const estado =
                     obtenerCampo(
                         fields,
@@ -848,7 +830,6 @@ function renderizarTickets() {
                             "Estado"
                         ]
                     );
-
 
                 const coincideBusqueda =
 
@@ -862,20 +843,17 @@ function renderizarTickets() {
                         .toLowerCase()
                         .includes(busqueda);
 
-
                 const coincideEstado =
 
                     !estadoFiltro ||
 
                     estado === estadoFiltro;
 
-
                 const coincidePrioridad =
 
                     !prioridadFiltro ||
 
                     prioridad === prioridadFiltro;
-
 
                 return (
 
@@ -890,7 +868,6 @@ function renderizarTickets() {
             }
         );
 
-
     if (!filtrados.length) {
 
         ticketsTableBody.innerHTML = "";
@@ -902,10 +879,8 @@ function renderizarTickets() {
 
     }
 
-
     ticketsEmpty.style.display =
         "none";
-
 
     ticketsTableBody.innerHTML =
         filtrados.map(
@@ -913,7 +888,6 @@ function renderizarTickets() {
 
                 const fields =
                     item.fields || {};
-
 
                 const titulo =
                     obtenerCampo(
@@ -923,7 +897,6 @@ function renderizarTickets() {
                             "Título"
                         ]
                     );
-
 
                 const ticketId =
                     obtenerCampo(
@@ -935,7 +908,6 @@ function renderizarTickets() {
                     `TKT-${String(item.id)
                         .padStart(6, "0")}`;
 
-
                 const categoria =
                     obtenerCampo(
                         fields,
@@ -945,7 +917,6 @@ function renderizarTickets() {
                         ]
                     );
 
-
                 const prioridad =
                     obtenerCampo(
                         fields,
@@ -953,7 +924,6 @@ function renderizarTickets() {
                             "Prioridad"
                         ]
                     );
-
 
                 const estado =
                     obtenerCampo(
@@ -964,7 +934,6 @@ function renderizarTickets() {
                     ) ||
                     "Pendiente";
 
-
                 const fecha =
                     obtenerCampo(
                         fields,
@@ -974,15 +943,11 @@ function renderizarTickets() {
                         ]
                     );
 
-
                 const puedeResolver =
 
                     estado !== "Resuelto" &&
 
-                    estado !== "Cerrado" &&
-
-                    estado !== "Sin resolver";
-
+                    estado !== "Cerrado";
 
                 return `
 
@@ -1000,20 +965,17 @@ function renderizarTickets() {
 
                         </td>
 
-
                         <td>
 
                             ${escaparHTML(titulo)}
 
                         </td>
 
-
                         <td>
 
                             ${escaparHTML(categoria)}
 
                         </td>
-
 
                         <td>
 
@@ -1027,7 +989,6 @@ function renderizarTickets() {
 
                         </td>
 
-
                         <td>
 
                             <span
@@ -1040,13 +1001,11 @@ function renderizarTickets() {
 
                         </td>
 
-
                         <td>
 
                             ${formatearFecha(fecha)}
 
                         </td>
-
 
                         <td>
 
@@ -1059,7 +1018,10 @@ function renderizarTickets() {
                                 <button
                                     type="button"
                                     class="btn-resolver"
-                                    onclick="event.stopPropagation(); abrirResolverTicket('${item.id}')"
+                                    onclick="
+                                        event.stopPropagation();
+                                        abrirResolverTicket('${item.id}');
+                                    "
                                 >
                                     ✓ Resolver
                                 </button>
@@ -1085,16 +1047,14 @@ function renderizarTickets() {
 
 }
 
-
 /* =========================================================
-   RESUMEN
+RESUMEN
 ========================================================= */
 
 function actualizarResumen() {
 
     const total =
         ticketsData.length;
-
 
     const pendientes =
         ticketsData.filter(
@@ -1105,7 +1065,6 @@ function actualizarResumen() {
                 ) === "Pendiente"
         ).length;
 
-
     const proceso =
         ticketsData.filter(
             item =>
@@ -1114,7 +1073,6 @@ function actualizarResumen() {
                     ["Estado"]
                 ) === "En proceso"
         ).length;
-
 
     const resueltos =
         ticketsData.filter(
@@ -1126,7 +1084,6 @@ function actualizarResumen() {
                         ["Estado"]
                     );
 
-
                 return (
                     estado === "Resuelto" ||
                     estado === "Cerrado"
@@ -1135,27 +1092,22 @@ function actualizarResumen() {
             }
         ).length;
 
-
     totalTickets.textContent =
         total;
-
 
     ticketsPendientes.textContent =
         pendientes;
 
-
     ticketsProceso.textContent =
         proceso;
-
 
     ticketsResueltos.textContent =
         resueltos;
 
 }
 
-
 /* =========================================================
-   GENERAR ID
+GENERAR ID
 ========================================================= */
 
 function generarTicketID() {
@@ -1165,38 +1117,29 @@ function generarTicketID() {
             .toString()
             .slice(-6);
 
-
     return `TKT-${numero}`;
 
 }
 
-
 /* =========================================================
-   CREAR TICKET
+CREAR TICKET
 ========================================================= */
 
-async function crearTicket(
-    event
-) {
+async function crearTicket(event) {
 
     event.preventDefault();
-
 
     const titulo =
         ticketTitulo.value.trim();
 
-
     const categoria =
         ticketCategoria.value;
-
 
     const prioridad =
         ticketPrioridad.value;
 
-
     const descripcion =
         ticketDescripcion.value.trim();
-
 
     if (
         !titulo ||
@@ -1214,37 +1157,29 @@ async function crearTicket(
 
     }
 
-
     try {
 
         crearTicketBtn.disabled =
             true;
 
-
         crearTicketBtn.innerHTML =
             "⏳ Creando...";
-
 
         const usuario =
             await obtenerUsuarioActual();
 
-
         const sitio =
             await obtenerSitioSharePoint();
-
 
         const lista =
             await obtenerListaTickets();
 
-
         const ticketID =
             generarTicketID();
-
 
         const fecha =
             new Date()
                 .toISOString();
-
 
         const body = {
 
@@ -1287,11 +1222,9 @@ async function crearTicket(
 
         };
 
-
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
             `${sitio.id}/lists/${lista.id}/items`;
-
 
         await graphFetch(
 
@@ -1308,7 +1241,6 @@ async function crearTicket(
 
         );
 
-
         mostrarMensaje(
 
             `Ticket ${ticketID} creado correctamente.`,
@@ -1317,16 +1249,12 @@ async function crearTicket(
 
         );
 
-
         ticketForm.reset();
-
 
         ticketPrioridad.value =
             "Media";
 
-
         await cargarTickets();
-
 
     }
 
@@ -1336,7 +1264,6 @@ async function crearTicket(
             "Error creando ticket:",
             error
         );
-
 
         mostrarMensaje(
 
@@ -1354,7 +1281,6 @@ async function crearTicket(
         crearTicketBtn.disabled =
             false;
 
-
         crearTicketBtn.innerHTML =
             "<span>🎫</span> Crear ticket";
 
@@ -1362,9 +1288,8 @@ async function crearTicket(
 
 }
 
-
 /* =========================================================
-   MENSAJE
+MENSAJE GENERAL
 ========================================================= */
 
 function mostrarMensaje(
@@ -1375,10 +1300,8 @@ function mostrarMensaje(
     ticketMensaje.textContent =
         mensaje;
 
-
     ticketMensaje.className =
         `ticket-message ${tipo}`;
-
 
     setTimeout(
         () => {
@@ -1395,14 +1318,11 @@ function mostrarMensaje(
 
 }
 
-
 /* =========================================================
-   ABRIR MODAL RESOLVER
+ABRIR MODAL RESOLVER
 ========================================================= */
 
-function abrirResolverTicket(
-    itemId
-) {
+function abrirResolverTicket(itemId) {
 
     const ticket =
         ticketsData.find(
@@ -1411,17 +1331,14 @@ function abrirResolverTicket(
                 String(itemId)
         );
 
-
     if (!ticket) {
 
         return;
 
     }
 
-
     const fields =
         ticket.fields || {};
-
 
     const estado =
         obtenerCampo(
@@ -1429,10 +1346,8 @@ function abrirResolverTicket(
             ["Estado"]
         );
 
-
     if (
         estado === "Resuelto" ||
-        estado === "Sin resolver" ||
         estado === "Cerrado"
     ) {
 
@@ -1440,10 +1355,8 @@ function abrirResolverTicket(
 
     }
 
-
     ticketSeleccionadoResolver =
         ticket;
-
 
     const ticketId =
         obtenerCampo(
@@ -1453,40 +1366,32 @@ function abrirResolverTicket(
         `TKT-${String(ticket.id)
             .padStart(6, "0")}`;
 
-
     resolverTicketId.textContent =
         ticketId;
-
 
     resolverEstado.value =
         "Resuelto";
 
-
     resolverDescripcion.value =
         "";
-
 
     resolverMensaje.textContent =
         "";
 
-
     resolverMensaje.className =
         "ticket-message";
-
 
     resolverModal.classList.add(
         "show"
     );
-
 
     document.body.style.overflow =
         "hidden";
 
 }
 
-
 /* =========================================================
-   CERRAR MODAL RESOLVER
+CERRAR MODAL RESOLVER
 ========================================================= */
 
 function cerrarResolverTicket() {
@@ -1495,10 +1400,8 @@ function cerrarResolverTicket() {
         "show"
     );
 
-
     ticketSeleccionadoResolver =
         null;
-
 
     if (
         !ticketModal.classList.contains("show")
@@ -1511,9 +1414,8 @@ function cerrarResolverTicket() {
 
 }
 
-
 /* =========================================================
-   MOSTRAR MENSAJE DEL MODAL RESOLVER
+MENSAJE MODAL RESOLVER
 ========================================================= */
 
 function mostrarMensajeResolver(
@@ -1524,15 +1426,13 @@ function mostrarMensajeResolver(
     resolverMensaje.textContent =
         mensaje;
 
-
     resolverMensaje.className =
         `ticket-message ${tipo}`;
 
 }
 
-
 /* =========================================================
-   GUARDAR RESULTADO DEL TICKET
+GUARDAR RESULTADO
 ========================================================= */
 
 async function guardarResultadoTicket() {
@@ -1545,14 +1445,11 @@ async function guardarResultadoTicket() {
 
     }
 
-
     const estado =
         resolverEstado.value;
 
-
     const descripcion =
         resolverDescripcion.value.trim();
-
 
     if (!descripcion) {
 
@@ -1570,45 +1467,45 @@ async function guardarResultadoTicket() {
 
     }
 
-
     try {
 
         confirmarResolver.disabled =
             true;
 
-
         confirmarResolver.innerHTML =
             "⏳ Guardando...";
-
 
         const sitio =
             await obtenerSitioSharePoint();
 
-
         const lista =
             await obtenerListaTickets();
-
 
         const itemId =
             ticketSeleccionadoResolver.id;
 
+        const nombreCampoSolucion =
+            await obtenerCampoTipoSolucion();
 
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
             `${sitio.id}/lists/${lista.id}/items/` +
             `${itemId}/fields`;
 
-
         const body = {
 
             Estado:
-                estado,
-
-            TipoSolucion:
-                descripcion
+                estado
 
         };
 
+        body[nombreCampoSolucion] =
+            descripcion;
+
+        console.log(
+            "Actualizando ticket:",
+            body
+        );
 
         await graphFetch(
 
@@ -1625,7 +1522,6 @@ async function guardarResultadoTicket() {
 
         );
 
-
         const ticketId =
             obtenerCampo(
                 ticketSeleccionadoResolver.fields,
@@ -1634,21 +1530,17 @@ async function guardarResultadoTicket() {
             `TKT-${String(itemId)
                 .padStart(6, "0")}`;
 
-
         cerrarResolverTicket();
-
 
         mostrarMensaje(
 
-            `Ticket ${ticketId} actualizado correctamente.`,
+            `Ticket ${ticketId} actualizado: ${estado}.`,
 
             "success"
 
         );
 
-
         await cargarTickets();
-
 
     }
 
@@ -1659,11 +1551,10 @@ async function guardarResultadoTicket() {
             error
         );
 
-
         mostrarMensajeResolver(
 
-            "No se pudo actualizar el ticket. " +
-            "Revisa la conexión con Microsoft Lists.",
+            error.message ||
+            "No se pudo actualizar el ticket.",
 
             "error"
 
@@ -1676,7 +1567,6 @@ async function guardarResultadoTicket() {
         confirmarResolver.disabled =
             false;
 
-
         confirmarResolver.innerHTML =
             "✓ Guardar resultado";
 
@@ -1684,14 +1574,11 @@ async function guardarResultadoTicket() {
 
 }
 
-
 /* =========================================================
-   DETALLE
+MOSTRAR DETALLE
 ========================================================= */
 
-function mostrarDetalleTicket(
-    itemId
-) {
+function mostrarDetalleTicket(itemId) {
 
     const ticket =
         ticketsData.find(
@@ -1700,17 +1587,14 @@ function mostrarDetalleTicket(
                 String(itemId)
         );
 
-
     if (!ticket) {
 
         return;
 
     }
 
-
     const fields =
         ticket.fields || {};
-
 
     const ticketId =
         obtenerCampo(
@@ -1720,20 +1604,20 @@ function mostrarDetalleTicket(
         `TKT-${String(ticket.id)
             .padStart(6, "0")}`;
 
-
     const titulo =
         obtenerCampo(
             fields,
-            ["Title", "Título"]
+            [
+                "Title",
+                "Título"
+            ]
         );
-
 
     const usuario =
         obtenerCampo(
             fields,
             ["Usuario"]
         );
-
 
     const categoria =
         obtenerCampo(
@@ -1744,13 +1628,11 @@ function mostrarDetalleTicket(
             ]
         );
 
-
     const prioridad =
         obtenerCampo(
             fields,
             ["Prioridad"]
         );
-
 
     const estado =
         obtenerCampo(
@@ -1758,7 +1640,6 @@ function mostrarDetalleTicket(
             ["Estado"]
         ) ||
         "Pendiente";
-
 
     const fecha =
         obtenerCampo(
@@ -1769,6 +1650,26 @@ function mostrarDetalleTicket(
             ]
         );
 
+    const nombresSolucion = [
+        "TipoSolucion",
+        "Tipo solución",
+        "Tipo Solucion",
+        "Tipo_x0020_soluci_x00f3_n"
+    ];
+
+    if (campoTipoSolucion) {
+
+        nombresSolucion.push(
+            campoTipoSolucion
+        );
+
+    }
+
+    const solucion =
+        obtenerCampo(
+            fields,
+            nombresSolucion
+        );
 
     const descripcion =
         obtenerCampo(
@@ -1779,83 +1680,61 @@ function mostrarDetalleTicket(
             ]
         );
 
-
-    const solucion =
-        obtenerCampo(
-            fields,
-            [
-                "TipoSolucion"
-            ]
-        );
-
-
     document.getElementById(
         "modalTicketId"
     ).textContent =
         ticketId;
-
 
     const estadoElement =
         document.getElementById(
             "modalTicketEstado"
         );
 
-
     estadoElement.textContent =
         estado;
 
-
     estadoElement.className =
         `estado-badge ${claseEstado(estado)}`;
-
 
     document.getElementById(
         "modalTicketTitulo"
     ).textContent =
         titulo;
 
-
     document.getElementById(
         "modalTicketUsuario"
     ).textContent =
         usuario || "—";
-
 
     document.getElementById(
         "modalTicketCategoria"
     ).textContent =
         categoria || "—";
 
-
     document.getElementById(
         "modalTicketPrioridad"
     ).textContent =
         prioridad || "—";
-
 
     document.getElementById(
         "modalTicketFecha"
     ).textContent =
         formatearFecha(fecha);
 
-
     document.getElementById(
         "modalTicketDescripcion"
     ).textContent =
         descripcion || "—";
-
 
     const solucionBox =
         document.getElementById(
             "modalTicketSolucionBox"
         );
 
-
     const solucionElement =
         document.getElementById(
             "modalTicketSolucion"
         );
-
 
     if (solucion) {
 
@@ -1877,20 +1756,17 @@ function mostrarDetalleTicket(
 
     }
 
-
     ticketModal.classList.add(
         "show"
     );
-
 
     document.body.style.overflow =
         "hidden";
 
 }
 
-
 /* =========================================================
-   CERRAR MODAL DETALLE
+CERRAR DETALLE
 ========================================================= */
 
 function cerrarTicketModal() {
@@ -1898,7 +1774,6 @@ function cerrarTicketModal() {
     ticketModal.classList.remove(
         "show"
     );
-
 
     if (
         !resolverModal.classList.contains("show")
@@ -1911,9 +1786,8 @@ function cerrarTicketModal() {
 
 }
 
-
 /* =========================================================
-   EVENTOS
+EVENTOS
 ========================================================= */
 
 ticketForm.addEventListener(
@@ -1921,36 +1795,30 @@ ticketForm.addEventListener(
     crearTicket
 );
 
-
 actualizarTickets.addEventListener(
     "click",
     cargarTickets
 );
-
 
 buscarTicket.addEventListener(
     "input",
     renderizarTickets
 );
 
-
 filtroEstado.addEventListener(
     "change",
     renderizarTickets
 );
-
 
 filtroPrioridad.addEventListener(
     "change",
     renderizarTickets
 );
 
-
 cerrarModal.addEventListener(
     "click",
     cerrarTicketModal
 );
-
 
 ticketModal.addEventListener(
     "click",
@@ -1967,9 +1835,8 @@ ticketModal.addEventListener(
     }
 );
 
-
 /* =========================================================
-   EVENTOS - MODAL RESOLVER
+EVENTOS MODAL RESOLVER
 ========================================================= */
 
 cerrarResolverModal.addEventListener(
@@ -1977,18 +1844,15 @@ cerrarResolverModal.addEventListener(
     cerrarResolverTicket
 );
 
-
 cancelarResolver.addEventListener(
     "click",
     cerrarResolverTicket
 );
 
-
 confirmarResolver.addEventListener(
     "click",
     guardarResultadoTicket
 );
-
 
 resolverModal.addEventListener(
     "click",
@@ -2005,9 +1869,8 @@ resolverModal.addEventListener(
     }
 );
 
-
 /* =========================================================
-   ESCAPE
+ESCAPE
 ========================================================= */
 
 document.addEventListener(
@@ -2027,9 +1890,8 @@ document.addEventListener(
     }
 );
 
-
 /* =========================================================
-   INICIALIZACIÓN
+INICIALIZACIÓN
 ========================================================= */
 
 async function iniciarTickets() {
@@ -2049,10 +1911,8 @@ async function iniciarTickets() {
             error
         );
 
-
         usuarioNombre.textContent =
             "No se pudo obtener el usuario";
-
 
         usuarioCorreo.textContent =
             "Revisa tu sesión de Microsoft 365";
@@ -2060,6 +1920,5 @@ async function iniciarTickets() {
     }
 
 }
-
 
 iniciarTickets();

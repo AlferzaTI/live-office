@@ -291,8 +291,8 @@ async function obtenerToken() {
     catch (error) {
 
         console.warn(
-            "Token silencioso no disponible. "
-            + "Solicitando autenticación interactiva.",
+            "Token silencioso no disponible. " +
+            "Solicitando autenticación interactiva.",
             error
         );
 
@@ -560,10 +560,16 @@ async function cargarTickets() {
             await obtenerListaTickets();
 
 
+        /*
+         * IMPORTANTE:
+         * $expand debe llevar el signo $
+         * para que Graph devuelva los campos.
+         */
+
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
             `${sitio.id}/lists/${lista.id}/items` +
-            `?expand=fields&$top=999`;
+            `?$expand=fields&$top=999`;
 
 
         const resultado =
@@ -572,6 +578,12 @@ async function cargarTickets() {
 
         ticketsData =
             resultado.value || [];
+
+
+        console.log(
+            "Tickets cargados:",
+            ticketsData
+        );
 
 
         renderizarTickets();
@@ -1092,7 +1104,7 @@ function renderizarTickets() {
                         </td>
 
 
-                        <td>
+                        <td class="ticket-action-cell">
 
                             ${accion}
 

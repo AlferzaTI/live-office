@@ -426,7 +426,6 @@
 ========================================================= */
 
 .ticket-form-card,
-
 .tickets-list-card {
 
     padding: 25px;
@@ -470,7 +469,6 @@
 
 
 .section-heading h3,
-
 .list-header h3 {
 
     margin: 0;
@@ -541,9 +539,7 @@
 
 
 .form-group input,
-
 .form-group select,
-
 .form-group textarea {
 
     width: 100%;
@@ -584,9 +580,7 @@
 
 
 .form-group input:focus,
-
 .form-group select:focus,
-
 .form-group textarea:focus {
 
     background: white;
@@ -760,9 +754,7 @@
 
 
 .btn-primary,
-
 .btn-secondary,
-
 .refresh-button {
 
     border: 0;
@@ -895,7 +887,6 @@
 
 
 .ticket-filters input,
-
 .ticket-filters select {
 
     width: 100%;
@@ -922,7 +913,6 @@
 
 
 .ticket-filters input:focus,
-
 .ticket-filters select:focus {
 
     border-color: #0a84ff;
@@ -1020,7 +1010,6 @@
 ========================================================= */
 
 .tickets-table th:last-child,
-
 .tickets-table td:last-child {
 
     width: 125px;
@@ -1056,6 +1045,8 @@
     width: 125px;
 
     min-width: 125px;
+
+    max-width: 125px;
 
     text-align: center !important;
 
@@ -1190,7 +1181,6 @@
 
 
 .estado-badge,
-
 .prioridad-badge {
 
     display: inline-flex;
@@ -1517,7 +1507,6 @@
 
 
 .modal-info-grid span,
-
 .modal-description > span {
 
     display: block;
@@ -1657,7 +1646,6 @@
 
 
 #resolverEstado,
-
 #resolverDescripcion {
 
     width: 100%;
@@ -1871,7 +1859,6 @@
 
 
     .ticket-form-card,
-
     .tickets-list-card {
 
         padding: 18px;
@@ -1907,7 +1894,6 @@
 
 
     .btn-primary,
-
     .btn-secondary {
 
         width: 100%;

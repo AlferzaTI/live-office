@@ -1,5 +1,3 @@
-(function () {
-
 /* =========================================================
    ALFERZA LIVE OFFICE
    TICKETS
@@ -21,7 +19,7 @@ const MSAL_CONFIG = {
             "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
         redirectUri:
-            new URL("blank.html", window.location.href).href
+            "https://alferzati.github.io/live-office/blank.html"
 
     },
 
@@ -62,6 +60,8 @@ const SCOPES_GRAPH = [
 
     "User.Read",
 
+    "Sites.Read.All",
+
     "Sites.ReadWrite.All"
 
 ];
@@ -70,19 +70,6 @@ const SCOPES_GRAPH = [
 /* =========================================================
    MSAL
 ========================================================= */
-
-if (typeof msal === "undefined") {
-
-    document.getElementById("usuarioNombre").textContent =
-        "No cargó la librería de Microsoft (MSAL)";
-
-    document.getElementById("usuarioCorreo").textContent =
-        "Revisa tu conexión o bloqueadores de contenido";
-
-    throw new Error("MSAL no está disponible.");
-
-}
-
 
 const msalInstance =
     new msal.PublicClientApplication(
@@ -272,13 +259,9 @@ async function obtenerToken() {
 
     if (!cuentas.length) {
 
-        const e = new Error(
+        throw new Error(
             "No existe una sesión de Microsoft."
         );
-
-        e.codigo = "SIN_SESION";
-
-        throw e;
 
     }
 
@@ -307,24 +290,27 @@ async function obtenerToken() {
 
     catch (error) {
 
-        /*
-         * No abrimos popup automáticamente:
-         * el navegador lo bloquea si no viene
-         * de un clic del usuario.
-         */
-
         console.warn(
-            "Token silencioso no disponible:",
+            "Token silencioso no disponible. " +
+            "Solicitando autenticación interactiva.",
             error
         );
 
-        const e = new Error(
-            "Se requiere autorización de Microsoft."
-        );
 
-        e.codigo = "REQUIERE_INTERACCION";
+        const resultado =
+            await msalInstance.acquireTokenPopup({
 
-        throw e;
+                scopes:
+                    SCOPES_GRAPH
+
+            });
+
+
+        cuentaActual =
+            msalInstance.getAllAccounts()[0];
+
+
+        return resultado.accessToken;
 
     }
 
@@ -449,7 +435,7 @@ async function obtenerListaTickets() {
     const url =
         `https://graph.microsoft.com/v1.0/sites/` +
         `${sitio.id}/lists` +
-        `?$select=id,name,displayName&$top=200`;
+        `?$filter=displayName eq '${TICKETS_LIST_NAME}'`;
 
 
     const resultado =
@@ -470,31 +456,8 @@ async function obtenerListaTickets() {
     }
 
 
-    const objetivo =
-        TICKETS_LIST_NAME.toLowerCase();
-
-
     listaTickets =
-        resultado.value.find(
-            l =>
-                String(l.displayName || "")
-                    .toLowerCase() === objetivo ||
-                String(l.name || "")
-                    .toLowerCase() === objetivo
-        );
-
-
-    if (!listaTickets) {
-
-        throw new Error(
-            `No se encontró la lista "${TICKETS_LIST_NAME}". ` +
-            `Listas disponibles: ` +
-            resultado.value
-                .map(l => l.displayName)
-                .join(", ")
-        );
-
-    }
+        resultado.value[0];
 
 
     return listaTickets;
@@ -534,7 +497,7 @@ async function obtenerUsuarioActual() {
     if (!respuesta.ok) {
 
         throw new Error(
-            `No se pudo obtener el usuario (${respuesta.status}).`
+            "No se pudo obtener el usuario."
         );
 
     }
@@ -646,8 +609,6 @@ async function cargarTickets() {
                     class="table-loading"
                 >
                     No se pudieron cargar los tickets.
-                    <br>
-                    <small>${escaparHTML(String(error.message).slice(0, 300))}</small>
                 </td>
 
             </tr>
@@ -2203,131 +2164,9 @@ document.addEventListener(
    INICIALIZACIÓN
 ========================================================= */
 
-async function esperarCuenta(
-    ms = 6000
-) {
-
-    const fin =
-        Date.now() + ms;
-
-
-    while (Date.now() < fin) {
-
-        if (
-            msalInstance.getAllAccounts().length
-        ) {
-
-            return true;
-
-        }
-
-        await new Promise(
-            r => setTimeout(r, 400)
-        );
-
-    }
-
-    return false;
-
-}
-
-
-function mostrarBotonLogin(
-    texto
-) {
-
-    usuarioNombre.textContent =
-        "Sesión de Microsoft requerida";
-
-    usuarioCorreo.textContent =
-        texto;
-
-    ticketsTableBody.innerHTML = `
-        <tr>
-            <td colspan="7" class="table-loading">
-                <button
-                    type="button"
-                    class="btn-primary"
-                    id="btnLoginTickets"
-                >
-                    Iniciar sesión / autorizar con Microsoft
-                </button>
-            </td>
-        </tr>
-    `;
-
-    document
-        .getElementById("btnLoginTickets")
-        .addEventListener(
-            "click",
-            async () => {
-
-                try {
-
-                    const cuentas =
-                        msalInstance.getAllAccounts();
-
-                    if (cuentas.length) {
-
-                        await msalInstance.acquireTokenPopup({
-                            scopes: SCOPES_GRAPH,
-                            account: cuentas[0]
-                        });
-
-                    }
-
-                    else {
-
-                        await msalInstance.loginPopup({
-                            scopes: SCOPES_GRAPH
-                        });
-
-                    }
-
-                    iniciarTickets();
-
-                }
-
-                catch (error) {
-
-                    console.error(
-                        "Error de inicio de sesión:",
-                        error
-                    );
-
-                    usuarioCorreo.textContent =
-                        "No se pudo iniciar sesión: " +
-                        String(error.message || error)
-                            .slice(0, 200);
-
-                }
-
-            }
-        );
-
-}
-
-
 async function iniciarTickets() {
 
     try {
-
-        /*
-         * auth.js se carga después de este archivo,
-         * así que damos unos segundos para que
-         * termine de restaurar la sesión.
-         */
-
-        if (!(await esperarCuenta())) {
-
-            mostrarBotonLogin(
-                "Inicia sesión para ver y crear tickets"
-            );
-
-            return;
-
-        }
-
 
         await obtenerUsuarioActual();
 
@@ -2343,41 +2182,16 @@ async function iniciarTickets() {
         );
 
 
-        if (
-            error.codigo === "REQUIERE_INTERACCION" ||
-            error.codigo === "SIN_SESION"
-        ) {
-
-            mostrarBotonLogin(
-                "Autoriza los permisos de Microsoft"
-            );
-
-            return;
-
-        }
-
-
         usuarioNombre.textContent =
             "No se pudo obtener el usuario";
 
+
         usuarioCorreo.textContent =
-            String(error.message || error)
-                .slice(0, 200);
+            "Revisa tu sesión de Microsoft 365";
 
     }
 
 }
 
 
-/* Funciones usadas desde onclick en el HTML */
-
-window.abrirResolverTicket =
-    abrirResolverTicket;
-
-window.mostrarDetalleTicket =
-    mostrarDetalleTicket;
-
-
 iniciarTickets();
-
-})();

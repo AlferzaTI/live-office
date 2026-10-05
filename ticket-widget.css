@@ -4,11 +4,12 @@
 
 .ticket-widget {
     position: fixed;
+
     right: 20px;
     bottom: 20px;
 
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
 
     z-index: 9998;
 
@@ -24,8 +25,8 @@
 }
 
 .ticket-widget img {
-    width: 70px;
-    height: 70px;
+    width: 110px;
+    height: 110px;
 
     object-fit: contain;
 
@@ -96,6 +97,7 @@
 
 .ticket-widget-modal {
     width: 100%;
+
     max-width: 650px;
 
     max-height: 92vh;
@@ -178,6 +180,7 @@
     margin: 0;
 
     font-size: 20px;
+
     font-weight: 700;
 }
 
@@ -685,14 +688,15 @@ body.ticket-modal-open {
         right: 14px;
         bottom: 14px;
 
-        width: 62px;
-        height: 62px;
+        width: 85px;
+        height: 85px;
     }
 
     .ticket-widget img {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
+        width: 85px;
+        height: 85px;
+
+        object-fit: contain;
     }
 
     .ticket-widget-overlay {

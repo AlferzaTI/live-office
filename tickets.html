@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -74,64 +75,47 @@
 
             <ul>
 
-                <li
-                    onclick="window.location.href='index.html'"
-                >
+                <li onclick="window.location.href='index.html'">
                     🏢 Oficina
                 </li>
 
 
-                <li
-                    onclick="window.location.href='personal.html'"
-                >
+                <li onclick="window.location.href='personal.html'">
                     👥 Personal
                 </li>
 
 
-                <li
-                    onclick="window.location.href='reserva.html'"
-                >
+                <li onclick="window.location.href='reserva.html'">
                     📝 Reservas
                 </li>
 
 
-                <li
-                    onclick="window.location.href='salas/salas.html'"
-                >
+                <li onclick="window.location.href='salas/salas.html'">
                     📅 Salas
                 </li>
 
 
-                <li
-                    onclick="window.location.href='comunicados.html'"
-                >
+                <li onclick="window.location.href='comunicados.html'">
                     📢 Comunicados
                 </li>
 
 
-                <li
-                    onclick="window.location.href='seguridad.html'"
-                >
+                <li onclick="window.location.href='seguridad.html'">
                     🔐 Seguridad
                 </li>
 
 
-                <li
-                    onclick="window.location.href='infraestructura.html'"
-                >
+                <li onclick="window.location.href='infraestructura.html'">
                     🏗️ Infraestructura
                 </li>
 
-                <li
-                onclick="window.location.href='tickets.html'"
-            >
-                🎫 Tickets
+
+                <li onclick="window.location.href='tickets.html'">
+                    🎫 Tickets
                 </li>
 
 
-                <li
-                    onclick="window.location.href='configuracion.html'"
-                >
+                <li onclick="window.location.href='configuracion.html'">
                     ⚙️ Configuración
                 </li>
 
@@ -638,6 +622,10 @@
                             Resuelto
                         </option>
 
+                        <option value="Sin resolver">
+                            Sin resolver
+                        </option>
+
                         <option value="Cerrado">
                             Cerrado
                         </option>
@@ -708,6 +696,10 @@
                                     Fecha
                                 </th>
 
+                                <th>
+                                    Acción
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -718,7 +710,7 @@
                             <tr>
 
                                 <td
-                                    colspan="6"
+                                    colspan="7"
                                     class="table-loading"
                                 >
                                     Cargando tickets...
@@ -870,6 +862,158 @@
                 <p id="modalTicketDescripcion">
                     —
                 </p>
+
+            </div>
+
+
+            <!-- RESULTADO / SOLUCIÓN -->
+
+            <div
+                class="modal-description"
+                id="modalTicketSolucionBox"
+                style="display:none;"
+            >
+
+                <span>
+                    RESULTADO / SOLUCIÓN
+                </span>
+
+                <p id="modalTicketSolucion">
+                    —
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         MODAL RESOLVER TICKET
+    =========================================== -->
+
+    <div
+        id="resolverModal"
+        class="ticket-modal"
+    >
+
+        <div class="ticket-modal-content resolver-modal-content">
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="cerrarResolverModal"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-ticket-header">
+
+                <span id="resolverTicketId">
+                    TKT-000000
+                </span>
+
+                <span class="resolver-label">
+                    RESOLVER TICKET
+                </span>
+
+            </div>
+
+
+            <h3>
+                Gestionar ticket
+            </h3>
+
+
+            <p class="resolver-help">
+                Indica el resultado de la atención del ticket
+                y registra una breve descripción.
+            </p>
+
+
+
+            <!-- ESTADO -->
+
+            <div class="form-group resolver-status-group">
+
+                <label for="resolverEstado">
+                    Resultado
+                </label>
+
+                <select id="resolverEstado">
+
+                    <option value="Resuelto">
+                        Resuelto
+                    </option>
+
+                    <option value="Sin resolver">
+                        Sin resolver
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label for="resolverDescripcion">
+                    Descripción de la solución
+                </label>
+
+                <textarea
+                    id="resolverDescripcion"
+                    rows="5"
+                    maxlength="1000"
+                    placeholder="Describe brevemente cómo se solucionó el problema..."
+                    required
+                ></textarea>
+
+                <small>
+                    Máximo 1000 caracteres.
+                </small>
+
+            </div>
+
+
+
+            <!-- MENSAJE -->
+
+            <div
+                id="resolverMensaje"
+                class="ticket-message"
+            ></div>
+
+
+
+            <!-- BOTONES -->
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    id="cancelarResolver"
+                >
+                    Cancelar
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn-primary"
+                    id="confirmarResolver"
+                >
+                    ✓ Guardar resultado
+                </button>
 
             </div>
 

@@ -1828,3 +1828,136 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================
+   GESTIÓN DE TRABAJADORES
+========================================= */
+
+.section-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.btn-gestionar-trabajadores {
+    border: none;
+    background: #00205c;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-gestionar-trabajadores:hover {
+    background: #00347f;
+    transform: translateY(-1px);
+}
+
+
+/* MODAL */
+
+.gestion-trabajador-modal {
+    width: min(520px, calc(100vw - 32px));
+}
+
+.ip-search-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.ip-search-wrapper .modal-input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.btn-buscar-ip {
+    border: none;
+    background: #00205c;
+    color: #ffffff;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-buscar-ip:hover {
+    background: #00347f;
+}
+
+.modal-equipo.encontrado {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #f4f7fb;
+    border: 1px solid #dbe3ef;
+}
+
+.modal-equipo.encontrado span {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: #667085;
+}
+
+.modal-equipo.encontrado strong {
+    font-size: 15px;
+    color: #101828;
+}
+
+.modal-equipo.encontrado small {
+    color: #667085;
+    font-size: 12px;
+}
+
+.modal-btn.danger {
+    background: #b42318;
+    color: #ffffff;
+    border: none;
+}
+
+.modal-btn.danger:hover:not(:disabled) {
+    background: #912018;
+}
+
+.modal-btn:disabled,
+.btn-buscar-ip:disabled,
+.btn-gestionar-trabajadores:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 700px) {
+
+    .section-heading-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-gestionar-trabajadores {
+        width: 100%;
+    }
+
+    .ip-search-wrapper {
+        flex-direction: column;
+    }
+
+    .btn-buscar-ip {
+        height: 42px;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+}

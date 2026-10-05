@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -14,20 +15,29 @@
 
     <link rel="preconnect" href="https://graph.microsoft.com">
     <link rel="preconnect" href="https://login.microsoftonline.com">
+
     <link rel="stylesheet" href="infraestructura.css?v=5">
 
-    <script defer src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+    <script
+        defer
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js">
+    </script>
+
 </head>
 
 <body>
 
-    <!-- LOADING -->
+    <!-- =========================================
+         LOADING
+    ========================================== -->
 
     <div id="loadingOverlay" class="loading-overlay">
 
         <div class="loading-content">
 
-            <div class="gear-spinner">⚙️</div>
+            <div class="gear-spinner">
+                ⚙️
+            </div>
 
             <p id="loadingMessage">
                 Cargando monitoreo...
@@ -42,7 +52,9 @@
     </div>
 
 
-    <!-- TOPBAR -->
+    <!-- =========================================
+         TOPBAR
+    ========================================== -->
 
     <header class="topbar">
 
@@ -71,15 +83,22 @@
     </header>
 
 
-    <!-- CONTENEDOR -->
+    <!-- =========================================
+         CONTENEDOR
+    ========================================== -->
 
     <div class="container">
 
-        <!-- SIDEBAR -->
+
+        <!-- =========================================
+             SIDEBAR
+        ========================================== -->
 
         <aside class="sidebar">
 
-            <h2>MENÚ</h2>
+            <h2>
+                MENÚ
+            </h2>
 
             <ul>
 
@@ -120,11 +139,16 @@
         </aside>
 
 
-        <!-- CONTENIDO -->
+        <!-- =========================================
+             CONTENIDO
+        ========================================== -->
 
         <main class="content">
 
-            <!-- HEADER DE INFRAESTRUCTURA -->
+
+            <!-- =========================================
+                 HEADER
+            ========================================== -->
 
             <section class="page-header">
 
@@ -183,7 +207,9 @@
             </section>
 
 
-            <!-- SERVICIOS -->
+            <!-- =========================================
+                 SERVICIOS
+            ========================================== -->
 
             <section class="monitor-section services-section">
 
@@ -236,9 +262,14 @@
             </section>
 
 
-            <!-- EQUIPOS -->
+            <!-- =========================================
+                 EQUIPOS
+            ========================================== -->
 
             <section class="monitor-section equipos-section">
+
+
+                <!-- CABECERA -->
 
                 <div class="section-heading">
 
@@ -259,19 +290,50 @@
 
                     </div>
 
+
                     <div
-                        id="equiposEstado"
-                        class="section-status online"
+                        class="section-heading-actions"
+                        style="
+                            display:flex;
+                            align-items:center;
+                            gap:12px;
+                        "
                     >
-                        ● ACTUALIZADO
+
+                        <!-- NUEVO BOTÓN -->
+
+                        <button
+                            type="button"
+                            id="btnGestionarTrabajadores"
+                            class="modal-btn primary"
+                            style="
+                                white-space:nowrap;
+                                padding:10px 16px;
+                                cursor:pointer;
+                            "
+                        >
+                            👤 Gestionar trabajadores
+                        </button>
+
+
+                        <div
+                            id="equiposEstado"
+                            class="section-status online"
+                        >
+                            ● ACTUALIZADO
+                        </div>
+
                     </div>
 
                 </div>
 
 
-                <!-- RESUMEN -->
+                <!-- =========================================
+                     RESUMEN
+                ========================================== -->
 
                 <div class="equipos-summary">
+
 
                     <div class="equipment-stat">
 
@@ -338,9 +400,12 @@
                 </div>
 
 
-                <!-- FILTROS -->
+                <!-- =========================================
+                     FILTROS
+                ========================================== -->
 
                 <div class="equipos-controls">
+
 
                     <div class="search-wrapper">
 
@@ -406,7 +471,9 @@
                 </div>
 
 
-                <!-- RESULTADOS -->
+                <!-- =========================================
+                     RESULTADOS
+                ========================================== -->
 
                 <div class="equipos-results">
 
@@ -417,7 +484,9 @@
                 </div>
 
 
-                <!-- TABLA -->
+                <!-- =========================================
+                     TABLA
+                ========================================== -->
 
                 <div class="equipos-table-container">
 
@@ -427,17 +496,38 @@
 
                             <tr>
 
-                                <th>EQUIPO</th>
-                                <th>ESTADO</th>
-                                <th>TRABAJADOR</th>
-                                <th>IP</th>
-                                <th>SISTEMA OPERATIVO</th>
-                                <th>ÁREA / OU</th>
-                                <th>ÚLTIMO REGISTRO AD</th>
+                                <th>
+                                    EQUIPO
+                                </th>
+
+                                <th>
+                                    ESTADO
+                                </th>
+
+                                <th>
+                                    TRABAJADOR
+                                </th>
+
+                                <th>
+                                    IP
+                                </th>
+
+                                <th>
+                                    SISTEMA OPERATIVO
+                                </th>
+
+                                <th>
+                                    ÁREA / OU
+                                </th>
+
+                                <th>
+                                    ÚLTIMO REGISTRO AD
+                                </th>
 
                             </tr>
 
                         </thead>
+
 
                         <tbody id="equiposTableBody">
 
@@ -493,7 +583,9 @@
             </section>
 
 
-            <!-- FOOTER -->
+            <!-- =========================================
+                 FOOTER
+            ========================================== -->
 
             <footer class="page-footer">
 
@@ -516,33 +608,37 @@
     </div>
 
 
-    <!-- MODAL -->
+    <!-- =========================================
+         MODAL GESTIÓN DE TRABAJADORES
+    ========================================== -->
 
     <div
-        id="trabajadorModal"
+        id="gestionTrabajadorModal"
         class="modal-overlay"
         style="display:none;"
     >
 
         <div class="trabajador-modal">
 
+            <!-- HEADER -->
+
             <div class="modal-header">
 
                 <div>
 
                     <span class="modal-kicker">
-                        ASIGNACIÓN
+                        GESTIÓN DE ASIGNACIÓN
                     </span>
 
                     <h3>
-                        Registrar trabajador
+                        Gestionar trabajador
                     </h3>
 
                 </div>
 
                 <button
                     type="button"
-                    id="cerrarTrabajadorModal"
+                    id="cerrarGestionTrabajadorModal"
                     class="modal-close"
                     aria-label="Cerrar"
                 >
@@ -552,23 +648,86 @@
             </div>
 
 
+            <!-- BODY -->
+
             <div class="modal-body">
 
-                <div class="modal-equipo">
 
-                    <span>
-                        EQUIPO
-                    </span>
+                <!-- IP -->
 
-                    <strong id="modalEquipoNombre">
-                        --
-                    </strong>
+                <label
+                    for="gestionIP"
+                    class="modal-label"
+                >
+                    Dirección IP
+                </label>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:8px;
+                        margin-bottom:20px;
+                    "
+                >
+
+                    <input
+                        type="text"
+                        id="gestionIP"
+                        class="modal-input"
+                        placeholder="Ej. 192.168.1.25"
+                        autocomplete="off"
+                        style="margin-bottom:0;"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="buscarEquipoIP"
+                        class="modal-btn primary"
+                        style="
+                            white-space:nowrap;
+                            cursor:pointer;
+                        "
+                    >
+                        Buscar
+                    </button>
 
                 </div>
 
 
+                <!-- EQUIPO ENCONTRADO -->
+
+                <div
+                    id="equipoEncontrado"
+                    class="modal-equipo"
+                    style="
+                        display:none;
+                        margin-bottom:20px;
+                    "
+                >
+
+                    <span>
+                        EQUIPO ENCONTRADO
+                    </span>
+
+                    <strong id="gestionEquipoNombre">
+                        --
+                    </strong>
+
+                    <small
+                        id="gestionEquipoDetalle"
+                    >
+                        --
+                    </small>
+
+                </div>
+
+
+                <!-- TRABAJADOR -->
+
                 <label
-                    for="trabajadorNombre"
+                    for="gestionTrabajador"
                     class="modal-label"
                 >
                     Trabajador
@@ -576,15 +735,19 @@
 
                 <input
                     type="text"
-                    id="trabajadorNombre"
+                    id="gestionTrabajador"
                     class="modal-input"
                     placeholder="Ingrese nombre y apellido"
                     autocomplete="off"
                     maxlength="150"
+                    disabled
                 >
 
+
+                <!-- MENSAJE -->
+
                 <div
-                    id="trabajadorError"
+                    id="gestionTrabajadorMensaje"
                     class="modal-error"
                     style="display:none;"
                 ></div>
@@ -592,22 +755,47 @@
             </div>
 
 
+            <!-- FOOTER -->
+
             <div class="modal-footer">
+
 
                 <button
                     type="button"
-                    id="cancelarTrabajador"
+                    id="cancelarGestionTrabajador"
                     class="modal-btn secondary"
                 >
                     Cancelar
                 </button>
 
+
                 <button
                     type="button"
-                    id="guardarTrabajador"
-                    class="modal-btn primary"
+                    id="btnEliminarTrabajador"
+                    class="modal-btn danger"
+                    disabled
                 >
-                    Guardar
+                    Eliminar
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btnEditarTrabajador"
+                    class="modal-btn secondary"
+                    disabled
+                >
+                    Editar
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btnRegistrarTrabajador"
+                    class="modal-btn primary"
+                    disabled
+                >
+                    Registrar
                 </button>
 
             </div>
@@ -617,7 +805,12 @@
     </div>
 
 
-    <script defer src="infraestructura.js?v=5"></script>
+    <!-- JS -->
+
+    <script
+        defer
+        src="infraestructura.js?v=6">
+    </script>
 
 </body>
 </html>

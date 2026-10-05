@@ -79,7 +79,9 @@ if (typeof msal === "undefined") {
     document.getElementById("usuarioCorreo").textContent =
         "Revisa tu conexión o bloqueadores de contenido";
 
-    throw new Error("MSAL no está disponible.");
+    throw new Error(
+        "MSAL no está disponible."
+    );
 
 }
 
@@ -103,6 +105,22 @@ let listaTickets = null;
 let ticketsData = [];
 
 let ticketSeleccionadoResolver = null;
+
+
+/*
+ * Aquí guardaremos el nombre INTERNO real
+ * de la columna que visualmente se llama
+ * TipoSolucion.
+ *
+ * Ejemplos:
+ *
+ * TipoSolucion
+ * ConfirmarResolve
+ * Tipo_x005f_Solucion
+ *
+ */
+
+let nombreCampoSolucion = null;
 
 
 /* =========================================================
@@ -261,6 +279,27 @@ function escaparHTML(valor) {
 
 
 /* =========================================================
+   NORMALIZAR NOMBRES DE COLUMNAS
+========================================================= */
+
+function normalizarNombreColumna(valor) {
+
+    return String(valor || "")
+
+        .toLowerCase()
+
+        .normalize("NFD")
+
+        .replace(/[\u0300-\u036f]/g, "")
+
+        .replace(/[\s_\-]/g, "")
+
+        .trim();
+
+}
+
+
+/* =========================================================
    TOKEN
 ========================================================= */
 
@@ -272,11 +311,13 @@ async function obtenerToken() {
 
     if (!cuentas.length) {
 
-        const e = new Error(
-            "No existe una sesión de Microsoft."
-        );
+        const e =
+            new Error(
+                "No existe una sesión de Microsoft."
+            );
 
-        e.codigo = "SIN_SESION";
+        e.codigo =
+            "SIN_SESION";
 
         throw e;
 
@@ -307,22 +348,21 @@ async function obtenerToken() {
 
     catch (error) {
 
-        /*
-         * No abrimos popup automáticamente:
-         * el navegador lo bloquea si no viene
-         * de un clic del usuario.
-         */
-
         console.warn(
             "Token silencioso no disponible:",
             error
         );
 
-        const e = new Error(
-            "Se requiere autorización de Microsoft."
-        );
 
-        e.codigo = "REQUIERE_INTERACCION";
+        const e =
+            new Error(
+                "Se requiere autorización de Microsoft."
+            );
+
+
+        e.codigo =
+            "REQUIERE_INTERACCION";
+
 
         throw e;
 
@@ -397,7 +437,28 @@ async function graphFetch(
     }
 
 
-    return respuesta.json();
+    const texto =
+        await respuesta.text();
+
+
+    if (!texto) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        return JSON.parse(texto);
+
+    }
+
+    catch {
+
+        return texto;
+
+    }
 
 }
 
@@ -476,28 +537,278 @@ async function obtenerListaTickets() {
 
     listaTickets =
         resultado.value.find(
+
             l =>
+
                 String(l.displayName || "")
                     .toLowerCase() === objetivo ||
+
                 String(l.name || "")
                     .toLowerCase() === objetivo
+
         );
 
 
     if (!listaTickets) {
 
         throw new Error(
+
             `No se encontró la lista "${TICKETS_LIST_NAME}". ` +
+
             `Listas disponibles: ` +
+
             resultado.value
-                .map(l => l.displayName)
+                .map(l => l.displayName || l.name)
                 .join(", ")
+
         );
 
     }
 
 
     return listaTickets;
+
+}
+
+
+/* =========================================================
+   OBTENER COLUMNA REAL DE SOLUCIÓN
+========================================================= */
+
+async function obtenerNombreCampoSolucion() {
+
+    if (nombreCampoSolucion) {
+
+        return nombreCampoSolucion;
+
+    }
+
+
+    const sitio =
+        await obtenerSitioSharePoint();
+
+
+    const lista =
+        await obtenerListaTickets();
+
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/` +
+        `${sitio.id}/lists/${lista.id}/columns` +
+        `?$select=name,displayName,hidden,readOnly&$top=200`;
+
+
+    const resultado =
+        await graphFetch(url);
+
+
+    const columnas =
+        resultado.value || [];
+
+
+    console.log(
+        "Columnas reales de TicketsTI:",
+        columnas
+    );
+
+
+    /*
+     * Primero buscamos por nombre visible.
+     *
+     * Esto cubre el caso:
+     *
+     * displayName = TipoSolucion
+     * name = ConfirmarResolve
+     *
+     */
+
+    let columna =
+        columnas.find(
+
+            columnaActual =>
+
+                normalizarNombreColumna(
+                    columnaActual.displayName
+                ) === "tiposolucion"
+
+        );
+
+
+    /*
+     * Si no existe por displayName,
+     * buscamos directamente por nombre interno.
+     */
+
+    if (!columna) {
+
+        columna =
+            columnas.find(
+
+                columnaActual => {
+
+                    const nombre =
+                        normalizarNombreColumna(
+                            columnaActual.name
+                        );
+
+
+                    return (
+
+                        nombre === "tiposolucion" ||
+
+                        nombre === "confirmarresolve"
+
+                    );
+
+                }
+
+            );
+
+    }
+
+
+    if (!columna) {
+
+        console.error(
+            "No se encontró la columna TipoSolucion. " +
+            "Columnas disponibles:",
+            columnas
+        );
+
+
+        throw new Error(
+
+            "No se encontró la columna de solución " +
+            "en Microsoft Lists. Revisa que exista una " +
+            "columna cuyo nombre visible sea TipoSolucion."
+
+        );
+
+    }
+
+
+    nombreCampoSolucion =
+        columna.name;
+
+
+    console.log(
+        "Campo de solución detectado:",
+        {
+            displayName:
+                columna.displayName,
+
+            name:
+                columna.name
+        }
+    );
+
+
+    return nombreCampoSolucion;
+
+}
+
+
+/* =========================================================
+   OBTENER SOLUCIÓN DESDE LOS CAMPOS
+========================================================= */
+
+function obtenerSolucion(
+    fields
+) {
+
+    if (!fields) {
+
+        return "";
+
+    }
+
+
+    /*
+     * Primero usamos el nombre interno detectado.
+     */
+
+    if (
+        nombreCampoSolucion &&
+        fields[nombreCampoSolucion] !== undefined &&
+        fields[nombreCampoSolucion] !== null
+    ) {
+
+        return fields[nombreCampoSolucion];
+
+    }
+
+
+    /*
+     * Compatibilidad con los nombres que
+     * ya venías utilizando.
+     */
+
+    const posiblesNombres = [
+
+        "TipoSolucion",
+
+        "ConfirmarResolve"
+
+    ];
+
+
+    for (
+        const nombre of posiblesNombres
+    ) {
+
+        if (
+            fields[nombre] !== undefined &&
+            fields[nombre] !== null
+        ) {
+
+            return fields[nombre];
+
+        }
+
+    }
+
+
+    /*
+     * Búsqueda adicional por equivalencia
+     * del nombre interno o visible.
+     */
+
+    const claves =
+        Object.keys(fields);
+
+
+    const claveEncontrada =
+        claves.find(
+
+            clave => {
+
+                const normalizada =
+                    normalizarNombreColumna(
+                        clave
+                    );
+
+
+                return (
+
+                    normalizada === "tiposolucion" ||
+
+                    normalizada === "confirmarresolve"
+
+                );
+
+            }
+
+        );
+
+
+    if (claveEncontrada) {
+
+        return fields[claveEncontrada];
+
+    }
+
+
+    return "";
 
 }
 
@@ -534,7 +845,9 @@ async function obtenerUsuarioActual() {
     if (!respuesta.ok) {
 
         throw new Error(
+
             `No se pudo obtener el usuario (${respuesta.status}).`
+
         );
 
     }
@@ -589,6 +902,10 @@ async function cargarTickets() {
         `;
 
 
+        ticketsEmpty.style.display =
+            "none";
+
+
         const sitio =
             await obtenerSitioSharePoint();
 
@@ -598,10 +915,28 @@ async function cargarTickets() {
 
 
         /*
-         * IMPORTANTE:
-         * $expand debe llevar el signo $
-         * para que Graph devuelva los campos.
+         * Intentamos detectar la columna de solución
+         * desde el inicio.
+         *
+         * Esto no afecta la carga si la columna
+         * está correctamente creada.
          */
+
+        try {
+
+            await obtenerNombreCampoSolucion();
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "No se pudo detectar inicialmente la columna de solución:",
+                error
+            );
+
+        }
+
 
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
@@ -645,9 +980,18 @@ async function cargarTickets() {
                     colspan="7"
                     class="table-loading"
                 >
+
                     No se pudieron cargar los tickets.
+
                     <br>
-                    <small>${escaparHTML(String(error.message).slice(0, 300))}</small>
+
+                    <small>
+                        ${escaparHTML(
+                            String(error.message)
+                                .slice(0, 500)
+                        )}
+                    </small>
+
                 </td>
 
             </tr>
@@ -719,7 +1063,9 @@ function formatearFecha(
 
 
     return date.toLocaleString(
+
         "es-PE",
+
         {
 
             day:
@@ -738,6 +1084,7 @@ function formatearFecha(
                 "2-digit"
 
         }
+
     );
 
 }
@@ -867,6 +1214,7 @@ function renderizarTickets() {
 
     const filtrados =
         ticketsData.filter(
+
             item => {
 
                 const fields =
@@ -962,6 +1310,7 @@ function renderizarTickets() {
                 );
 
             }
+
         );
 
 
@@ -983,6 +1332,7 @@ function renderizarTickets() {
 
     ticketsTableBody.innerHTML =
         filtrados.map(
+
             item => {
 
                 const fields =
@@ -1006,6 +1356,7 @@ function renderizarTickets() {
                             "TicketID"
                         ]
                     ) ||
+
                     `TKT-${String(item.id)
                         .padStart(6, "0")}`;
 
@@ -1036,6 +1387,7 @@ function renderizarTickets() {
                             "Estado"
                         ]
                     ) ||
+
                     "Pendiente";
 
 
@@ -1050,11 +1402,11 @@ function renderizarTickets() {
 
 
                 /*
-                 * Los tickets Resueltos o Cerrados
-                 * ya no necesitan acción.
+                 * Resuelto y Cerrado no muestran
+                 * el botón de gestión.
                  *
-                 * Los Pendientes, En proceso y
-                 * Sin resolver pueden volver a gestionarse.
+                 * Pendiente, En proceso y Sin resolver
+                 * sí pueden volver a gestionarse.
                  */
 
                 const accion =
@@ -1063,12 +1415,15 @@ function renderizarTickets() {
                     estado === "Cerrado"
 
                         ? `
+
                             <span class="sin-accion">
                                 —
                             </span>
+
                         `
 
                         : `
+
                             <button
                                 type="button"
                                 class="btn-resolver"
@@ -1076,6 +1431,7 @@ function renderizarTickets() {
                             >
                                 ✓ Resolver
                             </button>
+
                         `;
 
 
@@ -1088,25 +1444,19 @@ function renderizarTickets() {
                         <td>
 
                             <span class="ticket-id">
-
                                 ${escaparHTML(ticketId)}
-
                             </span>
 
                         </td>
 
 
                         <td>
-
                             ${escaparHTML(titulo)}
-
                         </td>
 
 
                         <td>
-
                             ${escaparHTML(categoria)}
-
                         </td>
 
 
@@ -1115,9 +1465,7 @@ function renderizarTickets() {
                             <span
                                 class="prioridad-badge ${clasePrioridad(prioridad)}"
                             >
-
                                 ${escaparHTML(prioridad)}
-
                             </span>
 
                         </td>
@@ -1128,18 +1476,14 @@ function renderizarTickets() {
                             <span
                                 class="estado-badge ${claseEstado(estado)}"
                             >
-
                                 ${escaparHTML(estado)}
-
                             </span>
 
                         </td>
 
 
                         <td>
-
                             ${formatearFecha(fecha)}
-
                         </td>
 
 
@@ -1154,6 +1498,7 @@ function renderizarTickets() {
                 `;
 
             }
+
         ).join("");
 
 }
@@ -1171,26 +1516,33 @@ function actualizarResumen() {
 
     const pendientes =
         ticketsData.filter(
+
             item =>
+
                 obtenerCampo(
                     item.fields,
                     ["Estado"]
                 ) === "Pendiente"
+
         ).length;
 
 
     const proceso =
         ticketsData.filter(
+
             item =>
+
                 obtenerCampo(
                     item.fields,
                     ["Estado"]
                 ) === "En proceso"
+
         ).length;
 
 
     const resueltos =
         ticketsData.filter(
+
             item => {
 
                 const estado =
@@ -1209,6 +1561,7 @@ function actualizarResumen() {
                 );
 
             }
+
         ).length;
 
 
@@ -1282,8 +1635,11 @@ async function crearTicket(
     ) {
 
         mostrarMensaje(
+
             "Completa todos los campos obligatorios.",
+
             "error"
+
         );
 
         return;
@@ -1322,47 +1678,80 @@ async function crearTicket(
                 .toISOString();
 
 
+        const fields = {
+
+            Title:
+                titulo,
+
+            TicketID:
+                ticketID,
+
+            Usuario:
+                usuario.displayName ||
+                "",
+
+            Correo:
+                usuario.mail ||
+                usuario.userPrincipalName ||
+                "",
+
+            Categoria:
+                categoria,
+
+            Prioridad:
+                prioridad,
+
+            Descripcion:
+                descripcion,
+
+            Estado:
+                "Pendiente",
+
+            FechaCreacion:
+                fecha,
+
+            AsignadoA:
+                "Soporte TI"
+
+        };
+
+
+        /*
+         * Buscamos el nombre interno real
+         * de TipoSolucion.
+         *
+         * Si existe, inicializamos el campo.
+         */
+
+        try {
+
+            const campoSolucion =
+                await obtenerNombreCampoSolucion();
+
+
+            fields[campoSolucion] =
+                "";
+
+        }
+
+        catch (error) {
+
+            console.warn(
+
+                "No se pudo detectar TipoSolucion al crear " +
+                "el ticket. El ticket se creará sin ese campo.",
+
+                error
+
+            );
+
+        }
+
+
         const body = {
 
-            fields: {
-
-                Title:
-                    titulo,
-
-                TicketID:
-                    ticketID,
-
-                Usuario:
-                    usuario.displayName ||
-                    "",
-
-                Correo:
-                    usuario.mail ||
-                    usuario.userPrincipalName ||
-                    "",
-
-                Categoria:
-                    categoria,
-
-                Prioridad:
-                    prioridad,
-
-                Descripcion:
-                    descripcion,
-
-                Estado:
-                    "Pendiente",
-
-                FechaCreacion:
-                    fecha,
-
-                AsignadoA:
-                    "Soporte TI",
-
-                TipoSolucion:
-                    ""
-
-            }
+            fields:
+                fields
 
         };
 
@@ -1420,7 +1809,9 @@ async function crearTicket(
         mostrarMensaje(
 
             "No se pudo crear el ticket. " +
-            "Revisa la conexión con Microsoft Lists.",
+
+            String(error.message || error)
+                .slice(0, 300),
 
             "error"
 
@@ -1460,6 +1851,7 @@ function mostrarMensaje(
 
 
     setTimeout(
+
         () => {
 
             ticketMensaje.className =
@@ -1469,7 +1861,9 @@ function mostrarMensaje(
                 "";
 
         },
+
         5000
+
     );
 
 }
@@ -1485,9 +1879,12 @@ function mostrarDetalleTicket(
 
     const ticket =
         ticketsData.find(
+
             item =>
+
                 String(item.id) ===
                 String(itemId)
+
         );
 
 
@@ -1507,6 +1904,7 @@ function mostrarDetalleTicket(
             fields,
             ["TicketID"]
         ) ||
+
         `TKT-${String(ticket.id)
             .padStart(6, "0")}`;
 
@@ -1550,6 +1948,7 @@ function mostrarDetalleTicket(
             fields,
             ["Estado"]
         ) ||
+
         "Pendiente";
 
 
@@ -1574,12 +1973,7 @@ function mostrarDetalleTicket(
 
 
     const solucion =
-        obtenerCampo(
-            fields,
-            [
-                "TipoSolucion"
-            ]
-        );
+        obtenerSolucion(fields);
 
 
     document.getElementById(
@@ -1639,8 +2033,7 @@ function mostrarDetalleTicket(
 
 
     /*
-     * Mostrar el resultado / solución
-     * únicamente cuando exista.
+     * RESULTADO / SOLUCIÓN
      */
 
     const solucionBox =
@@ -1720,14 +2113,21 @@ function abrirResolverTicket(
      * abra también el detalle del ticket.
      */
 
-    event.stopPropagation();
+    if (event) {
+
+        event.stopPropagation();
+
+    }
 
 
     const ticket =
         ticketsData.find(
+
             item =>
+
                 String(item.id) ===
                 String(itemId)
+
         );
 
 
@@ -1747,6 +2147,7 @@ function abrirResolverTicket(
             fields,
             ["TicketID"]
         ) ||
+
         `TKT-${String(ticket.id)
             .padStart(6, "0")}`;
 
@@ -1756,14 +2157,12 @@ function abrirResolverTicket(
             fields,
             ["Estado"]
         ) ||
+
         "Pendiente";
 
 
     const solucion =
-        obtenerCampo(
-            fields,
-            ["TipoSolucion"]
-        );
+        obtenerSolucion(fields);
 
 
     ticketSeleccionadoResolver =
@@ -1775,16 +2174,19 @@ function abrirResolverTicket(
 
 
     /*
-     * Si el ticket ya estaba Sin resolver,
-     * dejamos seleccionada esa opción.
+     * Si ya estaba Sin resolver,
+     * mantenemos esa opción.
      *
-     * En cualquier otro estado, por defecto
+     * Para cualquier otro estado
      * se propone Resuelto.
      */
 
     resolverEstado.value =
+
         estado === "Sin resolver"
+
             ? "Sin resolver"
+
             : "Resuelto";
 
 
@@ -1909,7 +2311,9 @@ async function guardarResultadoTicket() {
 
         );
 
+
         resolverDescripcion.focus();
+
 
         return;
 
@@ -1934,14 +2338,18 @@ async function guardarResultadoTicket() {
             await obtenerListaTickets();
 
 
+        /*
+         * Detectamos el nombre interno REAL
+         * de la columna TipoSolucion.
+         */
+
+        const campoSolucion =
+            await obtenerNombreCampoSolucion();
+
+
         const itemId =
             ticketSeleccionadoResolver.id;
 
-
-        /*
-         * Actualizamos directamente los campos
-         * del elemento de Microsoft Lists.
-         */
 
         const url =
             `https://graph.microsoft.com/v1.0/sites/` +
@@ -1949,15 +2357,45 @@ async function guardarResultadoTicket() {
             `${itemId}/fields`;
 
 
+        /*
+         * NO usamos directamente:
+         *
+         * TipoSolucion: descripcion
+         *
+         * porque TipoSolucion puede ser solo
+         * el nombre visible.
+         *
+         * Usamos el nombre interno detectado.
+         */
+
         const body = {
 
             Estado:
-                estado,
-
-            TipoSolucion:
-                descripcion
+                estado
 
         };
+
+
+        body[campoSolucion] =
+            descripcion;
+
+
+        console.log(
+            "Actualizando ticket:",
+            {
+                itemId:
+                    itemId,
+
+                campoSolucion:
+                    campoSolucion,
+
+                estado:
+                    estado,
+
+                descripcion:
+                    descripcion
+            }
+        );
 
 
         await graphFetch(
@@ -1978,8 +2416,8 @@ async function guardarResultadoTicket() {
 
 
         /*
-         * Actualizar también los datos locales
-         * para que la interfaz responda inmediatamente.
+         * Actualizar los datos locales
+         * inmediatamente.
          */
 
         if (
@@ -1990,7 +2428,9 @@ async function guardarResultadoTicket() {
                 estado;
 
 
-            ticketSeleccionadoResolver.fields.TipoSolucion =
+            ticketSeleccionadoResolver.fields[
+                campoSolucion
+            ] =
                 descripcion;
 
         }
@@ -2006,11 +2446,11 @@ async function guardarResultadoTicket() {
 
 
         /*
-         * Esperamos un momento para que el usuario
-         * vea el mensaje antes de cerrar.
+         * Cerramos y recargamos la información.
          */
 
         setTimeout(
+
             async () => {
 
                 cerrarResolverTicket();
@@ -2022,7 +2462,9 @@ async function guardarResultadoTicket() {
                 await cargarTickets();
 
             },
+
             700
+
         );
 
     }
@@ -2030,16 +2472,29 @@ async function guardarResultadoTicket() {
     catch (error) {
 
         console.error(
+
             "Error guardando resultado del ticket:",
+
             error
+
         );
 
+
+        /*
+         * Mostramos el error real de Graph
+         * para saber exactamente qué está fallando
+         * si Microsoft rechaza el PATCH.
+         */
 
         mostrarResolverMensaje(
 
             "No se pudo guardar el resultado. " +
-            "Verifica que la columna TipoSolucion " +
-            "exista en Microsoft Lists y que tenga permisos de edición.",
+
+            String(
+                error?.message ||
+                error ||
+                "Error desconocido"
+            ).slice(0, 500),
 
             "error"
 
@@ -2106,7 +2561,9 @@ cerrarModal.addEventListener(
 ========================================================= */
 
 ticketModal.addEventListener(
+
     "click",
+
     event => {
 
         if (
@@ -2118,6 +2575,7 @@ ticketModal.addEventListener(
         }
 
     }
+
 );
 
 
@@ -2144,7 +2602,9 @@ confirmarResolver.addEventListener(
 
 
 resolverModal.addEventListener(
+
     "click",
+
     event => {
 
         if (
@@ -2156,6 +2616,7 @@ resolverModal.addEventListener(
         }
 
     }
+
 );
 
 
@@ -2164,7 +2625,9 @@ resolverModal.addEventListener(
 ========================================================= */
 
 document.addEventListener(
+
     "keydown",
+
     event => {
 
         if (
@@ -2196,6 +2659,7 @@ document.addEventListener(
         }
 
     }
+
 );
 
 
@@ -2211,7 +2675,9 @@ async function esperarCuenta(
         Date.now() + ms;
 
 
-    while (Date.now() < fin) {
+    while (
+        Date.now() < fin
+    ) {
 
         if (
             msalInstance.getAllAccounts().length
@@ -2221,16 +2687,28 @@ async function esperarCuenta(
 
         }
 
+
         await new Promise(
-            r => setTimeout(r, 400)
+
+            r =>
+                setTimeout(
+                    r,
+                    400
+                )
+
         );
 
     }
+
 
     return false;
 
 }
 
+
+/* =========================================================
+   LOGIN
+========================================================= */
 
 function mostrarBotonLogin(
     texto
@@ -2239,12 +2717,20 @@ function mostrarBotonLogin(
     usuarioNombre.textContent =
         "Sesión de Microsoft requerida";
 
+
     usuarioCorreo.textContent =
         texto;
 
+
     ticketsTableBody.innerHTML = `
+
         <tr>
-            <td colspan="7" class="table-loading">
+
+            <td
+                colspan="7"
+                class="table-loading"
+            >
+
                 <button
                     type="button"
                     class="btn-primary"
@@ -2252,77 +2738,123 @@ function mostrarBotonLogin(
                 >
                     Iniciar sesión / autorizar con Microsoft
                 </button>
+
             </td>
+
         </tr>
+
     `;
 
-    document
-        .getElementById("btnLoginTickets")
-        .addEventListener(
-            "click",
-            async () => {
 
-                try {
+    const btnLoginTickets =
+        document.getElementById(
+            "btnLoginTickets"
+        );
 
-                    const cuentas =
-                        msalInstance.getAllAccounts();
 
-                    if (cuentas.length) {
+    if (!btnLoginTickets) {
 
-                        await msalInstance.acquireTokenPopup({
-                            scopes: SCOPES_GRAPH,
-                            account: cuentas[0]
-                        });
+        return;
 
-                    }
+    }
 
-                    else {
 
-                        await msalInstance.loginPopup({
-                            scopes: SCOPES_GRAPH
-                        });
+    btnLoginTickets.addEventListener(
 
-                    }
+        "click",
 
-                    iniciarTickets();
+        async () => {
+
+            try {
+
+                const cuentas =
+                    msalInstance.getAllAccounts();
+
+
+                if (cuentas.length) {
+
+                    await msalInstance.acquireTokenPopup({
+
+                        scopes:
+                            SCOPES_GRAPH,
+
+                        account:
+                            cuentas[0]
+
+                    });
+
+                }
+
+                else {
+
+                    await msalInstance.loginPopup({
+
+                        scopes:
+                            SCOPES_GRAPH
+
+                    });
 
                 }
 
-                catch (error) {
 
-                    console.error(
-                        "Error de inicio de sesión:",
-                        error
-                    );
-
-                    usuarioCorreo.textContent =
-                        "No se pudo iniciar sesión: " +
-                        String(error.message || error)
-                            .slice(0, 200);
-
-                }
+                iniciarTickets();
 
             }
-        );
+
+            catch (error) {
+
+                console.error(
+
+                    "Error de inicio de sesión:",
+
+                    error
+
+                );
+
+
+                usuarioCorreo.textContent =
+
+                    "No se pudo iniciar sesión: " +
+
+                    String(
+                        error.message ||
+                        error
+                    ).slice(0, 300);
+
+            }
+
+        }
+
+    );
 
 }
 
+
+/* =========================================================
+   INICIAR TICKETS
+========================================================= */
 
 async function iniciarTickets() {
 
     try {
 
         /*
-         * auth.js se carga después de este archivo,
-         * así que damos unos segundos para que
-         * termine de restaurar la sesión.
+         * auth.js se carga después de tickets.js.
+         *
+         * Esperamos a que MSAL restaure
+         * la cuenta existente.
          */
 
-        if (!(await esperarCuenta())) {
+        if (
+            !(await esperarCuenta())
+        ) {
 
             mostrarBotonLogin(
+
                 "Inicia sesión para ver y crear tickets"
+
             );
+
 
             return;
 
@@ -2338,19 +2870,30 @@ async function iniciarTickets() {
     catch (error) {
 
         console.error(
+
             "Error inicializando Tickets:",
+
             error
+
         );
 
 
         if (
-            error.codigo === "REQUIERE_INTERACCION" ||
-            error.codigo === "SIN_SESION"
+
+            error.codigo ===
+                "REQUIERE_INTERACCION" ||
+
+            error.codigo ===
+                "SIN_SESION"
+
         ) {
 
             mostrarBotonLogin(
+
                 "Autoriza los permisos de Microsoft"
+
             );
+
 
             return;
 
@@ -2360,23 +2903,34 @@ async function iniciarTickets() {
         usuarioNombre.textContent =
             "No se pudo obtener el usuario";
 
+
         usuarioCorreo.textContent =
-            String(error.message || error)
-                .slice(0, 200);
+
+            String(
+                error.message ||
+                error
+            ).slice(0, 300);
 
     }
 
 }
 
 
-/* Funciones usadas desde onclick en el HTML */
+/* =========================================================
+   FUNCIONES USADAS DESDE HTML
+========================================================= */
 
 window.abrirResolverTicket =
     abrirResolverTicket;
 
+
 window.mostrarDetalleTicket =
     mostrarDetalleTicket;
 
+
+/* =========================================================
+   ARRANQUE
+========================================================= */
 
 iniciarTickets();
 

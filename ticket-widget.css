@@ -10,9 +10,9 @@
 
     bottom: 20px;
 
-    width: 160px;
+    width: 200px;
 
-    height: 160px;
+    height: 200px;
 
     z-index: 9998;
 
@@ -34,9 +34,9 @@
 
 .ticket-widget img {
 
-    width: 160px;
+    width: 200px;
 
-    height: 160px;
+    height: 200px;
 
     object-fit: contain;
 

@@ -1,7 +1,7 @@
 /* =========================================================
    ALFERZA LIVE OFFICE
    TICKETS
-   ========================================================= */
+========================================================= */
 
 
 /* =========================================================
@@ -25,9 +25,11 @@ const MSAL_CONFIG = {
 
     cache: {
 
-        cacheLocation: "sessionStorage",
+        cacheLocation:
+            "sessionStorage",
 
-        storeAuthStateInCookie: false
+        storeAuthStateInCookie:
+            false
 
     }
 
@@ -51,7 +53,7 @@ const TICKETS_LIST_NAME =
 
 
 /* =========================================================
-   SCOPES
+   SCOPES GRAPH
 ========================================================= */
 
 const SCOPES_GRAPH = [
@@ -86,6 +88,8 @@ let sitioSharePoint = null;
 let listaTickets = null;
 
 let ticketsData = [];
+
+let ticketSeleccionadoResolver = null;
 
 
 /* =========================================================
@@ -177,6 +181,42 @@ const cerrarModal =
 
 
 /* =========================================================
+   DOM - MODAL RESOLVER
+========================================================= */
+
+const resolverModal =
+    document.getElementById("resolverModal");
+
+
+const cerrarResolverModal =
+    document.getElementById("cerrarResolverModal");
+
+
+const cancelarResolver =
+    document.getElementById("cancelarResolver");
+
+
+const confirmarResolver =
+    document.getElementById("confirmarResolver");
+
+
+const resolverTicketId =
+    document.getElementById("resolverTicketId");
+
+
+const resolverEstado =
+    document.getElementById("resolverEstado");
+
+
+const resolverDescripcion =
+    document.getElementById("resolverDescripcion");
+
+
+const resolverMensaje =
+    document.getElementById("resolverMensaje");
+
+
+/* =========================================================
    UTILIDADES
 ========================================================= */
 
@@ -191,6 +231,7 @@ function escaparHTML(valor) {
 
     }
 
+
     return String(valor)
 
         .replace(/&/g, "&amp;")
@@ -202,6 +243,7 @@ function escaparHTML(valor) {
         .replace(/"/g, "&quot;")
 
         .replace(/'/g, "&#039;");
+
 }
 
 
@@ -233,9 +275,11 @@ async function obtenerToken() {
         const resultado =
             await msalInstance.acquireTokenSilent({
 
-                scopes: SCOPES_GRAPH,
+                scopes:
+                    SCOPES_GRAPH,
 
-                account: cuentaActual
+                account:
+                    cuentaActual
 
             });
 
@@ -246,12 +290,24 @@ async function obtenerToken() {
 
     catch (error) {
 
+        console.warn(
+            "Token silencioso no disponible. "
+            + "Solicitando autenticación interactiva.",
+            error
+        );
+
+
         const resultado =
             await msalInstance.acquireTokenPopup({
 
-                scopes: SCOPES_GRAPH
+                scopes:
+                    SCOPES_GRAPH
 
             });
+
+
+        cuentaActual =
+            msalInstance.getAllAccounts()[0];
 
 
         return resultado.accessToken;
@@ -485,7 +541,7 @@ async function cargarTickets() {
             <tr>
 
                 <td
-                    colspan="6"
+                    colspan="7"
                     class="table-loading"
                 >
                     Cargando tickets...
@@ -522,7 +578,6 @@ async function cargarTickets() {
 
         actualizarResumen();
 
-
     }
 
     catch (error) {
@@ -538,7 +593,7 @@ async function cargarTickets() {
             <tr>
 
                 <td
-                    colspan="6"
+                    colspan="7"
                     class="table-loading"
                 >
                     No se pudieron cargar los tickets.
@@ -616,15 +671,20 @@ function formatearFecha(
         "es-PE",
         {
 
-            day: "2-digit",
+            day:
+                "2-digit",
 
-            month: "2-digit",
+            month:
+                "2-digit",
 
-            year: "numeric",
+            year:
+                "numeric",
 
-            hour: "2-digit",
+            hour:
+                "2-digit",
 
-            minute: "2-digit"
+            minute:
+                "2-digit"
 
         }
     );
@@ -660,6 +720,15 @@ function claseEstado(
     ) {
 
         return "estado-resuelto";
+
+    }
+
+
+    if (
+        valor === "sin resolver"
+    ) {
+
+        return "estado-sin-resolver";
 
     }
 
@@ -810,6 +879,10 @@ function renderizarTickets() {
 
                     String(ticketId)
                         .toLowerCase()
+                        .includes(busqueda) ||
+
+                    String(categoria)
+                        .toLowerCase()
                         .includes(busqueda);
 
 
@@ -925,10 +998,40 @@ function renderizarTickets() {
                     );
 
 
+                /*
+                 * Los tickets Resueltos o Cerrados
+                 * ya no necesitan acción.
+                 *
+                 * Los Pendientes, En proceso y
+                 * Sin resolver pueden volver a gestionarse.
+                 */
+
+                const accion =
+
+                    estado === "Resuelto" ||
+                    estado === "Cerrado"
+
+                        ? `
+                            <span class="sin-accion">
+                                —
+                            </span>
+                        `
+
+                        : `
+                            <button
+                                type="button"
+                                class="btn-resolver"
+                                onclick="abrirResolverTicket(event, '${escaparHTML(item.id)}')"
+                            >
+                                ✓ Resolver
+                            </button>
+                        `;
+
+
                 return `
 
                     <tr
-                        onclick="mostrarDetalleTicket('${item.id}')"
+                        onclick="mostrarDetalleTicket('${escaparHTML(item.id)}')"
                     >
 
                         <td>
@@ -988,6 +1091,13 @@ function renderizarTickets() {
 
                         </td>
 
+
+                        <td>
+
+                            ${accion}
+
+                        </td>
+
                     </tr>
 
                 `;
@@ -1040,8 +1150,11 @@ function actualizarResumen() {
 
 
                 return (
+
                     estado === "Resuelto" ||
+
                     estado === "Cerrado"
+
                 );
 
             }
@@ -1193,7 +1306,10 @@ async function crearTicket(
                     fecha,
 
                 AsignadoA:
-                    "Soporte TI"
+                    "Soporte TI",
+
+                TipoSolucion:
+                    ""
 
             }
 
@@ -1211,7 +1327,8 @@ async function crearTicket(
 
             {
 
-                method: "POST",
+                method:
+                    "POST",
 
                 body:
                     JSON.stringify(body)
@@ -1238,7 +1355,6 @@ async function crearTicket(
 
 
         await cargarTickets();
-
 
     }
 
@@ -1309,7 +1425,7 @@ function mostrarMensaje(
 
 
 /* =========================================================
-   DETALLE
+   MOSTRAR DETALLE DEL TICKET
 ========================================================= */
 
 function mostrarDetalleTicket(
@@ -1347,7 +1463,10 @@ function mostrarDetalleTicket(
     const titulo =
         obtenerCampo(
             fields,
-            ["Title", "Título"]
+            [
+                "Title",
+                "Título"
+            ]
         );
 
 
@@ -1399,6 +1518,15 @@ function mostrarDetalleTicket(
             [
                 "Descripcion",
                 "Descripción"
+            ]
+        );
+
+
+    const solucion =
+        obtenerCampo(
+            fields,
+            [
+                "TipoSolucion"
             ]
         );
 
@@ -1459,6 +1587,46 @@ function mostrarDetalleTicket(
         descripcion || "—";
 
 
+    /*
+     * Mostrar el resultado / solución
+     * únicamente cuando exista.
+     */
+
+    const solucionBox =
+        document.getElementById(
+            "modalTicketSolucionBox"
+        );
+
+
+    const solucionElement =
+        document.getElementById(
+            "modalTicketSolucion"
+        );
+
+
+    if (solucion) {
+
+        solucionElement.textContent =
+            solucion;
+
+
+        solucionBox.style.display =
+            "block";
+
+    }
+
+    else {
+
+        solucionElement.textContent =
+            "—";
+
+
+        solucionBox.style.display =
+            "none";
+
+    }
+
+
     ticketModal.classList.add(
         "show"
     );
@@ -1471,7 +1639,7 @@ function mostrarDetalleTicket(
 
 
 /* =========================================================
-   CERRAR MODAL
+   CERRAR MODAL DETALLE
 ========================================================= */
 
 function cerrarTicketModal() {
@@ -1483,6 +1651,361 @@ function cerrarTicketModal() {
 
     document.body.style.overflow =
         "";
+
+}
+
+
+/* =========================================================
+   ABRIR MODAL RESOLVER
+========================================================= */
+
+function abrirResolverTicket(
+    event,
+    itemId
+) {
+
+    /*
+     * Evita que el click del botón
+     * abra también el detalle del ticket.
+     */
+
+    event.stopPropagation();
+
+
+    const ticket =
+        ticketsData.find(
+            item =>
+                String(item.id) ===
+                String(itemId)
+        );
+
+
+    if (!ticket) {
+
+        return;
+
+    }
+
+
+    const fields =
+        ticket.fields || {};
+
+
+    const ticketId =
+        obtenerCampo(
+            fields,
+            ["TicketID"]
+        ) ||
+        `TKT-${String(ticket.id)
+            .padStart(6, "0")}`;
+
+
+    const estado =
+        obtenerCampo(
+            fields,
+            ["Estado"]
+        ) ||
+        "Pendiente";
+
+
+    const solucion =
+        obtenerCampo(
+            fields,
+            ["TipoSolucion"]
+        );
+
+
+    ticketSeleccionadoResolver =
+        ticket;
+
+
+    resolverTicketId.textContent =
+        ticketId;
+
+
+    /*
+     * Si el ticket ya estaba Sin resolver,
+     * dejamos seleccionada esa opción.
+     *
+     * En cualquier otro estado, por defecto
+     * se propone Resuelto.
+     */
+
+    resolverEstado.value =
+        estado === "Sin resolver"
+            ? "Sin resolver"
+            : "Resuelto";
+
+
+    resolverDescripcion.value =
+        solucion || "";
+
+
+    resolverMensaje.textContent =
+        "";
+
+
+    resolverMensaje.className =
+        "ticket-message";
+
+
+    resolverModal.classList.add(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================================
+   CERRAR MODAL RESOLVER
+========================================================= */
+
+function cerrarResolverTicket() {
+
+    resolverModal.classList.remove(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+
+    ticketSeleccionadoResolver =
+        null;
+
+
+    resolverDescripcion.value =
+        "";
+
+
+    resolverMensaje.textContent =
+        "";
+
+
+    resolverMensaje.className =
+        "ticket-message";
+
+}
+
+
+/* =========================================================
+   MENSAJE MODAL RESOLVER
+========================================================= */
+
+function mostrarResolverMensaje(
+    mensaje,
+    tipo
+) {
+
+    resolverMensaje.textContent =
+        mensaje;
+
+
+    resolverMensaje.className =
+        `ticket-message ${tipo}`;
+
+}
+
+
+/* =========================================================
+   GUARDAR RESULTADO DEL TICKET
+========================================================= */
+
+async function guardarResultadoTicket() {
+
+    if (!ticketSeleccionadoResolver) {
+
+        return;
+
+    }
+
+
+    const estado =
+        resolverEstado.value;
+
+
+    const descripcion =
+        resolverDescripcion.value.trim();
+
+
+    if (!estado) {
+
+        mostrarResolverMensaje(
+
+            "Selecciona el resultado del ticket.",
+
+            "error"
+
+        );
+
+        return;
+
+    }
+
+
+    if (!descripcion) {
+
+        mostrarResolverMensaje(
+
+            "Ingresa una descripción del resultado.",
+
+            "error"
+
+        );
+
+        resolverDescripcion.focus();
+
+        return;
+
+    }
+
+
+    try {
+
+        confirmarResolver.disabled =
+            true;
+
+
+        confirmarResolver.innerHTML =
+            "⏳ Guardando...";
+
+
+        const sitio =
+            await obtenerSitioSharePoint();
+
+
+        const lista =
+            await obtenerListaTickets();
+
+
+        const itemId =
+            ticketSeleccionadoResolver.id;
+
+
+        /*
+         * Actualizamos directamente los campos
+         * del elemento de Microsoft Lists.
+         */
+
+        const url =
+            `https://graph.microsoft.com/v1.0/sites/` +
+            `${sitio.id}/lists/${lista.id}/items/` +
+            `${itemId}/fields`;
+
+
+        const body = {
+
+            Estado:
+                estado,
+
+            TipoSolucion:
+                descripcion
+
+        };
+
+
+        await graphFetch(
+
+            url,
+
+            {
+
+                method:
+                    "PATCH",
+
+                body:
+                    JSON.stringify(body)
+
+            }
+
+        );
+
+
+        /*
+         * Actualizar también los datos locales
+         * para que la interfaz responda inmediatamente.
+         */
+
+        if (
+            ticketSeleccionadoResolver.fields
+        ) {
+
+            ticketSeleccionadoResolver.fields.Estado =
+                estado;
+
+
+            ticketSeleccionadoResolver.fields.TipoSolucion =
+                descripcion;
+
+        }
+
+
+        mostrarResolverMensaje(
+
+            "Resultado guardado correctamente.",
+
+            "success"
+
+        );
+
+
+        /*
+         * Esperamos un momento para que el usuario
+         * vea el mensaje antes de cerrar.
+         */
+
+        setTimeout(
+            async () => {
+
+                cerrarResolverTicket();
+
+                renderizarTickets();
+
+                actualizarResumen();
+
+                await cargarTickets();
+
+            },
+            700
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error guardando resultado del ticket:",
+            error
+        );
+
+
+        mostrarResolverMensaje(
+
+            "No se pudo guardar el resultado. " +
+            "Verifica que la columna TipoSolucion " +
+            "exista en Microsoft Lists y que tenga permisos de edición.",
+
+            "error"
+
+        );
+
+    }
+
+    finally {
+
+        confirmarResolver.disabled =
+            false;
+
+
+        confirmarResolver.innerHTML =
+            "✓ Guardar resultado";
+
+    }
 
 }
 
@@ -1527,6 +2050,10 @@ cerrarModal.addEventListener(
 );
 
 
+/* =========================================================
+   EVENTOS MODAL DETALLE
+========================================================= */
+
 ticketModal.addEventListener(
     "click",
     event => {
@@ -1543,12 +2070,74 @@ ticketModal.addEventListener(
 );
 
 
+/* =========================================================
+   EVENTOS MODAL RESOLVER
+========================================================= */
+
+cerrarResolverModal.addEventListener(
+    "click",
+    cerrarResolverTicket
+);
+
+
+cancelarResolver.addEventListener(
+    "click",
+    cerrarResolverTicket
+);
+
+
+confirmarResolver.addEventListener(
+    "click",
+    guardarResultadoTicket
+);
+
+
+resolverModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target === resolverModal
+        ) {
+
+            cerrarResolverTicket();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   TECLA ESCAPE
+========================================================= */
+
 document.addEventListener(
     "keydown",
     event => {
 
         if (
-            event.key === "Escape"
+            event.key !== "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            resolverModal.classList.contains("show")
+        ) {
+
+            cerrarResolverTicket();
+
+            return;
+
+        }
+
+
+        if (
+            ticketModal.classList.contains("show")
         ) {
 
             cerrarTicketModal();

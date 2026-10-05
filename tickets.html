@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -14,6 +13,7 @@
     <title>Tickets | ALFERZA LIVE OFFICE</title>
 
     <link rel="stylesheet" href="styles.css">
+
     <link rel="stylesheet" href="tickets.css">
 
 </head>
@@ -440,7 +440,10 @@
                                     🟢 Baja
                                 </option>
 
-                                <option value="Media" selected>
+                                <option
+                                    value="Media"
+                                    selected
+                                >
                                     🟡 Media
                                 </option>
 
@@ -853,6 +856,8 @@
             </div>
 
 
+            <!-- DESCRIPCIÓN DEL PROBLEMA -->
+
             <div class="modal-description">
 
                 <span>
@@ -919,7 +924,7 @@
                 </span>
 
                 <span class="resolver-label">
-                    RESOLVER TICKET
+                    GESTIONAR TICKET
                 </span>
 
             </div>
@@ -931,8 +936,8 @@
 
 
             <p class="resolver-help">
-                Indica el resultado de la atención del ticket
-                y registra una breve descripción.
+                Selecciona el resultado de la atención y
+                registra una breve descripción.
             </p>
 
 
@@ -966,14 +971,14 @@
             <div class="form-group">
 
                 <label for="resolverDescripcion">
-                    Descripción de la solución
+                    Descripción del resultado
                 </label>
 
                 <textarea
                     id="resolverDescripcion"
                     rows="5"
                     maxlength="1000"
-                    placeholder="Describe brevemente cómo se solucionó el problema..."
+                    placeholder="Describe cómo se atendió el ticket o por qué no pudo ser resuelto..."
                     required
                 ></textarea>
 

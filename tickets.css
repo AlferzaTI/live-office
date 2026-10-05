@@ -1,8 +1,7 @@
-
 /* =========================================================
    ALFERZA LIVE OFFICE
    TICKETS
-   ========================================================= */
+========================================================= */
 
 
 /* =========================================================
@@ -146,9 +145,11 @@
 
     border-radius: 15px;
 
-    background: rgba(255,255,255,0.12);
+    background:
+        rgba(255,255,255,0.12);
 
-    border: 1px solid rgba(255,255,255,0.18);
+    border:
+        1px solid rgba(255,255,255,0.18);
 
 }
 
@@ -170,7 +171,8 @@
 
     margin-bottom: 9px;
 
-    color: rgba(255,255,255,0.68);
+    color:
+        rgba(255,255,255,0.68);
 
     font-size: 10px;
 
@@ -183,7 +185,8 @@
 
 .tickets-breadcrumb span {
 
-    color: rgba(255,255,255,0.35);
+    color:
+        rgba(255,255,255,0.35);
 
 }
 
@@ -211,7 +214,8 @@
 
     max-width: 580px;
 
-    color: rgba(255,255,255,0.70);
+    color:
+        rgba(255,255,255,0.70);
 
     font-size: 13px;
 
@@ -242,9 +246,11 @@
 
     border-radius: 14px;
 
-    background: rgba(255,255,255,0.10);
+    background:
+        rgba(255,255,255,0.10);
 
-    border: 1px solid rgba(255,255,255,0.16);
+    border:
+        1px solid rgba(255,255,255,0.16);
 
     backdrop-filter: blur(8px);
 
@@ -265,7 +271,8 @@
 
     border-radius: 11px;
 
-    background: rgba(255,255,255,0.10);
+    background:
+        rgba(255,255,255,0.10);
 
     font-size: 17px;
 
@@ -278,7 +285,8 @@
 
     margin-bottom: 4px;
 
-    color: rgba(255,255,255,0.60);
+    color:
+        rgba(255,255,255,0.60);
 
     font-size: 9px;
 
@@ -933,7 +941,7 @@
 
     border-collapse: collapse;
 
-    min-width: 850px;
+    min-width: 950px;
 
 }
 
@@ -1237,7 +1245,8 @@
 
     box-sizing: border-box;
 
-    background: rgba(15,23,42,0.70);
+    background:
+        rgba(15,23,42,0.70);
 
     opacity: 0;
 
@@ -1364,6 +1373,10 @@
 }
 
 
+/* =========================================================
+   INFORMACIÓN MODAL
+========================================================= */
+
 .modal-info-grid {
 
     display: grid;
@@ -1454,6 +1467,24 @@
 
 
 /* =========================================================
+   SOLUCIÓN EN DETALLE
+========================================================= */
+
+#modalTicketSolucionBox {
+
+    margin-top: 15px;
+
+}
+
+
+#modalTicketSolucion {
+
+    white-space: pre-wrap;
+
+}
+
+
+/* =========================================================
    MODAL RESOLVER
 ========================================================= */
 
@@ -1528,17 +1559,6 @@
 
 
 /* =========================================================
-   SOLUCIÓN EN DETALLE
-========================================================= */
-
-#modalTicketSolucionBox {
-
-    margin-top: 15px;
-
-}
-
-
-/* =========================================================
    ANIMACIONES
 ========================================================= */
 
@@ -1548,7 +1568,8 @@
 
         opacity: 0;
 
-        transform: translateX(-15px);
+        transform:
+            translateX(-15px);
 
     }
 
@@ -1556,7 +1577,8 @@
 
         opacity: 1;
 
-        transform: translateX(0);
+        transform:
+            translateX(0);
 
     }
 
@@ -1601,7 +1623,8 @@
 
     .ticket-filters {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
     }
 
@@ -1621,7 +1644,8 @@
 
         padding: 25px;
 
-        border-radius: 0 20px 20px 20px;
+        border-radius:
+            0 20px 20px 20px;
 
     }
 
@@ -1642,7 +1666,8 @@
 
     .form-grid {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
     }
 
@@ -1656,7 +1681,8 @@
 
     .tickets-summary {
 
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns:
+            1fr 1fr;
 
     }
 
@@ -1675,7 +1701,8 @@
 
     .tickets-summary {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
     }
 
@@ -1689,7 +1716,8 @@
 
     .form-actions {
 
-        flex-direction: column-reverse;
+        flex-direction:
+            column-reverse;
 
     }
 
@@ -1706,7 +1734,8 @@
 
     .modal-info-grid {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
     }
 

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="es">
@@ -12,6 +13,7 @@
     >
 
     <title>ALFERZA LIVE OFFICE</title>
+
 
     <!-- ==========================================
          COMPROBAR ACCESO
@@ -40,11 +42,20 @@
     </script>
 
 
-    <!-- Estilos -->
+    <!-- ==========================================
+         ESTILOS
+         ========================================== -->
 
     <link
         rel="stylesheet"
         href="styles.css"
+    >
+
+    <!-- Widget de tickets -->
+
+    <link
+        rel="stylesheet"
+        href="css/ticket-widget.css"
     >
 
 </head>
@@ -181,21 +192,32 @@
                 📢 Comunicados
             </li>
 
-            <li onclick="window.location.href='seguridad.html'">
+
+            <li
+                onclick="window.location.href='seguridad.html'"
+            >
                 🔐 Seguridad
             </li>
 
-            <li onclick="window.location.href='infraestructura.html'">
+
+            <li
+                onclick="window.location.href='infraestructura.html'"
+            >
                 🏗️ Infraestructura
             </li>
 
-             <li onclick="window.location.href='tickets.html'">
+
+            <li
+                onclick="window.location.href='tickets.html'"
+            >
                 🎫 Tickets
             </li>
 
 
-            <li onclick="window.location.href='configuracion.html'">
-                    ⚙️ Configuración
+            <li
+                onclick="window.location.href='configuracion.html'"
+            >
+                ⚙️ Configuración
             </li>
 
         </ul>
@@ -322,6 +344,24 @@
 
 
 <!-- ==========================================
+     WIDGET FLOTANTE DE TICKETS
+     ========================================== -->
+
+<div
+    class="ticket-widget"
+    onclick="abrirTicketWidget()"
+    title="Registrar ticket"
+>
+
+    <img
+        src="img/ticket.gif"
+        alt="Registrar ticket"
+    >
+
+</div>
+
+
+<!-- ==========================================
      MICROSOFT AUTHENTICATION LIBRARY
      ========================================== -->
 
@@ -337,6 +377,14 @@
 <script src="app.js"></script>
 
 
+<!-- ==========================================
+     WIDGET DE TICKETS
+     ========================================== -->
+
+<script src="js/ticket-widget.js"></script>
+
+
 </body>
 
 </html>
+

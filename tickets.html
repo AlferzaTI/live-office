@@ -1,519 +1,951 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
 
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <title>Tickets | ALFERZA LIVE OFFICE</title>
 
-<title>Tickets | ALFERZA LIVE OFFICE</title>
-
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="tickets.css">
-
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tickets.css">
 
 </head>
+
 
 <body>
 
 
-<header class="topbar">
+    <!-- ==========================================
+         BARRA SUPERIOR
+    =========================================== -->
 
-    <div class="logo">
+    <header class="topbar">
 
-        <h1>
-            ALFERZA LIVE OFFICE
-        </h1>
+        <div class="logo">
 
-        <span>
-            Mesa de ayuda TI
-        </span>
+            <h1>
+                ALFERZA LIVE OFFICE
+            </h1>
 
-    </div>
+            <span>
+                Mesa de ayuda TI
+            </span>
 
-    <div class="live-status">
+        </div>
 
-        <span class="live-status-dot"></span>
 
-        <span>
-            EN VIVO
-        </span>
+        <div class="live-status">
 
-    </div>
+            <span class="live-status-dot"></span>
 
-</header>
+            <span>
+                EN VIVO
+            </span>
 
+        </div>
 
-<div class="container">
+    </header>
 
-    <aside class="sidebar">
 
-        <h2>
-            MENÚ
-        </h2>
 
-        <ul>
+    <!-- ==========================================
+         CONTENEDOR PRINCIPAL
+    =========================================== -->
 
-            <li onclick="window.location.href='index.html'">
-                🏢 Oficina
-            </li>
+    <div class="container">
 
-            <li onclick="window.location.href='personal.html'">
-                👥 Personal
-            </li>
 
-            <li onclick="window.location.href='reserva.html'">
-                📝 Reservas
-            </li>
+        <!-- ==========================================
+             SIDEBAR
+        =========================================== -->
 
-            <li onclick="window.location.href='salas/salas.html'">
-                📅 Salas
-            </li>
+        <aside class="sidebar">
 
-            <li onclick="window.location.href='comunicados.html'">
-                📢 Comunicados
-            </li>
+            <h2>
+                MENÚ
+            </h2>
 
-            <li onclick="window.location.href='seguridad.html'">
-                🔐 Seguridad
-            </li>
 
-            <li onclick="window.location.href='infraestructura.html'">
-                🏗️ Infraestructura
-            </li>
+            <ul>
 
-            <li onclick="window.location.href='tickets.html'">
-                🎫 Tickets
-            </li>
+                <li onclick="window.location.href='index.html'">
+                    🏢 Oficina
+                </li>
 
-            <li onclick="window.location.href='configuracion.html'">
-                ⚙️ Configuración
-            </li>
 
-        </ul>
+                <li onclick="window.location.href='personal.html'">
+                    👥 Personal
+                </li>
 
-    </aside>
 
+                <li onclick="window.location.href='reserva.html'">
+                    📝 Reservas
+                </li>
 
-    <main class="content">
 
-        <section class="tickets-header">
+                <li onclick="window.location.href='salas/salas.html'">
+                    📅 Salas
+                </li>
 
-            <div class="tickets-header-content">
 
-                <div class="tickets-header-icon">
-                    <span>🎫</span>
-                </div>
+                <li onclick="window.location.href='comunicados.html'">
+                    📢 Comunicados
+                </li>
 
-                <div class="tickets-header-text">
 
-                    <div class="tickets-breadcrumb">
+                <li onclick="window.location.href='seguridad.html'">
+                    🔐 Seguridad
+                </li>
 
-                        OFICINA
 
-                        <span>/</span>
+                <li onclick="window.location.href='infraestructura.html'">
+                    🏗️ Infraestructura
+                </li>
 
-                        SOPORTE TI
 
-                        <span>/</span>
+                <li onclick="window.location.href='tickets.html'">
+                    🎫 Tickets
+                </li>
 
-                        TICKETS
 
-                    </div>
+                <li onclick="window.location.href='configuracion.html'">
+                    ⚙️ Configuración
+                </li>
 
-                    <h2>
-                        Tickets
-                    </h2>
+            </ul>
 
-                    <p>
-                        Registra y consulta solicitudes e
-                        incidencias de soporte tecnológico.
-                    </p>
+        </aside>
 
-                </div>
 
-            </div>
 
+        <!-- ==========================================
+             CONTENIDO
+        =========================================== -->
 
-            <div class="tickets-header-info">
+        <main class="content">
 
-                <div class="tickets-header-info-icon">
-                    🎫
-                </div>
 
-                <div>
+            <!-- ==========================================
+                 ENCABEZADO
+            =========================================== -->
 
-                    <span>
-                        MESA DE AYUDA
-                    </span>
+            <section class="tickets-header">
 
-                    <strong>
-                        SOPORTE TI
-                    </strong>
 
-                </div>
+                <div class="tickets-header-content">
 
-            </div>
 
-        </section>
-
-
-        <section class="tickets-summary">
-
-            <div class="summary-card">
-
-                <div class="summary-icon">
-                    📋
-                </div>
-
-                <div>
-
-                    <span>
-                        TOTAL
-                    </span>
-
-                    <strong id="totalTickets">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-card pendiente">
-
-                <div class="summary-icon">
-                    🟠
-                </div>
-
-                <div>
-
-                    <span>
-                        PENDIENTES
-                    </span>
-
-                    <strong id="ticketsPendientes">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-card proceso">
-
-                <div class="summary-icon">
-                    🔵
-                </div>
-
-                <div>
-
-                    <span>
-                        EN PROCESO
-                    </span>
-
-                    <strong id="ticketsProceso">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-card resuelto">
-
-                <div class="summary-icon">
-                    🟢
-                </div>
-
-                <div>
-
-                    <span>
-                        RESUELTOS
-                    </span>
-
-                    <strong id="ticketsResueltos">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <section class="ticket-form-card">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-kicker">
-                        SOPORTE
-                    </span>
-
-                    <h3>
-                        Registrar nuevo ticket
-                    </h3>
-
-                    <p>
-                        Describe el problema o solicitud
-                        que necesitas reportar al Área de TI.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <form id="ticketForm">
-
-                <div class="form-grid">
-
-                    <div class="form-group full">
-
-                        <label for="ticketTitulo">
-                            Asunto
-                        </label>
-
-                        <input
-                            type="text"
-                            id="ticketTitulo"
-                            placeholder="Ej. Problema con Outlook"
-                            maxlength="150"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="ticketCategoria">
-                            Categoría
-                        </label>
-
-                        <select
-                            id="ticketCategoria"
-                            required
-                        >
-
-                            <option value="">
-                                Seleccionar categoría
-                            </option>
-
-                            <option value="Correo">
-                                Correo electrónico
-                            </option>
-
-                            <option value="Internet">
-                                Internet / Red
-                            </option>
-
-                            <option value="Equipo">
-                                Equipo de cómputo
-                            </option>
-
-                            <option value="Impresora">
-                                Impresora
-                            </option>
-
-                            <option value="Acceso">
-                                Acceso / Cuenta
-                            </option>
-
-                            <option value="Software">
-                                Software
-                            </option>
-
-                            <option value="Microsoft 365">
-                                Microsoft 365
-                            </option>
-
-                            <option value="Otro">
-                                Otro
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="ticketPrioridad">
-                            Prioridad
-                        </label>
-
-                        <select
-                            id="ticketPrioridad"
-                            required
-                        >
-
-                            <option value="Baja">
-                                🟢 Baja
-                            </option>
-
-                            <option value="Media" selected>
-                                🟡 Media
-                            </option>
-
-                            <option value="Alta">
-                                🟠 Alta
-                            </option>
-
-                            <option value="Crítica">
-                                🔴 Crítica
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label for="ticketDescripcion">
-                            Descripción
-                        </label>
-
-                        <textarea
-                            id="ticketDescripcion"
-                            rows="6"
-                            maxlength="2000"
-                            placeholder="Describe detalladamente el problema o solicitud..."
-                            required
-                        ></textarea>
-
-                        <small>
-                            Máximo 2000 caracteres.
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <div class="user-info-box">
-
-                    <div class="user-info-icon">
-                        👤
-                    </div>
-
-                    <div>
-
-                        <span>
-                            SOLICITANTE
-                        </span>
-
-                        <strong id="usuarioNombre">
-                            Cargando usuario...
-                        </strong>
-
-                        <small id="usuarioCorreo">
-                            —
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    id="ticketMensaje"
-                    class="ticket-message"
-                ></div>
-
-
-                <div class="form-actions">
-
-                    <button
-                        type="reset"
-                        class="btn-secondary"
-                        id="limpiarTicket"
-                    >
-                        Limpiar
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="btn-primary"
-                        id="crearTicketBtn"
-                    >
+                    <div class="tickets-header-icon">
 
                         <span>
                             🎫
                         </span>
 
-                        Crear ticket
+                    </div>
 
+
+                    <div class="tickets-header-text">
+
+
+                        <div class="tickets-breadcrumb">
+
+                            OFICINA
+
+                            <span>/</span>
+
+                            SOPORTE TI
+
+                            <span>/</span>
+
+                            TICKETS
+
+                        </div>
+
+
+                        <h2>
+                            Tickets
+                        </h2>
+
+
+                        <p>
+                            Registra y consulta solicitudes e
+                            incidencias de soporte tecnológico.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==========================================
+                     BLOQUE DERECHO
+                =========================================== -->
+
+                <div class="tickets-header-info">
+
+                    <div class="tickets-header-info-icon">
+                        🎫
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            MESA DE AYUDA
+                        </span>
+
+                        <strong>
+                            SOPORTE TI
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 RESUMEN
+            =========================================== -->
+
+            <section class="tickets-summary">
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        📋
+                    </div>
+
+                    <div>
+
+                        <span>
+                            TOTAL
+                        </span>
+
+                        <strong id="totalTickets">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card pendiente">
+
+                    <div class="summary-icon">
+                        🟠
+                    </div>
+
+                    <div>
+
+                        <span>
+                            PENDIENTES
+                        </span>
+
+                        <strong id="ticketsPendientes">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card proceso">
+
+                    <div class="summary-icon">
+                        🔵
+                    </div>
+
+                    <div>
+
+                        <span>
+                            EN PROCESO
+                        </span>
+
+                        <strong id="ticketsProceso">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card resuelto">
+
+                    <div class="summary-icon">
+                        🟢
+                    </div>
+
+                    <div>
+
+                        <span>
+                            RESUELTOS
+                        </span>
+
+                        <strong id="ticketsResueltos">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 NUEVO TICKET
+            =========================================== -->
+
+            <section class="ticket-form-card">
+
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-kicker">
+                            SOPORTE
+                        </span>
+
+                        <h3>
+                            Registrar nuevo ticket
+                        </h3>
+
+                        <p>
+                            Describe el problema o solicitud
+                            que necesitas reportar al Área de TI.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <form id="ticketForm">
+
+
+                    <div class="form-grid">
+
+
+                        <!-- ASUNTO -->
+
+                        <div class="form-group full">
+
+                            <label for="ticketTitulo">
+                                Asunto
+                            </label>
+
+                            <input
+                                type="text"
+                                id="ticketTitulo"
+                                placeholder="Ej. Problema con Outlook"
+                                maxlength="150"
+                                required
+                            >
+
+                        </div>
+
+
+
+                        <!-- CATEGORÍA -->
+
+                        <div class="form-group">
+
+                            <label for="ticketCategoria">
+                                Categoría
+                            </label>
+
+                            <select
+                                id="ticketCategoria"
+                                required
+                            >
+
+                                <option value="">
+                                    Seleccionar categoría
+                                </option>
+
+                                <option value="Correo">
+                                    Correo electrónico
+                                </option>
+
+                                <option value="Internet">
+                                    Internet / Red
+                                </option>
+
+                                <option value="Equipo">
+                                    Equipo de cómputo
+                                </option>
+
+                                <option value="Impresora">
+                                    Impresora
+                                </option>
+
+                                <option value="Acceso">
+                                    Acceso / Cuenta
+                                </option>
+
+                                <option value="Software">
+                                    Software
+                                </option>
+
+                                <option value="Microsoft 365">
+                                    Microsoft 365
+                                </option>
+
+                                <option value="Otro">
+                                    Otro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- PRIORIDAD -->
+
+                        <div class="form-group">
+
+                            <label for="ticketPrioridad">
+                                Prioridad
+                            </label>
+
+                            <select
+                                id="ticketPrioridad"
+                                required
+                            >
+
+                                <option value="Baja">
+                                    🟢 Baja
+                                </option>
+
+                                <option value="Media" selected>
+                                    🟡 Media
+                                </option>
+
+                                <option value="Alta">
+                                    🟠 Alta
+                                </option>
+
+                                <option value="Crítica">
+                                    🔴 Crítica
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- DESCRIPCIÓN -->
+
+                        <div class="form-group full">
+
+                            <label for="ticketDescripcion">
+                                Descripción
+                            </label>
+
+                            <textarea
+                                id="ticketDescripcion"
+                                rows="6"
+                                maxlength="2000"
+                                placeholder="Describe detalladamente el problema o solicitud..."
+                                required
+                            ></textarea>
+
+                            <small>
+                                Máximo 2000 caracteres.
+                            </small>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- INFORMACIÓN USUARIO -->
+
+                    <div class="user-info-box">
+
+                        <div class="user-info-icon">
+                            👤
+                        </div>
+
+                        <div>
+
+                            <span>
+                                SOLICITANTE
+                            </span>
+
+                            <strong id="usuarioNombre">
+                                Cargando usuario...
+                            </strong>
+
+                            <small id="usuarioCorreo">
+                                —
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- MENSAJE -->
+
+                    <div
+                        id="ticketMensaje"
+                        class="ticket-message"
+                    ></div>
+
+
+
+                    <!-- BOTONES -->
+
+                    <div class="form-actions">
+
+                        <button
+                            type="reset"
+                            class="btn-secondary"
+                            id="limpiarTicket"
+                        >
+                            Limpiar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="btn-primary"
+                            id="crearTicketBtn"
+                        >
+
+                            <span>
+                                🎫
+                            </span>
+
+                            Crear ticket
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </section>
+
+
+
+            <!-- ==========================================
+                 LISTADO DE TICKETS
+            =========================================== -->
+
+            <section class="tickets-list-card">
+
+
+                <div class="list-header">
+
+                    <div>
+
+                        <span class="section-kicker">
+                            REGISTROS
+                        </span>
+
+                        <h3>
+                            Tickets registrados
+                        </h3>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="actualizarTickets"
+                        class="refresh-button"
+                    >
+                        ↻ Actualizar
                     </button>
 
                 </div>
 
-            </form>
-
-        </section>
 
 
-        <section class="tickets-list-card">
+                <!-- FILTROS -->
 
-            <div class="list-header">
+                <div class="ticket-filters">
 
-                <div>
 
-                    <span class="section-kicker">
-                        REGISTROS
-                    </span>
+                    <input
+                        type="text"
+                        id="buscarTicket"
+                        placeholder="Buscar ticket..."
+                    >
 
-                    <h3>
-                        Tickets registrados
-                    </h3>
+
+                    <select id="filtroEstado">
+
+                        <option value="">
+                            Todos los estados
+                        </option>
+
+                        <option value="Pendiente">
+                            Pendiente
+                        </option>
+
+                        <option value="En proceso">
+                            En proceso
+                        </option>
+
+                        <option value="Resuelto">
+                            Resuelto
+                        </option>
+
+                        <option value="Sin resolver">
+                            Sin resolver
+                        </option>
+
+                        <option value="Cerrado">
+                            Cerrado
+                        </option>
+
+                    </select>
+
+
+                    <select id="filtroPrioridad">
+
+                        <option value="">
+                            Todas las prioridades
+                        </option>
+
+                        <option value="Baja">
+                            Baja
+                        </option>
+
+                        <option value="Media">
+                            Media
+                        </option>
+
+                        <option value="Alta">
+                            Alta
+                        </option>
+
+                        <option value="Crítica">
+                            Crítica
+                        </option>
+
+                    </select>
+
 
                 </div>
 
-                <button
-                    type="button"
-                    id="actualizarTickets"
-                    class="refresh-button"
+
+
+                <!-- TABLA -->
+
+                <div class="tickets-table-container">
+
+                    <table class="tickets-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Ticket
+                                </th>
+
+                                <th>
+                                    Asunto
+                                </th>
+
+                                <th>
+                                    Categoría
+                                </th>
+
+                                <th>
+                                    Prioridad
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Fecha
+                                </th>
+
+                                <th>
+                                    Acción
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="ticketsTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="table-loading"
+                                >
+                                    Cargando tickets...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div
+                    id="ticketsEmpty"
+                    class="tickets-empty"
+                    style="display:none;"
                 >
-                    ↻ Actualizar
-                </button>
+
+                    <div>
+                        🎫
+                    </div>
+
+                    <strong>
+                        No hay tickets
+                    </strong>
+
+                    <span>
+                        Los tickets registrados aparecerán aquí.
+                    </span>
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         MODAL DETALLE
+    =========================================== -->
+
+    <div
+        id="ticketModal"
+        class="ticket-modal"
+    >
+
+        <div class="ticket-modal-content">
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="cerrarModal"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-ticket-header">
+
+                <span id="modalTicketId">
+                    TKT-000000
+                </span>
+
+                <span
+                    id="modalTicketEstado"
+                    class="estado-badge"
+                >
+                    Pendiente
+                </span>
 
             </div>
 
 
-            <div class="ticket-filters">
+            <h3 id="modalTicketTitulo">
+                —
+            </h3>
 
-                <input
-                    type="text"
-                    id="buscarTicket"
-                    placeholder="Buscar ticket..."
-                >
 
-                <select id="filtroEstado">
+            <div class="modal-info-grid">
 
-                    <option value="">
-                        Todos los estados
-                    </option>
+                <div>
 
-                    <option value="Pendiente">
-                        Pendiente
-                    </option>
+                    <span>
+                        SOLICITANTE
+                    </span>
 
-                    <option value="En proceso">
-                        En proceso
-                    </option>
+                    <strong id="modalTicketUsuario">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        CATEGORÍA
+                    </span>
+
+                    <strong id="modalTicketCategoria">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        PRIORIDAD
+                    </span>
+
+                    <strong id="modalTicketPrioridad">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        FECHA
+                    </span>
+
+                    <strong id="modalTicketFecha">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-description">
+
+                <span>
+                    DESCRIPCIÓN
+                </span>
+
+                <p id="modalTicketDescripcion">
+                    —
+                </p>
+
+            </div>
+
+
+            <!-- RESULTADO / SOLUCIÓN -->
+
+            <div
+                class="modal-description"
+                id="modalTicketSolucionBox"
+                style="display:none;"
+            >
+
+                <span>
+                    RESULTADO / SOLUCIÓN
+                </span>
+
+                <p id="modalTicketSolucion">
+                    —
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==========================================
+         MODAL RESOLVER TICKET
+    =========================================== -->
+
+    <div
+        id="resolverModal"
+        class="ticket-modal"
+    >
+
+        <div class="ticket-modal-content resolver-modal-content">
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="cerrarResolverModal"
+            >
+                ×
+            </button>
+
+
+            <div class="modal-ticket-header">
+
+                <span id="resolverTicketId">
+                    TKT-000000
+                </span>
+
+                <span class="resolver-label">
+                    RESOLVER TICKET
+                </span>
+
+            </div>
+
+
+            <h3>
+                Gestionar ticket
+            </h3>
+
+
+            <p class="resolver-help">
+                Indica el resultado de la atención del ticket
+                y registra una breve descripción.
+            </p>
+
+
+
+            <!-- ESTADO -->
+
+            <div class="form-group resolver-status-group">
+
+                <label for="resolverEstado">
+                    Resultado
+                </label>
+
+                <select id="resolverEstado">
 
                     <option value="Resuelto">
                         Resuelto
@@ -523,374 +955,92 @@
                         Sin resolver
                     </option>
 
-                    <option value="Cerrado">
-                        Cerrado
-                    </option>
-
-                </select>
-
-                <select id="filtroPrioridad">
-
-                    <option value="">
-                        Todas las prioridades
-                    </option>
-
-                    <option value="Baja">
-                        Baja
-                    </option>
-
-                    <option value="Media">
-                        Media
-                    </option>
-
-                    <option value="Alta">
-                        Alta
-                    </option>
-
-                    <option value="Crítica">
-                        Crítica
-                    </option>
-
                 </select>
 
             </div>
 
 
-            <div class="tickets-table-container">
 
-                <table class="tickets-table">
+            <!-- DESCRIPCIÓN -->
 
-                    <thead>
+            <div class="form-group">
 
-                        <tr>
+                <label for="resolverDescripcion">
+                    Descripción de la solución
+                </label>
 
-                            <th>
-                                Ticket
-                            </th>
+                <textarea
+                    id="resolverDescripcion"
+                    rows="5"
+                    maxlength="1000"
+                    placeholder="Describe brevemente cómo se solucionó el problema..."
+                    required
+                ></textarea>
 
-                            <th>
-                                Asunto
-                            </th>
-
-                            <th>
-                                Categoría
-                            </th>
-
-                            <th>
-                                Prioridad
-                            </th>
-
-                            <th>
-                                Estado
-                            </th>
-
-                            <th>
-                                Fecha
-                            </th>
-
-                            <th>
-                                Resolución
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="ticketsTableBody">
-
-                        <tr>
-
-                            <td
-                                colspan="7"
-                                class="table-loading"
-                            >
-                                Cargando tickets...
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
+                <small>
+                    Máximo 1000 caracteres.
+                </small>
 
             </div>
 
+
+
+            <!-- MENSAJE -->
 
             <div
-                id="ticketsEmpty"
-                class="tickets-empty"
-                style="display:none;"
-            >
-
-                <div>
-                    🎫
-                </div>
-
-                <strong>
-                    No hay tickets
-                </strong>
-
-                <span>
-                    Los tickets registrados aparecerán aquí.
-                </span>
-
-            </div>
-
-        </section>
-
-    </main>
-
-</div>
+                id="resolverMensaje"
+                class="ticket-message"
+            ></div>
 
 
-<!-- MODAL DETALLE -->
 
-<div
-    id="ticketModal"
-    class="ticket-modal"
->
+            <!-- BOTONES -->
 
-    <div class="ticket-modal-content">
+            <div class="form-actions">
 
-        <button
-            type="button"
-            class="modal-close"
-            id="cerrarModal"
-        >
-            ×
-        </button>
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    id="cancelarResolver"
+                >
+                    Cancelar
+                </button>
 
-        <div class="modal-ticket-header">
 
-            <span id="modalTicketId">
-                TKT-000000
-            </span>
-
-            <span
-                id="modalTicketEstado"
-                class="estado-badge"
-            >
-                Pendiente
-            </span>
-
-        </div>
-
-        <h3 id="modalTicketTitulo">
-            —
-        </h3>
-
-        <div class="modal-info-grid">
-
-            <div>
-
-                <span>
-                    SOLICITANTE
-                </span>
-
-                <strong id="modalTicketUsuario">
-                    —
-                </strong>
+                <button
+                    type="button"
+                    class="btn-primary"
+                    id="confirmarResolver"
+                >
+                    ✓ Guardar resultado
+                </button>
 
             </div>
 
-            <div>
-
-                <span>
-                    CATEGORÍA
-                </span>
-
-                <strong id="modalTicketCategoria">
-                    —
-                </strong>
-
-            </div>
-
-            <div>
-
-                <span>
-                    PRIORIDAD
-                </span>
-
-                <strong id="modalTicketPrioridad">
-                    —
-                </strong>
-
-            </div>
-
-            <div>
-
-                <span>
-                    FECHA
-                </span>
-
-                <strong id="modalTicketFecha">
-                    —
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="modal-description">
-
-            <span>
-                DESCRIPCIÓN
-            </span>
-
-            <p id="modalTicketDescripcion">
-                —
-            </p>
-
-        </div>
-
-
-        <div
-            class="modal-description"
-            id="modalTicketSolucionBox"
-            style="display:none;"
-        >
-
-            <span>
-                TIPO DE SOLUCIÓN
-            </span>
-
-            <p id="modalTicketSolucion">
-                —
-            </p>
 
         </div>
 
     </div>
 
-</div>
 
 
-<!-- MODAL RESOLVER -->
+    <!-- ==========================================
+         FOOTER
+    =========================================== -->
 
-<div
-    id="resolverModal"
-    class="ticket-modal"
->
+    <footer>
 
-    <div class="ticket-modal-content resolver-modal-content">
+        ALFERZA LIVE OFFICE · Mesa de ayuda TI
 
-        <button
-            type="button"
-            class="modal-close"
-            id="cerrarResolverModal"
-        >
-            ×
-        </button>
-
-        <div class="modal-ticket-header">
-
-            <span id="resolverTicketId">
-                TKT-000000
-            </span>
-
-            <span class="resolver-label">
-                GESTIONAR TICKET
-            </span>
-
-        </div>
+    </footer>
 
 
-        <h3>
-            Resolver ticket
-        </h3>
 
+    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 
-        <p class="resolver-help">
-            Selecciona el resultado de la atención y
-            registra brevemente qué se hizo o por qué
-            no pudo resolverse.
-        </p>
+    <script src="tickets.js"></script>
 
-
-        <div class="form-group resolver-status-group">
-
-            <label for="resolverEstado">
-                Estado final
-            </label>
-
-            <select id="resolverEstado">
-
-                <option value="Resuelto">
-                    Resuelto
-                </option>
-
-                <option value="Sin resolver">
-                    Sin resolver
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label for="resolverDescripcion">
-                Tipo de solución
-            </label>
-
-            <textarea
-                id="resolverDescripcion"
-                rows="5"
-                maxlength="1000"
-                placeholder="Ej. Se configuró nuevamente Outlook y se validó el envío y recepción de correos."
-                required
-            ></textarea>
-
-            <small>
-                Máximo 1000 caracteres.
-            </small>
-
-        </div>
-
-
-        <div
-            id="resolverMensaje"
-            class="ticket-message"
-        ></div>
-
-
-        <div class="form-actions">
-
-            <button
-                type="button"
-                class="btn-secondary"
-                id="cancelarResolver"
-            >
-                Cancelar
-            </button>
-
-            <button
-                type="button"
-                class="btn-primary"
-                id="confirmarResolver"
-            >
-                ✓ Guardar resultado
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<footer>
-    ALFERZA LIVE OFFICE · Mesa de ayuda TI
-</footer>
-
-
-<script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-
-<script src="tickets.js"></script>
-
-<script src="auth.js"></script>
+    <script src="auth.js"></script>
 
 
 </body>

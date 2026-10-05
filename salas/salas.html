@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -12,6 +11,7 @@
     >
 
     <title>Salas | ALFERZA LIVE OFFICE</title>
+
 
     <!-- =====================================================
          PROTECCIÓN DE ACCESO
@@ -32,7 +32,15 @@
     </script>
 
 
-    <link rel="stylesheet" href="../styles.css">
+    <!-- =====================================================
+         ESTILOS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="../styles.css"
+    >
+
     <link
         rel="stylesheet"
         href="../ticket-widget.css"
@@ -57,9 +65,13 @@
 
         <div class="logo">
 
-            <h1>ALFERZA LIVE OFFICE</h1>
+            <h1>
+                ALFERZA LIVE OFFICE
+            </h1>
 
-            <span>Monitoreo en tiempo real</span>
+            <span>
+                Monitoreo en tiempo real
+            </span>
 
         </div>
 
@@ -68,7 +80,9 @@
 
             <span class="live-status-dot"></span>
 
-            <span>EN VIVO</span>
+            <span>
+                EN VIVO
+            </span>
 
         </div>
 
@@ -89,61 +103,69 @@
 
         <aside class="sidebar">
 
-        <h2>
-            MENÚ
-        </h2>
+            <h2>
+                MENÚ
+            </h2>
 
 
-        <ul>
+            <ul>
 
-            <li>
-                🏢 Oficina
-            </li>
-
-
-            <li
-                onclick="window.location.href='../personal.html'"
-            >
-                👥 Personal
-            </li>
+                <li>
+                    🏢 Oficina
+                </li>
 
 
-            <li
-                onclick="window.location.href='../reserva.html'"
-            >
-                📝 Reservas
-            </li>
+                <li
+                    onclick="window.location.href='../personal.html'"
+                >
+                    👥 Personal
+                </li>
 
 
-            <li
-                onclick="window.location.href='../salas/salas.html'"
-            >
-                📅 Salas
-            </li>
+                <li
+                    onclick="window.location.href='../reserva.html'"
+                >
+                    📝 Reservas
+                </li>
 
 
-            <li
-                onclick="window.location.href='../comunicados.html'"
-            >
-                📢 Comunicados
-            </li>
-
-            <li onclick="window.location.href='../seguridad.html'">
-                🔐 Seguridad
-            </li>
-
-            <li onclick="window.location.href='../infraestructura.html'">
-                🏗️ Infraestructura
-            </li>
+                <li
+                    onclick="window.location.href='../salas/salas.html'"
+                >
+                    📅 Salas
+                </li>
 
 
-            <li onclick="window.location.href='../configuracion.html'">
+                <li
+                    onclick="window.location.href='../comunicados.html'"
+                >
+                    📢 Comunicados
+                </li>
+
+
+                <li
+                    onclick="window.location.href='../seguridad.html'"
+                >
+                    🔐 Seguridad
+                </li>
+
+
+                <li
+                    onclick="window.location.href='../infraestructura.html'"
+                >
+                    🏗️ Infraestructura
+                </li>
+
+
+                <li
+                    onclick="window.location.href='../configuracion.html'"
+                >
                     ⚙️ Configuración
                 </li>
 
-        </ul>
+            </ul>
 
-    </aside>
+        </aside>
 
 
 
@@ -167,13 +189,17 @@
 
                     <div class="breadcrumb">
 
-                        <span>OFICINA</span>
+                        <span>
+                            OFICINA
+                        </span>
 
                         <span class="breadcrumb-separator">
                             /
                         </span>
 
-                        <strong>SALAS</strong>
+                        <strong>
+                            SALAS
+                        </strong>
 
                     </div>
 
@@ -973,6 +999,7 @@
     </div>
 
 
+
     <!-- =====================================================
          PROTECCIÓN GENERAL
     ====================================================== -->
@@ -980,21 +1007,35 @@
     <script src="../auth.js"></script>
 
 
+
     <!-- =====================================================
          MICROSOFT AUTH
     ====================================================== -->
 
-    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"
+    ></script>
+
 
 
     <!-- =====================================================
-         JS PRINCIPAL
+         JS PRINCIPAL DE SALAS
     ====================================================== -->
 
     <script
         type="module"
         src="salas.js?v=20260921c"
     ></script>
+
+
+
+    <!-- =====================================================
+         WIDGET DE TICKETS
+         
+         IMPORTANTE:
+         salas.html está dentro de /salas/
+         por eso usamos ../
+    ====================================================== -->
 
     <script src="../ticket-widget.js"></script>
 

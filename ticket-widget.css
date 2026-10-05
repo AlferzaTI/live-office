@@ -1,20 +1,42 @@
-.ticket-widget {
-    position: fixed;
-    right: 25px;
-    bottom: 25px;
-    width: 75px;
-    height: 75px;
-    z-index: 9999;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
 
-.ticket-widget:hover {
-    transform: scale(1.1);
+/* ==========================================
+   WIDGET FLOTANTE DE TICKETS
+   ========================================== */
+
+.ticket-widget {
+    position: fixed !important;
+
+    right: 25px !important;
+    bottom: 25px !important;
+
+    width: 80px;
+    height: 80px;
+
+    z-index: 999999 !important;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    pointer-events: auto;
+
+    transition: transform 0.2s ease;
 }
 
 .ticket-widget img {
     width: 100%;
     height: 100%;
+
     object-fit: contain;
+
+    display: block;
+
+    pointer-events: none;
 }
+
+.ticket-widget:hover {
+    transform: scale(1.10);
+}
+

@@ -1869,3 +1869,241 @@ body {
     }
 
 }
+
+/* =========================================================
+   FOOTER — MISMO DISEÑO DEL HEADER
+========================================================= */
+
+.footer-topbar {
+
+    margin-top: 0;
+
+    width: 100%;
+
+    height: 80px;
+
+    position: relative;
+
+    background: #0f172a;
+
+    color: white;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 0 30px;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   LOGO DEL FOOTER
+   MISMA ANIMACIÓN DEL HEADER
+========================================================= */
+
+.footer-topbar .logo {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    z-index: 2;
+
+    text-align: center;
+
+    white-space: nowrap;
+}
+
+
+.footer-topbar .logo h1 {
+
+    margin: 0;
+
+    font-size: 24px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+
+    animation:
+        logoTitleAnimation
+        1.2s
+        ease-in-out
+        infinite;
+}
+
+
+.footer-topbar .logo span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    color: #cbd5e1;
+
+    letter-spacing: 0.5px;
+
+    animation:
+        logoSubtitleAnimation
+        1.2s
+        ease-in-out
+        infinite;
+}
+
+
+/* =========================================================
+   EN VIVO
+   MISMO DEL HEADER
+========================================================= */
+
+.footer-topbar .live-status {
+
+    position: relative;
+
+    z-index: 3;
+
+    margin-left: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 8px 13px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(34, 197, 94, 0.10);
+
+    border:
+        1px solid
+        rgba(34, 197, 94, 0.25);
+
+    color: #86efac;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.7px;
+}
+
+
+.footer-topbar .live-status-dot {
+
+    width: 8px;
+
+    height: 8px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(34, 197, 94, 0.12);
+
+    animation:
+        pulseLive
+        2s
+        infinite;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .footer-topbar {
+
+        height: 80px;
+
+        padding: 0 18px;
+    }
+
+
+    .footer-topbar .logo h1 {
+
+        font-size: 20px;
+    }
+
+
+    .footer-topbar .logo span {
+
+        font-size: 10px;
+    }
+
+
+    .footer-topbar .live-status {
+
+        padding: 7px 10px;
+
+        font-size: 10px;
+    }
+
+
+    .footer-topbar .live-status-dot {
+
+        width: 7px;
+
+        height: 7px;
+    }
+
+}
+
+
+@media (max-width: 430px) {
+
+    .footer-topbar .logo h1 {
+
+        font-size: 16px;
+
+        letter-spacing: 0.5px;
+    }
+
+
+    .footer-topbar .logo span {
+
+        font-size: 8px;
+    }
+
+
+    .footer-topbar .live-status {
+
+        padding: 6px 8px;
+
+        gap: 6px;
+
+        font-size: 9px;
+    }
+
+
+    .footer-topbar .live-status-dot {
+
+        width: 6px;
+
+        height: 6px;
+    }
+
+}

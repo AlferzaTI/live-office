@@ -2269,3 +2269,13 @@ body.modal-open {
     width: 100%;
 }
 
+/* =========================================
+   CONTORNO GENERAL DE CADA BOX / SALA
+   ========================================= */
+
+.room {
+    border: 3px solid #000000;
+    border-radius: 18px;
+    overflow: hidden;
+    box-sizing: border-box;
+}

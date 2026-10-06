@@ -637,11 +637,11 @@ footer {
     }
 
     .search-container {
-        right: 20px;
-    }
+    width: 100%;
+}
 
     .search-container input {
-        width: 260px;
+        width: 100%;
     }
 
     .stats {
@@ -1395,33 +1395,30 @@ footer {
 /* =========================================
    BUSCADOR — DEBAJO DEL ENCABEZADO
    ========================================= */
+/* =========================================
+   BUSCADOR — ANCHO COMPLETO
+   ========================================= */
 
 .search-container {
-
     position: static;
 
     width: 100%;
 
-    display: flex;
-
-    justify-content: flex-end;
+    display: block;
 
     margin-bottom: 20px;
 
-    z-index: 10;
-
+    box-sizing: border-box;
 }
 
-
 .search-container input {
+    display: block;
 
-    width: 320px;
+    width: 100%;
 
     padding: 12px 15px;
 
-    border:
-        1px solid
-        #cbd5e1;
+    border: 1px solid #cbd5e1;
 
     border-radius: 10px;
 
@@ -1434,35 +1431,22 @@ footer {
     font-size: 13px;
 
     box-shadow:
-        0 3px 10px
-        rgba(15, 23, 42, .08);
+        0 3px 10px rgba(15, 23, 42, .08);
 
-    transition:
-        .2s ease;
-
+    transition: .2s ease;
 }
-
 
 .search-container input::placeholder {
-
     color: #94a3b8;
-
 }
 
-
 .search-container input:focus {
-
     border-color: #3b82f6;
 
     box-shadow:
-        0 0 0 3px
-        rgba(59, 130, 246, .10),
-        0 4px 12px
-        rgba(15, 23, 42, .08);
-
+        0 0 0 3px rgba(59, 130, 246, .10),
+        0 4px 12px rgba(15, 23, 42, .08);
 }
-
-
 /* =========================================
    RESPONSIVE
    ========================================= */

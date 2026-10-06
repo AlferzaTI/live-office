@@ -2268,3 +2268,10 @@ body.modal-open {
     min-width: 0;
     width: 100%;
 }
+
+.sala3-etiquetas {
+    border: 2px solid #000000;
+    border-radius: 12px;
+    padding: 4px;
+    box-sizing: border-box;
+}

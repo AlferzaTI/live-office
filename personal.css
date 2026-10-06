@@ -1987,3 +1987,86 @@ body.modal-open {
     background: #f1f5f9;
 
 }
+
+/* =========================================
+   SALA 3 / GERENCIA
+   ETIQUETAS LATERALES
+   ========================================= */
+
+.sala3-layout {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 15px;
+    align-items: start;
+    width: 100%;
+}
+
+.sala3-etiquetas {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 90px;
+}
+
+.sala3-badge {
+    width: 90px;
+    min-height: 48px;
+    padding: 8px 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    background: linear-gradient(
+        135deg,
+        #6d28d9,
+        #4c1d95
+    );
+
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .04em;
+    text-transform: uppercase;
+
+    text-align: center;
+
+    border-radius: 10px;
+}
+
+.sala3-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    min-width: 0;
+    width: 100%;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .sala3-layout {
+        grid-template-columns: 75px minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .sala3-etiquetas {
+        width: 75px;
+    }
+
+    .sala3-badge {
+        width: 75px;
+        min-height: 44px;
+        font-size: 10px;
+    }
+
+}

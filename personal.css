@@ -610,6 +610,7 @@ body {
 
 }
 
+
 /* =========================================
    TOOLBAR
    ========================================= */
@@ -1985,5 +1986,255 @@ body.modal-open {
 .employee-unlabeled .employee-role {
 
     background: #f1f5f9;
+
+}
+
+
+/* =========================================================
+   PISO 3
+   SALA 3 + GERENCIA
+   ========================================================= */
+
+
+/*
+   IMPORTANTE:
+
+   Esta modificación afecta ÚNICAMENTE al article
+   que tenga las clases:
+
+       piso3-sala3-gerencia
+
+   Por lo tanto:
+
+       Piso 1  -> NO cambia
+       Piso 2  -> NO cambia
+       Comedor -> NO cambia
+       Otras salas -> NO cambian
+*/
+
+
+/* =========================================================
+   CONTENEDOR SALA 3 + GERENCIA
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3-gerencia {
+
+    display: grid;
+
+    /*
+       IZQUIERDA  = SALA 3
+       DERECHA    = GERENCIA
+
+       Sala 3 es más angosta, tal como el diseño
+       de referencia que mostraste.
+    */
+
+    grid-template-columns: 0.8fr 2fr;
+
+    gap: 0;
+
+    width: 100%;
+
+    min-width: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   SALA 3 - COLUMNA IZQUIERDA
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 {
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    box-sizing: border-box;
+
+    /*
+       Línea divisoria entre Sala 3 y Gerencia.
+    */
+
+    border-right: 1px solid #dbe3ec;
+
+}
+
+
+/* =========================================================
+   GERENCIA - COLUMNA DERECHA
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-gerencia {
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   HEADERS MORADOS
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .room-header,
+.floor-view[data-floor-view="3"] .piso3-gerencia .room-header {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    flex-shrink: 0;
+
+}
+
+
+/* =========================================================
+   CLUSTERS
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .room-cluster,
+.floor-view[data-floor-view="3"] .piso3-gerencia .room-cluster {
+
+    width: 100%;
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .room-cluster-label,
+.floor-view[data-floor-view="3"] .piso3-gerencia .room-cluster-label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+}
+
+
+/* =========================================================
+   GRILLA DE PUESTOS
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .desks,
+.floor-view[data-floor-view="3"] .piso3-gerencia .desks {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   SALA 3
+   LOS PUESTOS SE APILAN VERTICALMENTE
+   POR SER LA COLUMNA MÁS ANGOSTA
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .desks {
+
+    grid-template-columns: 1fr;
+
+}
+
+
+/* =========================================================
+   GERENCIA
+   DOS COLUMNAS DE PUESTOS
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-gerencia .desks {
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+}
+
+
+/* =========================================================
+   EVITAR DESBORDAMIENTO
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .employee,
+.floor-view[data-floor-view="3"] .piso3-gerencia .employee {
+
+    min-width: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   TEXTO DE SALA 3
+   ========================================================= */
+
+.floor-view[data-floor-view="3"] .piso3-sala3 .employee-name,
+.floor-view[data-floor-view="3"] .piso3-sala3 .employee-role {
+
+    max-width: 100%;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE PISO 3
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .floor-view[data-floor-view="3"] .piso3-sala3-gerencia {
+
+        grid-template-columns:
+            1fr 1.7fr;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .floor-view[data-floor-view="3"] .piso3-sala3-gerencia {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .floor-view[data-floor-view="3"] .piso3-sala3 {
+
+        border-right: 0;
+
+        border-bottom: 1px solid #dbe3ec;
+
+    }
+
+
+    .floor-view[data-floor-view="3"] .piso3-sala3 .desks {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
 
 }

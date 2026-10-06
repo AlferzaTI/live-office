@@ -1992,11 +1992,6 @@ body.modal-open {
    SALA 3 / GERENCIA
    ETIQUETAS LATERALES
    ========================================= */
-
-/* =========================================
-   SALA 3 / GERENCIA
-   ========================================= */
-
 /* =========================================
    SALA 3 / GERENCIA
    ========================================= */
@@ -2007,33 +2002,45 @@ body.modal-open {
 
 .sala3-layout {
     display: grid;
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 82px minmax(0, 1fr);
     gap: 15px;
+
     align-items: center;
+
     width: 100%;
+    box-sizing: border-box;
 }
 
 .sala3-etiquetas {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 12px;
 
-    width: 72px;
+    justify-content: center;
+    align-items: center;
+
+    gap: 14px;
+
+    width: 82px;
+    height: auto;
+
+    align-self: center;
 }
 
 .sala3-badge {
-    width: 72px;
-    min-height: 95px;
+    flex: 0 0 auto;
+
+    width: 82px;
+    height: 70px;
 
     display: flex;
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
 
     box-sizing: border-box;
 
-    padding: 10px 7px;
+    padding: 9px 6px;
 
     background: linear-gradient(
         135deg,
@@ -2048,29 +2055,41 @@ body.modal-open {
     text-align: center;
 }
 
+
+/* TÍTULO */
+
 .sala3-badge h3 {
-    margin: 0 0 6px;
+    margin: 0 0 5px;
 
     font-size: 10px;
-    line-height: 1.25;
+    line-height: 1.2;
+
     font-weight: 800;
 
     text-transform: uppercase;
 }
 
+
+/* SUBTÍTULO */
+
 .sala3-badge span {
-    display: block;
+    margin: 0;
 
     font-size: 8px;
-    line-height: 1.3;
+    line-height: 1.25;
+
     font-weight: 600;
 
     opacity: .9;
 }
 
+
+/* CONTENIDO DE TRABAJADORES */
+
 .sala3-contenido {
     display: flex;
     flex-direction: column;
+
     gap: 16px;
 
     min-width: 0;
@@ -2085,18 +2104,17 @@ body.modal-open {
 @media (max-width: 700px) {
 
     .sala3-layout {
-        grid-template-columns: 65px minmax(0, 1fr);
+        grid-template-columns: 68px minmax(0, 1fr);
         gap: 10px;
     }
 
     .sala3-etiquetas {
-        width: 65px;
+        width: 68px;
     }
 
     .sala3-badge {
-        width: 65px;
-        min-height: 85px;
-        padding: 8px 5px;
+        width: 68px;
+        height: 64px;
     }
 
     .sala3-badge h3 {

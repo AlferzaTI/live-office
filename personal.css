@@ -1993,11 +1993,19 @@ body.modal-open {
    ETIQUETAS LATERALES
    ========================================= */
 
+/* =========================================
+   SALA 3 / GERENCIA
+   ========================================= */
+
+.room-sala3 {
+    padding: 0;
+}
+
 .sala3-layout {
     display: grid;
     grid-template-columns: 90px minmax(0, 1fr);
     gap: 15px;
-    align-items: start;
+    align-items: stretch;
     width: 100%;
 }
 
@@ -2005,13 +2013,15 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    width: 90px;
+
+    height: 100%;
 }
 
 .sala3-badge {
+    flex: 1;
+
     width: 90px;
-    min-height: 48px;
-    padding: 8px 6px;
+    min-height: 0;
 
     display: flex;
     align-items: center;
@@ -2059,13 +2069,8 @@ body.modal-open {
         gap: 10px;
     }
 
-    .sala3-etiquetas {
-        width: 75px;
-    }
-
     .sala3-badge {
         width: 75px;
-        min-height: 44px;
         font-size: 10px;
     }
 

@@ -1997,37 +1997,43 @@ body.modal-open {
    SALA 3 / GERENCIA
    ========================================= */
 
+/* =========================================
+   SALA 3 / GERENCIA
+   ========================================= */
+
 .room-sala3 {
     padding: 0;
 }
 
 .sala3-layout {
     display: grid;
-    grid-template-columns: 90px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
     gap: 15px;
-    align-items: stretch;
+    align-items: center;
     width: 100%;
 }
 
 .sala3-etiquetas {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 12px;
 
-    height: 100%;
+    width: 72px;
 }
 
 .sala3-badge {
-    flex: 1;
-
-    width: 90px;
-    min-height: 0;
+    width: 72px;
+    min-height: 95px;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
     box-sizing: border-box;
+
+    padding: 10px 7px;
 
     background: linear-gradient(
         135deg,
@@ -2037,15 +2043,29 @@ body.modal-open {
 
     color: #ffffff;
 
-    font-size: 11px;
-    font-weight: 800;
-
-    letter-spacing: .04em;
-    text-transform: uppercase;
+    border-radius: 10px;
 
     text-align: center;
+}
 
-    border-radius: 10px;
+.sala3-badge h3 {
+    margin: 0 0 6px;
+
+    font-size: 10px;
+    line-height: 1.25;
+    font-weight: 800;
+
+    text-transform: uppercase;
+}
+
+.sala3-badge span {
+    display: block;
+
+    font-size: 8px;
+    line-height: 1.3;
+    font-weight: 600;
+
+    opacity: .9;
 }
 
 .sala3-contenido {
@@ -2065,13 +2085,26 @@ body.modal-open {
 @media (max-width: 700px) {
 
     .sala3-layout {
-        grid-template-columns: 75px minmax(0, 1fr);
+        grid-template-columns: 65px minmax(0, 1fr);
         gap: 10px;
     }
 
+    .sala3-etiquetas {
+        width: 65px;
+    }
+
     .sala3-badge {
-        width: 75px;
-        font-size: 10px;
+        width: 65px;
+        min-height: 85px;
+        padding: 8px 5px;
+    }
+
+    .sala3-badge h3 {
+        font-size: 9px;
+    }
+
+    .sala3-badge span {
+        font-size: 7px;
     }
 
 }

@@ -2253,3 +2253,18 @@ body.modal-open {
     }
 
 }
+
+/* =========================================
+   CENTRAR TRABAJADORES EN ALTURA
+   ========================================= */
+
+.room-sala3 .sala3-contenido {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 16px;
+
+    min-width: 0;
+    width: 100%;
+}

@@ -1997,154 +1997,40 @@ body.modal-open {
    ========================================= */
 
 /* =========================================
-   SALA 3 / GERENCIA
-   ========================================= */
-
-.sala3-layout {
-    display: grid;
-    grid-template-columns: 58px minmax(0, 1fr);
-    gap: 14px;
-
-    align-items: stretch;
-
-    width: 100%;
-    box-sizing: border-box;
-}
-
-
-/* =========================================
-   COLUMNA DE ETIQUETAS
-   ========================================= */
-
-.sala3-etiquetas {
-    display: flex;
-    flex-direction: column;
-
-    gap: 12px;
-
-    align-self: stretch;
-    height: 100%;
-
-    box-sizing: border-box;
-}
-
-
-/* =========================================
-   BOX MORADO
-   ========================================= */
-
-.sala3-badge {
-    flex: 1 1 0;
-
-    width: 58px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    box-sizing: border-box;
-
-    padding: 10px 5px;
-
-    background: linear-gradient(
-        135deg,
-        #6d28d9,
-        #4c1d95
-    );
-
-    color: #ffffff;
-
-    border-radius: 10px;
-
-    text-align: center;
-}
-
-
-/* =========================================
-   TÍTULO
-   ========================================= */
-
-.sala3-badge h3 {
-    margin: 0 0 5px;
-
-    font-size: 9px;
-    line-height: 1.2;
-
-    font-weight: 800;
-
-    text-transform: uppercase;
-}
-
-
-/* =========================================
-   SUBTÍTULO
-   ========================================= */
-
-.sala3-badge span {
-    margin: 0;
-
-    font-size: 7px;
-    line-height: 1.25;
-
-    font-weight: 600;
-
-    opacity: .9;
-}
-
-
-/* =========================================
-   ÁREA DE TRABAJADORES
-   ========================================= */
-
-.sala3-contenido {
-    display: flex;
-    flex-direction: column;
-
-    gap: 16px;
-
-    min-width: 0;
-    width: 100%;
-}
-
-
-/* =========================================
-   IMPORTANTE:
-   NO QUITAR EL PADDING NATURAL DE .ROOM
+   CENTRAR TODO EL BLOQUE SALA 3
    ========================================= */
 
 .room-sala3 {
-    padding: revert;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 
 /* =========================================
-   RESPONSIVE
+   CONTENIDO INTERNO
    ========================================= */
 
-@media (max-width: 700px) {
+.room-sala3 .sala3-layout {
+    width: 100%;
+    align-self: center;
+}
 
-    .sala3-layout {
-        grid-template-columns: 48px minmax(0, 1fr);
-        gap: 10px;
-    }
 
-    .sala3-etiquetas {
-        gap: 10px;
-    }
+/* =========================================
+   ETIQUETAS LATERALES
+   ========================================= */
 
-    .sala3-badge {
-        width: 48px;
-        padding: 8px 4px;
-    }
+.room-sala3 .sala3-etiquetas {
+    align-self: stretch;
+    justify-content: stretch;
+}
 
-    .sala3-badge h3 {
-        font-size: 8px;
-    }
 
-    .sala3-badge span {
-        font-size: 6px;
-    }
+/* =========================================
+   BOXES MORADOS
+   ========================================= */
 
+.room-sala3 .sala3-badge {
+    flex: 1 1 0;
 }

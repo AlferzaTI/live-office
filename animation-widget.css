@@ -1,23 +1,18 @@
-/* =========================================================
-   CUPHEAD ANIMATION WIDGET
-========================================================= */
-
 #cuphead-widget {
     position: fixed;
 
-    left: 15px;
-    bottom: 50px;
+    left: 20px;
+    bottom: 60px;
 
-    width: 180px;
+    width: 200px;
 
-    z-index: 999;
+    z-index: 99999;
 
     pointer-events: none;
 }
 
 #cuphead-widget img {
     display: block;
-
     width: 100%;
     height: auto;
 }

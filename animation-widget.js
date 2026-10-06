@@ -1,7 +1,3 @@
-/* =========================================================
-   CUPHEAD ANIMATION WIDGET
-========================================================= */
-
 (function () {
 
     const widget = document.createElement("div");
@@ -10,16 +6,16 @@
 
     const image = document.createElement("img");
 
-    image.alt = "";
+    image.alt = "Cuphead";
 
     widget.appendChild(image);
 
     document.body.appendChild(widget);
 
 
-    /* =========================================
-       FRAMES
-    ========================================= */
+    // =========================================
+    // CARGAR LOS 44 FRAMES
+    // =========================================
 
     const frames = [];
 
@@ -27,56 +23,38 @@
 
         const number = String(i).padStart(4, "0");
 
-        frames.push(
-            `img/Cuphead/cuphead_intro_b_${number}.png`
-        );
+        const frame = new Image();
 
+        frame.src =
+            `img/Cuphead/Cuphead/cuphead_intro_b_${number}.png`;
+
+        frames.push(frame);
     }
 
 
-    /* =========================================
-       PRECARGAR IMÁGENES
-    ========================================= */
-
-    const loadedFrames = [];
-
-    frames.forEach(src => {
-
-        const img = new Image();
-
-        img.src = src;
-
-        loadedFrames.push(img);
-
-    });
-
-
-    /* =========================================
-       ANIMACIÓN
-    ========================================= */
+    // =========================================
+    // ANIMACIÓN
+    // =========================================
 
     let currentFrame = 0;
 
-    const fps = 14;
+    function animateCuphead() {
 
-    const frameDuration = 1000 / fps;
-
-
-    function animate() {
-
-        image.src = loadedFrames[currentFrame].src;
+        image.src = frames[currentFrame].src;
 
         currentFrame++;
 
-        if (currentFrame >= loadedFrames.length) {
+        if (currentFrame >= frames.length) {
             currentFrame = 0;
         }
-
     }
 
 
-    animate();
+    // Primer frame
+    animateCuphead();
 
-    setInterval(animate, frameDuration);
+
+    // Velocidad
+    setInterval(animateCuphead, 80);
 
 })();

@@ -290,7 +290,7 @@ body {
 
 /* OFICINA ACTIVA */
 
-.sidebar li:active {
+.sidebar li.active {
     background: #334155;
 
     box-shadow:

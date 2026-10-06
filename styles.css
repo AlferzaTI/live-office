@@ -183,19 +183,24 @@ body {
    BUSCADOR
    AHORA DEBAJO DE LA BARRA NEGRA
 ========================================================= */
+/* =========================================
+   BUSCADOR — ANCHO COMPLETO
+   ========================================= */
 
 .search-container {
-    position: absolute;
+    position: static;
 
-    top: 95px;
-    right: 30px;
+    width: 100%;
 
-    z-index: 10;
+    display: block;
+
+    margin-bottom: 20px;
+
+    box-sizing: border-box;
 }
 
-
 .search-container input {
-    width: 320px;
+    width: 100%;
 
     padding: 12px 15px;
 
@@ -216,7 +221,6 @@ body {
 
     transition: .2s ease;
 }
-
 
 .search-container input::placeholder {
     color: #94a3b8;

@@ -1,156 +1,473 @@
 
 <!DOCTYPE html>
+
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>ALFERZA LIVE OFFICE</title>
 
-    <!-- PROTECCIÓN DE ACCESO -->
+
+    <!-- ==========================================
+         COMPROBAR ACCESO
+         ========================================== -->
+
     <script>
-        if (sessionStorage.getItem("alferza_login") !== "true") {
+
+        if (
+            sessionStorage.getItem("alferza_login") !== "true"
+        ) {
+
             window.location.replace("login.html");
+
         }
+
     </script>
 
-    <!-- ESTILOS -->
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="ticket-widget.css">
+
+    <!-- ==========================================
+         ESTILOS
+         ========================================== -->
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="ticket-widget.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- PANTALLA DE CARGA -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-content">
-            <div class="gear-spinner">⚙️</div>
-            <p id="loadingMessage">Cargando información...</p>
-            <span class="loading-subtitle">ALFERZA LIVE OFFICE</span>
+
+<!-- ==========================================
+     PANTALLA DE CARGA
+     ========================================== -->
+
+<div
+    id="loadingOverlay"
+    class="loading-overlay"
+>
+
+    <div class="loading-content">
+
+        <div class="gear-spinner">
+            ⚙️
         </div>
+
+        <p id="loadingMessage">
+            Cargando información...
+        </p>
+
+        <span class="loading-subtitle">
+            ALFERZA LIVE OFFICE
+        </span>
+
     </div>
 
-    <!-- HEADER -->
-    <header class="topbar">
-        <div class="logo">
-            <h1>ALFERZA LIVE OFFICE</h1>
-            <span>Monitoreo en tiempo real</span>
-        </div>
+</div>
 
-        <div class="live-status">
-            <span class="live-status-dot"></span>
-            <span>EN VIVO</span>
-        </div>
-    </header>
 
-    <!-- CONTENIDO -->
-    <div class="container">
+<!-- ==========================================
+     BARRA SUPERIOR
+     ========================================== -->
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar"></aside>
+<header class="topbar">
 
-        <!-- CONTENIDO PRINCIPAL -->
-        <main class="content">
+    <div class="logo">
 
-            <!-- ENCABEZADO OFICINA -->
-            <section class="office-header">
-                <div class="office-header-content">
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
 
-                    <div class="office-header-icon">
-                        <span>🏢</span>
-                    </div>
+        <span>
+            Monitoreo en tiempo real
+        </span>
 
-                    <div class="office-header-text">
-                        <div class="office-breadcrumb">
-                            <strong>OFICINA</strong>
-                            <span>/</span>
-                            MONITOREO EN TIEMPO REAL
-                        </div>
+    </div>
 
-                        <h2>Oficina ALFERZA</h2>
 
-                        <p>
-                            Monitoreo en tiempo real del estado de los colaboradores
-                            y disponibilidad de la oficina.
-                        </p>
-                    </div>
+    <div class="live-status">
+
+        <span class="live-status-dot"></span>
+
+        <span>
+            EN VIVO
+        </span>
+
+    </div>
+
+</header>
+
+
+<!-- ==========================================
+     CONTENIDO GENERAL
+     ========================================== -->
+
+<div class="container">
+
+
+    <!-- ======================================
+         MENÚ LATERAL
+         ====================================== -->
+
+    <aside class="sidebar">
+
+        <h2>
+            MENÚ
+        </h2>
+
+
+        <ul>
+
+
+            <li class="active">
+                🏢 Oficina
+            </li>
+
+
+            <li
+                onclick="window.location.href='personal.html'"
+            >
+                👥 Personal
+            </li>
+
+
+            <li
+                onclick="window.location.href='reserva.html'"
+            >
+                📝 Reservas
+            </li>
+
+
+            <li
+                onclick="window.location.href='salas/salas.html'"
+            >
+                📅 Salas
+            </li>
+
+
+            <li
+                onclick="window.location.href='comunicados.html'"
+            >
+                📢 Comunicados
+            </li>
+
+
+            <li
+                onclick="window.location.href='seguridad.html'"
+            >
+                🔐 Seguridad
+            </li>
+
+
+            <li
+                onclick="window.location.href='infraestructura.html'"
+            >
+                🏗️ Infraestructura
+            </li>
+
+
+            <li
+                onclick="window.location.href='tickets.html'"
+            >
+                🎫 Tickets
+            </li>
+
+            <li
+                onclick="window.location.href='permisos.html'"
+            >
+                🔐 Permisos
+            </li>
+
+
+            <li
+                onclick="window.location.href='configuracion.html'"
+            >
+                ⚙️ Configuración
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <!-- ======================================
+         CONTENIDO PRINCIPAL
+         ====================================== -->
+
+    <main class="content">
+
+
+        <!-- ==================================
+             ENCABEZADO PRINCIPAL — OFICINA
+             ================================== -->
+
+        <section class="office-header">
+
+            <div class="office-header-content">
+
+                <div class="office-header-icon">
+
+                    <span>
+                        🏢
+                    </span>
+
                 </div>
 
-                <!-- ESTADO OFICINA -->
-                <div class="office-header-status">
-                    <div class="office-status-icon">●</div>
 
-                    <div>
-                        <span>ESTADO DE OFICINA</span>
-                        <strong>ACTIVA</strong>
+                <div class="office-header-text">
+
+                    <div class="office-breadcrumb">
+
+                        <strong>
+                            OFICINA
+                        </strong>
+
+                        <span>
+                            /
+                        </span>
+
+                        MONITOREO EN TIEMPO REAL
+
                     </div>
-                </div>
-            </section>
 
-            <!-- BUSCADOR -->
-            <div class="search-container">
-                <input
-                    type="text"
-                    id="buscador"
-                    placeholder="Buscar trabajador..."
-                    autocomplete="off"
-                >
+
+                    <h2>
+                        Oficina ALFERZA
+                    </h2>
+
+
+                    <p>
+                        Monitoreo en tiempo real del estado de los colaboradores
+                        y disponibilidad de la oficina.
+                    </p>
+
+                </div>
+
             </div>
 
-            <!-- ESTADÍSTICAS -->
-            <section class="stats">
-                <div class="stat green" onclick="filtrarEstado('Available')">
-                    <span id="disp">0</span>
-                    <small>Disponibles</small>
+
+            <!-- ==================================
+                 BLOQUE DERECHO
+                 ================================== -->
+
+            <div class="office-header-status">
+
+                <div class="office-status-icon">
+                    ●
                 </div>
 
-                <div class="stat red" onclick="filtrarEstado('Busy')">
-                    <span id="busy">0</span>
-                    <small>Ocupados</small>
+
+                <div>
+
+                    <span>
+                        ESTADO DE OFICINA
+                    </span>
+
+                    <strong>
+                        ACTIVA
+                    </strong>
+
                 </div>
 
-                <div class="stat yellow" onclick="filtrarEstado('Away')">
-                    <span id="away">0</span>
-                    <small>Ausentes</small>
-                </div>
+            </div>
 
-                <div class="stat gray" onclick="filtrarEstado('Offline')">
-                    <span id="offline">0</span>
-                    <small>Offline</small>
-                </div>
-            </section>
+        </section>
 
-            <!-- PERSONAL -->
-            <section>
-                <h2 class="section-title">Personal de ALFERZA</h2>
 
-                <div id="officeGrid">
-                    <!-- Los trabajadores se cargarán desde app.js -->
-                </div>
-            </section>
+        <!-- ==================================
+             BUSCADOR
+             ================================== -->
 
-        </main>
+        <div class="search-container">
+
+            <input
+                type="text"
+                id="buscador"
+                placeholder="Buscar trabajador..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <!-- ==================================
+             ESTADÍSTICAS
+             ================================== -->
+
+        <section class="stats">
+
+
+            <div
+                class="stat green"
+                onclick="filtrarEstado('Available')"
+            >
+
+                <span id="disp">
+                    0
+                </span>
+
+                <small>
+                    Disponibles
+                </small>
+
+            </div>
+
+
+            <div
+                class="stat red"
+                onclick="filtrarEstado('Busy')"
+            >
+
+                <span id="busy">
+                    0
+                </span>
+
+                <small>
+                    Ocupados
+                </small>
+
+            </div>
+
+
+            <div
+                class="stat yellow"
+                onclick="filtrarEstado('Away')"
+            >
+
+                <span id="away">
+                    0
+                </span>
+
+                <small>
+                    Ausentes
+                </small>
+
+            </div>
+
+
+            <div
+                class="stat gray"
+                onclick="filtrarEstado('Offline')"
+            >
+
+                <span id="offline">
+                    0
+                </span>
+
+                <small>
+                    Offline
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================
+             PERSONAL
+             ================================== -->
+
+        <section>
+
+            <h2 class="section-title">
+                Personal de ALFERZA
+            </h2>
+
+
+            <div id="officeGrid">
+
+                <!--
+                    Los trabajadores se cargarán
+                    desde app.js
+                -->
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     PIE DE PÁGINA
+     ========================================== -->
+
+<!-- ==========================================
+     FOOTER
+     ========================================== -->
+
+<!-- ==========================================
+     FOOTER — MISMO DISEÑO DEL TOPBAR
+     ========================================== -->
+
+<footer class="topbar footer-topbar">
+
+    <div class="logo">
+
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
+
+        <span>
+            Monitoreo en tiempo real
+        </span>
+
     </div>
 
-    <!-- FOOTER -->
-    <footer class="topbar footer-topbar">
-        <div class="logo">
-            <h1>ALFERZA LIVE OFFICE</h1>
-            <span>Monitoreo en tiempo real</span>
-        </div>
 
-        <div class="live-status">
-            <span class="live-status-dot"></span>
-            <span>EN VIVO</span>
-        </div>
-    </footer>
+    <div class="live-status">
 
-    <!-- SCRIPTS -->
-    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-    <script src="app.js"></script>
-    <script src="/live-office/sidebar.js"></script>
-    <script src="ticket-widget.js"></script>
+        <span class="live-status-dot"></span>
+
+        <span>
+            EN VIVO
+        </span>
+
+    </div>
+
+</footer>
+
+
+<!-- ==========================================
+     MICROSOFT AUTHENTICATION
+     ========================================== -->
+
+<script
+    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+></script>
+
+
+<!-- ==========================================
+     APP
+     ========================================== -->
+
+<script src="app.js"></script>
+
+
+<!-- ==========================================
+     WIDGET GLOBAL DE TICKETS
+     ========================================== -->
+
+<script src="ticket-widget.js"></script>
+
 
 </body>
+
 </html>
+

@@ -16,6 +16,15 @@ const SHAREPOINT_HOST =
 const SHAREPOINT_SITE_PATH =
     "/personal/soporte1_alferza_pe";
 
+const TENANT_ID =
+    "dbab984f-4bb1-4b60-9dff-da59f54acdf1";
+
+const CLIENT_ID =
+    "5d98417c-74a7-4fab-8f2c-41ac127be696";
+
+const REDIRECT_URI =
+    "https://alferzati.github.io/live-office/blank.html";
+
 const GRUPO_TI = "TI";
 const GRUPO_NORMAL = "Normal";
 
@@ -51,6 +60,8 @@ const SCOPES_GRAPH = [
    VARIABLES GLOBALES
 ========================================================= */
 
+let permisosMsalInstance = null;
+
 let usuarioSeleccionado = null;
 
 let registrosPermisos = [];
@@ -61,6 +72,8 @@ let listaPermisosCache = null;
 
 let columnasPermisosCache = null;
 
+let mapaCamposCache = null;
+
 
 /* =========================================================
    INICIO
@@ -70,24 +83,36 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
 
-        console.log("Permisos cargado");
+        console.log(
+            "Permisos cargado"
+        );
+
 
         const contenido =
-            document.querySelector(".content");
+            document.querySelector(
+                ".content"
+            );
+
 
         if (contenido) {
-            contenido.style.display = "block";
-            contenido.style.visibility = "visible";
-            contenido.style.opacity = "1";
+
+            contenido.style.display =
+                "block";
+
+            contenido.style.visibility =
+                "visible";
+
+            contenido.style.opacity =
+                "1";
         }
 
-        ocultarPanelUsuario();
 
         configurarMenu();
 
         configurarEventos();
 
         await inicializarPermisos();
+
     }
 );
 
@@ -103,10 +128,11 @@ async function inicializarPermisos() {
         const cuenta =
             await obtenerCuentaActual();
 
+
         if (!cuenta) {
 
             mostrarMensaje(
-                "No se pudo obtener el usuario actual.",
+                "No se pudo obtener la sesión de Microsoft. Vuelve a iniciar sesión.",
                 "error"
             );
 
@@ -115,37 +141,71 @@ async function inicializarPermisos() {
 
 
         const correoActual =
-            obtenerCorreoCuenta(cuenta);
+            obtenerCorreoCuenta(
+                cuenta
+            );
 
 
         console.log(
-            "Usuario actual:",
+            "Cuenta MSAL:",
             correoActual
         );
 
 
         const userInfo =
-            document.getElementById("userInfo");
+            document.getElementById(
+                "userInfo"
+            );
+
 
         if (userInfo) {
 
             userInfo.textContent =
-                cuenta.nombre ||
+                cuenta.name ||
                 correoActual ||
                 "";
         }
 
 
-        /* =====================================================
-           CARGAR LISTA DE PERMISOS
-        ====================================================== */
+        /*
+         * Intentar obtener también el
+         * usuario real mediante Graph.
+         */
+
+        const usuarioGraph =
+            await obtenerUsuarioActualGraph();
+
+
+        if (usuarioGraph) {
+
+            console.log(
+                "Usuario actual desde Graph:",
+                usuarioGraph
+            );
+
+
+            if (userInfo) {
+
+                userInfo.textContent =
+                    usuarioGraph.displayName ||
+                    usuarioGraph.mail ||
+                    usuarioGraph.userPrincipalName ||
+                    correoActual;
+            }
+        }
+
+
+        /*
+         * Cargar los registros de permisos.
+         */
 
         await cargarPermisos();
 
 
-        /* =====================================================
-           COMPROBAR SI ES TI
-        ====================================================== */
+        /*
+         * Comprobar si el usuario actual
+         * tiene grupo TI.
+         */
 
         const registroActual =
             buscarRegistroPorCorreo(
@@ -157,7 +217,9 @@ async function inicializarPermisos() {
             USUARIOS_TI_INICIALES
                 .map(normalizarCorreo)
                 .includes(
-                    normalizarCorreo(correoActual)
+                    normalizarCorreo(
+                        correoActual
+                    )
                 )
             ||
             (
@@ -167,7 +229,9 @@ async function inicializarPermisos() {
                         registroActual,
                         "Grupo"
                     )
-                ).trim().toLowerCase() ===
+                )
+                    .trim()
+                    .toLowerCase() ===
                     GRUPO_TI.toLowerCase()
             );
 
@@ -184,286 +248,162 @@ async function inicializarPermisos() {
             "Usuario autorizado para administrar permisos."
         );
 
+
     } catch (error) {
 
         console.error(
-            "Error inicializando permisos:",
+            "Error en permisos:",
             error
         );
 
+
         mostrarMensaje(
-            obtenerMensajeError(error),
+            obtenerMensajeError(
+                error
+            ),
             "error"
         );
+
     }
 }
 
 
 /* =========================================================
-   EVENTOS
+   CONFIGURAR MSAL
 ========================================================= */
 
-function configurarEventos() {
+async function obtenerInstanciaMSAL() {
 
-    const btnBuscar =
-        document.getElementById(
-            "btnBuscarUsuario"
-        );
-
-    if (btnBuscar) {
-
-        btnBuscar.addEventListener(
-            "click",
-            buscarUsuario
-        );
-    }
-
-
-    const grupo =
-        document.getElementById(
-            "grupoUsuario"
-        );
-
-    if (grupo) {
-
-        grupo.addEventListener(
-            "change",
-            cambiarGrupo
-        );
-    }
-
-
-    const btnGuardar =
-        document.getElementById(
-            "btnGuardarPermisos"
-        );
-
-    if (btnGuardar) {
-
-        btnGuardar.addEventListener(
-            "click",
-            guardarPermisos
-        );
-    }
-
-
-    const correo =
-        document.getElementById(
-            "correoUsuario"
-        );
-
-    if (correo) {
-
-        correo.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    event.preventDefault();
-
-                    buscarUsuario();
-                }
-            }
-        );
-    }
-
-
-    /* =====================================================
-       EDITAR DESDE TABLA
-    ====================================================== */
-
-    const tabla =
-        document.getElementById(
-            "tablaPermisos"
-        );
-
-    if (tabla) {
-
-        tabla.addEventListener(
-            "click",
-            event => {
-
-                const boton =
-                    event.target.closest(
-                        "[data-editar-permiso]"
-                    );
-
-                if (!boton) return;
-
-                const itemId =
-                    boton.getAttribute(
-                        "data-editar-permiso"
-                    );
-
-                editarRegistro(
-                    itemId
-                );
-            }
-        );
-    }
-}
-
-
-/* =========================================================
-   MENÚ
-========================================================= */
-
-function configurarMenu() {
-
-    const menuToggle =
-        document.getElementById(
-            "menuToggle"
-        );
-
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
+    /*
+     * Por seguridad, si alguna página ya
+     * expone una instancia global, la usamos.
+     */
 
     if (
-        menuToggle &&
-        sidebar
+        window.msalInstance
     ) {
 
-        menuToggle.addEventListener(
-            "click",
-            () => {
+        return window.msalInstance;
+    }
 
-                sidebar.classList.toggle(
-                    "open"
-                );
-            }
+
+    /*
+     * Tu auth.js NO crea MSAL.
+     * Por eso esta página crea su propia
+     * instancia usando la misma aplicación.
+     */
+
+    if (
+        !window.msal ||
+        !window.msal.PublicClientApplication
+    ) {
+
+        throw new Error(
+            "La librería MSAL Browser no está cargada."
         );
     }
+
+
+    if (
+        !permisosMsalInstance
+    ) {
+
+        permisosMsalInstance =
+            new window.msal.PublicClientApplication({
+
+                auth: {
+
+                    clientId:
+                        CLIENT_ID,
+
+                    authority:
+                        `https://login.microsoftonline.com/${TENANT_ID}`,
+
+                    redirectUri:
+                        REDIRECT_URI
+
+                },
+
+                cache: {
+
+                    cacheLocation:
+                        "sessionStorage",
+
+                    storeAuthStateInCookie:
+                        false
+                }
+
+            });
+
+
+        /*
+         * Recuperar la cuenta que ya tiene
+         * la sesión iniciada.
+         */
+
+        const cuentas =
+            permisosMsalInstance.getAllAccounts();
+
+
+        if (
+            cuentas &&
+            cuentas.length > 0
+        ) {
+
+            permisosMsalInstance.setActiveAccount(
+                cuentas[0]
+            );
+        }
+    }
+
+
+    return permisosMsalInstance;
 }
 
 
 /* =========================================================
-   OCULTAR PANEL
-========================================================= */
-
-function ocultarPanelUsuario() {
-
-    const panel =
-        document.getElementById(
-            "panelPermisos"
-        );
-
-    if (panel) {
-
-        panel.style.display = "none";
-    }
-}
-
-
-/* =========================================================
-   MOSTRAR PANEL
-========================================================= */
-
-function mostrarPanelUsuario() {
-
-    const panel =
-        document.getElementById(
-            "panelPermisos"
-        );
-
-    if (panel) {
-
-        panel.style.display = "block";
-    }
-}
-
-
-/* =========================================================
-   CUENTA ACTUAL
+   OBTENER CUENTA ACTUAL
 ========================================================= */
 
 async function obtenerCuentaActual() {
 
-    try {
+    const instancia =
+        await obtenerInstanciaMSAL();
 
-        let instancia = null;
+
+    let cuenta =
+        instancia.getActiveAccount();
+
+
+    if (!cuenta) {
+
+        const cuentas =
+            instancia.getAllAccounts();
 
 
         if (
-            typeof msalInstance !==
-            "undefined"
+            cuentas &&
+            cuentas.length > 0
         ) {
 
-            instancia =
-                msalInstance;
-        }
+            cuenta =
+                cuentas[0];
 
 
-        if (
-            !instancia &&
-            window.msalInstance
-        ) {
-
-            instancia =
-                window.msalInstance;
-        }
-
-
-        if (!instancia) {
-
-            console.error(
-                "MSAL no está disponible."
+            instancia.setActiveAccount(
+                cuenta
             );
-
-            return null;
         }
+    }
 
 
-        let cuenta =
-            instancia.getActiveAccount();
-
-
-        if (!cuenta) {
-
-            const cuentas =
-                instancia.getAllAccounts();
-
-            if (
-                cuentas &&
-                cuentas.length > 0
-            ) {
-
-                cuenta =
-                    cuentas[0];
-
-                try {
-
-                    instancia.setActiveAccount(
-                        cuenta
-                    );
-
-                } catch (e) {
-                }
-            }
-        }
-
-
-        if (!cuenta) {
-
-            return null;
-        }
-
-
-        return cuenta;
-
-    } catch (error) {
-
-        console.error(
-            "Error obteniendo cuenta:",
-            error
-        );
+    if (!cuenta) {
 
         return null;
     }
+
+
+    return cuenta;
 }
 
 
@@ -471,20 +411,24 @@ async function obtenerCuentaActual() {
    CORREO DE CUENTA
 ========================================================= */
 
-function obtenerCorreoCuenta(cuenta) {
+function obtenerCorreoCuenta(
+    cuenta
+) {
 
     if (!cuenta) {
+
         return "";
     }
 
-    return (
+
+    return normalizarCorreo(
+
         cuenta.username ||
         cuenta.mail ||
         cuenta.userPrincipalName ||
         ""
-    )
-        .trim()
-        .toLowerCase();
+
+    );
 }
 
 
@@ -494,35 +438,8 @@ function obtenerCorreoCuenta(cuenta) {
 
 async function obtenerTokenGraph() {
 
-    let instancia = null;
-
-
-    if (
-        typeof msalInstance !==
-        "undefined"
-    ) {
-
-        instancia =
-            msalInstance;
-    }
-
-
-    if (
-        !instancia &&
-        window.msalInstance
-    ) {
-
-        instancia =
-            window.msalInstance;
-    }
-
-
-    if (!instancia) {
-
-        throw new Error(
-            "MSAL no está disponible."
-        );
-    }
+    const instancia =
+        await obtenerInstanciaMSAL();
 
 
     const cuenta =
@@ -532,48 +449,62 @@ async function obtenerTokenGraph() {
     if (!cuenta) {
 
         throw new Error(
-            "No existe una sesión activa de Microsoft."
+            "No existe una cuenta Microsoft activa en esta página. Cierra sesión y vuelve a iniciar sesión."
         );
     }
 
 
     try {
 
+        /*
+         * Primero intenta reutilizar
+         * el token existente.
+         */
+
         const resultado =
-            await instancia.acquireTokenSilent(
-                {
-                    scopes:
-                        SCOPES_GRAPH,
-                    account:
-                        cuenta
-                }
-            );
+            await instancia.acquireTokenSilent({
+
+                scopes:
+                    SCOPES_GRAPH,
+
+                account:
+                    cuenta
+
+            });
 
 
         return resultado.accessToken;
 
-    } catch (error) {
+
+    } catch (silentError) {
 
         console.warn(
-            "No se pudo obtener el token silenciosamente. Solicitando consentimiento.",
-            error
+            "acquireTokenSilent no pudo obtener el token:",
+            silentError
         );
 
+
+        /*
+         * Si hace falta consentimiento,
+         * abre el popup de Microsoft.
+         */
 
         try {
 
             const resultado =
-                await instancia.acquireTokenPopup(
-                    {
-                        scopes:
-                            SCOPES_GRAPH,
-                        account:
-                            cuenta
-                    }
-                );
+                await instancia.acquireTokenPopup({
+
+                    scopes:
+                        SCOPES_GRAPH,
+
+                    account:
+                        cuenta
+
+                });
 
 
             return resultado.accessToken;
+
 
         } catch (popupError) {
 
@@ -581,6 +512,7 @@ async function obtenerTokenGraph() {
                 "Error obteniendo token Graph:",
                 popupError
             );
+
 
             throw popupError;
         }
@@ -602,11 +534,15 @@ async function graphFetch(
 
 
     const headers = {
+
         Authorization:
             `Bearer ${token}`,
+
         Accept:
             "application/json",
+
         ...(options.headers || {})
+
     };
 
 
@@ -622,17 +558,21 @@ async function graphFetch(
 
     const response =
         await fetch(
+
             url,
+
             {
+
                 ...options,
+
                 headers
+
             }
+
         );
 
 
-    if (
-        !response.ok
-    ) {
+    if (!response.ok) {
 
         let detalle = "";
 
@@ -642,18 +582,24 @@ async function graphFetch(
             const errorData =
                 await response.json();
 
+
             detalle =
                 errorData?.error?.message ||
                 "";
-        } catch (e) {
+
+        } catch (error) {
+
+            // No hay cuerpo JSON.
         }
 
 
         throw new Error(
+
             `Graph ${response.status}: ${
                 detalle ||
                 response.statusText
             }`
+
         );
     }
 
@@ -667,6 +613,33 @@ async function graphFetch(
 
 
     return await response.json();
+}
+
+
+/* =========================================================
+   USUARIO ACTUAL DESDE GRAPH
+========================================================= */
+
+async function obtenerUsuarioActualGraph() {
+
+    try {
+
+        return await graphFetch(
+
+            "https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName"
+
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "No se pudo obtener /me:",
+            error
+        );
+
+
+        return null;
+    }
 }
 
 
@@ -771,143 +744,24 @@ async function obtenerColumnasPermisos() {
 
 
 /* =========================================================
-   NORMALIZAR TEXTO
+   MAPA DE CAMPOS
 ========================================================= */
 
-function normalizarTexto(valor) {
+async function obtenerMapaCampos() {
 
-    return String(
-        valor || ""
-    )
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-        .toLowerCase()
-        .replace(
-            /[^a-z0-9]/g,
-            ""
-        );
-}
+    if (
+        mapaCamposCache
+    ) {
 
+        return mapaCamposCache;
+    }
 
-/* =========================================================
-   NORMALIZAR CORREO
-========================================================= */
-
-function normalizarCorreo(correo) {
-
-    return String(
-        correo || ""
-    )
-        .trim()
-        .toLowerCase();
-}
-
-
-/* =========================================================
-   OBTENER NOMBRE INTERNO
-========================================================= */
-
-async function obtenerNombreCampo(
-    nombresPosibles,
-    obligatorio = true
-) {
 
     const columnas =
         await obtenerColumnasPermisos();
 
 
-    const candidatos =
-        nombresPosibles.map(
-            normalizarTexto
-        );
-
-
-    let columna =
-        columnas.find(
-            campo =>
-                candidatos.includes(
-                    normalizarTexto(
-                        campo.displayName
-                    )
-                )
-        );
-
-
-    if (!columna) {
-
-        columna =
-            columnas.find(
-                campo =>
-                    candidatos.includes(
-                        normalizarTexto(
-                            campo.name
-                        )
-                    )
-            );
-    }
-
-
-    if (!columna) {
-
-        if (obligatorio) {
-
-            throw new Error(
-                `No se encontró la columna: ${nombresPosibles.join(", ")}`
-            );
-        }
-
-
-        return null;
-    }
-
-
-    return columna.name;
-}
-
-
-/* =========================================================
-   MAPA DE COLUMNAS
-========================================================= */
-
-async function obtenerMapaCampos() {
-
     const mapa = {};
-
-
-    mapa.Title =
-        await obtenerNombreCampo(
-            [
-                "Title",
-                "Título"
-            ]
-        );
-
-
-    mapa.UsuarioCorreo =
-        await obtenerNombreCampo(
-            [
-                "UsuarioCorreo"
-            ]
-        );
-
-
-    mapa.NombreUsuario =
-        await obtenerNombreCampo(
-            [
-                "NombreUsuario"
-            ]
-        );
-
-
-    mapa.Grupo =
-        await obtenerNombreCampo(
-            [
-                "Grupo"
-            ]
-        );
 
 
     for (
@@ -915,16 +769,149 @@ async function obtenerMapaCampos() {
         MODULOS_PERMISOS
     ) {
 
-        mapa[modulo] =
-            await obtenerNombreCampo(
+        const columna =
+            encontrarColumna(
+
+                columnas,
+
                 [
                     modulo
                 ]
+
             );
+
+
+        if (!columna) {
+
+            throw new Error(
+
+                `No se encontró la columna de Microsoft Lists: ${modulo}`
+
+            );
+        }
+
+
+        mapa[modulo] =
+            columna.name;
     }
 
 
+    const titleColumn =
+        encontrarColumna(
+
+            columnas,
+
+            [
+                "Title",
+                "Título"
+            ]
+
+        );
+
+
+    if (!titleColumn) {
+
+        throw new Error(
+            "No se encontró la columna Title/Título."
+        );
+    }
+
+
+    mapa.Title =
+        titleColumn.name;
+
+
+    for (
+        const nombre of
+        [
+            "UsuarioCorreo",
+            "NombreUsuario",
+            "Grupo"
+        ]
+    ) {
+
+        const columna =
+            encontrarColumna(
+
+                columnas,
+
+                [
+                    nombre
+                ]
+
+            );
+
+
+        if (!columna) {
+
+            throw new Error(
+
+                `No se encontró la columna: ${nombre}`
+
+            );
+        }
+
+
+        mapa[nombre] =
+            columna.name;
+    }
+
+
+    mapaCamposCache =
+        mapa;
+
+
+    console.log(
+        "Mapa de columnas PermisosTI:",
+        mapa
+    );
+
+
     return mapa;
+}
+
+
+/* =========================================================
+   ENCONTRAR COLUMNA
+========================================================= */
+
+function encontrarColumna(
+    columnas,
+    nombres
+) {
+
+    const objetivos =
+        nombres.map(
+            normalizarTexto
+        );
+
+
+    return (
+
+        columnas.find(
+            columna =>
+                objetivos.includes(
+                    normalizarTexto(
+                        columna.displayName
+                    )
+                )
+        )
+
+        ||
+
+        columnas.find(
+            columna =>
+                objetivos.includes(
+                    normalizarTexto(
+                        columna.name
+                    )
+                )
+        )
+
+        ||
+
+        null
+    );
 }
 
 
@@ -992,21 +979,24 @@ async function cargarPermisos() {
 
 
     if (!tabla) {
+
         return [];
     }
 
 
+    tabla.innerHTML =
+        `
+        <div class="tabla-vacia">
+
+            <span>
+                Cargando usuarios...
+            </span>
+
+        </div>
+        `;
+
+
     try {
-
-        tabla.innerHTML =
-            `
-            <div class="tabla-vacia">
-                <span>
-                    Cargando usuarios...
-                </span>
-            </div>
-            `;
-
 
         registrosPermisos =
             await obtenerTodosLosItems();
@@ -1019,6 +1009,7 @@ async function cargarPermisos() {
 
         return registrosPermisos;
 
+
     } catch (error) {
 
         console.error(
@@ -1030,9 +1021,11 @@ async function cargarPermisos() {
         tabla.innerHTML =
             `
             <div class="tabla-vacia">
+
                 <span>
                     No se pudieron cargar los permisos.
                 </span>
+
             </div>
             `;
 
@@ -1046,7 +1039,7 @@ async function cargarPermisos() {
    RENDERIZAR TABLA
 ========================================================= */
 
-async function renderizarTablaPermisos(
+function renderizarTablaPermisos(
     registros
 ) {
 
@@ -1057,6 +1050,7 @@ async function renderizarTablaPermisos(
 
 
     if (!tabla) {
+
         return;
     }
 
@@ -1069,9 +1063,11 @@ async function renderizarTablaPermisos(
         tabla.innerHTML =
             `
             <div class="tabla-vacia">
+
                 <span>
                     No hay usuarios configurados.
                 </span>
+
             </div>
             `;
 
@@ -1084,11 +1080,6 @@ async function renderizarTablaPermisos(
 
     registros.forEach(
         registro => {
-
-            const fields =
-                registro.fields ||
-                {};
-
 
             const correo =
                 obtenerCampo(
@@ -1103,20 +1094,29 @@ async function renderizarTablaPermisos(
                     registro,
                     "NombreUsuario"
                 ) ||
+
                 obtenerCampo(
                     registro,
                     "Title"
                 ) ||
+
                 correo ||
+
                 "Sin nombre";
 
 
             const grupo =
-                obtenerCampo(
-                    registro,
-                    "Grupo"
-                ) ||
-                GRUPO_NORMAL;
+                String(
+
+                    obtenerCampo(
+                        registro,
+                        "Grupo"
+                    ) ||
+
+                    GRUPO_NORMAL
+
+                )
+                    .trim();
 
 
             const cantidad =
@@ -1126,26 +1126,34 @@ async function renderizarTablaPermisos(
 
 
             const esCompleto =
-                grupo === GRUPO_TI ||
+
+                grupo.toLowerCase() ===
+                    GRUPO_TI.toLowerCase()
+
+                ||
+
                 cantidad ===
                     MODULOS_PERMISOS.length;
 
 
-            let accesoTexto = "";
+            const accesoTexto =
+
+                grupo.toLowerCase() ===
+                    GRUPO_TI.toLowerCase()
+
+                    ? "Acceso total"
+
+                    : `${cantidad}/${MODULOS_PERMISOS.length}`;
 
 
-            if (
-                grupo === GRUPO_TI
-            ) {
+            const claseGrupo =
 
-                accesoTexto =
-                    "Acceso total";
+                grupo.toLowerCase() ===
+                    GRUPO_TI.toLowerCase()
 
-            } else {
+                    ? "badge-ti"
 
-                accesoTexto =
-                    `${cantidad}/${MODULOS_PERMISOS.length}`;
-            }
+                    : "badge-normal";
 
 
             filas +=
@@ -1179,21 +1187,9 @@ async function renderizarTablaPermisos(
 
                     <td>
 
-                        ${
-                            grupo === GRUPO_TI
-
-                                ? `
-                                    <span class="badge badge-ti">
-                                        TI
-                                    </span>
-                                  `
-
-                                : `
-                                    <span class="badge badge-normal">
-                                        Normal
-                                    </span>
-                                  `
-                        }
+                        <span class="badge ${claseGrupo}">
+                            ${escapeHtml(grupo)}
+                        </span>
 
                     </td>
 
@@ -1221,11 +1217,15 @@ async function renderizarTablaPermisos(
                     <td>
 
                         <button
+
                             type="button"
+
                             class="table-action-btn"
+
                             data-editar-permiso="${escapeHtml(
                                 registro.id
                             )}"
+
                         >
                             Editar
                         </button>
@@ -1291,6 +1291,7 @@ function obtenerCampo(
 ) {
 
     if (!registro) {
+
         return "";
     }
 
@@ -1337,17 +1338,22 @@ function contarPermisos(
 
     const grupo =
         String(
+
             obtenerCampo(
                 registro,
                 "Grupo"
-            )
+            ) ||
+
+            ""
+
         )
-            .trim();
+            .trim()
+            .toLowerCase();
 
 
     if (
         grupo ===
-        GRUPO_TI
+        GRUPO_TI.toLowerCase()
     ) {
 
         return MODULOS_PERMISOS.length;
@@ -1360,28 +1366,13 @@ function contarPermisos(
     MODULOS_PERMISOS.forEach(
         modulo => {
 
-            const valor =
-                obtenerCampo(
-                    registro,
-                    modulo
-                );
-
-
             if (
-                valor === true ||
-                valor === 1 ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "true" ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "sí" ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "si"
+                valorBooleano(
+                    obtenerCampo(
+                        registro,
+                        modulo
+                    )
+                )
             ) {
 
                 cantidad++;
@@ -1410,12 +1401,16 @@ function buscarRegistroPorCorreo(
 
     return registrosPermisos.find(
         registro =>
+
             normalizarCorreo(
+
                 obtenerCampo(
                     registro,
                     "UsuarioCorreo"
                 )
+
             ) === objetivo
+
     ) || null;
 }
 
@@ -1439,6 +1434,7 @@ async function buscarUsuario() {
 
 
     if (!input) {
+
         return;
     }
 
@@ -1477,7 +1473,9 @@ async function buscarUsuario() {
 
         if (btn) {
 
-            btn.disabled = true;
+            btn.disabled =
+                true;
+
             btn.textContent =
                 "Buscando...";
         }
@@ -1485,18 +1483,21 @@ async function buscarUsuario() {
 
         ocultarPanelUsuario();
 
-        usuarioSeleccionado = null;
+
+        usuarioSeleccionado =
+            null;
 
 
-        /* =====================================================
-           GRAPH /USERS
-        ====================================================== */
+        /*
+         * Buscar directamente mediante UPN.
+         */
 
         const url =
             `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(correo)}?$select=id,displayName,mail,userPrincipalName`;
 
 
-        let usuario;
+        let usuario =
+            null;
 
 
         try {
@@ -1506,16 +1507,31 @@ async function buscarUsuario() {
                     url
                 );
 
-        } catch (error) {
+
+        } catch (errorDirecto) {
 
             console.warn(
-                "Búsqueda directa falló. Intentando por filtro...",
-                error
+
+                "La búsqueda directa falló. Probando filtro.",
+
+                errorDirecto
+
             );
 
 
+            /*
+             * Segundo intento usando filtro.
+             */
+
+            const filtroCorreo =
+                correo.replace(
+                    /'/g,
+                    "''"
+                );
+
+
             const urlFiltro =
-                `https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '${correo}' or mail eq '${correo}'&$select=id,displayName,mail,userPrincipalName`;
+                `https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '${filtroCorreo}' or mail eq '${filtroCorreo}'&$select=id,displayName,mail,userPrincipalName`;
 
 
             const resultado =
@@ -1529,7 +1545,7 @@ async function buscarUsuario() {
                 resultado.value.length === 0
             ) {
 
-                throw error;
+                throw errorDirecto;
             }
 
 
@@ -1541,33 +1557,36 @@ async function buscarUsuario() {
         if (!usuario) {
 
             throw new Error(
-                "Usuario no encontrado."
+                "El usuario no fue encontrado en Microsoft Entra ID."
             );
         }
 
 
-        const correoUsuario =
-            normalizarCorreo(
-                usuario.mail ||
-                usuario.userPrincipalName ||
-                correo
-            );
-
-
         usuarioSeleccionado = {
+
             id:
-                usuario.id,
+                usuario.id ||
+                "",
 
             nombre:
                 usuario.displayName ||
                 "Sin nombre",
 
             correo:
-                correoUsuario,
+                normalizarCorreo(
+
+                    usuario.mail ||
+
+                    usuario.userPrincipalName ||
+
+                    correo
+
+                ),
 
             userPrincipalName:
                 usuario.userPrincipalName ||
                 ""
+
         };
 
 
@@ -1577,9 +1596,9 @@ async function buscarUsuario() {
         );
 
 
-        /* =====================================================
-           MOSTRAR INFORMACIÓN
-        ====================================================== */
+        /*
+         * Mostrar usuario.
+         */
 
         const nombreUsuario =
             document.getElementById(
@@ -1607,13 +1626,16 @@ async function buscarUsuario() {
         }
 
 
-        /* =====================================================
-           BUSCAR PERMISOS YA EXISTENTES
-        ====================================================== */
+        /*
+         * Buscar si ya tiene permisos
+         * en Microsoft Lists.
+         */
 
         const registro =
             buscarRegistroPorCorreo(
+
                 usuarioSeleccionado.correo
+
             );
 
 
@@ -1635,26 +1657,31 @@ async function buscarUsuario() {
     } catch (error) {
 
         console.error(
-            "Error buscando usuario:",
+            "Error buscando usuario en Graph:",
             error
         );
 
 
         mostrarMensaje(
+
             obtenerMensajeBusqueda(
                 error
             ),
+
             "error"
+
         );
 
 
         ocultarPanelUsuario();
 
+
     } finally {
 
         if (btn) {
 
-            btn.disabled = false;
+            btn.disabled =
+                false;
 
             btn.textContent =
                 "Buscar";
@@ -1664,7 +1691,7 @@ async function buscarUsuario() {
 
 
 /* =========================================================
-   CARGAR REGISTRO EN FORMULARIO
+   CARGAR REGISTRO EXISTENTE
 ========================================================= */
 
 function cargarRegistroEnFormulario(
@@ -1679,19 +1706,26 @@ function cargarRegistroEnFormulario(
 
     const grupoRegistrado =
         String(
+
             obtenerCampo(
                 registro,
                 "Grupo"
             ) ||
+
             GRUPO_NORMAL
+
         ).trim();
 
 
     if (grupo) {
 
         grupo.value =
-            grupoRegistrado === GRUPO_TI
+
+            grupoRegistrado.toLowerCase() ===
+                GRUPO_TI.toLowerCase()
+
                 ? GRUPO_TI
+
                 : GRUPO_NORMAL;
     }
 
@@ -1701,53 +1735,37 @@ function cargarRegistroEnFormulario(
 
             const checkbox =
                 document.querySelector(
+
                     `.permiso-modulo[data-modulo="${modulo}"]`
+
                 );
 
 
             if (!checkbox) {
+
                 return;
             }
 
 
-            const valor =
-                obtenerCampo(
-                    registro,
-                    modulo
-                );
-
-
             checkbox.checked =
-                valor === true ||
-                valor === 1 ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "true" ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "sí" ||
-                String(
-                    valor
-                ).toLowerCase() ===
-                    "si";
+                valorBooleano(
+
+                    obtenerCampo(
+                        registro,
+                        modulo
+                    )
+
+                );
         }
     );
 
 
     cambiarGrupo();
-
-
-    console.log(
-        "Permisos existentes cargados:",
-        registro
-    );
 }
 
 
 /* =========================================================
-   NUEVO USUARIO
+   PREPARAR NUEVO USUARIO
 ========================================================= */
 
 function prepararNuevoUsuario() {
@@ -1770,17 +1788,23 @@ function prepararNuevoUsuario() {
 
             const checkbox =
                 document.querySelector(
+
                     `.permiso-modulo[data-modulo="${modulo}"]`
+
                 );
 
 
             if (!checkbox) {
+
                 return;
             }
 
 
-            checkbox.checked = false;
-            checkbox.disabled = false;
+            checkbox.checked =
+                false;
+
+            checkbox.disabled =
+                false;
         }
     );
 }
@@ -1799,12 +1823,14 @@ function cambiarGrupo() {
 
 
     if (!grupo) {
+
         return;
     }
 
 
     const esTI =
-        grupo.value === GRUPO_TI;
+        grupo.value ===
+        GRUPO_TI;
 
 
     const controles =
@@ -1824,10 +1850,12 @@ function cambiarGrupo() {
                 control.disabled =
                     true;
 
+
             } else {
 
                 control.disabled =
                     false;
+
             }
         }
     );
@@ -1844,11 +1872,15 @@ async function editarRegistro(
 
     const registro =
         registrosPermisos.find(
+
             item =>
                 String(
                     item.id
                 ) ===
-                String(itemId)
+                String(
+                    itemId
+                )
+
         );
 
 
@@ -1892,16 +1924,7 @@ async function editarRegistro(
     }
 
 
-    try {
-
-        await buscarUsuario();
-
-    } catch (error) {
-
-        console.error(
-            error
-        );
-    }
+    await buscarUsuario();
 }
 
 
@@ -1955,7 +1978,9 @@ async function guardarPermisos() {
 
             const checkbox =
                 document.querySelector(
+
                     `.permiso-modulo[data-modulo="${modulo}"]`
+
                 );
 
 
@@ -1967,8 +1992,13 @@ async function guardarPermisos() {
     );
 
 
+    /*
+     * TI siempre tiene todo habilitado.
+     */
+
     if (
-        grupo === GRUPO_TI
+        grupo ===
+        GRUPO_TI
     ) {
 
         MODULOS_PERMISOS.forEach(
@@ -1985,7 +2015,8 @@ async function guardarPermisos() {
 
         if (btn) {
 
-            btn.disabled = true;
+            btn.disabled =
+                true;
 
             btn.textContent =
                 "Guardando...";
@@ -2046,25 +2077,31 @@ async function guardarPermisos() {
                     campos[modulo]
                 ] =
                     Boolean(
-                        permisos[modulo]
+                        permisos[
+                            modulo
+                        ]
                     );
             }
         );
 
 
-        /* =====================================================
-           ACTUALIZAR
-        ====================================================== */
+        /*
+         * ACTUALIZAR
+         */
 
         if (registroExistente) {
 
             const url =
+
                 `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${registroExistente.id}/fields`;
 
 
             await graphFetch(
+
                 url,
+
                 {
+
                     method:
                         "PATCH",
 
@@ -2072,59 +2109,72 @@ async function guardarPermisos() {
                         JSON.stringify(
                             fields
                         )
+
                 }
+
             );
 
 
             mostrarMensaje(
+
                 "Permisos actualizados correctamente.",
+
                 "success"
+
             );
 
 
-        /* =====================================================
-           CREAR
-        ====================================================== */
+        /*
+         * CREAR
+         */
 
         } else {
 
             const url =
+
                 `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
 
 
             await graphFetch(
+
                 url,
+
                 {
+
                     method:
                         "POST",
 
                     body:
-                        JSON.stringify(
-                            {
-                                fields
-                            }
-                        )
+                        JSON.stringify({
+                            fields
+                        })
+
                 }
+
             );
 
 
             mostrarMensaje(
+
                 "Usuario y permisos guardados correctamente.",
+
                 "success"
+
             );
         }
 
 
-        /* =====================================================
-           RECARGAR LISTA
-        ====================================================== */
+        /*
+         * Recargar tabla.
+         */
 
         await cargarPermisos();
 
 
-        /* =====================================================
-           VOLVER A CARGAR REGISTRO
-        ====================================================== */
+        /*
+         * Volver a cargar el registro
+         * actualizado en los switches.
+         */
 
         const actualizado =
             buscarRegistroPorCorreo(
@@ -2149,8 +2199,11 @@ async function guardarPermisos() {
 
 
         mostrarMensaje(
+
             `No se pudieron guardar los permisos. ${obtenerMensajeError(error)}`,
+
             "error"
+
         );
 
 
@@ -2158,11 +2211,52 @@ async function guardarPermisos() {
 
         if (btn) {
 
-            btn.disabled = false;
+            btn.disabled =
+                false;
 
             btn.textContent =
                 "Guardar permisos";
         }
+    }
+}
+
+
+/* =========================================================
+   MOSTRAR PANEL
+========================================================= */
+
+function mostrarPanelUsuario() {
+
+    const panel =
+        document.getElementById(
+            "panelPermisos"
+        );
+
+
+    if (panel) {
+
+        panel.style.display =
+            "block";
+    }
+}
+
+
+/* =========================================================
+   OCULTAR PANEL
+========================================================= */
+
+function ocultarPanelUsuario() {
+
+    const panel =
+        document.getElementById(
+            "panelPermisos"
+        );
+
+
+    if (panel) {
+
+        panel.style.display =
+            "none";
     }
 }
 
@@ -2180,6 +2274,7 @@ function mostrarAccesoDenegado() {
 
 
     if (!contenido) {
+
         return;
     }
 
@@ -2219,7 +2314,7 @@ function mostrarAccesoDenegado() {
 
 
 /* =========================================================
-   MENSAJE
+   MENSAJES
 ========================================================= */
 
 function mostrarMensaje(
@@ -2234,6 +2329,7 @@ function mostrarMensaje(
 
 
     if (!contenido) {
+
         return;
     }
 
@@ -2303,24 +2399,14 @@ function obtenerMensajeBusqueda(
 
     if (
         mensaje.includes(
-            "Graph 404"
-        )
-    ) {
-
-        return (
-            "El correo no existe en Microsoft Entra ID."
-        );
-    }
-
-
-    if (
-        mensaje.includes(
             "Graph 403"
         )
     ) {
 
         return (
-            "Microsoft Graph rechazó la consulta. Verifica que la aplicación tenga User.ReadBasic.All."
+
+            "Microsoft Graph rechazó la consulta. Verifica que User.ReadBasic.All esté habilitado para la aplicación."
+
         );
     }
 
@@ -2332,28 +2418,132 @@ function obtenerMensajeBusqueda(
     ) {
 
         return (
+
             "La sesión de Microsoft expiró. Cierra sesión y vuelve a ingresar."
+
+        );
+    }
+
+
+    if (
+        mensaje.includes(
+            "Graph 404"
+        )
+    ) {
+
+        return (
+
+            "El usuario no existe o no fue encontrado en Microsoft Entra ID."
+
+        );
+    }
+
+
+    if (
+        mensaje.includes(
+            "AADSTS65001"
+        ) ||
+
+        mensaje.includes(
+            "consent"
+        )
+    ) {
+
+        return (
+
+            "Microsoft solicita consentimiento para los permisos de Graph. Vuelve a iniciar sesión y acepta los permisos."
+
         );
     }
 
 
     return (
+
         `No se pudo buscar el usuario. ${mensaje}`
+
     );
 }
 
 
 /* =========================================================
-   MENSAJE GENERAL DE ERROR
+   NORMALIZAR TEXTO
 ========================================================= */
 
-function obtenerMensajeError(
-    error
+function normalizarTexto(
+    valor
 ) {
 
     return String(
-        error?.message ||
-        "Error desconocido."
+        valor || ""
+    )
+        .normalize(
+            "NFD"
+        )
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9]/g,
+            ""
+        );
+}
+
+
+/* =========================================================
+   NORMALIZAR CORREO
+========================================================= */
+
+function normalizarCorreo(
+    correo
+) {
+
+    return String(
+        correo || ""
+    )
+        .trim()
+        .toLowerCase();
+}
+
+
+/* =========================================================
+   VALOR BOOLEANO
+========================================================= */
+
+function valorBooleano(
+    valor
+) {
+
+    if (
+        valor === true ||
+        valor === 1
+    ) {
+
+        return true;
+    }
+
+
+    const texto =
+        String(
+            valor || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    return (
+
+        texto === "true" ||
+
+        texto === "1" ||
+
+        texto === "yes" ||
+
+        texto === "sí" ||
+
+        texto === "si"
+
     );
 }
 
@@ -2389,4 +2579,175 @@ function escapeHtml(
             /'/g,
             "&#039;"
         );
+}
+
+
+/* =========================================================
+   ERROR GENERAL
+========================================================= */
+
+function obtenerMensajeError(
+    error
+) {
+
+    return String(
+
+        error?.message ||
+
+        "Error desconocido."
+
+    );
+}
+
+
+/* =========================================================
+   MENÚ
+========================================================= */
+
+function configurarMenu() {
+
+    const menuToggle =
+        document.getElementById(
+            "menuToggle"
+        );
+
+
+    const sidebar =
+        document.getElementById(
+            "sidebar"
+        );
+
+
+    if (
+        menuToggle &&
+        sidebar
+    ) {
+
+        menuToggle.addEventListener(
+            "click",
+            () => {
+
+                sidebar.classList.toggle(
+                    "open"
+                );
+
+            }
+        );
+    }
+}
+
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
+function configurarEventos() {
+
+    const btnBuscar =
+        document.getElementById(
+            "btnBuscarUsuario"
+        );
+
+
+    if (btnBuscar) {
+
+        btnBuscar.addEventListener(
+            "click",
+            buscarUsuario
+        );
+    }
+
+
+    const grupo =
+        document.getElementById(
+            "grupoUsuario"
+        );
+
+
+    if (grupo) {
+
+        grupo.addEventListener(
+            "change",
+            cambiarGrupo
+        );
+    }
+
+
+    const btnGuardar =
+        document.getElementById(
+            "btnGuardarPermisos"
+        );
+
+
+    if (btnGuardar) {
+
+        btnGuardar.addEventListener(
+            "click",
+            guardarPermisos
+        );
+    }
+
+
+    const correo =
+        document.getElementById(
+            "correoUsuario"
+        );
+
+
+    if (correo) {
+
+        correo.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    buscarUsuario();
+                }
+            }
+        );
+    }
+
+
+    const tabla =
+        document.getElementById(
+            "tablaPermisos"
+        );
+
+
+    if (tabla) {
+
+        tabla.addEventListener(
+            "click",
+            event => {
+
+                const boton =
+                    event.target.closest(
+                        "[data-editar-permiso]"
+                    );
+
+
+                if (!boton) {
+
+                    return;
+                }
+
+
+                const itemId =
+                    boton.getAttribute(
+                        "data-editar-permiso"
+                    );
+
+
+                editarRegistro(
+                    itemId
+                );
+            }
+        );
+    }
 }

@@ -1,311 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Permisos | ALFERZA LIVE OFFICE</title>
 
-    <!-- CSS GENERAL -->
     <link rel="stylesheet" href="styles.css">
-
-    <!-- CSS DE PERMISOS -->
     <link rel="stylesheet" href="permisos.css">
-
 </head>
-
 
 <body>
 
-
-    <!-- =========================================================
-         BARRA SUPERIOR
-    ========================================================== -->
-
+    <!-- NAVBAR -->
     <header class="topbar">
-
-        <div class="topbar-left">
-
-            <button
-                type="button"
-                class="menu-toggle"
-                id="menuToggle"
-                aria-label="Abrir menú"
-            >
-                ☰
-            </button>
-
-            <div class="brand">
-
-                <div class="brand-title">
-                    ALFERZA LIVE OFFICE
-                </div>
-
-                <div class="brand-subtitle">
-                    Monitoreo en tiempo real
-                </div>
-
-            </div>
-
+        <div class="logo">
+            <h1>ALFERZA LIVE OFFICE</h1>
+            <span>Monitoreo en tiempo real</span>
         </div>
 
-
-        <div class="topbar-right">
-
-            <div class="live-indicator">
-
-                <span class="live-dot"></span>
-
-                <span>
-                    EN VIVO
-                </span>
-
-            </div>
-
-            <div
-                class="user-info"
-                id="userInfo"
-            >
-            </div>
-
+        <div class="live-status">
+            <span class="live-status-dot"></span>
+            EN VIVO
         </div>
-
     </header>
 
-
-
-    <!-- =========================================================
-         CONTENEDOR PRINCIPAL
-    ========================================================== -->
-
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="layout">
 
-
-        <!-- =====================================================
-             SIDEBAR
-        ====================================================== -->
-
-        <aside
-            class="sidebar"
-            id="sidebar"
-        >
-
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
             <nav class="sidebar-nav">
 
-
-                <!-- OFICINA -->
-
-                <a
-                    href="index.html"
-                    class="sidebar-item"
-                    data-page="Oficina"
-                >
+                <a href="index.html" class="sidebar-item" data-page="Oficina">
                     <span class="sidebar-icon">🏢</span>
                     <span class="sidebar-text">Oficina</span>
                 </a>
 
-
-
-                <!-- PERSONAL -->
-
-                <a
-                    href="personal.html"
-                    class="sidebar-item"
-                    data-page="Personal"
-                >
+                <a href="personal.html" class="sidebar-item" data-page="Personal">
                     <span class="sidebar-icon">👥</span>
                     <span class="sidebar-text">Personal</span>
                 </a>
 
-
-
-                <!-- RESERVAS -->
-
-                <a
-                    href="reservas.html"
-                    class="sidebar-item"
-                    data-page="Reservas"
-                >
+                <a href="reservas.html" class="sidebar-item" data-page="Reservas">
                     <span class="sidebar-icon">📅</span>
                     <span class="sidebar-text">Reservas</span>
                 </a>
 
-
-
-                <!-- SALAS -->
-
-                <a
-                    href="salas.html"
-                    class="sidebar-item"
-                    data-page="Salas"
-                >
+                <a href="salas.html" class="sidebar-item" data-page="Salas">
                     <span class="sidebar-icon">🚪</span>
                     <span class="sidebar-text">Salas</span>
                 </a>
 
-
-
-                <!-- COMUNICADOS -->
-
-                <a
-                    href="comunicados.html"
-                    class="sidebar-item"
-                    data-page="Comunicados"
-                >
+                <a href="comunicados.html" class="sidebar-item" data-page="Comunicados">
                     <span class="sidebar-icon">📢</span>
                     <span class="sidebar-text">Comunicados</span>
                 </a>
 
-
-
-                <!-- SEGURIDAD -->
-
-                <a
-                    href="seguridad.html"
-                    class="sidebar-item"
-                    data-page="Seguridad"
-                >
+                <a href="seguridad.html" class="sidebar-item" data-page="Seguridad">
                     <span class="sidebar-icon">🛡️</span>
                     <span class="sidebar-text">Seguridad</span>
                 </a>
 
-
-
-                <!-- INFRAESTRUCTURA -->
-
-                <a
-                    href="infraestructura.html"
-                    class="sidebar-item"
-                    data-page="Infraestructura"
-                >
+                <a href="infraestructura.html" class="sidebar-item" data-page="Infraestructura">
                     <span class="sidebar-icon">🖥️</span>
                     <span class="sidebar-text">Infraestructura</span>
                 </a>
 
-
-
-                <!-- TICKETS -->
-
-                <a
-                    href="tickets.html"
-                    class="sidebar-item"
-                    data-page="Tickets"
-                >
+                <a href="tickets.html" class="sidebar-item" data-page="Tickets">
                     <span class="sidebar-icon">🎫</span>
                     <span class="sidebar-text">Tickets</span>
                 </a>
 
-
-
-                <!-- PERMISOS -->
-
-                <a
-                    href="permisos.html"
-                    class="sidebar-item active"
-                    data-page="Permisos"
-                >
+                <a href="permisos.html" class="sidebar-item active" data-page="Permisos">
                     <span class="sidebar-icon">🔐</span>
                     <span class="sidebar-text">Permisos</span>
                 </a>
 
-
-
-                <!-- CONFIGURACIÓN -->
-
-                <a
-                    href="configuracion.html"
-                    class="sidebar-item"
-                    data-page="Configuracion"
-                >
+                <a href="configuracion.html" class="sidebar-item" data-page="Configuracion">
                     <span class="sidebar-icon">⚙️</span>
                     <span class="sidebar-text">Configuración</span>
                 </a>
 
-
             </nav>
-
         </aside>
 
-
-
-        <!-- =====================================================
-             CONTENIDO
-        ====================================================== -->
-
+        <!-- MAIN -->
         <main class="content">
 
+            <!-- HEADER -->
+            <section class="office-header">
+                <div class="office-header-content">
 
-            <!-- =================================================
-                 CABECERA
-            ================================================== -->
+                    <div class="office-header-icon">
+                        <span>🔐</span>
+                    </div>
 
-            <section class="page-header">
+                    <div class="office-header-text">
+                        <div class="office-breadcrumb">
+                            <strong>ALFERZA LIVE OFFICE</strong>
+                            <span>•</span>
+                            <span>Administración</span>
+                        </div>
 
-                <div>
+                        <h2>Permisos</h2>
 
-                    <h1>
-                        Permisos
-                    </h1>
-
-                    <p>
-                        Administración de accesos al sistema
-                    </p>
+                        <p>
+                            Administración de accesos al sistema
+                        </p>
+                    </div>
 
                 </div>
-
             </section>
 
-
-
-            <!-- =================================================
-                 CONTENEDOR DE PERMISOS
-            ================================================== -->
-
+            <!-- PERMISOS -->
             <section class="permisos-grid">
 
-
-                <!-- =================================================
-                     ASIGNAR PERMISOS
-                ================================================== -->
-
+                <!-- ASIGNAR PERMISOS -->
                 <div class="permisos-card">
 
                     <div class="card-header">
-
                         <div>
-
-                            <h2>
-                                Asignar permisos
-                            </h2>
-
+                            <h2>Asignar permisos</h2>
                             <p>
                                 Selecciona un usuario de Microsoft y configura su acceso.
                             </p>
-
                         </div>
-
                     </div>
 
-
-
-                    <!-- =================================================
-                         BUSCADOR
-                    ================================================== -->
-
                     <div class="form-group">
-
-                        <label for="correoUsuario">
-                            Buscar usuario
-                        </label>
+                        <label for="correoUsuario">Buscar usuario</label>
 
                         <div class="input-row">
-
                             <input
                                 type="text"
                                 id="correoUsuario"
@@ -321,438 +146,225 @@
                             >
                                 Buscar
                             </button>
-
                         </div>
-
                     </div>
 
-
-
-                    <!-- =================================================
-                         SELECTOR DE USUARIO
-                    ================================================== -->
-
                     <div class="form-group">
-
-                        <label for="selectorUsuario">
-                            Usuarios de Microsoft
-                        </label>
+                        <label for="selectorUsuario">Usuarios de Microsoft</label>
 
                         <select
                             id="selectorUsuario"
                             name="selectorUsuario"
                         >
-
-                            <option value="">
-                                Cargando usuarios...
-                            </option>
-
+                            <option value="">Cargando usuarios...</option>
                         </select>
-
                     </div>
 
-
-
-                    <!-- =================================================
-                         INFORMACIÓN USUARIO
-                    ================================================== -->
-
-                    <div
-                        class="usuario-panel"
-                        id="panelPermisos"
-                    >
+                    <div class="usuario-panel" id="panelPermisos">
 
                         <div class="usuario-info">
 
                             <div class="usuario-nombre">
-
-                                <span class="info-label">
-                                    Usuario
-                                </span>
-
-                                <strong id="nombreUsuario">
-                                    —
-                                </strong>
-
+                                <span class="info-label">Usuario</span>
+                                <strong id="nombreUsuario">—</strong>
                             </div>
 
-
                             <div class="usuario-correo">
-
-                                <span class="info-label">
-                                    Correo
-                                </span>
-
-                                <span id="correoMostrado">
-                                    —
-                                </span>
-
+                                <span class="info-label">Correo</span>
+                                <span id="correoMostrado">—</span>
                             </div>
 
                         </div>
 
-
-
-                        <!-- =================================================
-                             GRUPO
-                        ================================================== -->
-
                         <div class="form-group">
-
-                            <label for="grupoUsuario">
-                                Grupo
-                            </label>
+                            <label for="grupoUsuario">Grupo</label>
 
                             <select
                                 id="grupoUsuario"
                                 name="grupoUsuario"
                             >
-
-                                <option value="Normal">
-                                    Normal
-                                </option>
-
-                                <option value="TI">
-                                    TI
-                                </option>
-
+                                <option value="Normal">Normal</option>
+                                <option value="TI">TI</option>
                             </select>
-
                         </div>
-
-
-
-                        <!-- =================================================
-                             MÓDULOS
-                        ================================================== -->
 
                         <div class="modulos-section">
 
                             <div class="section-title">
-
-                                <h3>
-                                    Acceso a módulos
-                                </h3>
-
+                                <h3>Acceso a módulos</h3>
                                 <p>
                                     Activa o desactiva los módulos permitidos.
                                 </p>
-
                             </div>
-
-
 
                             <div class="modulos-permisos">
 
-
-                                <!-- OFICINA -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Oficina
-                                        </span>
-
+                                        <span class="modulo-nombre">Oficina</span>
                                         <span class="modulo-descripcion">
                                             Vista principal de la oficina
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Oficina"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- PERSONAL -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Personal
-                                        </span>
-
+                                        <span class="modulo-nombre">Personal</span>
                                         <span class="modulo-descripcion">
                                             Personal y trabajadores
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Personal"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- RESERVAS -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Reservas
-                                        </span>
-
+                                        <span class="modulo-nombre">Reservas</span>
                                         <span class="modulo-descripcion">
                                             Reservas y solicitudes
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Reservas"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- SALAS -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Salas
-                                        </span>
-
+                                        <span class="modulo-nombre">Salas</span>
                                         <span class="modulo-descripcion">
                                             Salas y espacios disponibles
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Salas"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- COMUNICADOS -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Comunicados
-                                        </span>
-
+                                        <span class="modulo-nombre">Comunicados</span>
                                         <span class="modulo-descripcion">
                                             Comunicados internos
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Comunicados"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- SEGURIDAD -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Seguridad
-                                        </span>
-
+                                        <span class="modulo-nombre">Seguridad</span>
                                         <span class="modulo-descripcion">
                                             Administración y seguridad TI
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Seguridad"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- INFRAESTRUCTURA -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Infraestructura
-                                        </span>
-
+                                        <span class="modulo-nombre">Infraestructura</span>
                                         <span class="modulo-descripcion">
                                             Infraestructura tecnológica
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Infraestructura"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- TICKETS -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Tickets
-                                        </span>
-
+                                        <span class="modulo-nombre">Tickets</span>
                                         <span class="modulo-descripcion">
                                             Gestión de tickets TI
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Tickets"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
-
-                                <!-- CONFIGURACIÓN -->
-
                                 <div class="modulo-item">
-
                                     <div class="modulo-info">
-
-                                        <span class="modulo-nombre">
-                                            Configuración
-                                        </span>
-
+                                        <span class="modulo-nombre">Configuración</span>
                                         <span class="modulo-descripcion">
                                             Configuración del sistema
                                         </span>
-
                                     </div>
 
-
                                     <label class="switch">
-
                                         <input
                                             type="checkbox"
                                             class="permiso-modulo"
                                             data-modulo="Configuracion"
                                         >
-
                                         <span class="slider"></span>
-
                                     </label>
-
                                 </div>
 
-
                             </div>
-
                         </div>
 
-
-
-                        <!-- =================================================
-                             GUARDAR
-                        ================================================== -->
-
                         <div class="form-actions">
-
                             <button
                                 type="button"
                                 id="btnGuardarPermisos"
@@ -760,162 +372,58 @@
                             >
                                 Guardar permisos
                             </button>
-
                         </div>
 
                     </div>
-
                 </div>
 
-
-
-                <!-- =================================================
-                     USUARIOS CONFIGURADOS
-                ================================================== -->
-
+                <!-- USUARIOS CONFIGURADOS -->
                 <div class="permisos-card">
 
                     <div class="card-header">
-
                         <div>
-
-                            <h2>
-                                Usuarios configurados
-                            </h2>
-
+                            <h2>Usuarios configurados</h2>
                             <p>
                                 Usuarios con permisos registrados.
                             </p>
-
                         </div>
-
                     </div>
-
 
                     <div
                         class="tabla-permisos"
                         id="tablaPermisos"
                     >
-
                         <div class="tabla-vacia">
-
-                            <span>
-                                No hay usuarios configurados.
-                            </span>
-
+                            <span>No hay usuarios configurados.</span>
                         </div>
-
                     </div>
 
                 </div>
 
-
             </section>
 
-
         </main>
-
     </div>
 
+    <!-- FOOTER -->
+    <footer class="footer-topbar">
 
-
-    <!-- =========================================================
-         FOOTER
-    ========================================================== -->
-
-    <footer class="footer">
-
-        <div class="footer-left">
-
-            <div class="footer-brand">
-                ALFERZA LIVE OFFICE
-            </div>
-
-            <div class="footer-subtitle">
-                Monitoreo en tiempo real
-            </div>
-
+        <div class="logo">
+            <h1>ALFERZA LIVE OFFICE</h1>
+            <span>Monitoreo en tiempo real</span>
         </div>
 
-
-        <div class="footer-right">
-
-            <span>
-                Área de TI
-            </span>
-
-            <span>
-                © 2026 ALFERZA HOLDING
-            </span>
-
+        <div class="live-status">
+            <span class="live-status-dot"></span>
+            EN VIVO
         </div>
 
     </footer>
 
-
-
-    <!-- =========================================================
-         MSAL
-    ========================================================== -->
-
+    <!-- SCRIPTS -->
     <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-
-
-    <!-- =========================================================
-         AUTENTICACIÓN
-    ========================================================== -->
-
     <script src="auth.js"></script>
-
-
-    <!-- =========================================================
-         PERMISOS
-    ========================================================== -->
-
     <script src="permisos.js"></script>
 
-
-
-    <!-- =========================================================
-         MENÚ
-    ========================================================== -->
-
-    <script>
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                const menuToggle =
-                    document.getElementById("menuToggle");
-
-                const sidebar =
-                    document.getElementById("sidebar");
-
-                if (
-                    menuToggle &&
-                    sidebar
-                ) {
-
-                    menuToggle.addEventListener(
-                        "click",
-                        function () {
-
-                            sidebar.classList.toggle(
-                                "open"
-                            );
-
-                        }
-                    );
-
-                }
-
-            }
-        );
-
-    </script>
-
-
 </body>
-
 </html>

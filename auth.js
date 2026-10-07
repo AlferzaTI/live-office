@@ -493,6 +493,8 @@
                 `${GRAPH}/sites/${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`
             );
 
+        console.log("Sitio PermisosTI:", sitio.id);
+
 
         const filtro =
             encodeURIComponent(
@@ -507,18 +509,19 @@
 
 
         const lista =
-            listas && listas.value
-                ? listas.value[0]
-                : null;
+            await graphFetch(
+                `${GRAPH}/sites/${sitio.id}/lists/${encodeURIComponent(PERMISOS_LIST_NAME)}`
+            );
 
-
-        if (!lista) {
+        if (!lista || !lista.id) {
 
             throw new Error(
                 "No se encontró la lista PermisosTI."
             );
 
         }
+
+        console.log("Lista PermisosTI:", lista.id);
 
 
         const respColumnas =

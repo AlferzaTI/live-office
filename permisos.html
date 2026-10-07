@@ -285,7 +285,7 @@
                             </h2>
 
                             <p>
-                                Configura el acceso de un usuario.
+                                Selecciona un usuario de Microsoft y configura su acceso.
                             </p>
 
                         </div>
@@ -294,21 +294,23 @@
 
 
 
-                    <!-- CORREO -->
+                    <!-- =================================================
+                         BUSCADOR
+                    ================================================== -->
 
                     <div class="form-group">
 
                         <label for="correoUsuario">
-                            Correo corporativo
+                            Buscar usuario
                         </label>
 
                         <div class="input-row">
 
                             <input
-                                type="email"
+                                type="text"
                                 id="correoUsuario"
                                 name="correoUsuario"
-                                placeholder="usuario@alferza.pe"
+                                placeholder="Nombre o correo corporativo"
                                 autocomplete="off"
                             >
 
@@ -326,7 +328,34 @@
 
 
 
-                    <!-- INFORMACIÓN USUARIO -->
+                    <!-- =================================================
+                         SELECTOR DE USUARIO
+                    ================================================== -->
+
+                    <div class="form-group">
+
+                        <label for="selectorUsuario">
+                            Usuarios de Microsoft
+                        </label>
+
+                        <select
+                            id="selectorUsuario"
+                            name="selectorUsuario"
+                        >
+
+                            <option value="">
+                                Cargando usuarios...
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         INFORMACIÓN USUARIO
+                    ================================================== -->
 
                     <div
                         class="usuario-panel"
@@ -364,7 +393,9 @@
 
 
 
-                        <!-- GRUPO -->
+                        <!-- =================================================
+                             GRUPO
+                        ================================================== -->
 
                         <div class="form-group">
 
@@ -716,7 +747,9 @@
 
 
 
-                        <!-- GUARDAR -->
+                        <!-- =================================================
+                             GUARDAR
+                        ================================================== -->
 
                         <div class="form-actions">
 
@@ -751,7 +784,7 @@
                             </h2>
 
                             <p>
-                                Usuarios registrados y sus grupos.
+                                Usuarios con permisos registrados.
                             </p>
 
                         </div>

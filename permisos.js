@@ -5,7 +5,7 @@
 
 
 /* =========================================================
-   CONFIGURACIÓN MSAL
+   CONFIGURACIÓN
 ========================================================= */
 
 const PERMISOS_TENANT_ID =
@@ -16,67 +16,9 @@ const PERMISOS_CLIENT_ID =
     "5d98417c-74a7-4fab-8f2c-41ac127be696";
 
 
-const permisosMsalConfig = {
+const PERMISOS_REDIRECT_URI =
+    "https://AlferzaTI.github.io/live-office/blank.html";
 
-    auth: {
-
-        clientId:
-            PERMISOS_CLIENT_ID,
-
-        authority:
-            `https://login.microsoftonline.com/${PERMISOS_TENANT_ID}`,
-
-        redirectUri:
-            "https://AlferzaTI.github.io/live-office/blank.html"
-
-    },
-
-    cache: {
-
-        cacheLocation:
-            "sessionStorage",
-
-        storeAuthStateInCookie:
-            false
-
-    }
-
-};
-
-
-/* =========================================================
-   SCOPES
-   MISMO ESQUEMA DE APP.JS
-========================================================= */
-
-const permisosScopes = [
-
-    "User.Read",
-
-    "Presence.Read.All",
-
-    "Sites.Read.All",
-
-    "AuditLog.Read.All",
-
-    "DeviceManagementManagedDevices.Read.All"
-
-];
-
-
-/* =========================================================
-   INSTANCIA MSAL
-========================================================= */
-
-const permisosMsalInstance =
-    new msal.PublicClientApplication(
-        permisosMsalConfig
-    );
-
-
-/* =========================================================
-   CONFIGURACIÓN SHAREPOINT
-========================================================= */
 
 const PERMISOS_LIST_NAME =
     "PermisosTI";
@@ -141,15 +83,76 @@ const MODULOS_PERMISOS = [
 
 
 /* =========================================================
+   SCOPES
+========================================================= */
+
+const PERMISOS_SCOPES = [
+
+    "User.Read",
+
+    "User.ReadBasic.All",
+
+    "Sites.ReadWrite.All"
+
+];
+
+
+/* =========================================================
+   CONFIGURACIÓN MSAL
+========================================================= */
+
+const permisosMsalConfig = {
+
+    auth: {
+
+        clientId:
+            PERMISOS_CLIENT_ID,
+
+        authority:
+            `https://login.microsoftonline.com/${PERMISOS_TENANT_ID}`,
+
+        redirectUri:
+            PERMISOS_REDIRECT_URI
+
+    },
+
+    cache: {
+
+        cacheLocation:
+            "sessionStorage",
+
+        storeAuthStateInCookie:
+            false
+
+    }
+
+};
+
+
+/* =========================================================
+   INSTANCIA MSAL
+========================================================= */
+
+const permisosMsalInstance =
+    new msal.PublicClientApplication(
+        permisosMsalConfig
+    );
+
+
+/* =========================================================
    VARIABLES
 ========================================================= */
 
-let usuarioSeleccionado =
-    null;
+let usuariosGraph =
+    [];
 
 
 let registrosPermisos =
     [];
+
+
+let usuarioSeleccionado =
+    null;
 
 
 let sitioSharePoint =
@@ -181,29 +184,159 @@ document.addEventListener(
         );
 
 
-        configurarMenu();
-
-
         configurarEventos();
 
 
         try {
 
-            await inicializarPermisos();
+            const cuenta =
+                obtenerCuentaMSAL();
+
+
+            if (!cuenta) {
+
+                mostrarMensaje(
+
+                    "No existe una sesión de Microsoft disponible. Cierra sesión y vuelve a ingresar.",
+
+                    "error"
+
+                );
+
+                return;
+
+            }
+
+
+            mostrarUsuarioNavbar(
+                cuenta
+            );
+
+
+            /*
+             * 1. Cargar usuarios directamente
+             *    desde Microsoft Graph.
+             */
+
+            await cargarUsuariosGraph();
+
+
+            /*
+             * 2. Intentar cargar configuración
+             *    guardada en PermisosTI.
+             *
+             *    Si falla, los usuarios de Graph
+             *    siguen funcionando.
+             */
+
+            try {
+
+                await cargarPermisos();
+
+            }
+
+            catch (errorLista) {
+
+                console.error(
+
+                    "No se pudo cargar PermisosTI:",
+
+                    errorLista
+
+                );
+
+
+                mostrarMensaje(
+
+                    "Los usuarios de Microsoft se cargaron correctamente, pero no se pudo acceder a PermisosTI.",
+
+                    "error"
+
+                );
+
+            }
+
+
+            /*
+             * 3. Validar que el usuario actual
+             *    sea TI.
+             */
+
+            const correoActual =
+                obtenerCorreoCuenta(
+                    cuenta
+                );
+
+
+            const registroActual =
+                buscarRegistroPorCorreo(
+                    correoActual
+                );
+
+
+            const esTIInicial =
+                USUARIOS_TI_INICIALES
+                    .map(
+                        normalizarCorreo
+                    )
+                    .includes(
+                        normalizarCorreo(
+                            correoActual
+                        )
+                    );
+
+
+            const esTILista =
+                registroActual &&
+
+                normalizarTexto(
+                    obtenerCampo(
+                        registroActual,
+                        "Grupo"
+                    )
+                ) ===
+                normalizarTexto(
+                    GRUPO_TI
+                );
+
+
+            if (
+                !esTIInicial &&
+                !esTILista
+            ) {
+
+                mostrarAccesoDenegado();
+
+                return;
+
+            }
+
+
+            console.log(
+                "Usuario autorizado para Permisos."
+            );
 
         }
 
         catch (error) {
 
             console.error(
+
                 "Error inicializando Permisos:",
+
                 error
+
             );
 
 
             mostrarMensaje(
-                obtenerMensajeError(error),
+
+                obtenerMensajeError(
+                    error
+                ),
+
                 "error"
+
             );
 
         }
@@ -213,133 +346,129 @@ document.addEventListener(
 
 
 /* =========================================================
-   INICIALIZAR PERMISOS
+   EVENTOS
 ========================================================= */
 
-async function inicializarPermisos() {
+function configurarEventos() {
 
-    /*
-     * Recuperamos la cuenta MSAL que ya inició sesión
-     * en login.js.
-     */
-
-    const cuenta =
-        obtenerCuentaMSAL();
-
-
-    if (!cuenta) {
-
-        mostrarMensaje(
-
-            "No existe una sesión de Microsoft disponible. Cierra sesión y vuelve a ingresar.",
-
-            "error"
-
-        );
-
-        return;
-
-    }
-
-
-    const correoActual =
-        obtenerCorreoCuenta(
-            cuenta
-        );
-
-
-    console.log(
-        "Cuenta actual:",
-        correoActual
-    );
-
-
-    /*
-     * Mostrar usuario en navbar.
-     */
-
-    const userInfo =
+    const botonBuscar =
         document.getElementById(
-            "userInfo"
+            "btnBuscarUsuario"
         );
 
 
-    if (userInfo) {
+    if (botonBuscar) {
 
-        userInfo.textContent =
-            cuenta.name ||
-            correoActual ||
-            "";
+        botonBuscar.addEventListener(
+
+            "click",
+
+            buscarUsuario
+
+        );
 
     }
 
 
-    /*
-     * Cargar permisos registrados.
-     */
-
-    await cargarPermisos();
-
-
-    /*
-     * Verificar si el usuario actual es TI.
-     */
-
-    const registroActual =
-        buscarRegistroPorCorreo(
-            correoActual
+    const inputBuscar =
+        document.getElementById(
+            "correoUsuario"
         );
 
 
-    const esTI =
-        USUARIOS_TI_INICIALES
-            .map(
-                normalizarCorreo
-            )
-            .includes(
-                normalizarCorreo(
-                    correoActual
-                )
-            )
-        ||
+    if (inputBuscar) {
 
-        (
+        inputBuscar.addEventListener(
 
-            registroActual &&
+            "keydown",
 
-            normalizarTexto(
+            function (event) {
 
-                obtenerCampo(
-                    registroActual,
-                    "Grupo"
-                )
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
 
-            ) ===
-                normalizarTexto(
-                    GRUPO_TI
-                )
+                    event.preventDefault();
+
+                    buscarUsuario();
+
+                }
+
+            }
 
         );
-
-
-    if (!esTI) {
-
-        mostrarAccesoDenegado();
-
-        return;
 
     }
 
 
-    console.log(
-        "Usuario TI autorizado."
-    );
+    const selector =
+        document.getElementById(
+            "selectorUsuario"
+        );
+
+
+    if (selector) {
+
+        selector.addEventListener(
+
+            "change",
+
+            function () {
+
+                seleccionarUsuario(
+                    this.value
+                );
+
+            }
+
+        );
+
+    }
+
+
+    const grupo =
+        document.getElementById(
+            "grupoUsuario"
+        );
+
+
+    if (grupo) {
+
+        grupo.addEventListener(
+
+            "change",
+
+            cambiarGrupo
+
+        );
+
+    }
+
+
+    const guardar =
+        document.getElementById(
+            "btnGuardarPermisos"
+        );
+
+
+    if (guardar) {
+
+        guardar.addEventListener(
+
+            "click",
+
+            guardarPermisos
+
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   OBTENER CUENTA MSAL
+   CUENTA MSAL
 ========================================================= */
 
 function obtenerCuentaMSAL() {
@@ -370,7 +499,7 @@ function obtenerCuentaMSAL() {
         catch (error) {
 
             console.warn(
-                "No se pudo establecer cuenta activa:",
+                "No se pudo establecer la cuenta activa.",
                 error
             );
 
@@ -383,6 +512,38 @@ function obtenerCuentaMSAL() {
 
 
     return null;
+
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+function mostrarUsuarioNavbar(
+    cuenta
+) {
+
+    const elemento =
+        document.getElementById(
+            "userInfo"
+        );
+
+
+    if (!elemento) {
+
+        return;
+
+    }
+
+
+    elemento.textContent =
+
+        cuenta.name ||
+
+        cuenta.username ||
+
+        "";
 
 }
 
@@ -418,7 +579,7 @@ function obtenerCorreoCuenta(
 
 
 /* =========================================================
-   OBTENER TOKEN GRAPH
+   TOKEN GRAPH
 ========================================================= */
 
 async function obtenerTokenGraph() {
@@ -438,24 +599,15 @@ async function obtenerTokenGraph() {
     }
 
 
-    permisosMsalInstance
-        .setActiveAccount(
-            cuenta
-        );
-
-
     try {
 
-        /*
-         * MISMO mecanismo que app.js.
-         */
-
         const respuesta =
+
             await permisosMsalInstance
                 .acquireTokenSilent({
 
                     scopes:
-                        permisosScopes,
+                        PERMISOS_SCOPES,
 
                     account:
                         cuenta
@@ -467,28 +619,64 @@ async function obtenerTokenGraph() {
 
     }
 
-    catch (error) {
+    catch (errorSilent) {
 
-        console.error(
+        console.warn(
 
-            "No se pudo obtener el token silenciosamente:",
+            "El token silencioso requiere interacción:",
 
-            error
+            errorSilent
 
         );
 
 
         /*
-         * NO hacemos loginPopup.
+         * Solo pedimos interacción si realmente
+         * hace falta el scope adicional.
          *
-         * La sesión se genera desde login.js.
+         * Si el consentimiento de administrador
+         * ya está configurado, no debería pedir
+         * aprobación administrativa.
          */
 
-        throw new Error(
+        try {
 
-            "No se pudo obtener el token de Microsoft Graph. Cierra sesión y vuelve a ingresar."
+            const respuesta =
 
-        );
+                await permisosMsalInstance
+                    .acquireTokenPopup({
+
+                        scopes:
+                            PERMISOS_SCOPES,
+
+                        account:
+                            cuenta
+
+                    });
+
+
+            return respuesta.accessToken;
+
+        }
+
+        catch (errorPopup) {
+
+            console.error(
+
+                "Error obteniendo token Graph:",
+
+                errorPopup
+
+            );
+
+
+            throw new Error(
+
+                "No se pudo obtener autorización para Microsoft Graph. Verifica User.ReadBasic.All y Sites.ReadWrite.All."
+
+            );
+
+        }
 
     }
 
@@ -504,14 +692,14 @@ async function graphFetch(
     opciones = {}
 ) {
 
-    const TOKEN =
+    const token =
         await obtenerTokenGraph();
 
 
     const headers = {
 
         Authorization:
-            `Bearer ${TOKEN}`,
+            `Bearer ${token}`,
 
         Accept:
             "application/json"
@@ -542,16 +730,14 @@ async function graphFetch(
                     opciones.method ||
                     "GET",
 
-                headers:
+                headers: {
 
-                    {
+                    ...headers,
 
-                        ...headers,
+                    ...(opciones.headers ||
+                        {})
 
-                        ...(opciones.headers ||
-                            {})
-
-                    },
+                },
 
                 body:
                     opciones.body ||
@@ -570,12 +756,12 @@ async function graphFetch(
 
         try {
 
-            const errorData =
+            const datos =
                 await respuesta.json();
 
 
             detalle =
-                errorData
+                datos
                     ?.error
                     ?.message ||
                 "";
@@ -584,7 +770,7 @@ async function graphFetch(
 
         catch (error) {
 
-            // Sin respuesta JSON.
+            // Sin contenido JSON.
 
         }
 
@@ -617,404 +803,42 @@ async function graphFetch(
 
 
 /* =========================================================
-   OBTENER SITIO SHAREPOINT
+   CARGAR TODOS LOS USUARIOS DE GRAPH
 ========================================================= */
 
-async function obtenerSitioSharePoint() {
+async function cargarUsuariosGraph() {
 
-    if (
-        sitioSharePoint
-    ) {
+    const selector =
+        document.getElementById(
+            "selectorUsuario"
+        );
 
-        return sitioSharePoint;
+
+    if (selector) {
+
+        selector.innerHTML =
+
+            `
+            <option value="">
+                Cargando usuarios de Microsoft...
+            </option>
+            `;
 
     }
-
-
-    const url =
-
-        `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`;
-
-
-    sitioSharePoint =
-        await graphFetch(
-            url
-        );
-
-
-    return sitioSharePoint;
-
-}
-
-
-/* =========================================================
-   OBTENER LISTA PERMISOS
-========================================================= */
-
-async function obtenerListaPermisos() {
-
-    if (
-        listaPermisos
-    ) {
-
-        return listaPermisos;
-
-    }
-
-
-    const sitio =
-        await obtenerSitioSharePoint();
-
-
-    const url =
-
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(PERMISOS_LIST_NAME)}`;
-
-
-    listaPermisos =
-        await graphFetch(
-            url
-        );
-
-
-    return listaPermisos;
-
-}
-
-
-/* =========================================================
-   OBTENER COLUMNAS
-========================================================= */
-
-async function obtenerColumnasPermisos() {
-
-    if (
-        columnasPermisos
-    ) {
-
-        return columnasPermisos;
-
-    }
-
-
-    const sitio =
-        await obtenerSitioSharePoint();
-
-
-    const lista =
-        await obtenerListaPermisos();
-
-
-    const url =
-
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/columns?$select=name,displayName,hidden,readOnly&$top=200`;
-
-
-    const resultado =
-        await graphFetch(
-            url
-        );
-
-
-    columnasPermisos =
-        resultado.value ||
-        [];
-
-
-    return columnasPermisos;
-
-}
-
-
-/* =========================================================
-   OBTENER MAPA DE COLUMNAS
-========================================================= */
-
-async function obtenerMapaCampos() {
-
-    if (
-        mapaCampos
-    ) {
-
-        return mapaCampos;
-
-    }
-
-
-    const columnas =
-        await obtenerColumnasPermisos();
-
-
-    mapaCampos = {};
-
-
-    /*
-     * TITLE
-     */
-
-    const columnaTitle =
-        encontrarColumna(
-
-            columnas,
-
-            [
-                "Title",
-                "Título"
-            ]
-
-        );
-
-
-    if (!columnaTitle) {
-
-        throw new Error(
-
-            "No se encontró la columna Title/Título en PermisosTI."
-
-        );
-
-    }
-
-
-    mapaCampos.Title =
-        columnaTitle.name;
-
-
-    /*
-     * USUARIOCORREO
-     */
-
-    const columnaCorreo =
-        encontrarColumna(
-
-            columnas,
-
-            [
-                "UsuarioCorreo"
-            ]
-
-        );
-
-
-    if (!columnaCorreo) {
-
-        throw new Error(
-
-            "No se encontró la columna UsuarioCorreo."
-
-        );
-
-    }
-
-
-    mapaCampos.UsuarioCorreo =
-        columnaCorreo.name;
-
-
-    /*
-     * NOMBREUSUARIO
-     */
-
-    const columnaNombre =
-        encontrarColumna(
-
-            columnas,
-
-            [
-                "NombreUsuario"
-            ]
-
-        );
-
-
-    if (!columnaNombre) {
-
-        throw new Error(
-
-            "No se encontró la columna NombreUsuario."
-
-        );
-
-    }
-
-
-    mapaCampos.NombreUsuario =
-        columnaNombre.name;
-
-
-    /*
-     * GRUPO
-     */
-
-    const columnaGrupo =
-        encontrarColumna(
-
-            columnas,
-
-            [
-                "Grupo"
-            ]
-
-        );
-
-
-    if (!columnaGrupo) {
-
-        throw new Error(
-
-            "No se encontró la columna Grupo."
-
-        );
-
-    }
-
-
-    mapaCampos.Grupo =
-        columnaGrupo.name;
-
-
-    /*
-     * MÓDULOS
-     */
-
-    MODULOS_PERMISOS
-        .forEach(
-            modulo => {
-
-                const columna =
-                    encontrarColumna(
-
-                        columnas,
-
-                        [
-                            modulo
-                        ]
-
-                    );
-
-
-                if (!columna) {
-
-                    throw new Error(
-
-                        `No se encontró la columna ${modulo}.`
-
-                    );
-
-                }
-
-
-                mapaCampos[
-                    modulo
-                ] =
-                    columna.name;
-
-            }
-        );
-
-
-    console.log(
-        "Mapa de columnas:",
-        mapaCampos
-    );
-
-
-    return mapaCampos;
-
-}
-
-
-/* =========================================================
-   ENCONTRAR COLUMNA
-========================================================= */
-
-function encontrarColumna(
-    columnas,
-    nombres
-) {
-
-    const objetivos =
-        nombres.map(
-            normalizarTexto
-        );
-
-
-    /*
-     * Primero displayName.
-     */
-
-    let columna =
-        columnas.find(
-
-            item =>
-
-                objetivos.includes(
-
-                    normalizarTexto(
-                        item.displayName
-                    )
-
-                )
-
-        );
-
-
-    /*
-     * Después nombre interno.
-     */
-
-    if (!columna) {
-
-        columna =
-            columnas.find(
-
-                item =>
-
-                    objetivos.includes(
-
-                        normalizarTexto(
-                            item.name
-                        )
-
-                    )
-
-            );
-
-    }
-
-
-    return columna ||
-        null;
-
-}
-
-
-/* =========================================================
-   OBTENER ITEMS DE PERMISOS
-========================================================= */
-
-async function obtenerTodosLosItems() {
-
-    const sitio =
-        await obtenerSitioSharePoint();
-
-
-    const lista =
-        await obtenerListaPermisos();
 
 
     let url =
 
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields&$top=500`;
+        "https://graph.microsoft.com/v1.0/users?$select=id,displayName,mail,userPrincipalName,accountEnabled&$top=999";
 
 
-    const items =
+    const usuarios =
         [];
 
 
     while (url) {
 
-        const resultado =
+        const respuesta =
             await graphFetch(
                 url
             );
@@ -1022,379 +846,199 @@ async function obtenerTodosLosItems() {
 
         if (
             Array.isArray(
-                resultado.value
+                respuesta.value
             )
         ) {
 
-            items.push(
-                ...resultado.value
+            usuarios.push(
+                ...respuesta.value
             );
 
         }
 
 
         url =
-            resultado[
+            respuesta[
                 "@odata.nextLink"
             ] ||
+
             null;
 
     }
 
 
-    return items;
+    /*
+     * Solo usuarios ALFERZA.
+     */
+
+    usuariosGraph =
+        usuarios
+            .filter(
+
+                usuario => {
+
+                    const correo =
+
+                        usuario.mail ||
+
+                        usuario.userPrincipalName ||
+
+                        "";
+
+
+                    return normalizarCorreo(
+                        correo
+                    ).endsWith(
+                        "@alferza.pe"
+                    );
+
+                }
+
+            )
+            .sort(
+
+                (a, b) => {
+
+                    const nombreA =
+                        String(
+                            a.displayName ||
+                            ""
+                        ).toLowerCase();
+
+
+                    const nombreB =
+                        String(
+                            b.displayName ||
+                            ""
+                        ).toLowerCase();
+
+
+                    return nombreA.localeCompare(
+                        nombreB,
+                        "es"
+                    );
+
+                }
+
+            );
+
+
+    renderizarUsuariosGraph();
+
+
+    console.log(
+
+        `Usuarios ALFERZA encontrados: ${usuariosGraph.length}`
+
+    );
 
 }
 
 
 /* =========================================================
-   CARGAR PERMISOS
+   RENDERIZAR SELECTOR
 ========================================================= */
 
-async function cargarPermisos() {
-
-    const tabla =
-        document.getElementById(
-            "tablaPermisos"
-        );
-
-
-    if (!tabla) {
-
-        return [];
-
-    }
-
-
-    try {
-
-        tabla.innerHTML =
-
-            `
-            <div class="tabla-vacia">
-
-                <span>
-                    Cargando usuarios...
-                </span>
-
-            </div>
-            `;
-
-
-        registrosPermisos =
-            await obtenerTodosLosItems();
-
-
-        renderizarTablaPermisos(
-            registrosPermisos
-        );
-
-
-        return registrosPermisos;
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Error cargando PermisosTI:",
-
-            error
-
-        );
-
-
-        tabla.innerHTML =
-
-            `
-            <div class="tabla-vacia">
-
-                <span>
-                    No se pudieron cargar los usuarios.
-                </span>
-
-            </div>
-            `;
-
-
-        throw error;
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDERIZAR TABLA
-========================================================= */
-
-function renderizarTablaPermisos(
-    registros
+function renderizarUsuariosGraph(
+    lista = usuariosGraph
 ) {
 
-    const tabla =
+    const selector =
         document.getElementById(
-            "tablaPermisos"
+            "selectorUsuario"
         );
 
 
-    if (!tabla) {
+    if (!selector) {
 
         return;
 
     }
 
 
-    if (
-        !registros ||
-        registros.length === 0
-    ) {
-
-        tabla.innerHTML =
-
-            `
-            <div class="tabla-vacia">
-
-                <span>
-                    No hay usuarios configurados.
-                </span>
-
-            </div>
-            `;
-
-
-        return;
-
-    }
-
-
-    let filas =
+    selector.innerHTML =
         "";
 
 
-    registros.forEach(
+    const opcionInicial =
+        document.createElement(
+            "option"
+        );
 
-        registro => {
+
+    opcionInicial.value =
+        "";
+
+
+    opcionInicial.textContent =
+
+        lista.length ===
+            usuariosGraph.length
+
+            ? `Selecciona un usuario (${usuariosGraph.length})`
+
+            : `${lista.length} usuarios encontrados`;
+
+
+    selector.appendChild(
+        opcionInicial
+    );
+
+
+    lista.forEach(
+
+        usuario => {
 
             const correo =
-                obtenerCampo(
-                    registro,
-                    "UsuarioCorreo"
-                ) ||
-                "";
+                normalizarCorreo(
 
+                    usuario.mail ||
 
-            const nombre =
-                obtenerCampo(
-                    registro,
-                    "NombreUsuario"
-                ) ||
+                    usuario.userPrincipalName ||
 
-                obtenerCampo(
-                    registro,
-                    "Title"
-                ) ||
+                    ""
 
-                correo ||
-
-                "Sin nombre";
-
-
-            const grupo =
-                String(
-
-                    obtenerCampo(
-                        registro,
-                        "Grupo"
-                    ) ||
-
-                    GRUPO_NORMAL
-
-                ).trim();
-
-
-            const cantidad =
-                contarPermisos(
-                    registro
                 );
 
 
-            const esTI =
-                normalizarTexto(
-                    grupo
-                ) ===
-                normalizarTexto(
-                    GRUPO_TI
+            const opcion =
+                document.createElement(
+                    "option"
                 );
 
 
-            const accesoCompleto =
-                esTI ||
-                cantidad ===
-                    MODULOS_PERMISOS.length;
+            opcion.value =
+                usuario.id;
 
 
-            const accesoTexto =
-                esTI
+            opcion.textContent =
 
-                    ? "Acceso total"
-
-                    : `${cantidad}/${MODULOS_PERMISOS.length}`;
+                `${usuario.displayName || "Sin nombre"} — ${correo}`;
 
 
-            const claseAcceso =
-                accesoCompleto
-
-                    ? "full"
-
-                    : "partial";
-
-
-            const claseGrupo =
-                esTI
-
-                    ? "badge-ti"
-
-                    : "badge-normal";
-
-
-            filas +=
-
-                `
-                <tr>
-
-                    <td>
-
-                        <div class="permission-user-cell">
-
-                            <div class="permission-user-avatar">
-                                👤
-                            </div>
-
-                            <div class="permission-user-info">
-
-                                <strong>
-                                    ${escapeHtml(
-                                        nombre
-                                    )}
-                                </strong>
-
-                                <span>
-                                    ${escapeHtml(
-                                        correo
-                                    )}
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-
-                    <td>
-
-                        <span
-                            class="badge ${claseGrupo}"
-                        >
-                            ${escapeHtml(
-                                grupo
-                            )}
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <span
-                            class="
-                                access-summary
-                                ${claseAcceso}
-                            "
-                        >
-                            ${escapeHtml(
-                                accesoTexto
-                            )}
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <button
-
-                            type="button"
-
-                            class="table-action-btn"
-
-                            data-editar-permiso="${escapeHtml(
-                                registro.id
-                            )}"
-
-                        >
-                            Editar
-                        </button>
-
-                    </td>
-
-                </tr>
-                `;
+            selector.appendChild(
+                opcion
+            );
 
         }
 
     );
 
 
-    tabla.innerHTML =
+    if (
+        lista.length === 0
+    ) {
 
-        `
-        <div class="permissions-table-container">
+        opcionInicial.textContent =
+            "No se encontraron usuarios.";
 
-            <table class="permissions-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Usuario
-                        </th>
-
-                        <th>
-                            Grupo
-                        </th>
-
-                        <th>
-                            Acceso
-                        </th>
-
-                        <th>
-                            Acción
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    ${filas}
-
-                </tbody>
-
-            </table>
-
-        </div>
-        `;
+    }
 
 }
 
 
 /* =========================================================
-   BUSCAR USUARIO CON GRAPH
+   BUSCAR USUARIO
 ========================================================= */
 
 async function buscarUsuario() {
@@ -1405,13 +1049,176 @@ async function buscarUsuario() {
         );
 
 
+    const selector =
+        document.getElementById(
+            "selectorUsuario"
+        );
+
+
     const boton =
         document.getElementById(
             "btnBuscarUsuario"
         );
 
 
-    if (!input) {
+    if (!input || !selector) {
+
+        return;
+
+    }
+
+
+    const texto =
+        normalizarTexto(
+            input.value
+        );
+
+
+    if (!texto) {
+
+        renderizarUsuariosGraph();
+
+        selector.focus();
+
+        return;
+
+    }
+
+
+    const resultados =
+        usuariosGraph.filter(
+
+            usuario => {
+
+                const nombre =
+                    normalizarTexto(
+                        usuario.displayName
+                    );
+
+
+                const correo =
+                    normalizarTexto(
+
+                        usuario.mail ||
+
+                        usuario.userPrincipalName ||
+
+                        ""
+
+                    );
+
+
+                return (
+
+                    nombre.includes(
+                        texto
+                    ) ||
+
+                    correo.includes(
+                        texto
+                    )
+
+                );
+
+            }
+
+        );
+
+
+    renderizarUsuariosGraph(
+        resultados
+    );
+
+
+    if (
+        resultados.length === 1
+    ) {
+
+        selector.value =
+            resultados[0].id;
+
+
+        await seleccionarUsuario(
+            resultados[0].id
+        );
+
+    }
+
+    else if (
+        resultados.length > 1
+    ) {
+
+        selector.focus();
+
+
+        mostrarMensaje(
+
+            `${resultados.length} usuarios encontrados. Selecciona uno de la lista.`,
+
+            "info"
+
+        );
+
+    }
+
+    else {
+
+        mostrarMensaje(
+
+            "No se encontró ningún usuario.",
+
+            "error"
+
+        );
+
+    }
+
+
+    if (boton) {
+
+        boton.textContent =
+            "Buscar";
+
+    }
+
+}
+
+
+/* =========================================================
+   SELECCIONAR USUARIO
+========================================================= */
+
+async function seleccionarUsuario(
+    usuarioId
+) {
+
+    if (!usuarioId) {
+
+        usuarioSeleccionado =
+            null;
+
+        ocultarPanelUsuario();
+
+        return;
+
+    }
+
+
+    const usuario =
+        usuariosGraph.find(
+
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(
+                    usuarioId
+                )
+
+        );
+
+
+    if (!usuario) {
 
         return;
 
@@ -1420,306 +1227,165 @@ async function buscarUsuario() {
 
     const correo =
         normalizarCorreo(
-            input.value
+
+            usuario.mail ||
+
+            usuario.userPrincipalName ||
+
+            ""
+
         );
 
 
-    if (!correo) {
+    usuarioSeleccionado = {
 
-        alert(
-            "Ingresa un correo corporativo."
+        id:
+            usuario.id,
+
+        nombre:
+            usuario.displayName ||
+            "Sin nombre",
+
+        correo:
+            correo,
+
+        userPrincipalName:
+            usuario.userPrincipalName ||
+            ""
+
+    };
+
+
+    console.log(
+
+        "Usuario seleccionado:",
+
+        usuarioSeleccionado
+
+    );
+
+
+    const nombreUsuario =
+        document.getElementById(
+            "nombreUsuario"
         );
 
-        return;
+
+    const correoMostrado =
+        document.getElementById(
+            "correoMostrado"
+        );
+
+
+    const input =
+        document.getElementById(
+            "correoUsuario"
+        );
+
+
+    if (nombreUsuario) {
+
+        nombreUsuario.textContent =
+            usuarioSeleccionado.nombre;
 
     }
 
 
-    if (
-        !correo.endsWith(
-            "@alferza.pe"
-        )
-    ) {
+    if (correoMostrado) {
 
-        alert(
-
-            "Ingresa un correo corporativo de @alferza.pe."
-
-        );
-
-        return;
+        correoMostrado.textContent =
+            usuarioSeleccionado.correo;
 
     }
 
 
-    try {
+    if (input) {
 
-        if (boton) {
+        input.value =
+            usuarioSeleccionado.correo;
 
-            boton.disabled =
-                true;
-
-            boton.textContent =
-                "Buscando...";
-
-        }
+    }
 
 
-        ocultarPanelUsuario();
+    /*
+     * Buscar configuración existente.
+     */
 
-
-        usuarioSeleccionado =
-            null;
-
-
-        /*
-         * MISMO GRAPH QUE APP.JS.
-         *
-         * En app.js ya utilizas:
-         *
-         * GET /users?$top=999
-         *
-         * Aquí hacemos una búsqueda filtrada
-         * para no traer todos los usuarios.
-         */
-
-        const correoFiltro =
-            correo.replace(
-                /'/g,
-                "''"
-            );
-
-
-        const url =
-
-            `https://graph.microsoft.com/v1.0/users?$filter=userPrincipalName eq '${correoFiltro}' or mail eq '${correoFiltro}'&$select=id,displayName,mail,userPrincipalName`;
-
-
-        console.log(
-            "Buscando usuario:",
-            correo
+    const registro =
+        buscarRegistroPorCorreo(
+            usuarioSeleccionado.correo
         );
 
 
-        const resultado =
-            await graphFetch(
-                url
-            );
+    if (registro) {
+
+        cargarRegistroEnFormulario(
+            registro
+        );
+
+    }
+
+    else {
+
+        prepararNuevoUsuario();
+
+    }
 
 
-        console.log(
-            "Respuesta Graph:",
-            resultado
+    mostrarPanelUsuario();
+
+}
+
+
+/* =========================================================
+   PREPARAR NUEVO USUARIO
+========================================================= */
+
+function prepararNuevoUsuario() {
+
+    const grupo =
+        document.getElementById(
+            "grupoUsuario"
         );
 
 
-        if (
-            !resultado.value ||
-            resultado.value.length === 0
-        ) {
+    if (grupo) {
 
-            /*
-             * Segundo intento con búsqueda
-             * directa por UPN.
-             */
+        grupo.value =
+            GRUPO_NORMAL;
 
-            const urlDirecta =
-
-                `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(correo)}?$select=id,displayName,mail,userPrincipalName`;
+    }
 
 
-            const usuarioDirecto =
-                await graphFetch(
-                    urlDirecta
-                );
+    MODULOS_PERMISOS.forEach(
 
+        modulo => {
 
-            if (!usuarioDirecto) {
+            const checkbox =
+                document.querySelector(
 
-                throw new Error(
-
-                    "El usuario no fue encontrado en Microsoft Graph."
+                    `.permiso-modulo[data-modulo="${modulo}"]`
 
                 );
+
+
+            if (!checkbox) {
+
+                return;
 
             }
 
 
-            usuarioSeleccionado = {
-
-                id:
-                    usuarioDirecto.id,
-
-                nombre:
-                    usuarioDirecto.displayName ||
-                    "Sin nombre",
-
-                correo:
-                    normalizarCorreo(
-
-                        usuarioDirecto.mail ||
-
-                        usuarioDirecto.userPrincipalName ||
-
-                        correo
-
-                    ),
-
-                userPrincipalName:
-                    usuarioDirecto.userPrincipalName ||
-                    ""
-
-            };
-
-        }
-
-        else {
-
-            const usuario =
-                resultado.value[0];
-
-
-            usuarioSeleccionado = {
-
-                id:
-                    usuario.id,
-
-                nombre:
-                    usuario.displayName ||
-                    "Sin nombre",
-
-                correo:
-                    normalizarCorreo(
-
-                        usuario.mail ||
-
-                        usuario.userPrincipalName ||
-
-                        correo
-
-                    ),
-
-                userPrincipalName:
-                    usuario.userPrincipalName ||
-                    ""
-
-            };
-
-        }
-
-
-        console.log(
-
-            "Usuario encontrado:",
-
-            usuarioSeleccionado
-
-        );
-
-
-        /*
-         * Mostrar nombre real.
-         */
-
-        const nombreUsuario =
-            document.getElementById(
-                "nombreUsuario"
-            );
-
-
-        const correoMostrado =
-            document.getElementById(
-                "correoMostrado"
-            );
-
-
-        if (nombreUsuario) {
-
-            nombreUsuario.textContent =
-                usuarioSeleccionado.nombre;
-
-        }
-
-
-        if (correoMostrado) {
-
-            correoMostrado.textContent =
-                usuarioSeleccionado.correo;
-
-        }
-
-
-        /*
-         * Revisar si ya tiene permisos.
-         */
-
-        const registro =
-            buscarRegistroPorCorreo(
-
-                usuarioSeleccionado.correo
-
-            );
-
-
-        if (registro) {
-
-            cargarRegistroEnFormulario(
-                registro
-            );
-
-        }
-
-        else {
-
-            prepararNuevoUsuario();
-
-        }
-
-
-        mostrarPanelUsuario();
-
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Error buscando usuario:",
-
-            error
-
-        );
-
-
-        mostrarMensaje(
-
-            obtenerMensajeBusqueda(
-                error
-            ),
-
-            "error"
-
-        );
-
-
-        ocultarPanelUsuario();
-
-    }
-
-    finally {
-
-        if (boton) {
-
-            boton.disabled =
+            checkbox.checked =
                 false;
 
-            boton.textContent =
-                "Buscar";
+
+            checkbox.disabled =
+                false;
 
         }
 
-    }
+    );
 
 }
 
@@ -1809,58 +1475,6 @@ function cargarRegistroEnFormulario(
 
 
 /* =========================================================
-   PREPARAR NUEVO USUARIO
-========================================================= */
-
-function prepararNuevoUsuario() {
-
-    const grupo =
-        document.getElementById(
-            "grupoUsuario"
-        );
-
-
-    if (grupo) {
-
-        grupo.value =
-            GRUPO_NORMAL;
-
-    }
-
-
-    MODULOS_PERMISOS.forEach(
-
-        modulo => {
-
-            const checkbox =
-                document.querySelector(
-
-                    `.permiso-modulo[data-modulo="${modulo}"]`
-
-                );
-
-
-            if (!checkbox) {
-
-                return;
-
-            }
-
-
-            checkbox.checked =
-                false;
-
-            checkbox.disabled =
-                false;
-
-        }
-
-    );
-
-}
-
-
-/* =========================================================
    CAMBIAR GRUPO
 ========================================================= */
 
@@ -1899,6 +1513,7 @@ function cambiarGrupo() {
                 control.checked =
                     true;
 
+
                 control.disabled =
                     true;
 
@@ -1919,354 +1534,689 @@ function cambiarGrupo() {
 
 
 /* =========================================================
-   GUARDAR PERMISOS
+   SHAREPOINT
 ========================================================= */
 
-async function guardarPermisos() {
+async function obtenerSitioSharePoint() {
 
-    const boton =
-        document.getElementById(
-            "btnGuardarPermisos"
-        );
+    if (
+        sitioSharePoint
+    ) {
 
-
-    const grupoSelect =
-        document.getElementById(
-            "grupoUsuario"
-        );
-
-
-    if (!usuarioSeleccionado) {
-
-        alert(
-
-            "Primero busca un usuario mediante Graph."
-
-        );
-
-        return;
+        return sitioSharePoint;
 
     }
 
 
-    const grupo =
-        grupoSelect
+    const url =
 
-            ? grupoSelect.value
-
-            : GRUPO_NORMAL;
+        `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`;
 
 
-    const correo =
-        usuarioSeleccionado.correo;
+    sitioSharePoint =
+        await graphFetch(
+            url
+        );
 
 
-    const nombre =
-        usuarioSeleccionado.nombre;
+    return sitioSharePoint;
+
+}
 
 
-    const permisos =
+/* =========================================================
+   OBTENER LISTA
+========================================================= */
+
+async function obtenerListaPermisos() {
+
+    if (
+        listaPermisos
+    ) {
+
+        return listaPermisos;
+
+    }
+
+
+    const sitio =
+        await obtenerSitioSharePoint();
+
+
+    const url =
+
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${encodeURIComponent(PERMISOS_LIST_NAME)}`;
+
+
+    listaPermisos =
+        await graphFetch(
+            url
+        );
+
+
+    return listaPermisos;
+
+}
+
+
+/* =========================================================
+   OBTENER COLUMNAS
+========================================================= */
+
+async function obtenerColumnasPermisos() {
+
+    if (
+        columnasPermisos
+    ) {
+
+        return columnasPermisos;
+
+    }
+
+
+    const sitio =
+        await obtenerSitioSharePoint();
+
+
+    const lista =
+        await obtenerListaPermisos();
+
+
+    const url =
+
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/columns?$select=name,displayName,hidden,readOnly&$top=200`;
+
+
+    const respuesta =
+        await graphFetch(
+            url
+        );
+
+
+    columnasPermisos =
+        respuesta.value ||
+        [];
+
+
+    return columnasPermisos;
+
+}
+
+
+/* =========================================================
+   ENCONTRAR COLUMNA
+========================================================= */
+
+function encontrarColumna(
+    columnas,
+    nombres
+) {
+
+    const objetivos =
+        nombres.map(
+            normalizarTexto
+        );
+
+
+    let columna =
+        columnas.find(
+
+            item =>
+
+                objetivos.includes(
+
+                    normalizarTexto(
+                        item.displayName
+                    )
+
+                )
+
+        );
+
+
+    if (!columna) {
+
+        columna =
+            columnas.find(
+
+                item =>
+
+                    objetivos.includes(
+
+                        normalizarTexto(
+                            item.name
+                        )
+
+                    )
+
+            );
+
+    }
+
+
+    return columna ||
+        null;
+
+}
+
+
+/* =========================================================
+   MAPA DE CAMPOS
+========================================================= */
+
+async function obtenerMapaCampos() {
+
+    if (
+        mapaCampos
+    ) {
+
+        return mapaCampos;
+
+    }
+
+
+    const columnas =
+        await obtenerColumnasPermisos();
+
+
+    mapaCampos =
         {};
+
+
+    const nombresBase = [
+
+        "Title",
+
+        "UsuarioCorreo",
+
+        "NombreUsuario",
+
+        "Grupo"
+
+    ];
+
+
+    for (
+        const nombre of
+        nombresBase
+    ) {
+
+        const columna =
+            encontrarColumna(
+
+                columnas,
+
+                nombre ===
+                    "Title"
+
+                    ? [
+                        "Title",
+                        "Título"
+                    ]
+
+                    : [
+                        nombre
+                    ]
+
+            );
+
+
+        if (!columna) {
+
+            throw new Error(
+
+                `No se encontró la columna ${nombre} en PermisosTI.`
+
+            );
+
+        }
+
+
+        mapaCampos[nombre] =
+            columna.name;
+
+    }
 
 
     MODULOS_PERMISOS.forEach(
 
         modulo => {
 
-            const checkbox =
-                document.querySelector(
+            const columna =
+                encontrarColumna(
 
-                    `.permiso-modulo[data-modulo="${modulo}"]`
+                    columnas,
+
+                    [
+                        modulo
+                    ]
 
                 );
 
 
-            permisos[
+            if (!columna) {
+
+                throw new Error(
+
+                    `No se encontró la columna ${modulo} en PermisosTI.`
+
+                );
+
+            }
+
+
+            mapaCampos[
                 modulo
             ] =
-
-                checkbox
-                    ? checkbox.checked
-                    : false;
+                columna.name;
 
         }
 
     );
 
 
-    /*
-     * TI siempre tiene todo.
-     */
+    console.log(
+        "Mapa PermisosTI:",
+        mapaCampos
+    );
+
+
+    return mapaCampos;
+
+}
+
+
+/* =========================================================
+   OBTENER ITEMS
+========================================================= */
+
+async function obtenerTodosLosItems() {
+
+    const sitio =
+        await obtenerSitioSharePoint();
+
+
+    const lista =
+        await obtenerListaPermisos();
+
+
+    let url =
+
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items?expand=fields&$top=500`;
+
+
+    const items =
+        [];
+
+
+    while (url) {
+
+        const respuesta =
+            await graphFetch(
+                url
+            );
+
+
+        if (
+            Array.isArray(
+                respuesta.value
+            )
+        ) {
+
+            items.push(
+                ...respuesta.value
+            );
+
+        }
+
+
+        url =
+            respuesta[
+                "@odata.nextLink"
+            ] ||
+            null;
+
+    }
+
+
+    return items;
+
+}
+
+
+/* =========================================================
+   CARGAR CONFIGURACIONES
+========================================================= */
+
+async function cargarPermisos() {
+
+    const tabla =
+        document.getElementById(
+            "tablaPermisos"
+        );
+
+
+    if (!tabla) {
+
+        return [];
+
+    }
+
+
+    tabla.innerHTML =
+
+        `
+        <div class="tabla-vacia">
+
+            <span>
+                Cargando configuraciones...
+            </span>
+
+        </div>
+        `;
+
+
+    registrosPermisos =
+        await obtenerTodosLosItems();
+
+
+    renderizarTablaPermisos(
+        registrosPermisos
+    );
+
+
+    return registrosPermisos;
+
+}
+
+
+/* =========================================================
+   RENDERIZAR TABLA
+========================================================= */
+
+function renderizarTablaPermisos(
+    registros
+) {
+
+    const tabla =
+        document.getElementById(
+            "tablaPermisos"
+        );
+
+
+    if (!tabla) {
+
+        return;
+
+    }
+
 
     if (
-        grupo ===
-        GRUPO_TI
+        !registros ||
+        registros.length === 0
     ) {
 
-        MODULOS_PERMISOS.forEach(
+        tabla.innerHTML =
 
-            modulo => {
+            `
+            <div class="tabla-vacia">
 
-                permisos[
-                    modulo
-                ] =
-                    true;
+                <span>
+                    No hay usuarios configurados.
+                </span>
+
+            </div>
+            `;
+
+
+        return;
+
+    }
+
+
+    let filas =
+        "";
+
+
+    registros.forEach(
+
+        registro => {
+
+            const correo =
+                obtenerCampo(
+                    registro,
+                    "UsuarioCorreo"
+                );
+
+
+            const nombre =
+                obtenerCampo(
+                    registro,
+                    "NombreUsuario"
+                ) ||
+
+                obtenerCampo(
+                    registro,
+                    "Title"
+                ) ||
+
+                correo ||
+
+                "Sin nombre";
+
+
+            const grupo =
+                String(
+
+                    obtenerCampo(
+                        registro,
+                        "Grupo"
+                    ) ||
+
+                    GRUPO_NORMAL
+
+                ).trim();
+
+
+            const cantidad =
+                contarPermisos(
+                    registro
+                );
+
+
+            const esTI =
+                normalizarTexto(
+                    grupo
+                ) ===
+                normalizarTexto(
+                    GRUPO_TI
+                );
+
+
+            const completo =
+                esTI ||
+
+                cantidad ===
+                    MODULOS_PERMISOS.length;
+
+
+            const textoAcceso =
+                esTI
+
+                    ? "Acceso total"
+
+                    : `${cantidad}/${MODULOS_PERMISOS.length}`;
+
+
+            filas +=
+
+                `
+                <tr>
+
+                    <td>
+
+                        <div class="permission-user-cell">
+
+                            <div class="permission-user-avatar">
+                                👤
+                            </div>
+
+                            <div class="permission-user-info">
+
+                                <strong>
+                                    ${escapeHtml(
+                                        nombre
+                                    )}
+                                </strong>
+
+                                <span>
+                                    ${escapeHtml(
+                                        correo
+                                    )}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="badge ${
+                                esTI
+                                    ? "badge-ti"
+                                    : "badge-normal"
+                            }"
+                        >
+                            ${escapeHtml(
+                                grupo
+                            )}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <span
+                            class="
+                                access-summary
+                                ${
+                                    completo
+                                        ? "full"
+                                        : "partial"
+                                }
+                            "
+                        >
+                            ${escapeHtml(
+                                textoAcceso
+                            )}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <button
+                            type="button"
+                            class="table-action-btn"
+                            data-editar-permiso="${escapeHtml(
+                                registro.id
+                            )}"
+                        >
+                            Editar
+                        </button>
+
+                    </td>
+
+                </tr>
+                `;
+
+        }
+
+    );
+
+
+    tabla.innerHTML =
+
+        `
+        <div class="permissions-table-container">
+
+            <table class="permissions-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Usuario
+                        </th>
+
+                        <th>
+                            Grupo
+                        </th>
+
+                        <th>
+                            Acceso
+                        </th>
+
+                        <th>
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    ${filas}
+
+                </tbody>
+
+            </table>
+
+        </div>
+        `;
+
+
+    /*
+     * Botones editar.
+     */
+
+    tabla
+        .querySelectorAll(
+            "[data-editar-permiso]"
+        )
+        .forEach(
+
+            boton => {
+
+                boton.addEventListener(
+
+                    "click",
+
+                    function () {
+
+                        editarRegistro(
+
+                            this.getAttribute(
+                                "data-editar-permiso"
+                            )
+
+                        );
+
+                    }
+
+                );
 
             }
 
         );
-
-    }
-
-
-    try {
-
-        if (boton) {
-
-            boton.disabled =
-                true;
-
-            boton.textContent =
-                "Guardando...";
-
-        }
-
-
-        const sitio =
-            await obtenerSitioSharePoint();
-
-
-        const lista =
-            await obtenerListaPermisos();
-
-
-        const campos =
-            await obtenerMapaCampos();
-
-
-        const existente =
-            buscarRegistroPorCorreo(
-                correo
-            );
-
-
-        const fields =
-            {};
-
-
-        /*
-         * TITLE
-         */
-
-        fields[
-            campos.Title
-        ] =
-            nombre ||
-            correo;
-
-
-        /*
-         * CORREO
-         */
-
-        fields[
-            campos.UsuarioCorreo
-        ] =
-            correo;
-
-
-        /*
-         * NOMBRE
-         */
-
-        fields[
-            campos.NombreUsuario
-        ] =
-            nombre ||
-            correo;
-
-
-        /*
-         * GRUPO
-         */
-
-        fields[
-            campos.Grupo
-        ] =
-            grupo;
-
-
-        /*
-         * MÓDULOS
-         */
-
-        MODULOS_PERMISOS.forEach(
-
-            modulo => {
-
-                fields[
-                    campos[modulo]
-                ] =
-                    Boolean(
-
-                        permisos[
-                            modulo
-                        ]
-
-                    );
-
-            }
-
-        );
-
-
-        /*
-         * ACTUALIZAR
-         */
-
-        if (existente) {
-
-            const url =
-
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${existente.id}/fields`;
-
-
-            await graphFetch(
-
-                url,
-
-                {
-
-                    method:
-                        "PATCH",
-
-                    body:
-                        JSON.stringify(
-                            fields
-                        )
-
-                }
-
-            );
-
-
-            mostrarMensaje(
-
-                "Permisos actualizados correctamente.",
-
-                "success"
-
-            );
-
-        }
-
-
-        /*
-         * CREAR
-         */
-
-        else {
-
-            const url =
-
-                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
-
-
-            await graphFetch(
-
-                url,
-
-                {
-
-                    method:
-                        "POST",
-
-                    body:
-                        JSON.stringify({
-
-                            fields:
-                                fields
-
-                        })
-
-                }
-
-            );
-
-
-            mostrarMensaje(
-
-                "Usuario y permisos guardados correctamente.",
-
-                "success"
-
-            );
-
-        }
-
-
-        /*
-         * Actualizar tabla.
-         */
-
-        await cargarPermisos();
-
-
-        /*
-         * Volver a cargar el registro.
-         */
-
-        const actualizado =
-            buscarRegistroPorCorreo(
-                correo
-            );
-
-
-        if (actualizado) {
-
-            cargarRegistroEnFormulario(
-                actualizado
-            );
-
-        }
-
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Error guardando permisos:",
-
-            error
-
-        );
-
-
-        mostrarMensaje(
-
-            `No se pudieron guardar los permisos. ${obtenerMensajeError(error)}`,
-
-            "error"
-
-        );
-
-    }
-
-    finally {
-
-        if (boton) {
-
-            boton.disabled =
-                false;
-
-            boton.textContent =
-                "Guardar permisos";
-
-        }
-
-    }
 
 }
 
@@ -2306,16 +2256,40 @@ async function editarRegistro(
 
 
     const correo =
-        obtenerCampo(
-            registro,
-            "UsuarioCorreo"
+        normalizarCorreo(
+
+            obtenerCampo(
+                registro,
+                "UsuarioCorreo"
+            )
+
         );
 
 
-    if (!correo) {
+    const usuario =
+        usuariosGraph.find(
+
+            item =>
+
+                normalizarCorreo(
+
+                    item.mail ||
+
+                    item.userPrincipalName ||
+
+                    ""
+
+                ) === correo
+
+        );
+
+
+    if (!usuario) {
 
         alert(
-            "El registro no tiene correo."
+
+            "El usuario ya no fue encontrado en Microsoft Graph."
+
         );
 
         return;
@@ -2323,21 +2297,23 @@ async function editarRegistro(
     }
 
 
-    const input =
+    const selector =
         document.getElementById(
-            "correoUsuario"
+            "selectorUsuario"
         );
 
 
-    if (input) {
+    if (selector) {
 
-        input.value =
-            correo;
+        selector.value =
+            usuario.id;
 
     }
 
 
-    await buscarUsuario();
+    await seleccionarUsuario(
+        usuario.id
+    );
 
 }
 
@@ -2496,6 +2472,587 @@ function contarPermisos(
 
 
 /* =========================================================
+   GUARDAR PERMISOS
+========================================================= */
+
+async function guardarPermisos() {
+
+    const boton =
+        document.getElementById(
+            "btnGuardarPermisos"
+        );
+
+
+    const grupoSelect =
+        document.getElementById(
+            "grupoUsuario"
+        );
+
+
+    if (!usuarioSeleccionado) {
+
+        alert(
+
+            "Primero selecciona un usuario."
+
+        );
+
+        return;
+
+    }
+
+
+    const grupo =
+        grupoSelect
+
+            ? grupoSelect.value
+
+            : GRUPO_NORMAL;
+
+
+    const permisos =
+        {};
+
+
+    MODULOS_PERMISOS.forEach(
+
+        modulo => {
+
+            const checkbox =
+                document.querySelector(
+
+                    `.permiso-modulo[data-modulo="${modulo}"]`
+
+                );
+
+
+            permisos[
+                modulo
+            ] =
+
+                checkbox
+                    ? checkbox.checked
+                    : false;
+
+        }
+
+    );
+
+
+    /*
+     * TI = acceso total.
+     */
+
+    if (
+        grupo ===
+        GRUPO_TI
+    ) {
+
+        MODULOS_PERMISOS.forEach(
+
+            modulo => {
+
+                permisos[
+                    modulo
+                ] =
+                    true;
+
+            }
+
+        );
+
+    }
+
+
+    try {
+
+        if (boton) {
+
+            boton.disabled =
+                true;
+
+            boton.textContent =
+                "Guardando...";
+
+        }
+
+
+        const sitio =
+            await obtenerSitioSharePoint();
+
+
+        const lista =
+            await obtenerListaPermisos();
+
+
+        const campos =
+            await obtenerMapaCampos();
+
+
+        const registroExistente =
+            buscarRegistroPorCorreo(
+
+                usuarioSeleccionado.correo
+
+            );
+
+
+        const fields =
+            {};
+
+
+        fields[
+            campos.Title
+        ] =
+
+            usuarioSeleccionado.nombre ||
+            usuarioSeleccionado.correo;
+
+
+        fields[
+            campos.UsuarioCorreo
+        ] =
+
+            usuarioSeleccionado.correo;
+
+
+        fields[
+            campos.NombreUsuario
+        ] =
+
+            usuarioSeleccionado.nombre ||
+            usuarioSeleccionado.correo;
+
+
+        fields[
+            campos.Grupo
+        ] =
+            grupo;
+
+
+        MODULOS_PERMISOS.forEach(
+
+            modulo => {
+
+                fields[
+                    campos[modulo]
+                ] =
+
+                    Boolean(
+
+                        permisos[
+                            modulo
+                        ]
+
+                    );
+
+            }
+
+        );
+
+
+        /*
+         * ACTUALIZAR
+         */
+
+        if (
+            registroExistente
+        ) {
+
+            const url =
+
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${registroExistente.id}/fields`;
+
+
+            await graphFetch(
+
+                url,
+
+                {
+
+                    method:
+                        "PATCH",
+
+                    body:
+                        JSON.stringify(
+                            fields
+                        )
+
+                }
+
+            );
+
+
+            mostrarMensaje(
+
+                "Permisos actualizados correctamente.",
+
+                "success"
+
+            );
+
+        }
+
+
+        /*
+         * CREAR
+         */
+
+        else {
+
+            const url =
+
+                `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`;
+
+
+            await graphFetch(
+
+                url,
+
+                {
+
+                    method:
+                        "POST",
+
+                    body:
+                        JSON.stringify({
+
+                            fields:
+                                fields
+
+                        })
+
+                }
+
+            );
+
+
+            mostrarMensaje(
+
+                "Permisos guardados correctamente.",
+
+                "success"
+
+            );
+
+        }
+
+
+        /*
+         * Volver a cargar
+         * configuraciones.
+         */
+
+        await cargarPermisos();
+
+
+        /*
+         * Recuperar el registro
+         * actualizado.
+         */
+
+        const actualizado =
+            buscarRegistroPorCorreo(
+
+                usuarioSeleccionado.correo
+
+            );
+
+
+        if (actualizado) {
+
+            cargarRegistroEnFormulario(
+                actualizado
+            );
+
+        }
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Error guardando permisos:",
+
+            error
+
+        );
+
+
+        mostrarMensaje(
+
+            `No se pudieron guardar los permisos. ${obtenerMensajeError(error)}`,
+
+            "error"
+
+        );
+
+    }
+
+    finally {
+
+        if (boton) {
+
+            boton.disabled =
+                false;
+
+            boton.textContent =
+                "Guardar permisos";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   MOSTRAR PANEL
+========================================================= */
+
+function mostrarPanelUsuario() {
+
+    const panel =
+        document.getElementById(
+            "panelPermisos"
+        );
+
+
+    if (panel) {
+
+        panel.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================================================
+   OCULTAR PANEL
+========================================================= */
+
+function ocultarPanelUsuario() {
+
+    const panel =
+        document.getElementById(
+            "panelPermisos"
+        );
+
+
+    if (panel) {
+
+        panel.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   ACCESO DENEGADO
+========================================================= */
+
+function mostrarAccesoDenegado() {
+
+    const contenido =
+        document.querySelector(
+            ".content"
+        );
+
+
+    if (!contenido) {
+
+        return;
+
+    }
+
+
+    contenido.innerHTML =
+
+        `
+        <section class="page-header">
+
+            <div>
+
+                <h1>
+                    Permisos
+                </h1>
+
+                <p>
+                    Administración de accesos al sistema
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <div class="permisos-card">
+
+            <div class="tabla-vacia">
+
+                <span>
+                    No tienes permisos para administrar esta sección.
+                </span>
+
+            </div>
+
+        </div>
+        `;
+
+}
+
+
+/* =========================================================
+   MOSTRAR MENSAJE
+========================================================= */
+
+function mostrarMensaje(
+    mensaje,
+    tipo = "error"
+) {
+
+    const contenido =
+        document.querySelector(
+            ".content"
+        );
+
+
+    if (!contenido) {
+
+        return;
+
+    }
+
+
+    const anterior =
+        contenido.querySelector(
+            ".mensaje-permisos"
+        );
+
+
+    if (anterior) {
+
+        anterior.remove();
+
+    }
+
+
+    const aviso =
+        document.createElement(
+            "div"
+        );
+
+
+    aviso.className =
+        `permission-message ${tipo} mensaje-permisos`;
+
+
+    aviso.textContent =
+        mensaje;
+
+
+    contenido.prepend(
+        aviso
+    );
+
+
+    setTimeout(
+
+        () => {
+
+            if (
+                aviso &&
+                aviso.parentNode
+            ) {
+
+                aviso.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
+
+
+/* =========================================================
+   ERROR DE BÚSQUEDA
+========================================================= */
+
+function obtenerMensajeBusqueda(
+    error
+) {
+
+    const mensaje =
+        String(
+            error?.message ||
+            ""
+        );
+
+
+    if (
+        mensaje.includes(
+            "Graph 401"
+        )
+    ) {
+
+        return (
+
+            "La sesión de Microsoft no es válida."
+
+        );
+
+    }
+
+
+    if (
+        mensaje.includes(
+            "Graph 403"
+        )
+    ) {
+
+        return (
+
+            "Graph rechazó el acceso. Verifica User.ReadBasic.All."
+
+        );
+
+    }
+
+
+    if (
+        mensaje.includes(
+            "Graph 404"
+        )
+    ) {
+
+        return (
+
+            "No se encontró el usuario."
+
+        );
+
+    }
+
+
+    return (
+
+        `No se pudo buscar el usuario. ${mensaje}`
+
+    );
+
+}
+
+
+/* =========================================================
    VALOR BOOLEANO
 ========================================================= */
 
@@ -2588,269 +3145,6 @@ function normalizarCorreo(
 
 
 /* =========================================================
-   MOSTRAR PANEL
-========================================================= */
-
-function mostrarPanelUsuario() {
-
-    const panel =
-        document.getElementById(
-            "panelPermisos"
-        );
-
-
-    if (panel) {
-
-        panel.style.display =
-            "block";
-
-    }
-
-}
-
-
-/* =========================================================
-   OCULTAR PANEL
-========================================================= */
-
-function ocultarPanelUsuario() {
-
-    const panel =
-        document.getElementById(
-            "panelPermisos"
-        );
-
-
-    if (panel) {
-
-        panel.style.display =
-            "none";
-
-    }
-
-}
-
-
-/* =========================================================
-   MENSAJE
-========================================================= */
-
-function mostrarMensaje(
-    mensaje,
-    tipo = "error"
-) {
-
-    const contenido =
-        document.querySelector(
-            ".content"
-        );
-
-
-    if (!contenido) {
-
-        return;
-
-    }
-
-
-    const anterior =
-        contenido.querySelector(
-            ".mensaje-permisos"
-        );
-
-
-    if (anterior) {
-
-        anterior.remove();
-
-    }
-
-
-    const aviso =
-        document.createElement(
-            "div"
-        );
-
-
-    aviso.className =
-        `permission-message ${tipo} mensaje-permisos`;
-
-
-    aviso.textContent =
-        mensaje;
-
-
-    contenido.prepend(
-        aviso
-    );
-
-
-    setTimeout(
-
-        () => {
-
-            if (
-                aviso &&
-                aviso.parentNode
-            ) {
-
-                aviso.remove();
-
-            }
-
-        },
-
-        5000
-
-    );
-
-}
-
-
-/* =========================================================
-   ACCESO DENEGADO
-========================================================= */
-
-function mostrarAccesoDenegado() {
-
-    const contenido =
-        document.querySelector(
-            ".content"
-        );
-
-
-    if (!contenido) {
-
-        return;
-
-    }
-
-
-    contenido.innerHTML =
-
-        `
-        <section class="page-header">
-
-            <div>
-
-                <h1>
-                    Permisos
-                </h1>
-
-                <p>
-                    Administración de accesos al sistema
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <div class="permisos-card">
-
-            <div class="tabla-vacia">
-
-                <span>
-                    No tienes permisos para administrar esta sección.
-                </span>
-
-            </div>
-
-        </div>
-        `;
-
-}
-
-
-/* =========================================================
-   MENSAJE DE BÚSQUEDA
-========================================================= */
-
-function obtenerMensajeBusqueda(
-    error
-) {
-
-    const mensaje =
-        String(
-            error?.message ||
-            ""
-        );
-
-
-    if (
-        mensaje.includes(
-            "Graph 401"
-        )
-    ) {
-
-        return (
-
-            "La sesión de Microsoft no es válida. Cierra sesión y vuelve a ingresar."
-
-        );
-
-    }
-
-
-    if (
-        mensaje.includes(
-            "Graph 403"
-        )
-    ) {
-
-        return (
-
-            "Microsoft Graph rechazó el acceso a usuarios. Verifica los permisos de la aplicación."
-
-        );
-
-    }
-
-
-    if (
-        mensaje.includes(
-            "Graph 404"
-        )
-    ) {
-
-        return (
-
-            "El usuario no existe en Microsoft Entra ID."
-
-        );
-
-    }
-
-
-    return (
-
-        `No se pudo buscar el usuario. ${obtenerMensajeError(error)}`
-
-    );
-
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-function obtenerMensajeError(
-    error
-) {
-
-    return (
-
-        error?.message ||
-
-        "Error desconocido."
-
-    );
-
-}
-
-
-/* =========================================================
    ESCAPAR HTML
 ========================================================= */
 
@@ -2886,185 +3180,19 @@ function escapeHtml(
 
 
 /* =========================================================
-   MENÚ
+   ERROR GENERAL
 ========================================================= */
 
-function configurarMenu() {
+function obtenerMensajeError(
+    error
+) {
 
-    const menuToggle =
-        document.getElementById(
-            "menuToggle"
-        );
+    return (
 
+        error?.message ||
 
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
+        "Error desconocido."
 
-
-    if (
-        menuToggle &&
-        sidebar
-    ) {
-
-        menuToggle.addEventListener(
-
-            "click",
-
-            function () {
-
-                sidebar.classList.toggle(
-                    "open"
-                );
-
-            }
-
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   EVENTOS
-========================================================= */
-
-function configurarEventos() {
-
-    const btnBuscar =
-        document.getElementById(
-            "btnBuscarUsuario"
-        );
-
-
-    if (btnBuscar) {
-
-        btnBuscar.addEventListener(
-
-            "click",
-
-            buscarUsuario
-
-        );
-
-    }
-
-
-    const grupo =
-        document.getElementById(
-            "grupoUsuario"
-        );
-
-
-    if (grupo) {
-
-        grupo.addEventListener(
-
-            "change",
-
-            cambiarGrupo
-
-        );
-
-    }
-
-
-    const btnGuardar =
-        document.getElementById(
-            "btnGuardarPermisos"
-        );
-
-
-    if (btnGuardar) {
-
-        btnGuardar.addEventListener(
-
-            "click",
-
-            guardarPermisos
-
-        );
-
-    }
-
-
-    const inputCorreo =
-        document.getElementById(
-            "correoUsuario"
-        );
-
-
-    if (inputCorreo) {
-
-        inputCorreo.addEventListener(
-
-            "keydown",
-
-            function (event) {
-
-                if (
-                    event.key ===
-                    "Enter"
-                ) {
-
-                    event.preventDefault();
-
-                    buscarUsuario();
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    const tabla =
-        document.getElementById(
-            "tablaPermisos"
-        );
-
-
-    if (tabla) {
-
-        tabla.addEventListener(
-
-            "click",
-
-            function (event) {
-
-                const boton =
-                    event.target.closest(
-
-                        "[data-editar-permiso]"
-
-                    );
-
-
-                if (!boton) {
-
-                    return;
-
-                }
-
-
-                const itemId =
-                    boton.getAttribute(
-                        "data-editar-permiso"
-                    );
-
-
-                editarRegistro(
-                    itemId
-                );
-
-            }
-
-        );
-
-    }
+    );
 
 }

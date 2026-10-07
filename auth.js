@@ -1,4 +1,3 @@
-
 /* =========================================================
    ALFERZA LIVE OFFICE
    CONTROL DE AUTENTICACIÓN Y PERMISOS
@@ -31,14 +30,8 @@ const SHAREPOINT_HOST =
 const SHAREPOINT_PATH =
     "/personal/soporte1_alferza_pe";
 
-/*
-   Lista de permisos.
-
-   IMPORTANTE:
-   Ya no dependemos de que PermisosTI aparezca
-   en /lists. Se consulta directamente.
-*/
-const PERMISOS_LIST_NAME = "PermisosTI";
+const PERMISOS_LIST_NAME =
+    "PermisosTI";
 
 const TI_ADMIN_EMAIL =
     "soporte1@alferza.pe";
@@ -100,9 +93,14 @@ const PAGINAS_PERMISOS = {
 
 /* =========================================================
    MSAL
+   =========================================================
+
+   IMPORTANTE:
+   Se usa authMsalInstance y NO msalInstance
+   para evitar conflicto con app.js.
    ========================================================= */
 
-let msalInstance = null;
+let authMsalInstance = null;
 let cuentaActual = null;
 let permisosActuales = null;
 
@@ -110,11 +108,14 @@ let permisosActuales = null;
    INICIO
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    iniciarControlPermisos();
+        iniciarControlPermisos();
 
-});
+    }
+);
 
 /* =========================================================
    CONTROL PRINCIPAL
@@ -135,7 +136,9 @@ async function iniciarControlPermisos() {
            ----------------------------------------- */
 
         if (
-            sessionStorage.getItem(SESION_KEY) !== "true"
+            sessionStorage.getItem(
+                SESION_KEY
+            ) !== "true"
         ) {
 
             console.warn(
@@ -242,10 +245,6 @@ async function iniciarControlPermisos() {
             "========================================"
         );
 
-        /*
-           En caso de error NO se conceden permisos.
-        */
-
         permisosActuales =
             crearPermisosDenegados();
 
@@ -272,11 +271,11 @@ async function iniciarControlPermisos() {
 
 async function crearMSAL() {
 
-    if (msalInstance) {
-        return msalInstance;
+    if (authMsalInstance) {
+        return authMsalInstance;
     }
 
-    msalInstance =
+    authMsalInstance =
         new msal.PublicClientApplication({
 
             auth: {
@@ -309,9 +308,9 @@ async function crearMSAL() {
             }
         });
 
-    await msalInstance.initialize();
+    await authMsalInstance.initialize();
 
-    return msalInstance;
+    return authMsalInstance;
 }
 
 /* =========================================================
@@ -321,7 +320,7 @@ async function crearMSAL() {
 function obtenerCuentaActual() {
 
     const cuentas =
-        msalInstance.getAllAccounts();
+        authMsalInstance.getAllAccounts();
 
     console.log(
         "Cuentas MSAL encontradas:",
@@ -331,10 +330,6 @@ function obtenerCuentaActual() {
     if (!cuentas.length) {
         return null;
     }
-
-    /*
-       Preferir cuenta del tenant correcto.
-    */
 
     const cuentaTenant =
         cuentas.find(
@@ -355,7 +350,6 @@ async function obtenerToken() {
 
         cuentaActual =
             obtenerCuentaActual();
-
     }
 
     if (!cuentaActual) {
@@ -368,7 +362,7 @@ async function obtenerToken() {
     try {
 
         const response =
-            await msalInstance.acquireTokenSilent({
+            await authMsalInstance.acquireTokenSilent({
 
                 account:
                     cuentaActual,
@@ -391,7 +385,7 @@ async function obtenerToken() {
         );
 
         const response =
-            await msalInstance.acquireTokenPopup({
+            await authMsalInstance.acquireTokenPopup({
 
                 scopes:
                     SCOPES
@@ -420,9 +414,7 @@ async function graphFetch(
 
     const response =
         await fetch(
-
             url,
-
             {
                 ...options,
 
@@ -487,52 +479,105 @@ async function obtenerListaPermisos(
     sitio
 ) {
 
-    /*
-       PRIMER INTENTO:
-       obtener directamente por nombre.
-    */
+    console.log("");
+    console.log(
+        "========================================"
+    );
 
-    const urlDirecta =
+    console.log(
+        "BUSCANDO LISTA DE PERMISOS"
+    );
+
+    console.log(
+        "Nombre:",
+        PERMISOS_LIST_NAME
+    );
+
+    console.log(
+        "Sitio:",
+        sitio.id
+    );
+
+    console.log(
+        "========================================"
+    );
+
+    /* -----------------------------------------
+       PRIMER INTENTO:
+       Buscar mediante displayName
+       ----------------------------------------- */
+
+    const nombreCodificado =
+        encodeURIComponent(
+            PERMISOS_LIST_NAME
+        );
+
+    const urlFiltro =
         `${GRAPH_BASE}/sites/` +
-        `${sitio.id}/lists/` +
-        `${encodeURIComponent(PERMISOS_LIST_NAME)}`;
+        `${sitio.id}/lists` +
+        `?$filter=displayName eq '${nombreCodificado}'` +
+        `&$select=id,name,displayName,webUrl`;
+
+    console.log(
+        "Buscando PermisosTI mediante filtro:"
+    );
+
+    console.log(
+        urlFiltro
+    );
 
     try {
 
-        console.log(
-            "Buscando lista directamente:",
-            urlDirecta
-        );
-
-        const lista =
+        const respuestaFiltro =
             await graphFetch(
-                urlDirecta
+                urlFiltro
             );
 
+        const listasFiltro =
+            respuestaFiltro.value || [];
+
         console.log(
-            "Lista PermisosTI encontrada directamente:",
-            lista
+            "Resultado del filtro:",
+            listasFiltro
         );
 
-        return lista;
+        if (
+            listasFiltro.length > 0
+        ) {
 
-    } catch (errorDirecto) {
+            const lista =
+                listasFiltro[0];
+
+            console.log(
+                "PermisosTI encontrada mediante filtro:",
+                lista
+            );
+
+            return lista;
+        }
+
+    } catch (error) {
 
         console.warn(
-            "No se pudo obtener PermisosTI directamente.",
-            errorDirecto
+            "Falló búsqueda mediante filtro:",
+            error
         );
     }
 
-    /*
+    /* -----------------------------------------
        SEGUNDO INTENTO:
-       buscar por displayName/name.
-    */
+       Enumerar todas las listas
+       ----------------------------------------- */
+
+    console.log(
+        "Enumerando listas del sitio..."
+    );
 
     const urlListas =
         `${GRAPH_BASE}/sites/` +
         `${sitio.id}/lists` +
-        `?$select=id,name,displayName&$top=200`;
+        `?$select=id,name,displayName,webUrl` +
+        `&$top=200`;
 
     const respuesta =
         await graphFetch(
@@ -545,6 +590,26 @@ async function obtenerListaPermisos(
     console.log(
         "Listas encontradas:",
         listas
+    );
+
+    console.table(
+        listas.map(
+            lista => ({
+
+                id:
+                    lista.id,
+
+                name:
+                    lista.name,
+
+                displayName:
+                    lista.displayName,
+
+                webUrl:
+                    lista.webUrl
+
+            })
+        )
     );
 
     const objetivo =
@@ -573,38 +638,59 @@ async function obtenerListaPermisos(
             }
         );
 
-    if (!listaEncontrada) {
+    if (listaEncontrada) {
 
-        console.error(
-            "No se encontró la lista PermisosTI."
+        console.log(
+            "PermisosTI encontrada:",
+            listaEncontrada
         );
 
-        console.table(
-            listas.map(
-                lista => ({
-                    id:
-                        lista.id,
-
-                    name:
-                        lista.name,
-
-                    displayName:
-                        lista.displayName
-                })
-            )
-        );
-
-        throw new Error(
-            `No se encontró la lista "${PERMISOS_LIST_NAME}".`
-        );
+        return listaEncontrada;
     }
 
-    console.log(
-        "Lista PermisosTI encontrada:",
-        listaEncontrada
+    /* -----------------------------------------
+       NO ENCONTRADA
+       ----------------------------------------- */
+
+    console.error(
+        "========================================"
     );
 
-    return listaEncontrada;
+    console.error(
+        "NO SE ENCONTRÓ PermisosTI"
+    );
+
+    console.error(
+        "Graph está viendo estas listas:"
+    );
+
+    console.table(
+        listas.map(
+            lista => ({
+
+                ID:
+                    lista.id,
+
+                Nombre:
+                    lista.name,
+
+                DisplayName:
+                    lista.displayName,
+
+                URL:
+                    lista.webUrl
+
+            })
+        )
+    );
+
+    console.error(
+        "========================================"
+    );
+
+    throw new Error(
+        `No se encontró la lista "${PERMISOS_LIST_NAME}" mediante Microsoft Graph.`
+    );
 }
 
 /* =========================================================
@@ -624,20 +710,27 @@ async function obtenerPermisosUsuario() {
     }
 
     const correo =
-        extraerCorreo(cuenta);
+        extraerCorreo(
+            cuenta
+        );
 
     console.log("");
-    console.log("========================================");
+    console.log(
+        "========================================"
+    );
+
     console.log(
         "USUARIO ACTUAL:",
         correo
     );
-    console.log("========================================");
 
-    /*
-       Usuario TI principal:
-       acceso completo.
-    */
+    console.log(
+        "========================================"
+    );
+
+    /* -----------------------------------------
+       ADMIN TI PRINCIPAL
+       ----------------------------------------- */
 
     if (
         normalizarCorreo(correo) ===
@@ -666,6 +759,11 @@ async function obtenerPermisosUsuario() {
         await obtenerListaPermisos(
             sitio
         );
+
+    console.log(
+        "ID REAL DE PermisosTI:",
+        lista.id
+    );
 
     /* -----------------------------------------
        ITEMS
@@ -719,7 +817,6 @@ async function obtenerPermisosUsuario() {
                     fields.Usuario,
 
                     fields.Title
-
                 ];
 
                 return correos.some(
@@ -731,10 +828,13 @@ async function obtenerPermisosUsuario() {
                             );
 
                         return (
+
                             correoCampo &&
+
                             normalizarCorreo(
                                 correoCampo
                             ) ===
+
                             normalizarCorreo(
                                 correo
                             )
@@ -743,6 +843,10 @@ async function obtenerPermisosUsuario() {
                 );
             }
         );
+
+    /* -----------------------------------------
+       USUARIO NO ENCONTRADO
+       ----------------------------------------- */
 
     if (!usuario) {
 
@@ -787,6 +891,10 @@ async function obtenerPermisosUsuario() {
 
         return crearPermisosDenegados();
     }
+
+    /* -----------------------------------------
+       REGISTRO ENCONTRADO
+       ----------------------------------------- */
 
     console.log("");
     console.log(
@@ -983,14 +1091,13 @@ function obtenerNombreModulo(
             "Permisos",
 
         "configuracion":
-            "Configuracion",
-
-        "configuración":
             "Configuracion"
     };
 
-    return equivalencias[texto] ||
-        modulo;
+    return (
+        equivalencias[texto] ||
+        modulo
+    );
 }
 
 /* =========================================================
@@ -1013,11 +1120,6 @@ function validarPaginaActual(
         encontrarPermisoPagina(
             pagina
         );
-
-    /*
-       Si no es una página protegida,
-       no hacemos nada.
-    */
 
     if (!modulo) {
 
@@ -1076,7 +1178,6 @@ function obtenerPaginaActual() {
         );
 
     if (!ruta) {
-
         return "index.html";
     }
 
@@ -1117,7 +1218,10 @@ function encontrarPermisoPagina(
         ruta.toLowerCase();
 
     for (
-        const [rutaMapa, modulo]
+        const [
+            rutaMapa,
+            modulo
+        ]
         of Object.entries(
             PAGINAS_PERMISOS
         )
@@ -1131,10 +1235,6 @@ function encontrarPermisoPagina(
             return modulo;
         }
     }
-
-    /*
-       Si estamos en index con ruta vacía.
-    */
 
     if (
         ruta === "" ||
@@ -1154,11 +1254,6 @@ function encontrarPermisoPagina(
 function bloquearPagina(
     modulo
 ) {
-
-    /*
-       Guardamos el HTML original para
-       poder restaurarlo si fuese necesario.
-    */
 
     const contenido =
         document.body;
@@ -1232,6 +1327,7 @@ function bloquearPagina(
             </div>
 
         </div>
+
     `;
 }
 
@@ -1253,9 +1349,9 @@ function obtenerCampoFlexible(
             nombre
         );
 
-    /*
-       Primero coincidencia exacta.
-    */
+    /* -----------------------------------------
+       COINCIDENCIA EXACTA
+       ----------------------------------------- */
 
     if (
         Object.prototype.hasOwnProperty.call(
@@ -1267,9 +1363,9 @@ function obtenerCampoFlexible(
         return fields[nombre];
     }
 
-    /*
-       Después coincidencia normalizada.
-    */
+    /* -----------------------------------------
+       COINCIDENCIA NORMALIZADA
+       ----------------------------------------- */
 
     const clave =
         Object.keys(fields)
@@ -1285,14 +1381,14 @@ function obtenerCampoFlexible(
         return fields[clave];
     }
 
-    /*
-       Compatibilidad con nombres
-       de SharePoint.
-    */
+    /* -----------------------------------------
+       ALIASES
+       ----------------------------------------- */
 
     const aliases = {
 
         "oficina": [
+
             "Oficina",
             "Oficina0",
             "AccesoOficina",
@@ -1300,6 +1396,7 @@ function obtenerCampoFlexible(
         ],
 
         "personal": [
+
             "Personal",
             "Personal0",
             "AccesoPersonal",
@@ -1307,6 +1404,7 @@ function obtenerCampoFlexible(
         ],
 
         "reservas": [
+
             "Reservas",
             "Reserva",
             "Reservas0",
@@ -1315,6 +1413,7 @@ function obtenerCampoFlexible(
         ],
 
         "salas": [
+
             "Salas",
             "Sala",
             "Salas0",
@@ -1323,6 +1422,7 @@ function obtenerCampoFlexible(
         ],
 
         "comunicados": [
+
             "Comunicados",
             "Comunicado",
             "Comunicados0",
@@ -1331,6 +1431,7 @@ function obtenerCampoFlexible(
         ],
 
         "seguridad": [
+
             "Seguridad",
             "Seguridad0",
             "AccesoSeguridad",
@@ -1338,6 +1439,7 @@ function obtenerCampoFlexible(
         ],
 
         "infraestructura": [
+
             "Infraestructura",
             "Infraestructura0",
             "AccesoInfraestructura",
@@ -1345,6 +1447,7 @@ function obtenerCampoFlexible(
         ],
 
         "tickets": [
+
             "Tickets",
             "Ticket",
             "Tickets0",
@@ -1353,6 +1456,7 @@ function obtenerCampoFlexible(
         ],
 
         "permisos": [
+
             "Permisos",
             "Permiso",
             "Permisos0",
@@ -1361,6 +1465,7 @@ function obtenerCampoFlexible(
         ],
 
         "configuracion": [
+
             "Configuracion",
             "Configuración",
             "Configuracion0",
@@ -1405,7 +1510,9 @@ function obtenerCampoFlexible(
 
         if (claveAlias) {
 
-            return fields[claveAlias];
+            return fields[
+                claveAlias
+            ];
         }
     }
 
@@ -1438,6 +1545,7 @@ function valorBooleano(
                 .toLowerCase();
 
         return [
+
             "true",
             "1",
             "si",
@@ -1448,6 +1556,7 @@ function valorBooleano(
             "permitida",
             "habilitado",
             "habilitada"
+
         ].includes(
             texto
         );
@@ -1468,10 +1577,6 @@ function extraerCorreo(
         return "";
     }
 
-    /*
-       Si ya es string.
-    */
-
     if (
         typeof valor === "string"
     ) {
@@ -1481,10 +1586,6 @@ function extraerCorreo(
             .toLowerCase();
     }
 
-    /*
-       Persona / lookup de SharePoint.
-    */
-
     if (
         typeof valor === "object"
     ) {
@@ -1492,17 +1593,11 @@ function extraerCorreo(
         return (
 
             valor.email ||
-
             valor.Email ||
-
             valor.mail ||
-
             valor.Mail ||
-
             valor.userPrincipalName ||
-
             valor.UserPrincipalName ||
-
             ""
 
         )
@@ -1573,6 +1668,7 @@ function guardarPaginaActual() {
 
         sessionStorage.setItem(
             RETURN_KEY,
+
             window.location.pathname +
             window.location.search +
             window.location.hash
@@ -1593,11 +1689,13 @@ function guardarPaginaActual() {
 
 window.AlferzaAuth = {
 
-    obtenerPermisos: () =>
-        permisosActuales,
+    obtenerPermisos:
+        () =>
+            permisosActuales,
 
-    obtenerCuenta: () =>
-        cuentaActual,
+    obtenerCuenta:
+        () =>
+            cuentaActual,
 
     tienePermiso:
         modulo =>
@@ -1607,5 +1705,4 @@ window.AlferzaAuth = {
                     modulo
                 )
             ] === true
-
 };

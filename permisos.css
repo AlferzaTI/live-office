@@ -5,119 +5,11 @@
 
 
 /* =========================================================
-   BASE
-========================================================= */
-
-html {
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    background: #eef2f7;
-    color: #0f172a;
-}
-
-
-/* =========================================================
-   LAYOUT
-   NO MODIFICA EL NAVBAR
-========================================================= */
-
-.layout {
-    width: 100%;
-    min-height: calc(100vh - 160px);
-    display: flex;
-}
-
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.sidebar {
-    width: 250px;
-    flex-shrink: 0;
-    background: #1e293b;
-    color: #ffffff;
-    padding: 25px;
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    padding: 15px;
-
-    margin-bottom: 10px;
-
-    border-radius: 10px;
-
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-}
-
-.sidebar-item:hover {
-    background: #334155;
-    color: #ffffff;
-}
-
-.sidebar-item.active {
-    background: #334155;
-    color: #ffffff;
-
-    box-shadow:
-        inset 3px 0 0 #3b82f6;
-}
-
-.sidebar-icon {
-    width: 24px;
-    flex-shrink: 0;
-    text-align: center;
-    font-size: 16px;
-}
-
-.sidebar-text {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-
-/* =========================================================
-   CONTENIDO
-========================================================= */
-
-.content {
-    flex: 1;
-    min-width: 0;
-    padding: 25px;
-}
-
-
-/* =========================================================
-   TARJETAS
+   CONTENIDO DE PERMISOS
 ========================================================= */
 
 .permisos-grid {
+
     width: 100%;
 
     display: grid;
@@ -131,25 +23,34 @@ body {
     align-items: start;
 }
 
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
 .permisos-card {
+
     min-width: 0;
 
     padding: 24px;
 
-    background: #ffffff;
-
-    border: 1px solid #dfe6ef;
+    background: white;
 
     border-radius: 18px;
 
+    border: 1px solid #dfe6ef;
+
     box-shadow:
-        0 5px 18px
-        rgba(15, 23, 42, 0.06);
+        0 6px 20px rgba(0, 0, 0, .08);
 }
 
+
 .card-header {
+
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 15px;
@@ -157,23 +58,29 @@ body {
     margin-bottom: 22px;
 }
 
+
 .card-header h2 {
+
     margin: 0;
 
     color: #0f172a;
 
     font-size: 20px;
+
     line-height: 1.2;
 
     font-weight: 800;
 }
 
+
 .card-header p {
+
     margin: 5px 0 0;
 
     color: #64748b;
 
     font-size: 12px;
+
     line-height: 1.4;
 }
 
@@ -183,11 +90,15 @@ body {
 ========================================================= */
 
 .form-group {
+
     width: 100%;
+
     margin-bottom: 18px;
 }
 
+
 .form-group > label {
+
     display: block;
 
     margin-bottom: 7px;
@@ -198,18 +109,24 @@ body {
 
     font-weight: 800;
 
-    letter-spacing: 0.2px;
+    letter-spacing: .2px;
 }
 
+
 .input-row {
+
     display: flex;
+
     align-items: stretch;
 
     gap: 10px;
 }
 
+
 .input-row input {
+
     flex: 1;
+
     min-width: 0;
 
     height: 44px;
@@ -231,17 +148,24 @@ body {
     outline: none;
 }
 
+
 .input-row input:focus {
-    background: #ffffff;
+
+    background: white;
 
     border-color: #2563eb;
 
     box-shadow:
-        0 0 0 3px
-        rgba(37, 99, 235, 0.08);
+        0 0 0 3px rgba(37, 99, 235, .08);
 }
 
-select {
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+.permisos-card select {
+
     width: 100%;
 
     height: 44px;
@@ -265,14 +189,15 @@ select {
     cursor: pointer;
 }
 
-select:focus {
-    background: #ffffff;
+
+.permisos-card select:focus {
+
+    background: white;
 
     border-color: #2563eb;
 
     box-shadow:
-        0 0 0 3px
-        rgba(37, 99, 235, 0.08);
+        0 0 0 3px rgba(37, 99, 235, .08);
 }
 
 
@@ -281,6 +206,7 @@ select:focus {
 ========================================================= */
 
 .btn-primary {
+
     height: 44px;
 
     flex-shrink: 0;
@@ -293,7 +219,7 @@ select:focus {
 
     background: #0a84ff;
 
-    color: #ffffff;
+    color: white;
 
     font-family: inherit;
 
@@ -304,40 +230,51 @@ select:focus {
     cursor: pointer;
 
     transition:
-        background 0.15s ease,
-        transform 0.15s ease;
+        background .15s ease,
+        transform .15s ease;
 }
 
+
 .btn-primary:hover {
+
     background: #006fd6;
 }
 
+
 .btn-primary:active {
+
     transform: translateY(1px);
 }
 
+
 .btn-primary:disabled {
-    opacity: 0.55;
+
+    opacity: .55;
+
     cursor: not-allowed;
 }
 
+
 .btn-save {
+
     min-width: 170px;
 }
 
 
 /* =========================================================
-   PANEL DE USUARIO
+   PANEL DEL USUARIO
 ========================================================= */
 
 .usuario-panel {
-    display: block;
+
     width: 100%;
 
     padding-top: 5px;
 }
 
+
 .usuario-info {
+
     display: grid;
 
     grid-template-columns:
@@ -349,8 +286,10 @@ select:focus {
     margin-bottom: 20px;
 }
 
+
 .usuario-nombre,
 .usuario-correo {
+
     min-width: 0;
 
     padding: 14px;
@@ -362,7 +301,9 @@ select:focus {
     background: #f8fafc;
 }
 
+
 .info-label {
+
     display: block;
 
     margin-bottom: 5px;
@@ -375,11 +316,13 @@ select:focus {
 
     text-transform: uppercase;
 
-    letter-spacing: 0.5px;
+    letter-spacing: .5px;
 }
+
 
 .usuario-nombre strong,
 .usuario-correo span:last-child {
+
     display: block;
 
     overflow: hidden;
@@ -401,14 +344,19 @@ select:focus {
 ========================================================= */
 
 .modulos-section {
+
     margin-top: 4px;
 }
 
+
 .modulos-section .section-title {
+
     margin-bottom: 14px;
 }
 
+
 .modulos-section .section-title h3 {
+
     margin: 0;
 
     color: #0f172a;
@@ -418,7 +366,9 @@ select:focus {
     font-weight: 800;
 }
 
+
 .modulos-section .section-title p {
+
     margin: 4px 0 0;
 
     color: #64748b;
@@ -426,7 +376,9 @@ select:focus {
     font-size: 11px;
 }
 
+
 .modulos-permisos {
+
     display: grid;
 
     grid-template-columns:
@@ -435,8 +387,11 @@ select:focus {
     gap: 10px;
 }
 
+
 .modulo-item {
+
     min-width: 0;
+
     min-height: 66px;
 
     display: flex;
@@ -453,14 +408,31 @@ select:focus {
 
     border-radius: 12px;
 
-    background: #ffffff;
+    background: white;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
 }
 
+
+.modulo-item:hover {
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 3px 10px rgba(15, 23, 42, .04);
+}
+
+
 .modulo-info {
+
     min-width: 0;
 }
 
+
 .modulo-nombre {
+
     display: block;
 
     overflow: hidden;
@@ -476,7 +448,9 @@ select:focus {
     text-overflow: ellipsis;
 }
 
+
 .modulo-descripcion {
+
     display: block;
 
     margin-top: 3px;
@@ -498,24 +472,31 @@ select:focus {
 ========================================================= */
 
 .switch {
+
     position: relative;
 
     width: 46px;
+
     height: 25px;
 
     flex-shrink: 0;
 }
 
+
 .switch input {
+
     position: absolute;
 
     width: 0;
+
     height: 0;
 
     opacity: 0;
 }
 
+
 .slider {
+
     position: absolute;
 
     inset: 0;
@@ -527,42 +508,52 @@ select:focus {
     cursor: pointer;
 
     transition:
-        background 0.15s ease;
+        background .15s ease;
 }
 
+
 .slider::before {
+
     content: "";
 
     position: absolute;
 
     width: 19px;
+
     height: 19px;
 
     left: 3px;
+
     top: 3px;
 
     border-radius: 50%;
 
-    background: #ffffff;
+    background: white;
 
     box-shadow:
-        0 2px 5px
-        rgba(15, 23, 42, 0.18);
+        0 2px 5px rgba(15, 23, 42, .18);
 
     transition:
-        transform 0.15s ease;
+        transform .15s ease;
 }
 
+
 .switch input:checked + .slider {
+
     background: #22c55e;
 }
 
+
 .switch input:checked + .slider::before {
+
     transform: translateX(21px);
 }
 
+
 .switch input:disabled + .slider {
-    opacity: 0.65;
+
+    opacity: .65;
+
     cursor: not-allowed;
 }
 
@@ -572,6 +563,7 @@ select:focus {
 ========================================================= */
 
 .form-actions {
+
     display: flex;
 
     justify-content: flex-end;
@@ -585,20 +577,25 @@ select:focus {
 
 
 /* =========================================================
-   TABLA
+   TABLA DE USUARIOS
 ========================================================= */
 
 .tabla-permisos {
+
     width: 100%;
+
     overflow-x: auto;
 }
 
+
 .tabla-vacia {
+
     min-height: 220px;
 
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     padding: 30px;
@@ -616,7 +613,9 @@ select:focus {
     font-size: 12px;
 }
 
+
 .tabla-permisos table {
+
     width: 100%;
 
     min-width: 520px;
@@ -624,7 +623,9 @@ select:focus {
     border-collapse: collapse;
 }
 
+
 .tabla-permisos th {
+
     padding: 11px 12px;
 
     background: #f8fafc;
@@ -641,10 +642,12 @@ select:focus {
 
     text-transform: uppercase;
 
-    letter-spacing: 0.5px;
+    letter-spacing: .5px;
 }
 
+
 .tabla-permisos td {
+
     padding: 12px;
 
     color: #334155;
@@ -656,11 +659,15 @@ select:focus {
     vertical-align: middle;
 }
 
+
 .tabla-permisos tr:last-child td {
+
     border-bottom: none;
 }
 
+
 .tabla-permisos tr:hover td {
+
     background: #f8fbff;
 }
 
@@ -670,9 +677,11 @@ select:focus {
 ========================================================= */
 
 .badge {
+
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
     padding: 5px 9px;
@@ -684,23 +693,35 @@ select:focus {
     font-weight: 800;
 }
 
+
 .badge-ti {
+
     background: #dbeafe;
+
     color: #1d4ed8;
 }
 
+
 .badge-normal {
+
     background: #f1f5f9;
+
     color: #475569;
 }
 
+
 .badge-activo {
+
     background: #dcfce7;
+
     color: #166534;
 }
 
+
 .badge-bloqueado {
+
     background: #fee2e2;
+
     color: #991b1b;
 }
 
@@ -710,6 +731,7 @@ select:focus {
 ========================================================= */
 
 .mensaje-error {
+
     margin-bottom: 18px;
 
     padding: 12px 14px;
@@ -729,130 +751,114 @@ select:focus {
 
 
 /* =========================================================
-   RESPONSIVE 1100
+   RESPONSIVE — 1100
 ========================================================= */
 
 @media (max-width: 1100px) {
 
     .permisos-grid {
+
         grid-template-columns: 1fr;
+
     }
 
     .permisos-card {
+
         width: 100%;
+
     }
+
 }
 
 
 /* =========================================================
-   RESPONSIVE 900
+   RESPONSIVE — 900
 ========================================================= */
 
 @media (max-width: 900px) {
 
-    .sidebar {
-        width: 210px;
-    }
-
-    .content {
-        padding: 24px;
-    }
-
     .modulos-permisos {
+
         grid-template-columns: 1fr 1fr;
+
     }
+
 }
 
 
 /* =========================================================
-   RESPONSIVE 700
+   RESPONSIVE — 700
 ========================================================= */
 
 @media (max-width: 700px) {
 
-    .layout {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        padding: 15px;
-    }
-
-    .sidebar-nav {
-        display: flex;
-        flex-direction: row;
-
-        gap: 8px;
-
-        overflow-x: auto;
-    }
-
-    .sidebar-item {
-        width: auto;
-
-        flex-shrink: 0;
-
-        margin-bottom: 0;
-
-        padding: 11px 14px;
-    }
-
-    .content {
-        padding: 18px;
-    }
-
-    .permisos-card {
-        padding: 18px;
-
-        border-radius: 15px;
-    }
-
     .usuario-info {
+
         grid-template-columns: 1fr;
+
     }
 
     .modulos-permisos {
+
         grid-template-columns: 1fr;
+
     }
 
     .input-row {
+
         flex-direction: column;
+
     }
 
     .input-row .btn-primary {
+
         width: 100%;
+
     }
 
     .form-actions {
+
         justify-content: stretch;
+
     }
 
     .btn-save {
+
         width: 100%;
+
     }
+
+    .permisos-card {
+
+        padding: 18px;
+
+    }
+
 }
 
 
 /* =========================================================
-   RESPONSIVE 450
+   RESPONSIVE — 450
 ========================================================= */
 
 @media (max-width: 450px) {
 
-    .sidebar-item {
-        padding: 10px 12px;
-    }
-
     .permisos-card {
+
         padding: 15px;
+
     }
 
     .card-header h2 {
+
         font-size: 18px;
+
     }
 
     .modulo-item {
+
         min-height: 62px;
+
     }
+
 }

@@ -5,479 +5,44 @@
 
 
 /* =========================================================
-   TOPBAR
-   COPIA EXACTA DE STYLES.CSS
-========================================================= */
-
-.topbar {
-    position: relative;
-    height: 80px;
-    background: #0f172a;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 30px;
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   LOGO CENTRADO
-   COPIA EXACTA DE STYLES.CSS
-========================================================= */
-
-.topbar .logo {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 2;
-    white-space: nowrap;
-}
-
-.topbar .logo h1 {
-    color: white !important;
-    font-size: 24px !important;
-    font-weight: 800 !important;
-    letter-spacing: .8px;
-    margin: 0;
-
-    animation:
-        logoTitleAnimation 1.2s ease-in-out infinite;
-}
-
-.topbar .logo span {
-    display: block;
-    margin-top: 3px;
-    font-size: 12px !important;
-    color: #cbd5e1 !important;
-    letter-spacing: .5px;
-
-    animation:
-        logoSubtitleAnimation 1.2s ease-in-out infinite;
-}
-
-
-/* =========================================================
-   ANIMACIÓN DEL TÍTULO
-   COPIA EXACTA DE STYLES.CSS
-========================================================= */
-
-@keyframes logoTitleAnimation {
-
-    0% {
-        opacity: .75;
-
-        transform: translateY(2px);
-
-        text-shadow:
-            0 0 0 rgba(255, 255, 255, 0);
-    }
-
-    50% {
-        opacity: 1;
-
-        transform: translateY(0);
-
-        text-shadow:
-            0 0 14px rgba(255, 255, 255, .25);
-    }
-
-    100% {
-        opacity: .75;
-
-        transform: translateY(2px);
-
-        text-shadow:
-            0 0 0 rgba(255, 255, 255, 0);
-    }
-}
-
-
-@keyframes logoSubtitleAnimation {
-
-    0%,
-    100% {
-        opacity: .55;
-    }
-
-    50% {
-        opacity: 1;
-    }
-}
-
-
-/* =========================================================
-   ESTADO EN VIVO
-   COPIA EXACTA DE STYLES.CSS
-========================================================= */
-
-.topbar .live-status {
-    margin-left: auto;
-
-    display: flex;
-    align-items: center;
-
-    gap: 9px;
-
-    padding: 8px 13px;
-
-    border-radius: 20px;
-
-    background: rgba(34, 197, 94, .10);
-
-    border: 1px solid rgba(34, 197, 94, .25);
-
-    color: #86efac !important;
-
-    font-size: 11px !important;
-
-    font-weight: 800;
-
-    letter-spacing: .7px;
-
-    position: relative;
-
-    z-index: 3;
-}
-
-
-.topbar .live-status-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: #22c55e;
-
-    box-shadow:
-        0 0 0 4px rgba(34, 197, 94, .12);
-
-    animation: pulseLive 2s infinite;
-}
-
-
-@keyframes pulseLive {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .45;
-    }
-}
-
-
-/* =========================================================
-   FOOTER
-   COPIA EXACTA DE STYLES.CSS
-========================================================= */
-
-.footer-topbar {
-    margin-top: 0;
-
-    width: 100%;
-
-    height: 80px;
-
-    position: relative;
-
-    background: #0f172a;
-
-    color: white;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    padding: 0 30px;
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-}
-
-
-.footer-topbar .logo {
-    position: absolute;
-
-    left: 50%;
-
-    top: 50%;
-
-    transform:
-        translate(-50%, -50%);
-
-    z-index: 2;
-
-    text-align: center;
-
-    white-space: nowrap;
-}
-
-
-.footer-topbar .logo h1 {
-    color: white !important;
-
-    margin: 0;
-
-    font-size: 24px !important;
-
-    font-weight: 800;
-
-    letter-spacing: 0.8px;
-
-    animation:
-        logoTitleAnimation
-        1.2s
-        ease-in-out
-        infinite;
-}
-
-
-.footer-topbar .logo span {
-    display: block;
-
-    margin-top: 3px;
-
-    font-size: 12px !important;
-
-    font-weight: 500;
-
-    color: #cbd5e1 !important;
-
-    letter-spacing: 0.5px;
-
-    animation:
-        logoSubtitleAnimation
-        1.2s
-        ease-in-out
-        infinite;
-}
-
-
-.footer-topbar .live-status {
-    position: relative;
-
-    z-index: 3;
-
-    margin-left: auto;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    padding: 8px 13px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(34, 197, 94, 0.10);
-
-    border:
-        1px solid
-        rgba(34, 197, 94, 0.25);
-
-    color: #86efac !important;
-
-    font-size: 11px !important;
-
-    font-weight: 800;
-
-    letter-spacing: 0.7px;
-}
-
-
-.footer-topbar .live-status-dot {
-    width: 8px;
-
-    height: 8px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #22c55e;
-
-    box-shadow:
-        0 0 0 4px
-        rgba(34, 197, 94, 0.12);
-
-    animation:
-        pulseLive
-        2s
-        infinite;
-}
-
-
-/* =========================================================
-   LAYOUT
-========================================================= */
-
-.layout {
-    display: flex;
-
-    width: 100%;
-
-    min-height: calc(100vh - 160px);
-}
-
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.layout .sidebar {
-    width: 250px;
-
-    flex-shrink: 0;
-
-    background: #1e293b;
-
-    color: white;
-
-    padding: 25px;
-}
-
-
-.layout .sidebar-nav {
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-.layout .sidebar-item {
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 15px;
-
-    margin-bottom: 10px;
-
-    border-radius: 10px;
-
-    color: white;
-
-    text-decoration: none;
-
-    font-size: 12px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: .2s ease;
-}
-
-
-.layout .sidebar-item:hover {
-    background: #334155;
-}
-
-
-.layout .sidebar-item.active {
-    background: #334155;
-
-    box-shadow:
-        inset 3px 0 0 #3b82f6;
-}
-
-
-.sidebar-icon {
-    width: 24px;
-
-    flex-shrink: 0;
-
-    text-align: center;
-
-    font-size: 16px;
-}
-
-
-.sidebar-text {
-    overflow: hidden;
-
-    white-space: nowrap;
-
-    text-overflow: ellipsis;
-}
-
-
-/* =========================================================
-   CONTENIDO
-========================================================= */
-
-.content {
-    flex: 1;
-
-    padding: 25px;
-
-    min-width: 0;
-}
-
-
-/* =========================================================
-   PERMISOS
+   PERMISOS — GRID
 ========================================================= */
 
 .permisos-grid {
     width: 100%;
-
     display: grid;
-
     grid-template-columns:
         minmax(0, 1.15fr)
         minmax(420px, 0.85fr);
-
     gap: 22px;
-
     align-items: start;
 }
 
 
+/* =========================================================
+   TARJETAS
+========================================================= */
+
 .permisos-card {
     min-width: 0;
-
     padding: 24px;
 
     background: white;
 
-    border-radius: 18px;
-
     border: 1px solid #dfe6ef;
+    border-radius: 18px;
 
     box-shadow:
         0 6px 20px rgba(0, 0, 0, .08);
 }
 
 
-/* =========================================================
-   HEADER DE TARJETA
-========================================================= */
-
 .card-header {
     display: flex;
-
     align-items: flex-start;
-
     justify-content: space-between;
 
     gap: 15px;
-
     margin-bottom: 22px;
 }
 
@@ -488,9 +53,7 @@
     color: #0f172a;
 
     font-size: 20px;
-
     line-height: 1.2;
-
     font-weight: 800;
 }
 
@@ -501,7 +64,6 @@
     color: #64748b;
 
     font-size: 12px;
-
     line-height: 1.4;
 }
 
@@ -512,7 +74,6 @@
 
 .form-group {
     width: 100%;
-
     margin-bottom: 18px;
 }
 
@@ -525,7 +86,6 @@
     color: #334155;
 
     font-size: 11px;
-
     font-weight: 800;
 
     letter-spacing: .2px;
@@ -534,7 +94,6 @@
 
 .input-row {
     display: flex;
-
     align-items: stretch;
 
     gap: 10px;
@@ -551,18 +110,15 @@
     padding: 0 13px;
 
     border: 1px solid #cbd5e1;
-
     border-radius: 10px;
 
-    background: #f8fafc;
+    outline: none;
 
+    background: #f8fafc;
     color: #0f172a;
 
     font-family: inherit;
-
     font-size: 13px;
-
-    outline: none;
 }
 
 
@@ -584,18 +140,15 @@
     padding: 0 12px;
 
     border: 1px solid #cbd5e1;
-
     border-radius: 10px;
 
-    background: #f8fafc;
+    outline: none;
 
+    background: #f8fafc;
     color: #0f172a;
 
     font-family: inherit;
-
     font-size: 13px;
-
-    outline: none;
 }
 
 
@@ -621,7 +174,6 @@
     padding: 0 18px;
 
     border: none;
-
     border-radius: 10px;
 
     background: #0a84ff;
@@ -629,15 +181,12 @@
     color: white;
 
     font-family: inherit;
-
     font-size: 12px;
-
     font-weight: 800;
 
     cursor: pointer;
 
-    transition:
-        background .15s ease;
+    transition: background .15s ease;
 }
 
 
@@ -648,7 +197,6 @@
 
 .btn-primary:disabled {
     opacity: .55;
-
     cursor: not-allowed;
 }
 
@@ -664,7 +212,6 @@
 
 .usuario-panel {
     width: 100%;
-
     padding-top: 5px;
 }
 
@@ -689,7 +236,6 @@
     padding: 14px;
 
     border: 1px solid #e2e8f0;
-
     border-radius: 12px;
 
     background: #f8fafc;
@@ -704,11 +250,9 @@
     color: #64748b;
 
     font-size: 9px;
-
     font-weight: 800;
 
     text-transform: uppercase;
-
     letter-spacing: .5px;
 }
 
@@ -722,11 +266,9 @@
     color: #0f172a;
 
     font-size: 12px;
-
     font-weight: 700;
 
     white-space: nowrap;
-
     text-overflow: ellipsis;
 }
 
@@ -751,7 +293,6 @@
     color: #0f172a;
 
     font-size: 15px;
-
     font-weight: 800;
 }
 
@@ -777,13 +318,11 @@
 
 .modulo-item {
     min-width: 0;
-
     min-height: 66px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: space-between;
 
     gap: 12px;
@@ -791,7 +330,6 @@
     padding: 12px 13px;
 
     border: 1px solid #e2e8f0;
-
     border-radius: 12px;
 
     background: white;
@@ -811,11 +349,9 @@
     color: #0f172a;
 
     font-size: 11px;
-
     font-weight: 800;
 
     white-space: nowrap;
-
     text-overflow: ellipsis;
 }
 
@@ -832,7 +368,6 @@
     font-size: 9px;
 
     white-space: nowrap;
-
     text-overflow: ellipsis;
 }
 
@@ -845,7 +380,6 @@
     position: relative;
 
     width: 46px;
-
     height: 25px;
 
     flex-shrink: 0;
@@ -856,7 +390,6 @@
     position: absolute;
 
     width: 0;
-
     height: 0;
 
     opacity: 0;
@@ -885,11 +418,9 @@
     position: absolute;
 
     width: 19px;
-
     height: 19px;
 
     left: 3px;
-
     top: 3px;
 
     border-radius: 50%;
@@ -916,7 +447,6 @@
 
 .switch input:disabled + .slider {
     opacity: .65;
-
     cursor: not-allowed;
 }
 
@@ -955,13 +485,11 @@
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     padding: 30px;
 
     border: 1px dashed #cbd5e1;
-
     border-radius: 14px;
 
     background: #f8fafc;
@@ -974,7 +502,18 @@
 }
 
 
-.tabla-permisos table {
+/* =========================================================
+   TABLA GENERADA POR JAVASCRIPT
+========================================================= */
+
+.permissions-table-container {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+
+.permissions-table {
     width: 100%;
 
     min-width: 520px;
@@ -983,7 +522,7 @@
 }
 
 
-.tabla-permisos th {
+.permissions-table th {
     padding: 11px 12px;
 
     background: #f8fafc;
@@ -993,7 +532,6 @@
     border-bottom: 1px solid #e2e8f0;
 
     font-size: 9px;
-
     font-weight: 800;
 
     text-align: left;
@@ -1004,7 +542,7 @@
 }
 
 
-.tabla-permisos td {
+.permissions-table td {
     padding: 12px;
 
     color: #334155;
@@ -1017,13 +555,81 @@
 }
 
 
-.tabla-permisos tr:last-child td {
+.permissions-table tr:last-child td {
     border-bottom: none;
 }
 
 
-.tabla-permisos tr:hover td {
+.permissions-table tr:hover td {
     background: #f8fbff;
+}
+
+
+/* =========================================================
+   USUARIO DE TABLA
+========================================================= */
+
+.permission-user-cell {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.permission-user-avatar {
+    width: 32px;
+    height: 32px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eef2f7;
+
+    font-size: 15px;
+}
+
+
+.permission-user-info {
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.permission-user-info strong {
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.permission-user-info span {
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 
@@ -1035,7 +641,6 @@
     display: inline-flex;
 
     align-items: center;
-
     justify-content: center;
 
     padding: 5px 9px;
@@ -1043,36 +648,99 @@
     border-radius: 999px;
 
     font-size: 9px;
-
     font-weight: 800;
 }
 
 
 .badge-ti {
     background: #dbeafe;
-
     color: #1d4ed8;
 }
 
 
 .badge-normal {
     background: #f1f5f9;
-
     color: #475569;
 }
 
 
 .badge-activo {
     background: #dcfce7;
-
     color: #166534;
 }
 
 
 .badge-bloqueado {
     background: #fee2e2;
-
     color: #991b1b;
+}
+
+
+/* =========================================================
+   RESUMEN DE ACCESO
+========================================================= */
+
+.access-summary {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+.access-summary.full {
+    background: #dcfce7;
+    color: #166534;
+}
+
+
+.access-summary.partial {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* =========================================================
+   BOTÓN DE TABLA
+========================================================= */
+
+.table-action-btn {
+    padding: 7px 11px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    background: white;
+
+    color: #334155;
+
+    font-family: inherit;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+
+.table-action-btn:hover {
+    background: #f8fafc;
+
+    border-color: #94a3b8;
+
+    color: #0f172a;
 }
 
 
@@ -1080,27 +748,52 @@
    MENSAJES
 ========================================================= */
 
-.mensaje-error {
+.mensaje-permisos {
     margin-bottom: 18px;
+}
+
+
+.permission-message {
+    width: 100%;
 
     padding: 12px 14px;
 
-    border: 1px solid #fecaca;
-
     border-radius: 10px;
 
-    background: #fef2f2;
-
-    color: #991b1b;
-
     font-size: 12px;
-
     font-weight: 600;
 }
 
 
+.permission-message.error {
+    border: 1px solid #fecaca;
+
+    background: #fef2f2;
+
+    color: #991b1b;
+}
+
+
+.permission-message.success {
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #166534;
+}
+
+
+.permission-message.info {
+    border: 1px solid #bfdbfe;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE 1100
 ========================================================= */
 
 @media (max-width: 1100px) {
@@ -1109,104 +802,29 @@
         grid-template-columns: 1fr;
     }
 
-    .permisos-card {
-        width: 100%;
-    }
 }
 
+
+/* =========================================================
+   RESPONSIVE 900
+========================================================= */
 
 @media (max-width: 900px) {
 
     .modulos-permisos {
         grid-template-columns: 1fr 1fr;
     }
+
 }
 
 
+/* =========================================================
+   RESPONSIVE 700
+========================================================= */
+
 @media (max-width: 700px) {
 
-    .topbar {
-        padding: 0 18px;
-    }
-
-    .topbar .logo h1 {
-        font-size: 20px !important;
-    }
-
-    .topbar .logo span {
-        font-size: 10px !important;
-    }
-
-    .topbar .live-status {
-        padding: 7px 10px;
-
-        font-size: 10px !important;
-    }
-
-    .topbar .live-status-dot {
-        width: 7px;
-
-        height: 7px;
-    }
-
-
-    .footer-topbar {
-        height: 80px;
-
-        padding: 0 18px;
-    }
-
-    .footer-topbar .logo h1 {
-        font-size: 20px !important;
-    }
-
-    .footer-topbar .logo span {
-        font-size: 10px !important;
-    }
-
-    .footer-topbar .live-status {
-        padding: 7px 10px;
-
-        font-size: 10px !important;
-    }
-
-    .footer-topbar .live-status-dot {
-        width: 7px;
-
-        height: 7px;
-    }
-
-
-    .layout {
-        flex-direction: column;
-    }
-
-    .layout .sidebar {
-        width: 100%;
-
-        padding: 15px;
-    }
-
-    .layout .sidebar-nav {
-        flex-direction: row;
-
-        gap: 8px;
-
-        overflow-x: auto;
-    }
-
-    .layout .sidebar-item {
-        width: auto;
-
-        flex-shrink: 0;
-
-        margin-bottom: 0;
-
-        padding: 11px 14px;
-    }
-
-
-    .content {
+    .permisos-card {
         padding: 18px;
     }
 
@@ -1215,91 +833,52 @@
         grid-template-columns: 1fr;
     }
 
+
     .modulos-permisos {
         grid-template-columns: 1fr;
     }
+
 
     .input-row {
         flex-direction: column;
     }
 
+
     .input-row .btn-primary {
         width: 100%;
     }
+
 
     .form-actions {
         justify-content: stretch;
     }
 
+
     .btn-save {
         width: 100%;
     }
 
-    .permisos-card {
-        padding: 18px;
-    }
 }
 
 
-@media (max-width: 430px) {
+/* =========================================================
+   RESPONSIVE 450
+========================================================= */
 
-    .topbar .logo h1 {
-        font-size: 16px !important;
-        letter-spacing: .5px;
-    }
-
-    .topbar .logo span {
-        font-size: 8px !important;
-    }
-
-    .topbar .live-status {
-        padding: 6px 8px;
-
-        gap: 6px;
-
-        font-size: 9px !important;
-    }
-
-    .topbar .live-status-dot {
-        width: 6px;
-
-        height: 6px;
-    }
-
-
-    .footer-topbar .logo h1 {
-        font-size: 16px !important;
-        letter-spacing: .5px;
-    }
-
-    .footer-topbar .logo span {
-        font-size: 8px !important;
-    }
-
-    .footer-topbar .live-status {
-        padding: 6px 8px;
-
-        gap: 6px;
-
-        font-size: 9px !important;
-    }
-
-    .footer-topbar .live-status-dot {
-        width: 6px;
-
-        height: 6px;
-    }
-
+@media (max-width: 450px) {
 
     .permisos-card {
         padding: 15px;
     }
 
+
     .card-header h2 {
         font-size: 18px;
     }
 
+
     .modulo-item {
         min-height: 62px;
     }
+
 }

@@ -1,429 +1,734 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Permisos | ALFERZA LIVE OFFICE</title>
 
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="permisos.css">
+    <script>
+
+        if (
+            sessionStorage.getItem("alferza_login") !== "true"
+        ) {
+
+            window.location.replace("login.html");
+
+        }
+
+    </script>
+
+    <link
+        rel="stylesheet"
+        href="styles.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="permisos.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- NAVBAR -->
-    <header class="topbar">
-        <div class="logo">
-            <h1>ALFERZA LIVE OFFICE</h1>
-            <span>Monitoreo en tiempo real</span>
-        </div>
 
-        <div class="live-status">
-            <span class="live-status-dot"></span>
-            EN VIVO
-        </div>
-    </header>
+<header class="topbar">
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="layout">
+    <div class="logo">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <nav class="sidebar-nav">
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
 
-                <a href="index.html" class="sidebar-item" data-page="Oficina">
-                    <span class="sidebar-icon">🏢</span>
-                    <span class="sidebar-text">Oficina</span>
-                </a>
+        <span>
+            Monitoreo en tiempo real
+        </span>
 
-                <a href="personal.html" class="sidebar-item" data-page="Personal">
-                    <span class="sidebar-icon">👥</span>
-                    <span class="sidebar-text">Personal</span>
-                </a>
-
-                <a href="reservas.html" class="sidebar-item" data-page="Reservas">
-                    <span class="sidebar-icon">📅</span>
-                    <span class="sidebar-text">Reservas</span>
-                </a>
-
-                <a href="salas.html" class="sidebar-item" data-page="Salas">
-                    <span class="sidebar-icon">🚪</span>
-                    <span class="sidebar-text">Salas</span>
-                </a>
-
-                <a href="comunicados.html" class="sidebar-item" data-page="Comunicados">
-                    <span class="sidebar-icon">📢</span>
-                    <span class="sidebar-text">Comunicados</span>
-                </a>
-
-                <a href="seguridad.html" class="sidebar-item" data-page="Seguridad">
-                    <span class="sidebar-icon">🛡️</span>
-                    <span class="sidebar-text">Seguridad</span>
-                </a>
-
-                <a href="infraestructura.html" class="sidebar-item" data-page="Infraestructura">
-                    <span class="sidebar-icon">🖥️</span>
-                    <span class="sidebar-text">Infraestructura</span>
-                </a>
-
-                <a href="tickets.html" class="sidebar-item" data-page="Tickets">
-                    <span class="sidebar-icon">🎫</span>
-                    <span class="sidebar-text">Tickets</span>
-                </a>
-
-                <a href="permisos.html" class="sidebar-item active" data-page="Permisos">
-                    <span class="sidebar-icon">🔐</span>
-                    <span class="sidebar-text">Permisos</span>
-                </a>
-
-                <a href="configuracion.html" class="sidebar-item" data-page="Configuracion">
-                    <span class="sidebar-icon">⚙️</span>
-                    <span class="sidebar-text">Configuración</span>
-                </a>
-
-            </nav>
-        </aside>
-
-        <!-- MAIN -->
-        <main class="content">
-
-            <!-- HEADER -->
-            <section class="office-header">
-                <div class="office-header-content">
-
-                    <div class="office-header-icon">
-                        <span>🔐</span>
-                    </div>
-
-                    <div class="office-header-text">
-                        <div class="office-breadcrumb">
-                            <strong>ALFERZA LIVE OFFICE</strong>
-                            <span>•</span>
-                            <span>Administración</span>
-                        </div>
-
-                        <h2>Permisos</h2>
-
-                        <p>
-                            Administración de accesos al sistema
-                        </p>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- PERMISOS -->
-            <section class="permisos-grid">
-
-                <!-- ASIGNAR PERMISOS -->
-                <div class="permisos-card">
-
-                    <div class="card-header">
-                        <div>
-                            <h2>Asignar permisos</h2>
-                            <p>
-                                Selecciona un usuario de Microsoft y configura su acceso.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="correoUsuario">Buscar usuario</label>
-
-                        <div class="input-row">
-                            <input
-                                type="text"
-                                id="correoUsuario"
-                                name="correoUsuario"
-                                placeholder="Nombre o correo corporativo"
-                                autocomplete="off"
-                            >
-
-                            <button
-                                type="button"
-                                id="btnBuscarUsuario"
-                                class="btn-primary"
-                            >
-                                Buscar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="selectorUsuario">Usuarios de Microsoft</label>
-
-                        <select
-                            id="selectorUsuario"
-                            name="selectorUsuario"
-                        >
-                            <option value="">Cargando usuarios...</option>
-                        </select>
-                    </div>
-
-                    <div class="usuario-panel" id="panelPermisos">
-
-                        <div class="usuario-info">
-
-                            <div class="usuario-nombre">
-                                <span class="info-label">Usuario</span>
-                                <strong id="nombreUsuario">—</strong>
-                            </div>
-
-                            <div class="usuario-correo">
-                                <span class="info-label">Correo</span>
-                                <span id="correoMostrado">—</span>
-                            </div>
-
-                        </div>
-
-                        <div class="form-group">
-                            <label for="grupoUsuario">Grupo</label>
-
-                            <select
-                                id="grupoUsuario"
-                                name="grupoUsuario"
-                            >
-                                <option value="Normal">Normal</option>
-                                <option value="TI">TI</option>
-                            </select>
-                        </div>
-
-                        <div class="modulos-section">
-
-                            <div class="section-title">
-                                <h3>Acceso a módulos</h3>
-                                <p>
-                                    Activa o desactiva los módulos permitidos.
-                                </p>
-                            </div>
-
-                            <div class="modulos-permisos">
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Oficina</span>
-                                        <span class="modulo-descripcion">
-                                            Vista principal de la oficina
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Oficina"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Personal</span>
-                                        <span class="modulo-descripcion">
-                                            Personal y trabajadores
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Personal"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Reservas</span>
-                                        <span class="modulo-descripcion">
-                                            Reservas y solicitudes
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Reservas"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Salas</span>
-                                        <span class="modulo-descripcion">
-                                            Salas y espacios disponibles
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Salas"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Comunicados</span>
-                                        <span class="modulo-descripcion">
-                                            Comunicados internos
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Comunicados"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Seguridad</span>
-                                        <span class="modulo-descripcion">
-                                            Administración y seguridad TI
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Seguridad"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Infraestructura</span>
-                                        <span class="modulo-descripcion">
-                                            Infraestructura tecnológica
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Infraestructura"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Tickets</span>
-                                        <span class="modulo-descripcion">
-                                            Gestión de tickets TI
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Tickets"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="modulo-item">
-                                    <div class="modulo-info">
-                                        <span class="modulo-nombre">Configuración</span>
-                                        <span class="modulo-descripcion">
-                                            Configuración del sistema
-                                        </span>
-                                    </div>
-
-                                    <label class="switch">
-                                        <input
-                                            type="checkbox"
-                                            class="permiso-modulo"
-                                            data-modulo="Configuracion"
-                                        >
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button
-                                type="button"
-                                id="btnGuardarPermisos"
-                                class="btn-primary btn-save"
-                            >
-                                Guardar permisos
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- USUARIOS CONFIGURADOS -->
-                <div class="permisos-card">
-
-                    <div class="card-header">
-                        <div>
-                            <h2>Usuarios configurados</h2>
-                            <p>
-                                Usuarios con permisos registrados.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="tabla-permisos"
-                        id="tablaPermisos"
-                    >
-                        <div class="tabla-vacia">
-                            <span>No hay usuarios configurados.</span>
-                        </div>
-                    </div>
-
-                </div>
-
-            </section>
-
-        </main>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="footer-topbar">
 
-        <div class="logo">
-            <h1>ALFERZA LIVE OFFICE</h1>
-            <span>Monitoreo en tiempo real</span>
-        </div>
+    <div class="live-status">
 
-        <div class="live-status">
-            <span class="live-status-dot"></span>
+        <span class="live-status-dot"></span>
+
+        <span>
             EN VIVO
-        </div>
+        </span>
 
-    </footer>
+    </div>
 
-    <!-- SCRIPTS -->
-    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-    <script src="auth.js"></script>
-    <script src="permisos.js"></script>
+</header>
+
+
+<div class="container">
+
+
+    <aside class="sidebar">
+
+        <h2>
+            MENÚ
+        </h2>
+
+
+        <ul>
+
+            <li
+                onclick="window.location.href='index.html'"
+            >
+                🏢 Oficina
+            </li>
+
+
+            <li
+                onclick="window.location.href='personal.html'"
+            >
+                👥 Personal
+            </li>
+
+
+            <li
+                onclick="window.location.href='reserva.html'"
+            >
+                📝 Reservas
+            </li>
+
+
+            <li
+                onclick="window.location.href='salas/salas.html'"
+            >
+                📅 Salas
+            </li>
+
+
+            <li
+                onclick="window.location.href='comunicados.html'"
+            >
+                📢 Comunicados
+            </li>
+
+
+            <li
+                onclick="window.location.href='seguridad.html'"
+            >
+                🔐 Seguridad
+            </li>
+
+
+            <li
+                onclick="window.location.href='infraestructura.html'"
+            >
+                🏗️ Infraestructura
+            </li>
+
+
+            <li
+                onclick="window.location.href='tickets.html'"
+            >
+                🎫 Tickets
+            </li>
+
+
+            <li class="active">
+                🔐 Permisos
+            </li>
+
+
+            <li
+                onclick="window.location.href='configuracion.html'"
+            >
+                ⚙️ Configuración
+            </li>
+
+        </ul>
+
+    </aside>
+
+
+    <main class="content">
+
+
+        <section class="office-header">
+
+            <div class="office-header-content">
+
+                <div class="office-header-icon">
+
+                    <span>
+                        🔐
+                    </span>
+
+                </div>
+
+
+                <div class="office-header-text">
+
+                    <div class="office-breadcrumb">
+
+                        <strong>
+                            PERMISOS
+                        </strong>
+
+                        <span>
+                            /
+                        </span>
+
+                        ADMINISTRACIÓN DE ACCESOS
+
+                    </div>
+
+
+                    <h2>
+                        Gestión de Permisos
+                    </h2>
+
+
+                    <p>
+                        Administración de accesos al sistema y módulos de ALFERZA LIVE OFFICE.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <section class="permisos-grid">
+
+
+            <div class="permisos-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Asignar permisos
+                        </h2>
+
+                        <p>
+                            Selecciona un usuario de Microsoft y configura su acceso.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="correoUsuario">
+                        Buscar usuario
+                    </label>
+
+
+                    <div class="input-row">
+
+                        <input
+                            type="text"
+                            id="correoUsuario"
+                            name="correoUsuario"
+                            placeholder="Nombre o correo corporativo"
+                            autocomplete="off"
+                        >
+
+
+                        <button
+                            type="button"
+                            id="btnBuscarUsuario"
+                            class="btn-primary"
+                        >
+                            Buscar
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="selectorUsuario">
+                        Usuarios de Microsoft
+                    </label>
+
+
+                    <select
+                        id="selectorUsuario"
+                        name="selectorUsuario"
+                    >
+
+                        <option value="">
+                            Cargando usuarios...
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="usuario-panel"
+                    id="panelPermisos"
+                >
+
+
+                    <div class="usuario-info">
+
+                        <div class="usuario-nombre">
+
+                            <span class="info-label">
+                                Usuario
+                            </span>
+
+                            <strong id="nombreUsuario">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="usuario-correo">
+
+                            <span class="info-label">
+                                Correo
+                            </span>
+
+                            <span id="correoMostrado">
+                                —
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="grupoUsuario">
+                            Grupo
+                        </label>
+
+
+                        <select
+                            id="grupoUsuario"
+                            name="grupoUsuario"
+                        >
+
+                            <option value="Normal">
+                                Normal
+                            </option>
+
+                            <option value="TI">
+                                TI
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="modulos-section">
+
+
+                        <div class="section-title">
+
+                            <h3>
+                                Acceso a módulos
+                            </h3>
+
+                            <p>
+                                Activa o desactiva los módulos permitidos.
+                            </p>
+
+                        </div>
+
+
+                        <div class="modulos-permisos">
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Oficina
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Vista principal de la oficina
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Oficina"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Personal
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Personal y trabajadores
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Personal"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Reservas
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Reservas y solicitudes
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Reservas"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Salas
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Salas y espacios disponibles
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Salas"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Comunicados
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Comunicados internos
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Comunicados"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Seguridad
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Administración y seguridad TI
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Seguridad"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Infraestructura
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Infraestructura tecnológica
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Infraestructura"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Tickets
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Gestión de tickets TI
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Tickets"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="modulo-item">
+
+                                <div class="modulo-info">
+
+                                    <span class="modulo-nombre">
+                                        Configuración
+                                    </span>
+
+                                    <span class="modulo-descripcion">
+                                        Configuración del sistema
+                                    </span>
+
+                                </div>
+
+
+                                <label class="switch">
+
+                                    <input
+                                        type="checkbox"
+                                        class="permiso-modulo"
+                                        data-modulo="Configuracion"
+                                    >
+
+                                    <span class="slider"></span>
+
+                                </label>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            id="btnGuardarPermisos"
+                            class="btn-primary btn-save"
+                        >
+                            Guardar permisos
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="permisos-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Usuarios configurados
+                        </h2>
+
+                        <p>
+                            Usuarios con permisos registrados.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="tabla-permisos"
+                    id="tablaPermisos"
+                >
+
+                    <div class="tabla-vacia">
+
+                        <span>
+                            No hay usuarios configurados.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<footer class="topbar footer-topbar">
+
+    <div class="logo">
+
+        <h1>
+            ALFERZA LIVE OFFICE
+        </h1>
+
+        <span>
+            Monitoreo en tiempo real
+        </span>
+
+    </div>
+
+
+    <div class="live-status">
+
+        <span class="live-status-dot"></span>
+
+        <span>
+            EN VIVO
+        </span>
+
+    </div>
+
+</footer>
+
+
+<script
+    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+></script>
+
+<script src="auth.js"></script>
+
+<script src="permisos.js"></script>
+
 
 </body>
 </html>

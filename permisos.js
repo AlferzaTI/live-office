@@ -1532,191 +1532,72 @@
 
     async function obtenerListaPermisos() {
 
-    if (
-        listaPermisos
-    ) {
-
+    if (listaPermisos) {
         return listaPermisos;
-
     }
 
+    const sitio = await obtenerSitioSharePoint();
 
-    const sitio =
-        await obtenerSitioSharePoint();
-
-
-    if (
-        !sitio ||
-        !sitio.id
-    ) {
-
+    if (!sitio || !sitio.id) {
         throw new Error(
             "No se pudo obtener el ID del sitio SharePoint."
         );
-
     }
+
+    /* =====================================================
+       ID REAL DE PERMISOSTI OBTENIDO DESDE SHAREPOINT
+    ===================================================== */
+
+    const PERMISOS_LIST_ID =
+        "9C313E91-5655-44BF-975C-4BEB9D56C2C1";
 
 
     console.log(
-        "Buscando lista:",
-        PERMISOS_LIST_NAME
+        "Buscando PermisosTI mediante ID:",
+        PERMISOS_LIST_ID
     );
 
 
     /* =====================================================
-       MÉTODO 1
-       ENUMERAR LISTAS
+       CONSULTA DIRECTA A MICROSOFT GRAPH
     ===================================================== */
 
     const url =
-        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists` +
-        `?$select=id,name,displayName&$top=200`;
-
-
-    const resultado =
-        await graphFetch(
-            url
-        );
-
-
-    const listas =
-
-        resultado &&
-        Array.isArray(
-            resultado.value
-        )
-
-            ? resultado.value
-
-            : [];
+        `https://graph.microsoft.com/v1.0/sites/` +
+        `${sitio.id}/lists/${PERMISOS_LIST_ID}` +
+        `?$select=id,name,displayName`;
 
 
     console.log(
-        "Listas devueltas por Microsoft Graph:",
-        listas
+        "URL directa de PermisosTI:",
+        url
     );
 
 
-    /* =====================================================
-       BUSCAR PERMISOSTI
-    ===================================================== */
-
-    const objetivo =
-        normalizarTexto(
-            PERMISOS_LIST_NAME
-        );
-
-
-    listaPermisos =
-        listas.find(
-
-            lista => {
-
-                const displayName =
-                    normalizarTexto(
-                        lista.displayName
-                    );
-
-
-                const name =
-                    normalizarTexto(
-                        lista.name
-                    );
-
-
-                return (
-
-                    displayName ===
-                    objetivo
-
-                    ||
-
-                    name ===
-                    objetivo
-
-                );
-
-            }
-
-        );
-
-
-    if (listaPermisos) {
-
-        console.log(
-
-            "Lista PermisosTI encontrada:",
-
-            listaPermisos
-
-        );
-
-
-        return listaPermisos;
-
-    }
-
-
-    /* =====================================================
-       MÉTODO 2
-       BUSCAR MEDIANTE FILTER
-    ===================================================== */
-
     try {
 
-        const nombreSeguro =
-            PERMISOS_LIST_NAME
-                .replace(
-                    /'/g,
-                    "''"
-                );
-
-
-        const urlFiltro =
-
-            `https://graph.microsoft.com/v1.0/sites/` +
-
-            `${sitio.id}/lists` +
-
-            `?$select=id,name,displayName` +
-
-            `&$filter=displayName eq '${nombreSeguro}'`;
+        const resultado =
+            await graphFetch(url);
 
 
         console.log(
-            "Intentando búsqueda directa de PermisosTI:",
-            urlFiltro
+            "Respuesta directa de PermisosTI:",
+            resultado
         );
-
-
-        const resultadoFiltro =
-            await graphFetch(
-                urlFiltro
-            );
 
 
         if (
-
-            resultadoFiltro &&
-
-            Array.isArray(
-                resultadoFiltro.value
-            ) &&
-
-            resultadoFiltro.value.length
-
+            resultado &&
+            resultado.id
         ) {
 
             listaPermisos =
-                resultadoFiltro.value[0];
+                resultado;
 
 
             console.log(
-
-                "PermisosTI encontrada mediante filtro:",
-
+                "PermisosTI encontrada directamente:",
                 listaPermisos
-
             );
 
 
@@ -1724,95 +1605,46 @@
 
         }
 
-    }
 
-    catch (errorFiltro) {
-
-        console.warn(
-
-            "La búsqueda filtrada de PermisosTI no estuvo disponible:",
-
-            errorFiltro
-
+        throw new Error(
+            "Microsoft Graph no devolvió información válida de PermisosTI."
         );
 
     }
 
+    catch (error) {
 
-    /* =====================================================
-       ERROR DETALLADO
-    ===================================================== */
-
-    const nombresDisponibles =
-
-        listas.length
-
-            ? listas
-
-                .map(
-
-                    lista => {
-
-                        const nombre =
-                            lista.displayName ||
-                            lista.name ||
-                            "Sin nombre";
-
-
-                        return `${nombre}`;
-
-                    }
-
-                )
-
-                .join(", ")
-
-            : "ninguna";
-
-
-    const error =
-        new Error(
-
-            `No se encontró la lista "${PERMISOS_LIST_NAME}". ` +
-
-            `Listas disponibles: ${nombresDisponibles}`
-
+        console.error(
+            "Error accediendo directamente a PermisosTI:",
+            error
         );
 
 
-    error.codigo =
-        "LISTA_PERMISOS_NO_ENCONTRADA";
+        const nuevoError =
+            new Error(
+                "No se pudo acceder directamente a la lista PermisosTI mediante Microsoft Graph."
+            );
 
 
-    error.sitioId =
-        sitio.id;
+        nuevoError.codigo =
+            "PERMISOS_LIST_ID_NO_DISPONIBLE";
 
 
-    error.listasDisponibles =
-        listas;
+        nuevoError.listaId =
+            PERMISOS_LIST_ID;
 
 
-    console.error(
-
-        "PERMISOSTI NO DISPONIBLE EN GRAPH",
-
-        {
-
-            listaBuscada:
-                PERMISOS_LIST_NAME,
-
-            sitio:
-                sitio,
-
-            listas:
-                listas
-
-        }
-
-    );
+        nuevoError.sitioId =
+            sitio.id;
 
 
-    throw error;
+        nuevoError.errorOriginal =
+            error;
+
+
+        throw nuevoError;
+
+    }
 
 }
 

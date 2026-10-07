@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Permisos | ALFERZA LIVE OFFICE</title>
+
+
+    <!-- =========================================
+         SESIÓN
+    ========================================== -->
+
+    <script>
+
+        if (
+            sessionStorage.getItem("alferza_login") !== "true"
+        ) {
+
+            window.location.replace("login.html");
+
+        }
+
+    </script>
+
+
+    <!-- =========================================
+         CONEXIONES
+    ========================================== -->
+
+    <link rel="preconnect" href="https://graph.microsoft.com">
+
+    <link rel="preconnect" href="https://login.microsoftonline.com">
+
+
+    <!-- =========================================
+         CSS
+    ========================================== -->
+
+    <link
+        rel="stylesheet"
+        href="permisos.css?v=1"
+    >
+
+    <link
+        rel="stylesheet"
+        href="ticket-widget.css"
+    >
+
+
+    <!-- =========================================
+         MSAL
+    ========================================== -->
+
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js">
+    </script>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         LOADING
+    ========================================== -->
+
+    <div
+        id="loadingOverlay"
+        class="loading-overlay"
+    >
+
+        <div class="loading-content">
+
+            <div class="gear-spinner">
+                🔐
+            </div>
+
+            <p id="loadingMessage">
+                Verificando permisos...
+            </p>
+
+            <span class="loading-subtitle">
+                ALFERZA LIVE OFFICE
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         TOPBAR
+    ========================================== -->
+
+    <header class="topbar">
+
+        <div class="logo">
+
+            <h1>
+                ALFERZA LIVE OFFICE
+            </h1>
+
+            <span>
+                Monitoreo en tiempo real
+            </span>
+
+        </div>
+
+
+        <div class="live-status">
+
+            <span class="live-status-dot"></span>
+
+            <span>
+                EN VIVO
+            </span>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =========================================
+         CONTENEDOR
+    ========================================== -->
+
+    <div class="container">
+
+
+        <!-- =========================================
+             SIDEBAR
+        ========================================== -->
+
+        <aside class="sidebar">
+
+            <h2>
+                MENÚ
+            </h2>
+
+
+            <ul>
+
+
+                <li onclick="window.location.href='index.html'">
+                    🏢 Oficina
+                </li>
+
+
+                <li onclick="window.location.href='personal.html'">
+                    👥 Personal
+                </li>
+
+
+                <li onclick="window.location.href='reserva.html'">
+                    📝 Reservas
+                </li>
+
+
+                <li onclick="window.location.href='salas/salas.html'">
+                    📅 Salas
+                </li>
+
+
+                <li onclick="window.location.href='comunicados.html'">
+                    📢 Comunicados
+                </li>
+
+
+                <li onclick="window.location.href='seguridad.html'">
+                    🔐 Seguridad
+                </li>
+
+
+                <li onclick="window.location.href='infraestructura.html'">
+                    🏗️ Infraestructura
+                </li>
+
+
+                <li onclick="window.location.href='tickets.html'">
+                    🎫 Tickets
+                </li>
+
+
+                <li class="active">
+                    🔐 Permisos
+                </li>
+
+
+                <li onclick="window.location.href='configuracion.html'">
+                    ⚙️ Configuración
+                </li>
+
+
+            </ul>
+
+        </aside>
+
+
+
+        <!-- =========================================
+             CONTENIDO
+        ========================================== -->
+
+        <main class="content">
+
+
+            <!-- =========================================
+                 HEADER
+            ========================================== -->
+
+            <section class="page-header">
+
+
+                <div class="page-header-main">
+
+                    <span class="page-label">
+                        ADMINISTRACIÓN TI
+                    </span>
+
+
+                    <h1>
+                        Gestión de permisos
+                    </h1>
+
+
+                    <p>
+                        Administra el acceso de los usuarios
+                        a las diferentes ventanas de ALFERZA LIVE OFFICE.
+                    </p>
+
+                </div>
+
+
+
+                <div class="permission-status-box">
+
+
+                    <div class="permission-status-icon">
+                        🔐
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            GRUPO ACTUAL
+                        </span>
+
+                        <strong id="grupoUsuarioActual">
+                            Verificando...
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =========================================
+                 BUSCAR USUARIO
+            ========================================== -->
+
+            <section class="permission-section">
+
+
+                <div class="section-heading">
+
+
+                    <div class="section-title-group">
+
+                        <span class="section-kicker">
+                            USUARIO
+                        </span>
+
+
+                        <h2>
+                            Buscar usuario
+                        </h2>
+
+
+                        <p>
+                            Ingresa el correo corporativo
+                            para consultar o configurar sus permisos.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="search-user-wrapper">
+
+
+                    <div class="search-user-input-wrapper">
+
+                        <span class="search-user-icon">
+                            ✉️
+                        </span>
+
+
+                        <input
+                            type="email"
+                            id="correoUsuario"
+                            placeholder="usuario@alferza.pe"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="btnBuscarUsuario"
+                        class="permission-btn primary"
+                    >
+                        🔎 Buscar usuario
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="btnNuevoUsuario"
+                        class="permission-btn secondary"
+                    >
+                        ＋ Nuevo
+                    </button>
+
+
+                </div>
+
+
+                <div
+                    id="buscarMensaje"
+                    class="permission-message"
+                ></div>
+
+
+            </section>
+
+
+
+            <!-- =========================================
+                 USUARIO SELECCIONADO
+            ========================================== -->
+
+            <section
+                id="usuarioSection"
+                class="permission-section"
+                style="display:none;"
+            >
+
+
+                <div class="section-heading">
+
+
+                    <div class="section-title-group">
+
+                        <span class="section-kicker">
+                            CONFIGURACIÓN
+                        </span>
+
+
+                        <h2>
+                            Usuario seleccionado
+                        </h2>
+
+                    </div>
+
+
+                    <div
+                        id="usuarioGrupoBadge"
+                        class="group-badge normal"
+                    >
+                        NORMAL
+                    </div>
+
+
+                </div>
+
+
+
+                <div class="selected-user-card">
+
+
+                    <div class="selected-user-icon">
+                        👤
+                    </div>
+
+
+                    <div class="selected-user-data">
+
+
+                        <span>
+                            CORREO CORPORATIVO
+                        </span>
+
+
+                        <strong id="usuarioSeleccionadoCorreo">
+                            —
+                        </strong>
+
+
+                        <small id="usuarioSeleccionadoNombre">
+                            —
+                        </small>
+
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="btnConfigurarPermisos"
+                        class="permission-btn primary"
+                    >
+                        🔐 Configurar permisos
+                    </button>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =========================================
+                 USUARIOS CONFIGURADOS
+            ========================================== -->
+
+            <section class="permission-section">
+
+
+                <div class="section-heading">
+
+
+                    <div class="section-title-group">
+
+                        <span class="section-kicker">
+                            USUARIOS
+                        </span>
+
+
+                        <h2>
+                            Usuarios configurados
+                        </h2>
+
+
+                        <p>
+                            Lista de usuarios con permisos registrados.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="btnActualizarPermisos"
+                        class="permission-btn secondary"
+                    >
+                        ↻ Actualizar
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- =========================================
+                     CONTADORES
+                ========================================== -->
+
+                <div class="permission-summary">
+
+
+                    <div class="permission-stat">
+
+
+                        <div class="permission-stat-icon total">
+                            👥
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Total
+                            </span>
+
+                            <strong id="totalUsuarios">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="permission-stat">
+
+
+                        <div class="permission-stat-icon ti">
+                            🛡️
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                TI
+                            </span>
+
+                            <strong id="usuariosTI">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="permission-stat">
+
+
+                        <div class="permission-stat-icon normal">
+                            👤
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Normales
+                            </span>
+
+                            <strong id="usuariosNormales">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =========================================
+                     TABLA
+                ========================================== -->
+
+                <div class="permissions-table-container">
+
+
+                    <table class="permissions-table">
+
+
+                        <thead>
+
+
+                            <tr>
+
+                                <th>
+                                    USUARIO
+                                </th>
+
+                                <th>
+                                    GRUPO
+                                </th>
+
+                                <th>
+                                    ACCESO
+                                </th>
+
+                                <th>
+                                    ACCIÓN
+                                </th>
+
+                            </tr>
+
+
+                        </thead>
+
+
+                        <tbody id="usuariosTableBody">
+
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="table-loading"
+                                >
+
+                                    <div class="loading-row">
+
+                                        <div class="loading-spinner"></div>
+
+                                        <span>
+                                            Cargando usuarios...
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =========================================
+                 FOOTER
+            ========================================== -->
+
+            <footer class="page-footer">
+
+
+                <span>
+                    ALFERZA LIVE OFFICE
+                </span>
+
+
+                <span>
+                    Gestión de permisos TI
+                </span>
+
+
+                <span>
+                    © 2026 ALFERZA HOLDING
+                </span>
+
+
+            </footer>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- =========================================
+         MODAL DE PERMISOS
+    ========================================== -->
+
+    <div
+        id="permisosModal"
+        class="modal-overlay"
+        style="display:none;"
+    >
+
+
+        <div class="permisos-modal">
+
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <span class="modal-kicker">
+                        CONTROL DE ACCESO
+                    </span>
+
+
+                    <h3>
+                        Configurar permisos
+                    </h3>
+
+
+                    <p id="modalUsuarioCorreo">
+                        —
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="cerrarPermisosModal"
+                    class="modal-close"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+
+                <!-- =====================================
+                     GRUPO
+                ====================================== -->
+
+                <div class="modal-block">
+
+
+                    <span class="modal-section-title">
+                        GRUPO DE USUARIO
+                    </span>
+
+
+                    <div class="group-selector">
+
+
+                        <button
+                            type="button"
+                            class="group-option"
+                            data-group="TI"
+                            id="grupoTI"
+                        >
+
+                            <span class="group-option-icon">
+                                🛡️
+                            </span>
+
+
+                            <span class="group-option-text">
+
+                                <strong>
+                                    TI
+                                </strong>
+
+                                <small>
+                                    Acceso completo al sistema
+                                </small>
+
+                            </span>
+
+
+                        </button>
+
+
+
+                        <button
+                            type="button"
+                            class="group-option"
+                            data-group="Normal"
+                            id="grupoNormal"
+                        >
+
+                            <span class="group-option-icon">
+                                👤
+                            </span>
+
+
+                            <span class="group-option-text">
+
+                                <strong>
+                                    Normal
+                                </strong>
+
+                                <small>
+                                    Permisos personalizados
+                                </small>
+
+                            </span>
+
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =====================================
+                     MÓDULOS
+                ====================================== -->
+
+                <div class="modal-block">
+
+
+                    <div class="modal-modules-header">
+
+
+                        <div>
+
+                            <span class="modal-section-title">
+                                ACCESO A VENTANAS
+                            </span>
+
+
+                            <small>
+                                Define qué módulos puede utilizar el usuario.
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            id="btnTodosPermisos"
+                            class="all-permissions-btn"
+                        >
+                            ✓ Todo
+                        </button>
+
+
+                    </div>
+
+
+
+                    <div class="permissions-grid">
+
+
+                        <!-- OFICINA -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Oficina"
+                        >
+
+                            <div class="permission-module-icon">
+                                🏢
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Oficina
+                                </strong>
+
+                                <small>
+                                    Vista principal
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Oficina"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- PERSONAL -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Personal"
+                        >
+
+                            <div class="permission-module-icon">
+                                👥
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Personal
+                                </strong>
+
+                                <small>
+                                    Directorio de personal
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Personal"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- RESERVAS -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Reservas"
+                        >
+
+                            <div class="permission-module-icon">
+                                📝
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Reservas
+                                </strong>
+
+                                <small>
+                                    Reservas de oficina
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Reservas"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- SALAS -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Salas"
+                        >
+
+                            <div class="permission-module-icon">
+                                📅
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Salas
+                                </strong>
+
+                                <small>
+                                    Salas de reuniones
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Salas"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- COMUNICADOS -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Comunicados"
+                        >
+
+                            <div class="permission-module-icon">
+                                📢
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Comunicados
+                                </strong>
+
+                                <small>
+                                    Comunicaciones
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Comunicados"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- SEGURIDAD -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Seguridad"
+                        >
+
+                            <div class="permission-module-icon">
+                                🔐
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Seguridad
+                                </strong>
+
+                                <small>
+                                    Seguridad TI
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Seguridad"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- INFRAESTRUCTURA -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Infraestructura"
+                        >
+
+                            <div class="permission-module-icon">
+                                🏗️
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Infraestructura
+                                </strong>
+
+                                <small>
+                                    Centro de monitoreo TI
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Infraestructura"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- TICKETS -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Tickets"
+                        >
+
+                            <div class="permission-module-icon">
+                                🎫
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Tickets
+                                </strong>
+
+                                <small>
+                                    Mesa de ayuda TI
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Tickets"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+
+                        <!-- CONFIGURACIÓN -->
+
+                        <div
+                            class="permission-item"
+                            data-module="Configuracion"
+                        >
+
+                            <div class="permission-module-icon">
+                                ⚙️
+                            </div>
+
+
+                            <div class="permission-module-info">
+
+                                <strong>
+                                    Configuración
+                                </strong>
+
+                                <small>
+                                    Configuración general
+                                </small>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="permission-toggle"
+                                data-permission="Configuracion"
+                            >
+
+                                <span class="toggle-label">
+                                    NO
+                                </span>
+
+                            </button>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =====================================
+                     MENSAJE
+                ====================================== -->
+
+                <div
+                    id="modalPermisosMensaje"
+                    class="permission-message"
+                ></div>
+
+
+            </div>
+
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    type="button"
+                    id="cancelarPermisos"
+                    class="permission-btn secondary"
+                >
+                    Cancelar
+                </button>
+
+
+                <button
+                    type="button"
+                    id="guardarPermisos"
+                    class="permission-btn primary"
+                >
+                    💾 Guardar permisos
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         SCRIPTS
+    ========================================== -->
+
+    <script
+        src="permisos.js?v=1">
+    </script>
+
+
+    <script
+        src="ticket-widget.js">
+    </script>
+
+
+</body>
+
+</html>

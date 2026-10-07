@@ -357,9 +357,7 @@ async function iniciarPermisos() {
 
 
         const correoActual =
-            obtenerCorreoCuenta(
-                cuenta
-            );
+    obtenerCorreoCuentaActual();
 
 
         const registroActual =

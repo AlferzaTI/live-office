@@ -1532,124 +1532,188 @@
 
     async function obtenerListaPermisos() {
 
-        if (
-            listaPermisos
-        ) {
+    if (
+        listaPermisos
+    ) {
 
-            return listaPermisos;
+        return listaPermisos;
 
-        }
-
-
-        const sitio =
-            await obtenerSitioSharePoint();
+    }
 
 
-        if (
-            !sitio ||
-            !sitio.id
-        ) {
-
-            throw new Error(
-                "No se pudo obtener el ID del sitio SharePoint."
-            );
-
-        }
+    const sitio =
+        await obtenerSitioSharePoint();
 
 
-        console.log(
-            "Buscando lista:",
+    if (
+        !sitio ||
+        !sitio.id
+    ) {
+
+        throw new Error(
+            "No se pudo obtener el ID del sitio SharePoint."
+        );
+
+    }
+
+
+    console.log(
+        "Buscando lista:",
+        PERMISOS_LIST_NAME
+    );
+
+
+    /* =====================================================
+       MÉTODO 1
+       ENUMERAR LISTAS
+    ===================================================== */
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists` +
+        `?$select=id,name,displayName&$top=200`;
+
+
+    const resultado =
+        await graphFetch(
+            url
+        );
+
+
+    const listas =
+
+        resultado &&
+        Array.isArray(
+            resultado.value
+        )
+
+            ? resultado.value
+
+            : [];
+
+
+    console.log(
+        "Listas devueltas por Microsoft Graph:",
+        listas
+    );
+
+
+    /* =====================================================
+       BUSCAR PERMISOSTI
+    ===================================================== */
+
+    const objetivo =
+        normalizarTexto(
             PERMISOS_LIST_NAME
         );
 
 
-        /* =====================================================
-           MÉTODO 1
-           ENUMERAR LISTAS
-        ===================================================== */
+    listaPermisos =
+        listas.find(
 
-        const url =
+            lista => {
+
+                const displayName =
+                    normalizarTexto(
+                        lista.displayName
+                    );
+
+
+                const name =
+                    normalizarTexto(
+                        lista.name
+                    );
+
+
+                return (
+
+                    displayName ===
+                    objetivo
+
+                    ||
+
+                    name ===
+                    objetivo
+
+                );
+
+            }
+
+        );
+
+
+    if (listaPermisos) {
+
+        console.log(
+
+            "Lista PermisosTI encontrada:",
+
+            listaPermisos
+
+        );
+
+
+        return listaPermisos;
+
+    }
+
+
+    /* =====================================================
+       MÉTODO 2
+       BUSCAR MEDIANTE FILTER
+    ===================================================== */
+
+    try {
+
+        const nombreSeguro =
+            PERMISOS_LIST_NAME
+                .replace(
+                    /'/g,
+                    "''"
+                );
+
+
+        const urlFiltro =
 
             `https://graph.microsoft.com/v1.0/sites/` +
 
             `${sitio.id}/lists` +
 
-            `?$select=id,name,displayName,hidden&$top=200`;
+            `?$select=id,name,displayName` +
 
-
-        const resultado =
-            await graphFetch(
-                url
-            );
-
-
-        const listas =
-
-            resultado &&
-            Array.isArray(
-                resultado.value
-            )
-
-                ? resultado.value
-
-                : [];
+            `&$filter=displayName eq '${nombreSeguro}'`;
 
 
         console.log(
-            "Listas devueltas por Microsoft Graph:",
-            listas
+            "Intentando búsqueda directa de PermisosTI:",
+            urlFiltro
         );
 
 
-        /* =====================================================
-           BUSCAR PERMISOSTI
-        ===================================================== */
-
-        const objetivo =
-            normalizarTexto(
-                PERMISOS_LIST_NAME
+        const resultadoFiltro =
+            await graphFetch(
+                urlFiltro
             );
 
 
-        listaPermisos =
-            listas.find(
+        if (
 
-                lista => {
+            resultadoFiltro &&
 
-                    const displayName =
-                        normalizarTexto(
-                            lista.displayName
-                        );
+            Array.isArray(
+                resultadoFiltro.value
+            ) &&
 
+            resultadoFiltro.value.length
 
-                    const name =
-                        normalizarTexto(
-                            lista.name
-                        );
+        ) {
 
+            listaPermisos =
+                resultadoFiltro.value[0];
 
-                    return (
-
-                        displayName ===
-                        objetivo
-
-                        ||
-
-                        name ===
-                        objetivo
-
-                    );
-
-                }
-
-            );
-
-
-        if (listaPermisos) {
 
             console.log(
 
-                "Lista PermisosTI encontrada:",
+                "PermisosTI encontrada mediante filtro:",
 
                 listaPermisos
 
@@ -1660,179 +1724,97 @@
 
         }
 
+    }
 
-        /* =====================================================
-           MÉTODO 2
-           BUSCAR MEDIANTE FILTER
-        ===================================================== */
+    catch (errorFiltro) {
 
-        try {
+        console.warn(
 
-            const nombreSeguro =
-                PERMISOS_LIST_NAME
-                    .replace(
-                        /'/g,
-                        "''"
-                    );
+            "La búsqueda filtrada de PermisosTI no estuvo disponible:",
 
+            errorFiltro
 
-            const urlFiltro =
+        );
 
-                `https://graph.microsoft.com/v1.0/sites/` +
+    }
 
-                `${sitio.id}/lists` +
 
-                `?$select=id,name,displayName,hidden` +
+    /* =====================================================
+       ERROR DETALLADO
+    ===================================================== */
 
-                `&$filter=displayName eq '${nombreSeguro}'`;
+    const nombresDisponibles =
 
+        listas.length
 
-            console.log(
-                "Intentando búsqueda directa de PermisosTI:",
-                urlFiltro
-            );
+            ? listas
 
+                .map(
 
-            const resultadoFiltro =
-                await graphFetch(
-                    urlFiltro
-                );
+                    lista => {
 
+                        const nombre =
+                            lista.displayName ||
+                            lista.name ||
+                            "Sin nombre";
 
-            if (
 
-                resultadoFiltro &&
+                        return `${nombre}`;
 
-                Array.isArray(
-                    resultadoFiltro.value
-                ) &&
+                    }
 
-                resultadoFiltro.value.length
+                )
 
-            ) {
+                .join(", ")
 
-                listaPermisos =
-                    resultadoFiltro.value[0];
+            : "ninguna";
 
 
-                console.log(
+    const error =
+        new Error(
 
-                    "PermisosTI encontrada mediante filtro:",
+            `No se encontró la lista "${PERMISOS_LIST_NAME}". ` +
 
-                    listaPermisos
-
-                );
-
-
-                return listaPermisos;
-
-            }
-
-        }
-
-        catch (errorFiltro) {
-
-            console.warn(
-
-                "La búsqueda filtrada de PermisosTI no estuvo disponible:",
-
-                errorFiltro
-
-            );
-
-        }
-
-
-        /* =====================================================
-           ERROR DETALLADO
-        ===================================================== */
-
-        const nombresDisponibles =
-
-            listas.length
-
-                ? listas
-
-                    .map(
-
-                        lista => {
-
-                            const nombre =
-                                lista.displayName ||
-                                lista.name ||
-                                "Sin nombre";
-
-
-                            return (
-
-                                `${nombre}` +
-
-                                (
-
-                                    lista.hidden === true
-
-                                        ? " [oculta]"
-
-                                        : ""
-
-                                )
-
-                            );
-
-                        }
-
-                    )
-
-                    .join(", ")
-
-                : "ninguna";
-
-
-        const error =
-            new Error(
-
-                `No se encontró la lista "${PERMISOS_LIST_NAME}". ` +
-
-                `Listas disponibles: ${nombresDisponibles}`
-
-            );
-
-
-        error.codigo =
-            "LISTA_PERMISOS_NO_ENCONTRADA";
-
-
-        error.sitioId =
-            sitio.id;
-
-
-        error.listasDisponibles =
-            listas;
-
-
-        console.error(
-
-            "PERMISOSTI NO DISPONIBLE EN GRAPH",
-
-            {
-
-                listaBuscada:
-                    PERMISOS_LIST_NAME,
-
-                sitio:
-                    sitio,
-
-                listas:
-                    listas
-
-            }
+            `Listas disponibles: ${nombresDisponibles}`
 
         );
 
 
-        throw error;
+    error.codigo =
+        "LISTA_PERMISOS_NO_ENCONTRADA";
 
-    }
+
+    error.sitioId =
+        sitio.id;
+
+
+    error.listasDisponibles =
+        listas;
+
+
+    console.error(
+
+        "PERMISOSTI NO DISPONIBLE EN GRAPH",
+
+        {
+
+            listaBuscada:
+                PERMISOS_LIST_NAME,
+
+            sitio:
+                sitio,
+
+            listas:
+                listas
+
+        }
+
+    );
+
+
+    throw error;
+
+}
 
 
     /* =========================================================

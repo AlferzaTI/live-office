@@ -82,6 +82,10 @@
 
     /* =========================================================
        CONFIGURACIÓN MSAL
+
+       IMPORTANTE:
+       SIEMPRE USAR EL BLANK.HTML DE LA RAÍZ.
+       NO CALCULARLO RELATIVO A LA PÁGINA ACTUAL.
     ========================================================= */
 
     const MSAL_CONFIG = {
@@ -95,10 +99,8 @@
                 "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
 
             redirectUri:
-                new URL(
-                    "blank.html",
-                    window.location.href
-                ).href
+                window.location.origin +
+                "/live-office/blank.html"
         },
 
         cache: {
@@ -120,9 +122,7 @@
             SESION_KEY
         );
 
-    if (
-        sesion !== "true"
-    ) {
+    if (sesion !== "true") {
 
         guardarReturnUrl();
 
@@ -146,7 +146,8 @@
 
         if (
             paginaActual !== LOGIN_PATH &&
-            paginaActual !== ROOT_PATH
+            paginaActual !== ROOT_PATH &&
+            !paginaActual.endsWith("/login.html")
         ) {
 
             sessionStorage.setItem(
@@ -172,6 +173,7 @@
     } else {
 
         iniciarControlPermisos();
+
     }
 
     /* =========================================================
@@ -197,14 +199,6 @@
             window.location.pathname
         );
 
-        /*
-         * IMPORTANTE:
-         * Ya no aplicamos primero permisos antiguos.
-         *
-         * Primero obtenemos los permisos reales
-         * desde SharePoint.
-         */
-
         try {
 
             const permisos =
@@ -224,15 +218,18 @@
             );
 
             /*
-             * Guardamos también el correo.
-             * Esto evita reutilizar permisos de otro usuario.
+             * Guardamos los permisos junto con el correo.
+             * Así nunca reutilizamos permisos de otro usuario.
              */
 
             sessionStorage.setItem(
                 PERMISOS_KEY,
-                JSON.stringify(
-                    permisos
-                )
+                JSON.stringify({
+                    correo: permisos.correo || "",
+                    permisos: permisos.permisos || {},
+                    grupo: permisos.grupo || "Normal",
+                    nombre: permisos.nombre || ""
+                })
             );
 
             aplicarPermisosMenu(
@@ -263,20 +260,15 @@
             );
 
             /*
-             * Error de sesión.
+             * Si la sesión de Microsoft ya no existe,
+             * limpiamos completamente la sesión local.
              */
 
             if (
                 esErrorSesion(error)
             ) {
 
-                sessionStorage.removeItem(
-                    SESION_KEY
-                );
-
-                sessionStorage.removeItem(
-                    PERMISOS_KEY
-                );
+                limpiarSesion();
 
                 guardarReturnUrl();
 
@@ -288,11 +280,12 @@
             }
 
             /*
-             * Si Graph falla, NO otorgamos permisos
-             * antiguos automáticamente.
+             * IMPORTANTE:
              *
-             * Esto evita que un usuario conserve acceso
-             * cuando sus permisos fueron modificados.
+             * Si SharePoint falla NO reutilizamos permisos
+             * antiguos.
+             *
+             * Esto evita accesos incorrectos.
              */
 
             console.warn(
@@ -313,19 +306,22 @@
     }
 
     /* =========================================================
-       OBTENER MSAL
+       LIMPIAR SESIÓN
     ========================================================= */
 
-    function obtenerMSAL () {
+    function limpiarSesion () {
 
-        if (
-            typeof msal !== "undefined"
-        ) {
+        sessionStorage.removeItem(
+            SESION_KEY
+        );
 
-            return msal;
-        }
+        sessionStorage.removeItem(
+            PERMISOS_KEY
+        );
 
-        return null;
+        sessionStorage.removeItem(
+            RETURN_KEY
+        );
     }
 
     /* =========================================================
@@ -334,7 +330,7 @@
 
     async function esperarMSAL () {
 
-        const maxIntentos = 50;
+        const maxIntentos = 100;
 
         for (
             let intento = 0;
@@ -358,9 +354,15 @@
             );
         }
 
-        throw new Error(
-            "MSAL no está disponible."
-        );
+        const error =
+            new Error(
+                "MSAL no está disponible."
+            );
+
+        error.codigo =
+            "MSAL_NO_DISPONIBLE";
+
+        throw error;
     }
 
     /* =========================================================
@@ -401,14 +403,19 @@
         const cuentas =
             instancia.getAllAccounts();
 
+        console.log(
+            "CUENTAS MSAL ENCONTRADAS:",
+            cuentas
+        );
+
         if (
             !cuentas ||
-            !cuentas.length
+            cuentas.length === 0
         ) {
 
             const error =
                 new Error(
-                    "No existe una cuenta de Microsoft."
+                    "No existe una cuenta de Microsoft activa."
                 );
 
             error.codigo =
@@ -420,9 +427,12 @@
         let cuenta =
             instancia.getActiveAccount();
 
-        if (
-            !cuenta
-        ) {
+        /*
+         * Si no existe cuenta activa,
+         * usamos la primera cuenta almacenada.
+         */
+
+        if (!cuenta) {
 
             cuenta =
                 cuentas[0];
@@ -433,7 +443,7 @@
         }
 
         console.log(
-            "CUENTA MICROSOFT:",
+            "CUENTA MICROSOFT ACTIVA:",
             cuenta
         );
 
@@ -472,19 +482,42 @@
                         cuenta
                 });
 
+            if (
+                !resultado ||
+                !resultado.accessToken
+            ) {
+
+                const error =
+                    new Error(
+                        "Microsoft no devolvió un token válido."
+                    );
+
+                error.codigo =
+                    "TOKEN_INVALIDO";
+
+                throw error;
+            }
+
             return resultado.accessToken;
 
         }
         catch (error) {
 
             console.error(
-                "No se pudo obtener token silenciosamente:",
+                "ERROR acquireTokenSilent:",
                 error
             );
 
+            /*
+             * NO hacemos loginRedirect aquí.
+             *
+             * Si auth.js hiciera una redirección automática,
+             * podría provocar un bucle de login.
+             */
+
             const nuevoError =
                 new Error(
-                    "Se requiere autenticación adicional de Microsoft."
+                    "No se pudo obtener el token de Microsoft."
                 );
 
             nuevoError.codigo =
@@ -515,7 +548,6 @@
             await fetch(
                 url,
                 {
-
                     method:
                         "GET",
 
@@ -551,9 +583,7 @@
         const texto =
             await respuesta.text();
 
-        if (
-            !texto
-        ) {
+        if (!texto) {
 
             return null;
         }
@@ -583,21 +613,16 @@
         } =
             await obtenerCuentaActual();
 
-        /* -----------------------------------------------------
-           CORREO
-        ----------------------------------------------------- */
+        /* =====================================================
+           OBTENER CORREO
+        ===================================================== */
 
         const correo =
             normalizarCorreo(
-
                 cuenta.username ||
-
                 cuenta.idTokenClaims?.preferred_username ||
-
                 cuenta.idTokenClaims?.email ||
-
                 cuenta.idTokenClaims?.upn ||
-
                 ""
             );
 
@@ -619,18 +644,22 @@
             "========================================="
         );
 
-        if (
-            !correo
-        ) {
+        if (!correo) {
 
-            throw new Error(
-                "No se pudo determinar el correo del usuario."
-            );
+            const error =
+                new Error(
+                    "No se pudo determinar el correo del usuario."
+                );
+
+            error.codigo =
+                "CORREO_NO_DETECTADO";
+
+            throw error;
         }
 
-        /* -----------------------------------------------------
+        /* =====================================================
            VALIDAR DOMINIO
-        ----------------------------------------------------- */
+        ===================================================== */
 
         if (
             !correo.endsWith(
@@ -649,9 +678,9 @@
             throw error;
         }
 
-        /* -----------------------------------------------------
+        /* =====================================================
            CUENTA TI INICIAL
-        ----------------------------------------------------- */
+        ===================================================== */
 
         if (
             correo ===
@@ -671,6 +700,16 @@
         }
 
         /* =====================================================
+           TOKEN
+        ===================================================== */
+
+        const token =
+            await obtenerToken(
+                instancia,
+                cuenta
+            );
+
+        /* =====================================================
            SITIO SHAREPOINT
         ===================================================== */
 
@@ -681,10 +720,7 @@
         const sitio =
             await graphFetch(
                 sitioUrl,
-                tokenObtener(
-                    instancia,
-                    cuenta
-                )
+                token
             );
 
         console.log(
@@ -711,12 +747,6 @@
             `${sitio.id}/lists` +
             `?$select=id,name,displayName&$top=200`;
 
-        const token =
-            await tokenObtener(
-                instancia,
-                cuenta
-            );
-
         const listas =
             await graphFetch(
                 listasUrl,
@@ -735,7 +765,7 @@
 
         const lista =
             (
-                listas.value || []
+                listas?.value || []
             ).find(
                 item => {
 
@@ -750,21 +780,13 @@
                         );
 
                     return (
-
-                        displayName ===
-                        objetivoLista
-
-                        ||
-
-                        name ===
-                        objetivoLista
+                        displayName === objetivoLista ||
+                        name === objetivoLista
                     );
                 }
             );
 
-        if (
-            !lista
-        ) {
+        if (!lista) {
 
             throw new Error(
                 `No se encontró la lista "${PERMISOS_LIST_NAME}".`
@@ -774,6 +796,43 @@
         console.log(
             "LISTA PERMISOSTI ENCONTRADA:",
             lista
+        );
+
+        /* =====================================================
+           OBTENER COLUMNAS DE LA LISTA
+
+           Esto permite detectar correctamente los nombres
+           internos de SharePoint.
+        ===================================================== */
+
+        const columnasUrl =
+            `https://graph.microsoft.com/v1.0/sites/` +
+            `${sitio.id}/lists/${lista.id}/columns` +
+            `?$select=id,name,displayName`;
+
+        const columnas =
+            await graphFetch(
+                columnasUrl,
+                token
+            );
+
+        console.log(
+            "COLUMNAS PERMISOSTI:",
+            columnas
+        );
+
+        /* =====================================================
+           MAPEAR COLUMNAS
+        ===================================================== */
+
+        const mapaColumnas =
+            construirMapaColumnas(
+                columnas?.value || []
+            );
+
+        console.log(
+            "MAPA DE COLUMNAS:",
+            mapaColumnas
         );
 
         /* =====================================================
@@ -822,7 +881,7 @@
         );
 
         /* =====================================================
-           MOSTRAR REGISTROS PARA DEBUG
+           MOSTRAR REGISTROS
         ===================================================== */
 
         console.log(
@@ -839,6 +898,7 @@
                 console.log(
                     "ID:",
                     item.id,
+
                     "| UsuarioCorreo:",
                     obtenerCampoFlexible(
                         item,
@@ -847,9 +907,12 @@
                             "Usuario Correo",
                             "Correo",
                             "Email",
-                            "CorreoUsuario"
-                        ]
+                            "CorreoUsuario",
+                            "Title"
+                        ],
+                        mapaColumnas
                     ),
+
                     "| Nombre:",
                     obtenerCampoFlexible(
                         item,
@@ -857,7 +920,8 @@
                             "NombreUsuario",
                             "Nombre Usuario",
                             "Nombre"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 );
             }
@@ -871,13 +935,15 @@
            BUSCAR REGISTRO DEL USUARIO
         ===================================================== */
 
-        let registro = null;
+        let registro =
+            null;
 
         for (
             const item of items
         ) {
 
-            const valoresCorreo = [
+            const posiblesCorreos = [
+
                 obtenerCampoFlexible(
                     item,
                     [
@@ -886,19 +952,21 @@
                         "Correo",
                         "Email",
                         "CorreoUsuario"
-                    ]
+                    ],
+                    mapaColumnas
                 ),
 
                 obtenerCampoFlexible(
                     item,
                     [
                         "Title"
-                    ]
+                    ],
+                    mapaColumnas
                 )
             ];
 
             const correosNormalizados =
-                valoresCorreo
+                posiblesCorreos
                     .map(
                         valor =>
                             extraerCorreo(
@@ -910,9 +978,9 @@
                     );
 
             console.log(
-                "Comparando usuario:",
+                "Comparando:",
                 correo,
-                "contra:",
+                "CONTRA:",
                 correosNormalizados
             );
 
@@ -956,6 +1024,10 @@
             );
         }
 
+        /* =====================================================
+           REGISTRO ENCONTRADO
+        ===================================================== */
+
         console.log(
             "========================================="
         );
@@ -986,16 +1058,14 @@
 
         const grupo =
             String(
-
                 obtenerCampoFlexible(
                     registro,
                     [
                         "Grupo"
-                    ]
+                    ],
+                    mapaColumnas
                 ) ||
-
                 "Normal"
-
             ).trim();
 
         console.log(
@@ -1038,7 +1108,8 @@
                         registro,
                         [
                             "Oficina"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1048,7 +1119,8 @@
                         registro,
                         [
                             "Personal"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1058,7 +1130,8 @@
                         registro,
                         [
                             "Reservas"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1068,7 +1141,8 @@
                         registro,
                         [
                             "Salas"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1078,7 +1152,8 @@
                         registro,
                         [
                             "Comunicados"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1088,7 +1163,8 @@
                         registro,
                         [
                             "Seguridad"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1098,7 +1174,8 @@
                         registro,
                         [
                             "Infraestructura"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1108,7 +1185,8 @@
                         registro,
                         [
                             "Tickets"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
 
@@ -1119,9 +1197,15 @@
                         [
                             "Configuracion",
                             "Configuración"
-                        ]
+                        ],
+                        mapaColumnas
                     )
                 ),
+
+            /*
+             * Un usuario Normal nunca puede administrar
+             * permisos.
+             */
 
             Permisos:
                 false
@@ -1150,16 +1234,15 @@
 
             nombre:
                 cuenta.name ||
-
                 obtenerCampoFlexible(
                     registro,
                     [
                         "NombreUsuario",
                         "Nombre Usuario",
                         "Nombre"
-                    ]
+                    ],
+                    mapaColumnas
                 ) ||
-
                 correo,
 
             grupo:
@@ -1171,33 +1254,55 @@
     }
 
     /* =========================================================
-       TOKEN AUXILIAR
+       CONSTRUIR MAPA DE COLUMNAS SHAREPOINT
     ========================================================= */
 
-    async function tokenObtener (
-        instancia,
-        cuenta
+    function construirMapaColumnas (
+        columnas
     ) {
 
-        return obtenerToken(
-            instancia,
-            cuenta,
-            [
-                "User.Read",
-                "Sites.ReadWrite.All"
-            ]
+        const mapa = {};
+
+        columnas.forEach(
+            columna => {
+
+                const nombreInterno =
+                    columna.name || "";
+
+                const nombreVisible =
+                    columna.displayName || "";
+
+                if (
+                    nombreInterno
+                ) {
+
+                    mapa[
+                        normalizarTexto(
+                            nombreInterno
+                        )
+                    ] =
+                        nombreInterno;
+                }
+
+                if (
+                    nombreVisible
+                ) {
+
+                    mapa[
+                        normalizarTexto(
+                            nombreVisible
+                        )
+                    ] =
+                        nombreInterno;
+                }
+            }
         );
+
+        return mapa;
     }
 
     /* =========================================================
        EXTRAER CORREO
-       Permite manejar:
-
-       - texto normal
-       - objeto Persona de SharePoint
-       - objeto con email
-       - objeto con mail
-       - objeto con userPrincipalName
     ========================================================= */
 
     function extraerCorreo (
@@ -1255,7 +1360,6 @@
                 valor.text,
 
                 valor.displayName
-
             ];
 
             for (
@@ -1775,7 +1879,8 @@
 
     function obtenerCampo (
         registro,
-        nombre
+        nombre,
+        mapaColumnas = {}
     ) {
 
         if (
@@ -1792,6 +1897,34 @@
             normalizarTexto(
                 nombre
             );
+
+        /*
+         * Primero intentamos con el nombre interno
+         * resuelto mediante /columns.
+         */
+
+        const nombreInterno =
+            mapaColumnas[
+                objetivo
+            ];
+
+        if (
+            nombreInterno &&
+            Object.prototype.hasOwnProperty.call(
+                fields,
+                nombreInterno
+            )
+        ) {
+
+            return fields[
+                nombreInterno
+            ];
+        }
+
+        /*
+         * Después buscamos directamente entre
+         * las propiedades recibidas por Graph.
+         */
 
         const clave =
             Object.keys(
@@ -1822,7 +1955,8 @@
 
     function obtenerCampoFlexible (
         registro,
-        nombres
+        nombres,
+        mapaColumnas = {}
     ) {
 
         if (
@@ -1839,7 +1973,8 @@
             const valor =
                 obtenerCampo(
                     registro,
-                    nombre
+                    nombre,
+                    mapaColumnas
                 );
 
             if (
@@ -1915,18 +2050,14 @@
         return String(
             valor ?? ""
         )
-
             .normalize(
                 "NFD"
             )
-
             .replace(
                 /[\u0300-\u036f]/g,
                 ""
             )
-
             .toLowerCase()
-
             .replace(
                 /[^a-z0-9]/g,
                 ""
@@ -1959,17 +2090,14 @@
         return String(
             ruta ?? ""
         )
-
             .replace(
                 /^\/+/,
                 ""
             )
-
             .replace(
                 /\/+$/,
                 ""
             )
-
             .toLowerCase();
     }
 
@@ -1984,27 +2112,22 @@
         return String(
             valor ?? ""
         )
-
             .replace(
                 /&/g,
                 "&amp;"
             )
-
             .replace(
                 /</g,
                 "&lt;"
             )
-
             .replace(
                 />/g,
                 "&gt;"
             )
-
             .replace(
                 /"/g,
                 "&quot;"
             )
-
             .replace(
                 /'/g,
                 "&#039;"
@@ -2037,6 +2160,14 @@
         if (
             error.codigo ===
             "DOMINIO_NO_AUTORIZADO"
+        ) {
+
+            return true;
+        }
+
+        if (
+            error.codigo ===
+            "MSAL_NO_DISPONIBLE"
         ) {
 
             return true;
@@ -2101,7 +2232,10 @@
 
                     ""
                 );
-            }
+            },
+
+        limpiarSesion:
+            limpiarSesion
     };
 
 })();

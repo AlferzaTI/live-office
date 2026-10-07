@@ -508,10 +508,9 @@
             );
 
 
-        const lista =
-            await graphFetch(
-                `${GRAPH}/sites/${sitio.id}/lists/${encodeURIComponent(PERMISOS_LIST_NAME)}`
-            );
+        const lista = {
+            id: "9C313E91-5655-44BF-975C-4BEB9D56C2C1"
+        };
 
         if (!lista || !lista.id) {
 

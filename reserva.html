@@ -20,7 +20,7 @@
 </head>
 
 
-<body>
+<body data-modulo="Reservas">
 
 
     <!-- =====================================================
@@ -71,6 +71,7 @@
         <ul>
 
             <li
+                data-modulo-link="Oficina"
                 onclick="window.location.href='index.html'"
             >
                 🏢 Oficina
@@ -78,19 +79,24 @@
 
 
             <li
+                data-modulo-link="Personal"
                 onclick="window.location.href='personal.html'"
             >
                 👥 Personal
             </li>
 
 
-            <li class="active">
+            <li
+                class="active"
+                data-modulo-link="Reservas"
+            >
                 📝 Reservas
 
             </li>
 
 
             <li
+                data-modulo-link="Salas"
                 onclick="window.location.href='salas/salas.html'"
             >
                 📅 Salas
@@ -98,34 +104,46 @@
 
 
             <li
+                data-modulo-link="Comunicados"
                 onclick="window.location.href='comunicados.html'"
             >
                 📢 Comunicados
             </li>
 
-            <li onclick="window.location.href='seguridad.html'">
+            <li
+                data-modulo-link="Seguridad"
+                onclick="window.location.href='seguridad.html'"
+            >
                 🔐 Seguridad
             </li>
 
-            <li onclick="window.location.href='infraestructura.html'">
+            <li
+                data-modulo-link="Infraestructura"
+                onclick="window.location.href='infraestructura.html'"
+            >
                 🏗️ Infraestructura
             </li>
 
             <li
+                data-modulo-link="Tickets"
                 onclick="window.location.href='tickets.html'"
             >
                 🎫 Tickets
             </li>
 
             <li
+                data-modulo-link="Configuracion"
                 onclick="window.location.href='permisos.html'"
             >
                 🔐 Permisos
             </li>
 
 
-            <li onclick="window.location.href='configuracion.html'">
-                    ⚙️ Configuración
+            <li
+                data-modulo-link="Configuracion"
+                onclick="window.location.href='configuracion.html'"
+            >
+                ⚙️ Configuración
             </li>
 
         </ul>
@@ -311,7 +329,7 @@
 
 
     <!-- =====================================================
-         JAVASCRIPT
+         JAVASCRIPT DE LA PÁGINA
          ===================================================== -->
 
     <script>
@@ -384,10 +402,18 @@
 
     </script>
 
-    <script src="auth.js"></script>
-    <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
 
+    <!-- =====================================================
+         SCRIPTS (EL ORDEN IMPORTA)
+         1. MSAL primero
+         2. auth.js (control de sesión y permisos)
+         3. ticket-widget.js
+         ===================================================== -->
+
+    <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+    <script src="auth.js"></script>
     <script src="ticket-widget.js"></script>
+
 </body>
 
 </html>

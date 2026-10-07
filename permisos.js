@@ -258,6 +258,28 @@ document.addEventListener(
 
 
 /* =========================================================
+   MOSTRAR USUARIO EN NAVBAR
+========================================================= */
+
+function mostrarUsuarioNavbar() {
+
+    if (!userInfo || !cuentaActual) {
+
+        return;
+
+    }
+
+
+    userInfo.textContent =
+
+        cuentaActual.name ||
+
+        cuentaActual.username ||
+
+        "";
+
+}
+/* =========================================================
    INICIAR
 ========================================================= */
 
@@ -275,10 +297,6 @@ async function iniciarPermisos() {
 
 
     try {
-
-        /*
-         * Cuenta Microsoft ya existente.
-         */
 
         const cuenta =
             obtenerCuenta();
@@ -304,34 +322,93 @@ async function iniciarPermisos() {
             cuenta;
 
 
-        /*
-         * Mostrar usuario en navbar.
-         */
-
         mostrarUsuarioNavbar();
 
-
-        /*
-         * Cargar usuarios desde GRAPH.
-         */
 
         await cargarUsuariosGraph();
 
 
-        /*
-         * Cargar configuración guardada
-         * desde PermisosTI.
-         */
+        try {
 
-        await cargarPermisos();
+            await cargarPermisos();
+
+        }
+
+        catch (errorLista) {
+
+            console.error(
+
+                "No se pudo cargar PermisosTI:",
+
+                errorLista
+
+            );
 
 
-        /*
-         * Validar administrador TI.
-         */
+            mostrarMensaje(
 
-        await validarAdministradorTI();
+                "Los usuarios de Microsoft se cargaron correctamente, pero no se pudo acceder a PermisosTI.",
 
+                "error"
+
+            );
+
+        }
+
+
+        const correoActual =
+            obtenerCorreoCuenta(
+                cuenta
+            );
+
+
+        const registroActual =
+            buscarRegistroPorCorreo(
+                correoActual
+            );
+
+
+        const esTIInicial =
+            USUARIOS_TI_INICIALES
+                .map(
+                    normalizarCorreo
+                )
+                .includes(
+                    normalizarCorreo(
+                        correoActual
+                    )
+                );
+
+
+        const esTILista =
+            registroActual &&
+
+            normalizarTexto(
+                obtenerCampo(
+                    registroActual,
+                    "Grupo"
+                )
+            ) ===
+                normalizarTexto(
+                    GRUPO_TI
+                );
+
+
+        if (
+            !esTIInicial &&
+            !esTILista
+        ) {
+
+            mostrarAccesoDenegado();
+
+            return;
+
+        }
+
+
+        console.log(
+            "Usuario autorizado para Permisos."
+        );
 
     }
 

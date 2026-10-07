@@ -1,4 +1,3 @@
-
 (function () {
 
     /* =========================================================
@@ -8,7 +7,8 @@
 
 
     /* =========================================================
-       CONFIGURACIÓN SHAREPOINT
+       CONFIGURACIÓN MICROSOFT
+       AUTH.JS ES EL RESPONSABLE DE MSAL
     ========================================================= */
 
     const SHAREPOINT_HOST =
@@ -19,25 +19,12 @@
         "/personal/soporte1_alferza_pe";
 
 
-    const SHAREPOINT_BASE_URL =
-        `https://${SHAREPOINT_HOST}${SHAREPOINT_SITE_PATH}`;
-
-
     const PERMISOS_LIST_NAME =
         "PermisosTI";
 
 
-    const PERMISOS_LIST_ID =
-        "9C313E91-5655-44BF-975C-4BEB9D56C2C1";
-
-
-    const PERMISOS_LIST_URL =
-        `${SHAREPOINT_SITE_PATH}/Lists/${PERMISOS_LIST_NAME}`;
-
-
     /* =========================================================
        SCOPES GRAPH
-       SOLO PARA MICROSOFT GRAPH
     ========================================================= */
 
     const SCOPES_GRAPH = [
@@ -45,26 +32,6 @@
         "User.Read",
 
         "Sites.ReadWrite.All"
-
-    ];
-
-
-    /* =========================================================
-       SCOPES SHAREPOINT
-       IMPORTANTE:
-       ESTE TOKEN ES DIFERENTE AL TOKEN DE GRAPH
-    ========================================================= */
-
-    const SCOPES_SHAREPOINT_READ = [
-
-        `https://${SHAREPOINT_HOST}/AllSites.Read`
-
-    ];
-
-
-    const SCOPES_SHAREPOINT_WRITE = [
-
-        `https://${SHAREPOINT_HOST}/AllSites.Write`
 
     ];
 
@@ -83,7 +50,7 @@
 
     /* =========================================================
        USUARIOS TI INICIALES
-       SOLO CUENTA DE EMERGENCIA / ADMINISTRACIÓN INICIAL
+       SOLO CUENTAS DE EMERGENCIA / ADMINISTRACIÓN INICIAL
     ========================================================= */
 
     const USUARIOS_TI_INICIALES = [
@@ -125,24 +92,17 @@
     ========================================================= */
 
     if (
-
         !window.alferzaAuth ||
-
         !window.alferzaMsal
-
     ) {
 
         mostrarErrorInicial(
-
             "No se pudo inicializar la autenticación de Microsoft."
-
         );
 
 
         console.error(
-
             "ALFERZA LIVE OFFICE: auth.js debe cargarse antes que permisos.js."
-
         );
 
 
@@ -153,7 +113,7 @@
 
     /* =========================================================
        MSAL
-       USA LA MISMA INSTANCIA DE AUTH.JS
+       SE UTILIZA LA INSTANCIA CREADA POR AUTH.JS
     ========================================================= */
 
     const msalInstance =
@@ -165,6 +125,14 @@
     ========================================================= */
 
     let cuentaActual =
+        null;
+
+
+    let sitioSharePoint =
+        null;
+
+
+    let listaPermisos =
         null;
 
 
@@ -181,10 +149,6 @@
 
 
     let mapaCampos =
-        null;
-
-
-    let tipoEntidadLista =
         null;
 
 
@@ -257,11 +221,8 @@
     ========================================================= */
 
     document.addEventListener(
-
         "DOMContentLoaded",
-
         iniciarPermisos
-
     );
 
 
@@ -272,11 +233,8 @@
     function mostrarUsuarioNavbar() {
 
         if (
-
             !userInfo ||
-
             !cuentaActual
-
         ) {
 
             return;
@@ -302,9 +260,7 @@
     async function iniciarPermisos() {
 
         console.log(
-
             "Iniciando módulo Permisos..."
-
         );
 
 
@@ -317,16 +273,13 @@
         try {
 
             /* =================================================
-               ESPERAR AUTH.JS
+               ESPERAR AUTENTICACIÓN DE AUTH.JS
             ================================================= */
 
             if (
-
                 window.alferzaAuth &&
-
                 typeof window.alferzaAuth.inicializar ===
                     "function"
-
             ) {
 
                 await window.alferzaAuth.inicializar();
@@ -366,11 +319,8 @@
 
 
             console.log(
-
                 "Cuenta autenticada:",
-
                 cuentaActual
-
             );
 
 
@@ -383,11 +333,8 @@
 
 
             console.log(
-
                 "Correo actual:",
-
                 correoActual
-
             );
 
 
@@ -402,32 +349,27 @@
                         normalizarCorreo
                     )
                     .includes(
-
                         normalizarCorreo(
                             correoActual
                         )
-
                     );
 
 
             console.log(
-
                 "¿Es TI inicial?:",
-
                 esTIInicial
-
             );
 
 
             /* =================================================
-               CARGAR USUARIOS DESDE GRAPH
+               CARGAR USUARIOS
             ================================================= */
 
             await cargarUsuariosGraph();
 
 
             /* =================================================
-               CARGAR PERMISOS DESDE SHAREPOINT REST
+               CARGAR PERMISOS
             ================================================= */
 
             try {
@@ -448,7 +390,11 @@
 
 
                 /*
-                 * El administrador inicial puede continuar.
+                 * El administrador inicial puede continuar
+                 * aunque la lista tenga un problema.
+                 *
+                 * Para cualquier otro usuario NO concedemos
+                 * permisos si no podemos consultar PermisosTI.
                  */
 
                 if (esTIInicial) {
@@ -481,9 +427,7 @@
             if (esTIInicial) {
 
                 console.log(
-
                     "Usuario autorizado como TI inicial."
-
                 );
 
 
@@ -498,18 +442,13 @@
 
             const registroActual =
                 buscarRegistroPorCorreo(
-
                     correoActual
-
                 );
 
 
             console.log(
-
                 "Registro PermisosTI del usuario actual:",
-
                 registroActual
-
             );
 
 
@@ -524,11 +463,8 @@
                     ? normalizarTexto(
 
                         obtenerCampo(
-
                             registroActual,
-
                             "Grupo"
-
                         )
 
                     )
@@ -539,29 +475,20 @@
             const esTILista =
 
                 grupoActual ===
-
                 normalizarTexto(
-
                     GRUPO_TI
-
                 );
 
 
             console.log(
-
                 "Grupo del usuario actual:",
-
                 grupoActual
-
             );
 
 
             console.log(
-
                 "¿Autorizado por PermisosTI?:",
-
                 esTILista
-
             );
 
 
@@ -584,9 +511,7 @@
             ================================================= */
 
             console.log(
-
                 "Usuario autorizado para administrar Permisos."
-
             );
 
         }
@@ -623,7 +548,10 @@
 
     function configurarEventos() {
 
-        if (btnBuscarUsuario) {
+
+        if (
+            btnBuscarUsuario
+        ) {
 
             btnBuscarUsuario.addEventListener(
 
@@ -636,7 +564,9 @@
         }
 
 
-        if (correoUsuario) {
+        if (
+            correoUsuario
+        ) {
 
             correoUsuario.addEventListener(
 
@@ -645,10 +575,8 @@
                 function (event) {
 
                     if (
-
                         event.key ===
                         "Enter"
-
                     ) {
 
                         event.preventDefault();
@@ -664,7 +592,9 @@
         }
 
 
-        if (selectorUsuario) {
+        if (
+            selectorUsuario
+        ) {
 
             selectorUsuario.addEventListener(
 
@@ -683,7 +613,9 @@
         }
 
 
-        if (grupoUsuario) {
+        if (
+            grupoUsuario
+        ) {
 
             grupoUsuario.addEventListener(
 
@@ -696,7 +628,9 @@
         }
 
 
-        if (btnGuardarPermisos) {
+        if (
+            btnGuardarPermisos
+        ) {
 
             btnGuardarPermisos.addEventListener(
 
@@ -733,11 +667,8 @@
 
 
         if (
-
             menuToggle &&
-
             sidebar
-
         ) {
 
             menuToggle.addEventListener(
@@ -765,13 +696,14 @@
 
     function obtenerCuenta() {
 
+        /*
+         * Primero utilizamos auth.js.
+         */
+
         if (
-
             window.alferzaAuth &&
-
             typeof window.alferzaAuth.obtenerCuenta ===
                 "function"
-
         ) {
 
             const cuentaAuth =
@@ -791,29 +723,26 @@
         }
 
 
+        /*
+         * Respaldo usando la instancia compartida.
+         */
+
         const cuentas =
             msalInstance.getAllAccounts();
 
 
         if (
-
             cuentas &&
-
             cuentas.length > 0
-
         ) {
 
             cuentaActual =
-
                 msalInstance.getActiveAccount() ||
-
                 cuentas[0];
 
 
             msalInstance.setActiveAccount(
-
                 cuentaActual
-
             );
 
 
@@ -828,29 +757,34 @@
 
 
     /* =========================================================
-       TOKEN GRAPH
+       TOKEN
+       UTILIZA AUTH.JS
     ========================================================= */
 
-    async function obtenerTokenGraph() {
+    async function obtenerToken() {
+
+        /*
+         * Utilizamos el mecanismo centralizado
+         * de auth.js.
+         */
 
         if (
-
             window.alferzaAuth &&
-
             typeof window.alferzaAuth.obtenerToken ===
                 "function"
-
         ) {
 
             return await window.alferzaAuth.obtenerToken(
-
                 SCOPES_GRAPH
-
             );
 
         }
 
 
+        /*
+         * Respaldo.
+         */
+
         const cuenta =
             obtenerCuenta();
 
@@ -859,9 +793,7 @@
 
             const error =
                 new Error(
-
                     "No existe una sesión de Microsoft."
-
                 );
 
 
@@ -872,106 +804,20 @@
             throw error;
 
         }
-
-
-        const resultado =
-
-            await msalInstance.acquireTokenSilent({
-
-                scopes:
-                    SCOPES_GRAPH,
-
-                account:
-                    cuenta
-
-            });
-
-
-        return resultado.accessToken;
-
-    }
-
-
-    /* =========================================================
-       TOKEN SHAREPOINT
-       USA LA MISMA SESIÓN MSAL DE AUTH.JS
-    ========================================================= */
-
-    async function obtenerTokenSharePoint(
-        escritura = false
-    ) {
-
-        const cuenta =
-            obtenerCuenta();
-
-
-        if (!cuenta) {
-
-            const error =
-                new Error(
-
-                    "No existe una sesión de Microsoft."
-
-                );
-
-
-            error.codigo =
-                "SIN_SESION";
-
-
-            throw error;
-
-        }
-
-
-        const scopes =
-
-            escritura
-
-                ? SCOPES_SHAREPOINT_WRITE
-
-                : SCOPES_SHAREPOINT_READ;
-
-
-        console.log(
-
-            "Solicitando token SharePoint:",
-
-            scopes
-
-        );
 
 
         try {
 
             const resultado =
-
                 await msalInstance.acquireTokenSilent({
 
                     scopes:
-                        scopes,
+                        SCOPES_GRAPH,
 
                     account:
                         cuenta
 
                 });
-
-
-            if (
-
-                !resultado ||
-
-                !resultado.accessToken
-
-            ) {
-
-                throw new Error(
-
-                    "Microsoft no devolvió un token de SharePoint."
-
-                );
-
-            }
 
 
             return resultado.accessToken;
@@ -982,7 +828,7 @@
 
             console.error(
 
-                "Error obteniendo token SharePoint:",
+                "No se pudo obtener el token silenciosamente:",
 
                 error
 
@@ -992,21 +838,13 @@
             const nuevoError =
                 new Error(
 
-                    "No se pudo obtener el token de SharePoint. " +
-
-                    "Verifica que la aplicación tenga permisos " +
-
-                    "SharePoint AllSites.Read/AllSites.Write."
+                    "No se pudo obtener el token de Microsoft."
 
                 );
 
 
             nuevoError.codigo =
-                "SHAREPOINT_TOKEN_ERROR";
-
-
-            nuevoError.errorOriginal =
-                error;
+                "REQUIERE_INTERACCION";
 
 
             throw nuevoError;
@@ -1021,15 +859,12 @@
     ========================================================= */
 
     async function graphFetch(
-
         url,
-
         opciones = {}
-
     ) {
 
         const token =
-            await obtenerTokenGraph();
+            await obtenerToken();
 
 
         const headers = {
@@ -1046,7 +881,6 @@
 
 
         const respuesta =
-
             await fetch(
 
                 url,
@@ -1078,10 +912,8 @@
 
 
         if (
-
             respuesta.status ===
             204
-
         ) {
 
             return null;
@@ -1091,162 +923,6 @@
 
         const texto =
             await respuesta.text();
-
-
-        if (!texto) {
-
-            return null;
-
-        }
-
-
-        try {
-
-            return JSON.parse(
-                texto
-            );
-
-        }
-
-        catch {
-
-            return texto;
-
-        }
-
-    }
-
-
-    /* =========================================================
-       SHAREPOINT REST FETCH
-    ========================================================= */
-
-    async function sharePointFetch(
-
-        url,
-
-        opciones = {},
-
-        escritura = false
-
-    ) {
-
-        const token =
-
-            await obtenerTokenSharePoint(
-
-                escritura
-
-            );
-
-
-        const headers = {
-
-            Authorization:
-                `Bearer ${token}`,
-
-            Accept:
-                "application/json;odata=nometadata",
-
-            "Content-Type":
-                "application/json;odata=nometadata",
-
-            ...(opciones.headers || {})
-
-        };
-
-
-        const respuesta =
-
-            await fetch(
-
-                url,
-
-                {
-
-                    ...opciones,
-
-                    headers
-
-                }
-
-            );
-
-
-        const texto =
-            await respuesta.text();
-
-
-        if (!respuesta.ok) {
-
-            console.error(
-
-                "SharePoint REST error:",
-
-                {
-
-                    status:
-                        respuesta.status,
-
-                    url:
-                        url,
-
-                    response:
-                        texto
-
-                }
-
-            );
-
-
-            let detalle =
-                texto;
-
-
-            try {
-
-                const json =
-                    JSON.parse(
-                        texto
-                    );
-
-
-                detalle =
-
-                    json.error?.message?.value ||
-
-                    json.error?.message ||
-
-                    texto;
-
-            }
-
-            catch {
-
-                // La respuesta no era JSON.
-
-            }
-
-
-            const error =
-                new Error(
-
-                    `SharePoint ${respuesta.status}: ${detalle}`
-
-                );
-
-
-            error.status =
-                respuesta.status;
-
-
-            error.response =
-                texto;
-
-
-            throw error;
-
-        }
 
 
         if (!texto) {
@@ -1279,7 +955,9 @@
 
     async function cargarUsuariosGraph() {
 
-        if (selectorUsuario) {
+        if (
+            selectorUsuario
+        ) {
 
             selectorUsuario.innerHTML =
 
@@ -1314,41 +992,34 @@
 
 
             if (
-
                 resultado &&
-
                 Array.isArray(
                     resultado.value
                 )
-
             ) {
 
                 usuarios.push(
-
                     ...resultado.value
-
                 );
 
             }
 
 
             url =
-
                 resultado[
-
                     "@odata.nextLink"
-
                 ] ||
-
                 null;
 
         }
 
 
+        /*
+         * Solo usuarios ALFERZA.
+         */
+
         usuariosGraph =
-
             usuarios
-
                 .filter(
 
                     usuario => {
@@ -1363,43 +1034,32 @@
 
 
                         return normalizarCorreo(
-
                             correo
-
                         ).endsWith(
-
                             "@alferza.pe"
-
                         );
 
                     }
 
                 )
-
                 .sort(
 
                     (a, b) => {
 
                         const nombreA =
-
                             String(
-
                                 a.displayName ||
-
                                 ""
-
-                            ).toLowerCase();
+                            )
+                                .toLowerCase();
 
 
                         const nombreB =
-
                             String(
-
                                 b.displayName ||
-
                                 ""
-
-                            ).toLowerCase();
+                            )
+                                .toLowerCase();
 
 
                         return nombreA.localeCompare(
@@ -1416,9 +1076,7 @@
 
 
         renderizarSelectorUsuarios(
-
             usuariosGraph
-
         );
 
 
@@ -1438,12 +1096,12 @@
     ========================================================= */
 
     function renderizarSelectorUsuarios(
-
         usuarios
-
     ) {
 
-        if (!selectorUsuario) {
+        if (
+            !selectorUsuario
+        ) {
 
             return;
 
@@ -1470,9 +1128,7 @@
 
 
         selectorUsuario.appendChild(
-
             opcionInicial
-
         );
 
 
@@ -1490,7 +1146,6 @@
 
 
                 const opcion =
-
                     document.createElement(
                         "option"
                     );
@@ -1506,9 +1161,7 @@
 
 
                 selectorUsuario.appendChild(
-
                     opcion
-
                 );
 
             }
@@ -1516,10 +1169,11 @@
         );
 
 
-        if (!usuarios.length) {
+        if (
+            !usuarios.length
+        ) {
 
             opcionInicial.textContent =
-
                 "No se encontraron usuarios.";
 
         }
@@ -1534,13 +1188,10 @@
     async function buscarUsuario() {
 
         const texto =
-
             normalizarTexto(
 
                 correoUsuario
-
                     ? correoUsuario.value
-
                     : ""
 
             );
@@ -1549,9 +1200,7 @@
         if (!texto) {
 
             renderizarSelectorUsuarios(
-
                 usuariosGraph
-
             );
 
 
@@ -1561,7 +1210,6 @@
 
 
         const resultados =
-
             usuariosGraph.filter(
 
                 usuario => {
@@ -1569,9 +1217,7 @@
                     const nombre =
 
                         normalizarTexto(
-
                             usuario.displayName
-
                         );
 
 
@@ -1606,37 +1252,28 @@
 
 
         renderizarSelectorUsuarios(
-
             resultados
-
         );
 
 
         if (
-
             resultados.length ===
             1
-
         ) {
 
             selectorUsuario.value =
-
                 resultados[0].id;
 
 
             seleccionarUsuario(
-
                 resultados[0].id
-
             );
 
         }
 
         else if (
-
             resultados.length ===
             0
-
         ) {
 
             mostrarMensaje(
@@ -1669,9 +1306,7 @@
     ========================================================= */
 
     function seleccionarUsuario(
-
         usuarioId
-
     ) {
 
         if (!usuarioId) {
@@ -1689,7 +1324,6 @@
 
 
         const usuario =
-
             usuariosGraph.find(
 
                 item =>
@@ -1779,8 +1413,11 @@
         }
 
 
-        const registro =
+        /*
+         * Buscar configuración guardada.
+         */
 
+        const registro =
             buscarRegistroPorCorreo(
 
                 usuarioSeleccionado.correo
@@ -1791,9 +1428,7 @@
         if (registro) {
 
             cargarRegistroEnFormulario(
-
                 registro
-
             );
 
         }
@@ -1816,7 +1451,9 @@
 
     function mostrarPanel() {
 
-        if (panelPermisos) {
+        if (
+            panelPermisos
+        ) {
 
             panelPermisos.style.display =
                 "block";
@@ -1832,7 +1469,9 @@
 
     function ocultarPanel() {
 
-        if (panelPermisos) {
+        if (
+            panelPermisos
+        ) {
 
             panelPermisos.style.display =
                 "none";
@@ -1843,332 +1482,501 @@
 
 
     /* =========================================================
-       OBTENER LISTA MEDIANTE SHAREPOINT REST
+       OBTENER SITIO SHAREPOINT
     ========================================================= */
 
-    async function obtenerListaSharePoint() {
+    async function obtenerSitioSharePoint() {
+
+        if (
+            sitioSharePoint
+        ) {
+
+            return sitioSharePoint;
+
+        }
+
 
         const url =
 
-            `${SHAREPOINT_BASE_URL}` +
+            `https://graph.microsoft.com/v1.0/sites/` +
 
-            `/_api/web/GetList(@listUrl)` +
-
-            `?$select=Id,Title,ListItemEntityTypeFullName` +
-
-            `&@listUrl='${encodeURIComponent(
-
-                PERMISOS_LIST_URL
-
-            )}'`;
+            `${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`;
 
 
         console.log(
-
-            "Obteniendo información de PermisosTI mediante SharePoint REST:",
-
+            "Obteniendo sitio SharePoint:",
             url
-
         );
 
 
-        const resultado =
-
-            await sharePointFetch(
-
+        sitioSharePoint =
+            await graphFetch(
                 url
-
             );
 
 
         console.log(
-
-            "Información PermisosTI:",
-
-            resultado
-
+            "Sitio SharePoint encontrado:",
+            sitioSharePoint
         );
 
 
-        return resultado;
+        return sitioSharePoint;
 
     }
 
 
     /* =========================================================
-       OBTENER ITEMS DE PERMISOSTI
-       RenderListDataAsStream
+       OBTENER LISTA PERMISOS
     ========================================================= */
 
-    async function obtenerTodosLosItems() {
+    async function obtenerListaPermisos() {
 
-        /*
-         * IMPORTANTE:
-         * No utilizamos Graph.
-         *
-         * SharePoint está usando exactamente este endpoint
-         * para cargar la lista PermisosTI.
-         */
+    if (listaPermisos) {
+        return listaPermisos;
+    }
 
-        const url =
+    const sitio = await obtenerSitioSharePoint();
 
-            `${SHAREPOINT_BASE_URL}` +
-
-            `/_api/web/GetList(@listUrl)/RenderListDataAsStream` +
-
-            `?@listUrl='${encodeURIComponent(
-
-                PERMISOS_LIST_URL
-
-            )}'`;
-
-
-        console.log(
-
-            "Consultando PermisosTI mediante RenderListDataAsStream:",
-
-            url
-
+    if (!sitio || !sitio.id) {
+        throw new Error(
+            "No se pudo obtener el ID del sitio SharePoint."
         );
+    }
+
+    /* =====================================================
+       ID REAL DE PERMISOSTI OBTENIDO DESDE SHAREPOINT
+    ===================================================== */
+
+    const PERMISOS_LIST_ID =
+        "9C313E91-5655-44BF-975C-4BEB9D56C2C1";
 
 
-        /*
-         * CAML SIN FILTRO DE FECHA.
-         *
-         * Así obtenemos los 4 registros de la lista.
-         */
-
-        const viewXml =
-
-            `<View Scope="RecursiveAll">
-
-                <Query>
-
-                    <OrderBy>
-
-                        <FieldRef Name="ID" Ascending="TRUE" />
-
-                    </OrderBy>
-
-                </Query>
-
-                <ViewFields>
-
-                    <FieldRef Name="ID" />
-
-                    <FieldRef Name="Title" />
-
-                    <FieldRef Name="UsuarioCorreo" />
-
-                    <FieldRef Name="NombreUsuario" />
-
-                    <FieldRef Name="Grupo" />
-
-                    <FieldRef Name="Oficina" />
-
-                    <FieldRef Name="Personal" />
-
-                    <FieldRef Name="Reservas" />
-
-                    <FieldRef Name="Salas" />
-
-                    <FieldRef Name="Comunicados" />
-
-                    <FieldRef Name="Seguridad" />
-
-                    <FieldRef Name="Infraestructura" />
-
-                    <FieldRef Name="Tickets" />
-
-                    <FieldRef Name="Configuracion" />
-
-                </ViewFields>
-
-                <RowLimit Paged="TRUE">
-
-                    100
-
-                </RowLimit>
-
-            </View>`;
+    console.log(
+        "Buscando PermisosTI mediante ID:",
+        PERMISOS_LIST_ID
+    );
 
 
-        const body = {
+    /* =====================================================
+       CONSULTA DIRECTA A MICROSOFT GRAPH
+    ===================================================== */
 
-            parameters: {
-
-                __metadata: {
-
-                    type:
-                        "SP.RenderListDataParameters"
-
-                },
-
-                AddRequiredFields:
-                    true,
-
-                AllowMultipleValueFilterForTaxonomyFields:
-                    true,
-
-                FilterOutChannelFoldersInDefaultDocLib:
-                    true,
-
-                RequireFolderColoringFields:
-                    true,
-
-                DatesInUtc:
-                    true,
-
-                RenderOptions:
-                    1183783,
-
-                ViewXml:
-                    viewXml
-
-            }
-
-        };
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/` +
+        `${sitio.id}/lists/${PERMISOS_LIST_ID}` +
+        `?$select=id,name,displayName`;
 
 
-        console.log(
+    console.log(
+        "URL directa de PermisosTI:",
+        url
+    );
 
-            "Body RenderListDataAsStream:",
 
-            body
-
-        );
-
+    try {
 
         const resultado =
-
-            await sharePointFetch(
-
-                url,
-
-                {
-
-                    method:
-                        "POST",
-
-                    body:
-                        JSON.stringify(
-                            body
-                        )
-
-                },
-
-                false
-
-            );
+            await graphFetch(url);
 
 
         console.log(
-
-            "Respuesta PermisosTI:",
-
+            "Respuesta directa de PermisosTI:",
             resultado
-
         );
 
 
         if (
-
-            !resultado
-
+            resultado &&
+            resultado.id
         ) {
 
+            listaPermisos =
+                resultado;
+
+
+            console.log(
+                "PermisosTI encontrada directamente:",
+                listaPermisos
+            );
+
+
+            return listaPermisos;
+
+        }
+
+
+        throw new Error(
+            "Microsoft Graph no devolvió información válida de PermisosTI."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error accediendo directamente a PermisosTI:",
+            error
+        );
+
+
+        const nuevoError =
+            new Error(
+                "No se pudo acceder directamente a la lista PermisosTI mediante Microsoft Graph."
+            );
+
+
+        nuevoError.codigo =
+            "PERMISOS_LIST_ID_NO_DISPONIBLE";
+
+
+        nuevoError.listaId =
+            PERMISOS_LIST_ID;
+
+
+        nuevoError.sitioId =
+            sitio.id;
+
+
+        nuevoError.errorOriginal =
+            error;
+
+
+        throw nuevoError;
+
+    }
+
+}
+
+
+    /* =========================================================
+       OBTENER COLUMNAS
+    ========================================================= */
+
+    async function obtenerColumnasPermisos() {
+
+        const sitio =
+            await obtenerSitioSharePoint();
+
+
+        const lista =
+            await obtenerListaPermisos();
+
+
+        const url =
+
+            `https://graph.microsoft.com/v1.0/sites/` +
+
+            `${sitio.id}/lists/${lista.id}/columns` +
+
+            `?$select=name,displayName,hidden,readOnly&$top=200`;
+
+
+        const resultado =
+            await graphFetch(
+                url
+            );
+
+
+        return resultado.value || [];
+
+    }
+
+
+    /* =========================================================
+       OBTENER MAPA DE CAMPOS
+    ========================================================= */
+
+    async function obtenerMapaCampos() {
+
+        if (
+            mapaCampos
+        ) {
+
+            return mapaCampos;
+
+        }
+
+
+        const columnas =
+            await obtenerColumnasPermisos();
+
+
+        mapaCampos =
+            {};
+
+
+        /*
+         * COLUMNAS GENERALES
+         */
+
+        mapaCampos.Title =
+            buscarColumna(
+
+                columnas,
+
+                [
+
+                    "Title",
+
+                    "Título"
+
+                ]
+
+            );
+
+
+        mapaCampos.UsuarioCorreo =
+            buscarColumna(
+
+                columnas,
+
+                [
+
+                    "UsuarioCorreo"
+
+                ]
+
+            );
+
+
+        mapaCampos.NombreUsuario =
+            buscarColumna(
+
+                columnas,
+
+                [
+
+                    "NombreUsuario"
+
+                ]
+
+            );
+
+
+        mapaCampos.Grupo =
+            buscarColumna(
+
+                columnas,
+
+                [
+
+                    "Grupo"
+
+                ]
+
+            );
+
+
+        if (!mapaCampos.Title) {
+
             throw new Error(
-
-                "SharePoint no devolvió información de PermisosTI."
-
+                "No se encontró la columna Title/Título."
             );
 
         }
 
 
-        const filas =
+        if (!mapaCampos.UsuarioCorreo) {
 
-            resultado.ListData &&
+            throw new Error(
+                "No se encontró la columna UsuarioCorreo."
+            );
 
-            Array.isArray(
-                resultado.ListData.Row
-            )
-
-                ? resultado.ListData.Row
-
-                : [];
+        }
 
 
-        console.log(
+        if (!mapaCampos.NombreUsuario) {
 
-            "Filas encontradas en PermisosTI:",
+            throw new Error(
+                "No se encontró la columna NombreUsuario."
+            );
 
-            filas.length
-
-        );
+        }
 
 
-        console.log(
+        if (!mapaCampos.Grupo) {
 
-            "Registros PermisosTI:",
+            throw new Error(
+                "No se encontró la columna Grupo."
+            );
 
-            filas
-
-        );
+        }
 
 
         /*
-         * Convertimos las filas de SharePoint
-         * a la estructura que ya utiliza el resto
-         * del código.
+         * COLUMNAS DE PERMISOS
          */
 
-        const items =
+        MODULOS_PERMISOS.forEach(
 
-            filas.map(
+            modulo => {
 
-                fila => {
+                mapaCampos[modulo] =
+                    buscarColumna(
 
-                    const fields = {};
+                        columnas,
 
+                        [
 
-                    Object.keys(
-                        fila
-                    ).forEach(
+                            modulo
 
-                        clave => {
-
-                            fields[clave] =
-                                fila[clave];
-
-                        }
+                        ]
 
                     );
 
 
-                    return {
+                if (
+                    !mapaCampos[modulo]
+                ) {
 
-                        id:
+                    throw new Error(
 
-                            fila.ID ||
+                        `No se encontró la columna "${modulo}" en PermisosTI.`
 
-                            fila.Id ||
-
-                            fila.id ||
-
-                            "",
-
-                        fields:
-                            fields,
-
-                        raw:
-                            fila
-
-                    };
+                    );
 
                 }
 
+            }
+
+        );
+
+
+        console.log(
+
+            "Mapa de campos PermisosTI:",
+
+            mapaCampos
+
+        );
+
+
+        return mapaCampos;
+
+    }
+
+
+    /* =========================================================
+       BUSCAR COLUMNA
+    ========================================================= */
+
+    function buscarColumna(
+        columnas,
+        nombres
+    ) {
+
+        const objetivos =
+            nombres.map(
+                normalizarTexto
             );
+
+
+        let columna =
+            columnas.find(
+
+                item =>
+
+                    objetivos.includes(
+
+                        normalizarTexto(
+                            item.displayName
+                        )
+
+                    )
+
+            );
+
+
+        if (!columna) {
+
+            columna =
+                columnas.find(
+
+                    item =>
+
+                        objetivos.includes(
+
+                            normalizarTexto(
+                                item.name
+                            )
+
+                        )
+
+                );
+
+        }
+
+
+        return columna
+            ? columna.name
+            : null;
+
+    }
+
+
+    /* =========================================================
+       OBTENER TODOS LOS REGISTROS
+    ========================================================= */
+
+    async function obtenerTodosLosItems() {
+
+        const sitio =
+            await obtenerSitioSharePoint();
+
+
+        const lista =
+            await obtenerListaPermisos();
+
+
+        let url =
+
+            `https://graph.microsoft.com/v1.0/sites/` +
+
+            `${sitio.id}/lists/${lista.id}/items` +
+
+            `?$expand=fields&$top=500`;
+
+
+        const items =
+            [];
+
+
+        while (url) {
+
+            const resultado =
+                await graphFetch(
+                    url
+                );
+
+
+            if (
+                resultado &&
+                Array.isArray(
+                    resultado.value
+                )
+            ) {
+
+                items.push(
+                    ...resultado.value
+                );
+
+            }
+
+
+            url =
+                resultado[
+                    "@odata.nextLink"
+                ] ||
+                null;
+
+        }
+
+
+        console.log(
+            "Registros obtenidos desde PermisosTI:",
+            items
+        );
 
 
         return items;
@@ -2182,7 +1990,9 @@
 
     async function cargarPermisos() {
 
-        if (tablaPermisos) {
+        if (
+            tablaPermisos
+        ) {
 
             tablaPermisos.innerHTML =
 
@@ -2202,14 +2012,11 @@
         try {
 
             registrosPermisos =
-
                 await obtenerTodosLosItems();
 
 
             renderizarTablaPermisos(
-
                 registrosPermisos
-
             );
 
 
@@ -2220,6 +2027,7 @@
                 registrosPermisos.length
 
             );
+
 
         }
 
@@ -2234,7 +2042,9 @@
             );
 
 
-            if (tablaPermisos) {
+            if (
+                tablaPermisos
+            ) {
 
                 tablaPermisos.innerHTML =
 
@@ -2263,12 +2073,12 @@
     ========================================================= */
 
     function renderizarTablaPermisos(
-
         registros
-
     ) {
 
-        if (!tablaPermisos) {
+        if (
+            !tablaPermisos
+        ) {
 
             return;
 
@@ -2276,11 +2086,8 @@
 
 
         if (
-
             !registros ||
-
             !registros.length
-
         ) {
 
             tablaPermisos.innerHTML =
@@ -2310,32 +2117,21 @@
             registro => {
 
                 const correo =
-
                     obtenerCampo(
-
                         registro,
-
                         "UsuarioCorreo"
-
                     );
 
 
                 const nombre =
-
                     obtenerCampo(
-
                         registro,
-
                         "NombreUsuario"
-
                     ) ||
 
                     obtenerCampo(
-
                         registro,
-
                         "Title"
-
                     ) ||
 
                     correo ||
@@ -2344,15 +2140,11 @@
 
 
                 const grupo =
-
                     String(
 
                         obtenerCampo(
-
                             registro,
-
                             "Grupo"
-
                         ) ||
 
                         GRUPO_NORMAL
@@ -2361,31 +2153,21 @@
 
 
                 const cantidad =
-
                     contarPermisos(
-
                         registro
-
                     );
 
 
                 const esTI =
-
                     normalizarTexto(
-
                         grupo
-
                     ) ===
-
                     normalizarTexto(
-
                         GRUPO_TI
-
                     );
 
 
                 const completo =
-
                     esTI ||
 
                     cantidad ===
@@ -2438,11 +2220,9 @@
                                     }
                                 "
                             >
-
                                 ${escaparHTML(
                                     grupo
                                 )}
-
                             </span>
 
                         </td>
@@ -2547,13 +2327,9 @@
 
 
         tablaPermisos
-
             .querySelectorAll(
-
                 "[data-editar-permiso]"
-
             )
-
             .forEach(
 
                 boton => {
@@ -2567,9 +2343,7 @@
                             editarRegistro(
 
                                 this.getAttribute(
-
                                     "data-editar-permiso"
-
                                 )
 
                             );
@@ -2590,17 +2364,12 @@
     ========================================================= */
 
     function buscarRegistroPorCorreo(
-
         correo
-
     ) {
 
         const objetivo =
-
             normalizarCorreo(
-
                 correo
-
             );
 
 
@@ -2618,11 +2387,8 @@
                 normalizarCorreo(
 
                     obtenerCampo(
-
                         registro,
-
                         "UsuarioCorreo"
-
                     )
 
                 ) === objetivo
@@ -2637,19 +2403,13 @@
     ========================================================= */
 
     function cargarRegistroEnFormulario(
-
         registro
-
     ) {
 
         const grupo =
-
             obtenerCampo(
-
                 registro,
-
                 "Grupo"
-
             );
 
 
@@ -2676,7 +2436,6 @@
             modulo => {
 
                 const checkbox =
-
                     document.querySelector(
 
                         `.permiso-modulo[data-modulo="${modulo}"]`
@@ -2692,15 +2451,11 @@
 
 
                 checkbox.checked =
-
                     valorBooleano(
 
                         obtenerCampo(
-
                             registro,
-
                             modulo
-
                         )
 
                     );
@@ -2734,7 +2489,6 @@
             modulo => {
 
                 const checkbox =
-
                     document.querySelector(
 
                         `.permiso-modulo[data-modulo="${modulo}"]`
@@ -2770,16 +2524,12 @@
     function cambiarGrupo() {
 
         const grupo =
-
             grupoUsuario
-
                 ? grupoUsuario.value
-
                 : GRUPO_NORMAL;
 
 
         const esTI =
-
             normalizarTexto(
                 grupo
             ) ===
@@ -2789,13 +2539,9 @@
 
 
         document
-
             .querySelectorAll(
-
                 ".permiso-modulo"
-
             )
-
             .forEach(
 
                 checkbox => {
@@ -2825,135 +2571,6 @@
 
 
     /* =========================================================
-       OBTENER FORM DIGEST
-       NECESARIO PARA OPERACIONES POST DE ESCRITURA
-    ========================================================= */
-
-    async function obtenerRequestDigest() {
-
-        const url =
-
-            `${SHAREPOINT_BASE_URL}` +
-
-            `/_api/contextinfo`;
-
-
-        const resultado =
-
-            await sharePointFetch(
-
-                url,
-
-                {
-
-                    method:
-                        "POST",
-
-                    body:
-                        "{}"
-
-                },
-
-                true
-
-            );
-
-
-        const digest =
-
-            resultado
-
-                ?.d
-
-                ?.GetContextWebInformation
-
-                ?.FormDigestValue;
-
-
-        if (!digest) {
-
-            throw new Error(
-
-                "SharePoint no devolvió X-RequestDigest."
-
-            );
-
-        }
-
-
-        return digest;
-
-    }
-
-
-    /* =========================================================
-       OBTENER TIPO DE ITEM DE LA LISTA
-    ========================================================= */
-
-    async function obtenerTipoEntidadLista() {
-
-        if (tipoEntidadLista) {
-
-            return tipoEntidadLista;
-
-        }
-
-
-        const url =
-
-            `${SHAREPOINT_BASE_URL}` +
-
-            `/_api/web/GetList(@listUrl)` +
-
-            `?$select=ListItemEntityTypeFullName` +
-
-            `&@listUrl='${encodeURIComponent(
-
-                PERMISOS_LIST_URL
-
-            )}'`;
-
-
-        const resultado =
-
-            await sharePointFetch(
-
-                url
-
-            );
-
-
-        tipoEntidadLista =
-
-            resultado.ListItemEntityTypeFullName;
-
-
-        if (!tipoEntidadLista) {
-
-            throw new Error(
-
-                "No se pudo obtener ListItemEntityTypeFullName de PermisosTI."
-
-            );
-
-        }
-
-
-        console.log(
-
-            "Tipo de entidad PermisosTI:",
-
-            tipoEntidadLista
-
-        );
-
-
-        return tipoEntidadLista;
-
-    }
-
-
-    /* =========================================================
        GUARDAR PERMISOS
     ========================================================= */
 
@@ -2962,9 +2579,7 @@
         if (!usuarioSeleccionado) {
 
             alert(
-
                 "Primero selecciona un usuario."
-
             );
 
 
@@ -2974,11 +2589,10 @@
 
 
         /*
-         * Verificación adicional.
+         * Verificación adicional de seguridad.
          */
 
         const autorizado =
-
             await validarAdministradorTI();
 
 
@@ -2990,15 +2604,13 @@
 
 
         const grupo =
-
             grupoUsuario
-
                 ? grupoUsuario.value
-
                 : GRUPO_NORMAL;
 
 
-        const permisos = {};
+        const permisos =
+            {};
 
 
         MODULOS_PERMISOS.forEach(
@@ -3006,7 +2618,6 @@
             modulo => {
 
                 const checkbox =
-
                     document.querySelector(
 
                         `.permiso-modulo[data-modulo="${modulo}"]`
@@ -3014,12 +2625,12 @@
                     );
 
 
-                permisos[modulo] =
+                permisos[
+                    modulo
+                ] =
 
                     checkbox
-
                         ? checkbox.checked
-
                         : false;
 
             }
@@ -3028,25 +2639,25 @@
 
 
         /*
-         * TI siempre tiene todo.
+         * TI siempre tiene todos los módulos.
          */
 
         if (
-
             normalizarTexto(
                 grupo
             ) ===
             normalizarTexto(
                 GRUPO_TI
             )
-
         ) {
 
             MODULOS_PERMISOS.forEach(
 
                 modulo => {
 
-                    permisos[modulo] =
+                    permisos[
+                        modulo
+                    ] =
                         true;
 
                 }
@@ -3069,8 +2680,19 @@
             }
 
 
-            const existente =
+            const sitio =
+                await obtenerSitioSharePoint();
 
+
+            const lista =
+                await obtenerListaPermisos();
+
+
+            const campos =
+                await obtenerMapaCampos();
+
+
+            const existente =
                 buscarRegistroPorCorreo(
 
                     usuarioSeleccionado.correo
@@ -3078,45 +2700,72 @@
                 );
 
 
-            const fields = {};
+            const fields =
+                {};
 
 
             /*
-             * SharePoint REST utiliza los nombres internos.
+             * NOMBRE
              */
 
-            fields.Title =
+            fields[
+                campos.Title
+            ] =
 
                 usuarioSeleccionado.nombre ||
+                usuarioSeleccionado.correo;
+
+
+            /*
+             * CORREO
+             */
+
+            fields[
+                campos.UsuarioCorreo
+            ] =
 
                 usuarioSeleccionado.correo;
 
 
-            fields.UsuarioCorreo =
+            /*
+             * NOMBRE USUARIO
+             */
 
-                usuarioSeleccionado.correo;
-
-
-            fields.NombreUsuario =
+            fields[
+                campos.NombreUsuario
+            ] =
 
                 usuarioSeleccionado.nombre ||
-
                 usuarioSeleccionado.correo;
 
 
-            fields.Grupo =
+            /*
+             * GRUPO
+             */
+
+            fields[
+                campos.Grupo
+            ] =
                 grupo;
 
+
+            /*
+             * PERMISOS
+             */
 
             MODULOS_PERMISOS.forEach(
 
                 modulo => {
 
-                    fields[modulo] =
+                    fields[
+                        campos[modulo]
+                    ] =
 
                         Boolean(
 
-                            permisos[modulo]
+                            permisos[
+                                modulo
+                            ]
 
                         );
 
@@ -3125,109 +2774,38 @@
             );
 
 
-            const digest =
-
-                await obtenerRequestDigest();
-
-
             /*
-             * =================================================
-             * ACTUALIZAR
-             * =================================================
+             * ACTUALIZAR REGISTRO EXISTENTE
              */
 
             if (existente) {
 
-                const itemId =
-                    existente.id;
-
-
                 const url =
 
-                    `${SHAREPOINT_BASE_URL}` +
+                    `https://graph.microsoft.com/v1.0/sites/` +
 
-                    `/_api/web/GetList(@listUrl)/items(${itemId})` +
+                    `${sitio.id}/lists/${lista.id}/items/` +
 
-                    `?@listUrl='${encodeURIComponent(
-
-                        PERMISOS_LIST_URL
-
-                    )}'`;
+                    `${existente.id}/fields`;
 
 
-                const headers = {
+                await graphFetch(
 
-                    "X-RequestDigest":
-                        digest,
+                    url,
 
-                    "IF-MATCH":
-                        "*",
+                    {
 
-                    "X-HTTP-Method":
-                        "MERGE",
+                        method:
+                            "PATCH",
 
-                    Accept:
-                        "application/json;odata=verbose",
+                        body:
+                            JSON.stringify(
+                                fields
+                            )
 
-                    "Content-Type":
-                        "application/json;odata=verbose"
+                    }
 
-                };
-
-
-                const token =
-
-                    await obtenerTokenSharePoint(
-
-                        true
-
-                    );
-
-
-                const respuesta =
-
-                    await fetch(
-
-                        url,
-
-                        {
-
-                            method:
-                                "POST",
-
-                            headers: {
-
-                                Authorization:
-                                    `Bearer ${token}`,
-
-                                ...headers
-
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    fields
-                                )
-
-                        }
-
-                    );
-
-
-                const texto =
-
-                    await respuesta.text();
-
-
-                if (!respuesta.ok) {
-
-                    throw new Error(
-
-                        `SharePoint ${respuesta.status}: ${texto}`
-
-                    );
-
-                }
+                );
 
 
                 mostrarMensaje(
@@ -3242,105 +2820,38 @@
 
 
             /*
-             * =================================================
-             * CREAR
-             * =================================================
+             * CREAR REGISTRO NUEVO
              */
 
             else {
 
-                const tipoEntidad =
-
-                    await obtenerTipoEntidadLista();
-
-
                 const url =
 
-                    `${SHAREPOINT_BASE_URL}` +
+                    `https://graph.microsoft.com/v1.0/sites/` +
 
-                    `/_api/web/GetList(@listUrl)/items` +
-
-                    `?@listUrl='${encodeURIComponent(
-
-                        PERMISOS_LIST_URL
-
-                    )}'`;
+                    `${sitio.id}/lists/${lista.id}/items`;
 
 
-                const token =
+                await graphFetch(
 
-                    await obtenerTokenSharePoint(
+                    url,
 
-                        true
+                    {
 
-                    );
+                        method:
+                            "POST",
 
+                        body:
+                            JSON.stringify({
 
-                const body = {
+                                fields:
+                                    fields
 
-                    __metadata: {
+                            })
 
-                        type:
-                            tipoEntidad
+                    }
 
-                    },
-
-                    ...fields
-
-                };
-
-
-                const respuesta =
-
-                    await fetch(
-
-                        url,
-
-                        {
-
-                            method:
-                                "POST",
-
-                            headers: {
-
-                                Authorization:
-                                    `Bearer ${token}`,
-
-                                Accept:
-                                    "application/json;odata=verbose",
-
-                                "Content-Type":
-                                    "application/json;odata=verbose",
-
-                                "X-RequestDigest":
-                                    digest
-
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    body
-                                )
-
-                        }
-
-                    );
-
-
-                const texto =
-
-                    await respuesta.text();
-
-
-                if (!respuesta.ok) {
-
-                    throw new Error(
-
-                        `SharePoint ${respuesta.status}: ${texto}`
-
-                    );
-
-                }
+                );
 
 
                 mostrarMensaje(
@@ -3366,7 +2877,6 @@
              */
 
             const actualizado =
-
                 buscarRegistroPorCorreo(
 
                     usuarioSeleccionado.correo
@@ -3377,9 +2887,7 @@
             if (actualizado) {
 
                 cargarRegistroEnFormulario(
-
                     actualizado
-
                 );
 
             }
@@ -3433,13 +2941,10 @@
     ========================================================= */
 
     async function editarRegistro(
-
         itemId
-
     ) {
 
         const registro =
-
             registrosPermisos.find(
 
                 item =>
@@ -3457,9 +2962,7 @@
         if (!registro) {
 
             alert(
-
                 "No se encontró el registro."
-
             );
 
 
@@ -3469,22 +2972,17 @@
 
 
         const correo =
-
             normalizarCorreo(
 
                 obtenerCampo(
-
                     registro,
-
                     "UsuarioCorreo"
-
                 )
 
             );
 
 
         const usuario =
-
             usuariosGraph.find(
 
                 item =>
@@ -3525,9 +3023,7 @@
 
 
         seleccionarUsuario(
-
             usuario.id
-
         );
 
     }
@@ -3540,16 +3036,12 @@
     async function validarAdministradorTI() {
 
         const usuarioActualCorreo =
-
             obtenerCorreoCuentaActual();
 
 
         console.log(
-
             "Validando administrador TI:",
-
             usuarioActualCorreo
-
         );
 
 
@@ -3560,28 +3052,22 @@
         const esTIInicial =
 
             USUARIOS_TI_INICIALES
-
                 .map(
                     normalizarCorreo
                 )
-
                 .includes(
-
                     normalizarCorreo(
-
                         usuarioActualCorreo
-
                     )
-
                 );
 
 
-        if (esTIInicial) {
+        if (
+            esTIInicial
+        ) {
 
             console.log(
-
                 "Administrador TI autorizado mediante usuario inicial."
-
             );
 
 
@@ -3595,42 +3081,28 @@
          */
 
         const registro =
-
             buscarRegistroPorCorreo(
-
                 usuarioActualCorreo
-
             );
 
 
         if (
-
             registro &&
-
             normalizarTexto(
 
                 obtenerCampo(
-
                     registro,
-
                     "Grupo"
-
                 )
 
             ) ===
-
-            normalizarTexto(
-
-                GRUPO_TI
-
-            )
-
+                normalizarTexto(
+                    GRUPO_TI
+                )
         ) {
 
             console.log(
-
                 "Administrador TI autorizado mediante PermisosTI."
-
             );
 
 
@@ -3640,9 +3112,7 @@
 
 
         console.warn(
-
             "Usuario no autorizado como administrador TI."
-
         );
 
 
@@ -3660,32 +3130,34 @@
 
     function obtenerCorreoCuentaActual() {
 
+        /*
+         * Primero usamos auth.js.
+         */
+
         if (
-
             window.alferzaAuth &&
-
             typeof window.alferzaAuth.obtenerCorreo ===
                 "function"
-
         ) {
 
             const correoAuth =
-
                 window.alferzaAuth.obtenerCorreo();
 
 
             if (correoAuth) {
 
                 return normalizarCorreo(
-
                     correoAuth
-
                 );
 
             }
 
         }
 
+
+        /*
+         * Respaldo.
+         */
 
         if (!cuentaActual) {
 
@@ -3720,7 +3192,6 @@
     function mostrarAccesoDenegado() {
 
         const contenido =
-
             document.querySelector(
                 ".content"
             );
@@ -3774,17 +3245,12 @@
     ========================================================= */
 
     function valorBooleano(
-
         valor
-
     ) {
 
         if (
-
             valor === true ||
-
             valor === 1
-
         ) {
 
             return true;
@@ -3793,15 +3259,10 @@
 
 
         const texto =
-
             String(
-
                 valor || ""
-
             )
-
                 .trim()
-
                 .toLowerCase();
 
 
@@ -3827,11 +3288,8 @@
     ========================================================= */
 
     function obtenerCampo(
-
         registro,
-
         nombre
-
     ) {
 
         if (!registro) {
@@ -3842,25 +3300,17 @@
 
 
         const fields =
-
             registro.fields ||
-
-            registro.raw ||
-
             {};
 
 
         const objetivo =
-
             normalizarTexto(
-
                 nombre
-
             );
 
 
         const clave =
-
             Object.keys(
                 fields
             ).find(
@@ -3868,9 +3318,7 @@
                 key =>
 
                     normalizarTexto(
-
                         key
-
                     ) === objetivo
 
             );
@@ -3883,7 +3331,9 @@
         }
 
 
-        return fields[clave];
+        return fields[
+            clave
+        ];
 
     }
 
@@ -3893,36 +3343,25 @@
     ========================================================= */
 
     function contarPermisos(
-
         registro
-
     ) {
 
         const grupo =
-
             normalizarTexto(
 
                 obtenerCampo(
-
                     registro,
-
                     "Grupo"
-
                 )
 
             );
 
 
         if (
-
             grupo ===
-
             normalizarTexto(
-
                 GRUPO_TI
-
             )
-
         ) {
 
             return MODULOS_PERMISOS.length;
@@ -3943,11 +3382,8 @@
                     valorBooleano(
 
                         obtenerCampo(
-
                             registro,
-
                             modulo
-
                         )
 
                     )
@@ -3973,28 +3409,20 @@
     ========================================================= */
 
     function normalizarTexto(
-
         valor
-
     ) {
 
         return String(
-
             valor || ""
-
         )
-
             .normalize(
                 "NFD"
             )
-
             .replace(
                 /[\u0300-\u036f]/g,
                 ""
             )
-
             .toLowerCase()
-
             .replace(
                 /[^a-z0-9]/g,
                 ""
@@ -4008,19 +3436,13 @@
     ========================================================= */
 
     function normalizarCorreo(
-
         correo
-
     ) {
 
         return String(
-
             correo || ""
-
         )
-
             .trim()
-
             .toLowerCase();
 
     }
@@ -4031,17 +3453,12 @@
     ========================================================= */
 
     function escaparHTML(
-
         valor
-
     ) {
 
         if (
-
             valor === null ||
-
             valor === undefined
-
         ) {
 
             return "";
@@ -4050,31 +3467,24 @@
 
 
         return String(
-
             valor
-
         )
-
             .replace(
                 /&/g,
                 "&amp;"
             )
-
             .replace(
                 /</g,
                 "&lt;"
             )
-
             .replace(
                 />/g,
                 "&gt;"
             )
-
             .replace(
                 /"/g,
                 "&quot;"
             )
-
             .replace(
                 /'/g,
                 "&#039;"
@@ -4088,15 +3498,11 @@
     ========================================================= */
 
     function mostrarMensaje(
-
         mensaje,
-
         tipo = "error"
-
     ) {
 
         const contenido =
-
             document.querySelector(
                 ".content"
             );
@@ -4110,11 +3516,8 @@
 
 
         const anterior =
-
             contenido.querySelector(
-
                 ".mensaje-permisos"
-
             );
 
 
@@ -4126,14 +3529,12 @@
 
 
         const aviso =
-
             document.createElement(
                 "div"
             );
 
 
         aviso.className =
-
             `permission-message ${tipo} mensaje-permisos`;
 
 
@@ -4151,11 +3552,8 @@
             function () {
 
                 if (
-
                     aviso &&
-
                     aviso.parentNode
-
                 ) {
 
                     aviso.remove();
@@ -4176,13 +3574,10 @@
     ========================================================= */
 
     function mostrarErrorInicial(
-
         mensaje
-
     ) {
 
         const usuario =
-
             document.getElementById(
                 "userInfo"
             );
@@ -4203,12 +3598,12 @@
     ========================================================= */
 
     function obtenerMensajeError(
-
         error
-
     ) {
 
-        if (!error) {
+        if (
+            !error
+        ) {
 
             return "Error desconocido.";
 
@@ -4216,22 +3611,16 @@
 
 
         const mensaje =
-
             String(
-
                 error.message ||
-
                 error
-
             );
 
 
         if (
-
             mensaje.includes(
                 "Graph 401"
             )
-
         ) {
 
             return (
@@ -4244,11 +3633,9 @@
 
 
         if (
-
             mensaje.includes(
                 "Graph 403"
             )
-
         ) {
 
             return (
@@ -4261,65 +3648,13 @@
 
 
         if (
-
-            mensaje.includes(
-                "SharePoint 401"
-            )
-
-        ) {
-
-            return (
-
-                "El token de SharePoint no es válido o la aplicación no tiene acceso a SharePoint."
-
-            );
-
-        }
-
-
-        if (
-
-            mensaje.includes(
-                "SharePoint 403"
-            )
-
-        ) {
-
-            return (
-
-                "SharePoint rechazó el acceso a PermisosTI. Revisa los permisos AllSites.Read/AllSites.Write de la aplicación."
-
-            );
-
-        }
-
-
-        if (
-
-            error.codigo ===
-            "SHAREPOINT_TOKEN_ERROR"
-
-        ) {
-
-            return (
-
-                "No se pudo obtener el token de SharePoint. Revisa los permisos SharePoint de la aplicación."
-
-            );
-
-        }
-
-
-        if (
-
             error.codigo ===
             "LISTA_PERMISOS_NO_ENCONTRADA"
-
         ) {
 
             return (
 
-                "No se encontró la lista PermisosTI."
+                "Microsoft Graph no está mostrando la lista PermisosTI en el sitio configurado."
 
             );
 

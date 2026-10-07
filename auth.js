@@ -1,59 +1,46 @@
-/* =========================================
+
+/* =========================================================
    PROTECCIÓN Y CONTROL DE PERMISOS
    ALFERZA LIVE OFFICE
-========================================= */
+========================================================= */
 
 (function protegerPagina() {
 
-    /* =========================================
+    /* =========================================================
        CONFIGURACIÓN GENERAL
-    ========================================= */
+    ========================================================= */
 
-    const SESION_KEY =
-        "alferza_login";
+    const SESION_KEY = "alferza_login";
+    const RETURN_KEY = "alferza_return_url";
+    const PERMISOS_KEY = "alferza_permisos";
 
-    const RETURN_KEY =
-        "alferza_return_url";
+    const LOGIN_PATH = "/live-office/login.html";
+    const ROOT_PATH = "/live-office/";
 
-    const PERMISOS_KEY =
-        "alferza_permisos";
-
-
-    const LOGIN_PATH =
-        "/live-office/login.html";
-
-    const ROOT_PATH =
-        "/live-office/";
-
-
-    /* =========================================
+    /* =========================================================
        SHAREPOINT
-    ========================================= */
+    ========================================================= */
 
     const SHAREPOINT_HOST =
         "alferzaholding-my.sharepoint.com";
 
-
     const SHAREPOINT_SITE_PATH =
         "/personal/soporte1_alferza_pe";
-
 
     const PERMISOS_LIST_NAME =
         "PermisosTI";
 
-
-    /* =========================================
+    /* =========================================================
        CUENTA TI INICIAL
        ESTA CUENTA SIEMPRE TIENE ACCESO TOTAL
-    ========================================= */
+    ========================================================= */
 
     const USUARIO_TI_INICIAL =
         "soporte1@alferza.pe";
 
-
-    /* =========================================
+    /* =========================================================
        MAPEO DE PÁGINAS
-    ========================================= */
+    ========================================================= */
 
     const PAGINAS_PERMISOS = {
 
@@ -92,41 +79,27 @@
 
         "configuracion.html":
             "Configuracion"
-
     };
 
-
-    /* =========================================
+    /* =========================================================
        COMPROBAR SESIÓN
-    ========================================= */
+    ========================================================= */
 
     const sesion =
-        sessionStorage.getItem(
-            SESION_KEY
-        );
+        sessionStorage.getItem(SESION_KEY);
 
-
-    if (
-        sesion !==
-        "true"
-    ) {
+    if (sesion !== "true") {
 
         guardarReturnUrl();
 
-
-        window.location.replace(
-            LOGIN_PATH
-        );
-
+        window.location.replace(LOGIN_PATH);
 
         return;
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        GUARDAR URL DE RETORNO
-    ========================================= */
+    ========================================================= */
 
     function guardarReturnUrl() {
 
@@ -134,7 +107,6 @@
             window.location.pathname +
             window.location.search +
             window.location.hash;
-
 
         if (
             paginaActual !== LOGIN_PATH &&
@@ -145,81 +117,84 @@
                 RETURN_KEY,
                 paginaActual
             );
-
         }
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        INICIO
-    ========================================= */
+    ========================================================= */
 
-    if (
-        document.readyState ===
-        "loading"
-    ) {
+    if (document.readyState === "loading") {
 
         document.addEventListener(
             "DOMContentLoaded",
             iniciarControlPermisos
         );
 
-    }
-
-    else {
+    } else {
 
         iniciarControlPermisos();
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        INICIAR CONTROL
-    ========================================= */
+    ========================================================= */
 
     async function iniciarControlPermisos() {
 
-        /*
-         * Si ya hay permisos guardados en sesión,
-         * los usamos inmediatamente para ocultar
-         * el menú mientras se actualiza la
-         * información desde SharePoint.
-         */
+        console.log(
+            "========================================="
+        );
+
+        console.log(
+            "ALFERZA LIVE OFFICE - CONTROL DE PERMISOS"
+        );
+
+        console.log(
+            "========================================="
+        );
+
+        console.log(
+            "Página actual:",
+            window.location.pathname
+        );
+
+        /* -----------------------------------------
+           Aplicar temporalmente permisos guardados
+        ----------------------------------------- */
 
         aplicarPermisosGuardados();
-
 
         try {
 
             const permisos =
                 await obtenerPermisosUsuario();
 
+            console.log(
+                "PERMISOS OBTENIDOS:",
+                permisos
+            );
 
-            /*
-             * Guardar permisos actuales.
-             */
+            /* -----------------------------------------
+               Guardar permisos actuales
+            ----------------------------------------- */
 
             sessionStorage.setItem(
                 PERMISOS_KEY,
-                JSON.stringify(
-                    permisos
-                )
+                JSON.stringify(permisos)
             );
 
-
-            /*
-             * Aplicar menú.
-             */
+            /* -----------------------------------------
+               Aplicar menú
+            ----------------------------------------- */
 
             aplicarPermisosMenu(
                 permisos
             );
 
-
-            /*
-             * Validar página actual.
-             */
+            /* -----------------------------------------
+               Validar página actual
+            ----------------------------------------- */
 
             validarPaginaActual(
                 permisos
@@ -230,47 +205,78 @@
         catch (error) {
 
             console.error(
-                "Error comprobando permisos:",
+                "========================================="
+            );
+
+            console.error(
+                "ERROR OBTENIENDO PERMISOS"
+            );
+
+            console.error(
                 error
             );
 
+            console.error(
+                "========================================="
+            );
 
             /*
-             * En caso de error no damos
-             * acceso automáticamente.
+             * IMPORTANTE:
+             *
+             * Si Graph falla, NO sobrescribimos
+             * los permisos existentes con false.
+             *
+             * Primero intentamos utilizar los permisos
+             * almacenados en sesión.
              */
+
+            const permisosGuardados =
+                obtenerPermisosGuardados();
+
+            if (permisosGuardados) {
+
+                console.warn(
+                    "Se utilizarán los permisos guardados en sesión."
+                );
+
+                aplicarPermisosMenu(
+                    permisosGuardados
+                );
+
+                validarPaginaActual(
+                    permisosGuardados
+                );
+
+                return;
+            }
+
+            /*
+             * Solo si nunca existieron permisos
+             * válidos, mostramos acceso restringido.
+             */
+
+            console.warn(
+                "No existen permisos almacenados."
+            );
 
             const permisosDenegados =
                 crearPermisosDenegados();
-
-
-            sessionStorage.setItem(
-                PERMISOS_KEY,
-                JSON.stringify(
-                    permisosDenegados
-                )
-            );
-
 
             aplicarPermisosMenu(
                 permisosDenegados
             );
 
-
             validarPaginaActual(
                 permisosDenegados
             );
-
         }
-
     }
 
+    /* =========================================================
+       OBTENER PERMISOS GUARDADOS
+    ========================================================= */
 
-    /* =========================================
-       APLICAR PERMISOS GUARDADOS
-    ========================================= */
-
-    function aplicarPermisosGuardados() {
+    function obtenerPermisosGuardados() {
 
         try {
 
@@ -279,29 +285,21 @@
                     PERMISOS_KEY
                 );
 
-
             if (!almacenados) {
-
-                return;
-
+                return null;
             }
-
 
             const permisos =
                 JSON.parse(
                     almacenados
                 );
 
-
             if (
                 permisos &&
                 permisos.permisos
             ) {
 
-                aplicarPermisosMenu(
-                    permisos
-                );
-
+                return permisos;
             }
 
         }
@@ -309,47 +307,60 @@
         catch (error) {
 
             console.warn(
-                "No se pudieron leer permisos almacenados:",
+                "No se pudieron leer permisos guardados:",
                 error
             );
-
         }
 
+        return null;
     }
 
+    /* =========================================================
+       APLICAR PERMISOS GUARDADOS
+    ========================================================= */
 
-    /* =========================================
+    function aplicarPermisosGuardados() {
+
+        const permisos =
+            obtenerPermisosGuardados();
+
+        if (!permisos) {
+            return;
+        }
+
+        console.log(
+            "Permisos guardados encontrados:",
+            permisos
+        );
+
+        aplicarPermisosMenu(
+            permisos
+        );
+    }
+
+    /* =========================================================
        OBTENER MSAL
-    ========================================= */
+    ========================================================= */
 
     function obtenerMSAL() {
 
         if (
-            typeof msal !==
-            "undefined"
+            typeof msal !== "undefined"
         ) {
 
             return msal;
-
         }
 
-
         return null;
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        ESPERAR MSAL
-       EVITA ERROR SI LA LIBRERÍA
-       TODAVÍA NO TERMINÓ DE CARGAR
-    ========================================= */
+    ========================================================= */
 
     async function esperarMSAL() {
 
-        const maxIntentos =
-            50;
-
+        const maxIntentos = 50;
 
         for (
             let intento = 0;
@@ -358,14 +369,11 @@
         ) {
 
             if (
-                typeof msal !==
-                "undefined"
+                typeof msal !== "undefined"
             ) {
 
                 return msal;
-
             }
-
 
             await new Promise(
                 resolve =>
@@ -374,26 +382,21 @@
                         100
                     )
             );
-
         }
-
 
         throw new Error(
             "MSAL no está disponible."
         );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        CREAR MSAL
-    ========================================= */
+    ========================================================= */
 
     async function crearMSAL() {
 
         const libreria =
             await esperarMSAL();
-
 
         const config = {
 
@@ -410,9 +413,7 @@
                         "blank.html",
                         window.location.href
                     ).href
-
             },
-
 
             cache: {
 
@@ -421,32 +422,25 @@
 
                 storeAuthStateInCookie:
                     false
-
             }
-
         };
-
 
         return new libreria.PublicClientApplication(
             config
         );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER CUENTA ACTUAL
-    ========================================= */
+    ========================================================= */
 
     async function obtenerCuentaActual() {
 
         const instancia =
             await crearMSAL();
 
-
         const cuentas =
             instancia.getAllAccounts();
-
 
         if (
             !cuentas ||
@@ -456,13 +450,10 @@
             throw new Error(
                 "No existe una cuenta de Microsoft."
             );
-
         }
-
 
         let cuenta =
             instancia.getActiveAccount();
-
 
         if (!cuenta) {
 
@@ -472,9 +463,12 @@
             instancia.setActiveAccount(
                 cuenta
             );
-
         }
 
+        console.log(
+            "Cuenta Microsoft:",
+            cuenta
+        );
 
         return {
 
@@ -483,15 +477,12 @@
 
             cuenta:
                 cuenta
-
         };
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER TOKEN
-    ========================================= */
+    ========================================================= */
 
     async function obtenerToken(
         instancia,
@@ -502,40 +493,36 @@
             await instancia.acquireTokenSilent({
 
                 scopes: [
-
                     "User.Read",
-
                     "Sites.ReadWrite.All"
-
                 ],
 
                 account:
                     cuenta
-
             });
 
-
         return resultado.accessToken;
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        GRAPH FETCH
-    ========================================= */
+    ========================================================= */
 
     async function graphFetch(
         url,
         token
     ) {
 
+        console.log(
+            "Graph GET:",
+            url
+        );
+
         const respuesta =
             await fetch(
                 url,
                 {
-
-                    method:
-                        "GET",
+                    method: "GET",
 
                     headers: {
 
@@ -544,36 +531,26 @@
 
                         Accept:
                             "application/json"
-
                     }
-
                 }
             );
 
-
-        if (
-            !respuesta.ok
-        ) {
+        if (!respuesta.ok) {
 
             const texto =
                 await respuesta.text();
 
-
             throw new Error(
                 `Graph ${respuesta.status}: ${texto}`
             );
-
         }
 
-
         return respuesta.json();
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER PERMISOS DEL USUARIO
-    ========================================= */
+    ========================================================= */
 
     async function obtenerPermisosUsuario() {
 
@@ -583,17 +560,15 @@
         } =
             await obtenerCuentaActual();
 
-
         const token =
             await obtenerToken(
                 instancia,
                 cuenta
             );
 
-
-        /*
-         * Obtener correo.
-         */
+        /* -----------------------------------------
+           OBTENER CORREO
+        ----------------------------------------- */
 
         const correo =
             normalizarCorreo(
@@ -605,24 +580,23 @@
                 cuenta.idTokenClaims?.email ||
 
                 ""
-
             );
 
+        console.log(
+            "Correo detectado:",
+            correo
+        );
 
         if (!correo) {
 
             throw new Error(
                 "No se pudo determinar el correo del usuario."
             );
-
         }
 
-
-        /*
-         * =====================================
-         * TI INICIAL
-         * =====================================
-         */
+        /* -----------------------------------------
+           CUENTA TI INICIAL
+        ----------------------------------------- */
 
         if (
             correo ===
@@ -631,30 +605,23 @@
             )
         ) {
 
-            return crearPermisosTI(
-
-                correo,
-
-                cuenta.name ||
-                correo
-
+            console.log(
+                "Usuario TI inicial detectado."
             );
 
+            return crearPermisosTI(
+                correo,
+                cuenta.name || correo
+            );
         }
 
-
-        /*
-         * =====================================
-         * SITIO SHAREPOINT
-         * =====================================
-         */
+        /* -----------------------------------------
+           SITIO SHAREPOINT
+        ----------------------------------------- */
 
         const sitioUrl =
-
             `https://graph.microsoft.com/v1.0/sites/` +
-
             `${SHAREPOINT_HOST}:${SHAREPOINT_SITE_PATH}`;
-
 
         const sitio =
             await graphFetch(
@@ -662,6 +629,10 @@
                 token
             );
 
+        console.log(
+            "Sitio SharePoint:",
+            sitio
+        );
 
         if (
             !sitio ||
@@ -671,24 +642,16 @@
             throw new Error(
                 "No se pudo obtener el sitio de SharePoint."
             );
-
         }
 
-
-        /*
-         * =====================================
-         * OBTENER LISTAS
-         * =====================================
-         */
+        /* -----------------------------------------
+           OBTENER LISTAS
+        ----------------------------------------- */
 
         const listasUrl =
-
             `https://graph.microsoft.com/v1.0/sites/` +
-
             `${sitio.id}/lists` +
-
             `?$select=id,name,displayName&$top=200`;
-
 
         const listas =
             await graphFetch(
@@ -696,19 +659,20 @@
                 token
             );
 
+        console.log(
+            "Listas SharePoint:",
+            listas
+        );
 
         const objetivoLista =
             normalizarTexto(
                 PERMISOS_LIST_NAME
             );
 
-
         const lista =
             (
-                listas.value ||
-                []
+                listas.value || []
             ).find(
-
                 item => {
 
                     const displayName =
@@ -716,67 +680,51 @@
                             item.displayName
                         );
 
-
                     const name =
                         normalizarTexto(
                             item.name
                         );
 
-
                     return (
-
                         displayName ===
                         objetivoLista
-
                         ||
-
                         name ===
                         objetivoLista
-
                     );
-
                 }
-
             );
-
 
         if (!lista) {
 
             throw new Error(
                 `No se encontró la lista "${PERMISOS_LIST_NAME}".`
             );
-
         }
 
+        console.log(
+            "Lista PermisosTI encontrada:",
+            lista
+        );
 
-        /*
-         * =====================================
-         * OBTENER ITEMS DE PERMISOSTI
-         * =====================================
-         */
+        /* -----------------------------------------
+           OBTENER ITEMS
+        ----------------------------------------- */
 
         let itemsUrl =
-
             `https://graph.microsoft.com/v1.0/sites/` +
-
             `${sitio.id}/lists/${lista.id}/items` +
-
             `?$expand=fields&$top=500`;
-
 
         const items = [];
 
-
-        while (
-            itemsUrl
-        ) {
+        while (itemsUrl) {
 
             const resultado =
                 await graphFetch(
                     itemsUrl,
                     token
                 );
-
 
             if (
                 resultado &&
@@ -788,127 +736,219 @@
                 items.push(
                     ...resultado.value
                 );
-
             }
-
 
             itemsUrl =
                 resultado[
                     "@odata.nextLink"
-                ] ||
-                null;
-
+                ] || null;
         }
 
+        console.log(
+            "Cantidad de registros PermisosTI:",
+            items.length
+        );
 
-        /*
-         * =====================================
-         * BUSCAR REGISTRO DEL USUARIO
-         * =====================================
-         */
+        console.log(
+            "Registros PermisosTI:",
+            items
+        );
+
+        /* -----------------------------------------
+           BUSCAR REGISTRO DEL USUARIO
+        ----------------------------------------- */
 
         const registro =
             items.find(
-
                 item => {
 
                     const correoRegistro =
-                        obtenerCampo(
+                        obtenerCampoFlexible(
                             item,
-                            "UsuarioCorreo"
+                            [
+                                "UsuarioCorreo",
+                                "Usuario Correo",
+                                "Correo",
+                                "Email",
+                                "CorreoUsuario"
+                            ]
                         );
 
-
-                    return (
-
+                    const correoNormalizado =
                         normalizarCorreo(
                             correoRegistro
-                        ) ===
-                        correo
+                        );
 
+                    console.log(
+                        "Comparando usuario:",
+                        correoNormalizado,
+                        "con:",
+                        correo
                     );
 
+                    return (
+                        correoNormalizado ===
+                        correo
+                    );
                 }
-
             );
 
-
-        /*
-         * =====================================
-         * SIN REGISTRO
-         * =====================================
-         */
+        /* -----------------------------------------
+           SIN REGISTRO
+        ----------------------------------------- */
 
         if (!registro) {
 
-            return crearPermisosDenegados(
-
-                correo,
-
-                cuenta.name ||
+            console.warn(
+                "NO SE ENCONTRÓ REGISTRO PARA:",
                 correo
-
             );
 
+            return crearPermisosDenegados(
+                correo,
+                cuenta.name || correo
+            );
         }
 
+        console.log(
+            "REGISTRO DEL USUARIO ENCONTRADO:",
+            registro
+        );
 
-        /*
-         * =====================================
-         * GRUPO
-         * =====================================
-         */
+        /* -----------------------------------------
+           GRUPO
+        ----------------------------------------- */
 
         const grupo =
             String(
 
-                obtenerCampo(
+                obtenerCampoFlexible(
                     registro,
-                    "Grupo"
+                    [
+                        "Grupo"
+                    ]
                 ) ||
 
                 "Normal"
 
-            )
-                .trim();
+            ).trim();
 
+        console.log(
+            "Grupo del usuario:",
+            grupo
+        );
 
-        /*
-         * =====================================
-         * GRUPO TI
-         * ACCESO TOTAL
-         * =====================================
-         */
+        /* -----------------------------------------
+           GRUPO TI
+           ACCESO TOTAL
+        ----------------------------------------- */
 
         if (
-
-            normalizarTexto(
-                grupo
-            ) ===
-
-            normalizarTexto(
-                "TI"
-            )
-
+            normalizarTexto(grupo) ===
+            normalizarTexto("TI")
         ) {
 
-            return crearPermisosTI(
-
-                correo,
-
-                cuenta.name ||
-                correo
-
+            console.log(
+                "Usuario pertenece al grupo TI."
             );
 
+            return crearPermisosTI(
+                correo,
+                cuenta.name || correo
+            );
         }
 
+        /* -----------------------------------------
+           PERMISOS INDIVIDUALES
+        ----------------------------------------- */
 
-        /*
-         * =====================================
-         * GRUPO NORMAL
-         * =====================================
-         */
+        const permisos = {
+
+            Oficina:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Oficina"]
+                    )
+                ),
+
+            Personal:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Personal"]
+                    )
+                ),
+
+            Reservas:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Reservas"]
+                    )
+                ),
+
+            Salas:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Salas"]
+                    )
+                ),
+
+            Comunicados:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Comunicados"]
+                    )
+                ),
+
+            Seguridad:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Seguridad"]
+                    )
+                ),
+
+            Infraestructura:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Infraestructura"]
+                    )
+                ),
+
+            Tickets:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Tickets"]
+                    )
+                ),
+
+            Configuracion:
+                valorBooleano(
+                    obtenerCampoFlexible(
+                        registro,
+                        ["Configuracion"]
+                    )
+                ),
+
+            /*
+             * Permisos es administrativo.
+             * Solo TI puede verlo.
+             */
+
+            Permisos:
+                false
+        };
+
+        console.log(
+            "PERMISOS LEÍDOS DESDE SHAREPOINT:",
+            permisos
+        );
 
         return {
 
@@ -916,12 +956,15 @@
                 correo,
 
             nombre:
-
                 cuenta.name ||
 
-                obtenerCampo(
+                obtenerCampoFlexible(
                     registro,
-                    "NombreUsuario"
+                    [
+                        "NombreUsuario",
+                        "Nombre Usuario",
+                        "Nombre"
+                    ]
                 ) ||
 
                 correo,
@@ -929,108 +972,14 @@
             grupo:
                 "Normal",
 
-            permisos: {
-
-                Oficina:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Oficina"
-                        )
-                    ),
-
-                Personal:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Personal"
-                        )
-                    ),
-
-                Reservas:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Reservas"
-                        )
-                    ),
-
-                Salas:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Salas"
-                        )
-                    ),
-
-                Comunicados:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Comunicados"
-                        )
-                    ),
-
-                Seguridad:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Seguridad"
-                        )
-                    ),
-
-                Infraestructura:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Infraestructura"
-                        )
-                    ),
-
-                Tickets:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Tickets"
-                        )
-                    ),
-
-                Configuracion:
-
-                    valorBooleano(
-                        obtenerCampo(
-                            registro,
-                            "Configuracion"
-                        )
-                    ),
-
-                /*
-                 * La página Permisos es administrativa
-                 * y no tiene columna propia en PermisosTI.
-                 * Solo Grupo TI puede verla.
-                 */
-
-                Permisos:
-                    false
-
-            }
-
+            permisos:
+                permisos
         };
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        CREAR PERMISOS TI
-    ========================================= */
+    ========================================================= */
 
     function crearPermisosTI(
         correo,
@@ -1050,46 +999,32 @@
 
             permisos: {
 
-                Oficina:
-                    true,
+                Oficina: true,
 
-                Personal:
-                    true,
+                Personal: true,
 
-                Reservas:
-                    true,
+                Reservas: true,
 
-                Salas:
-                    true,
+                Salas: true,
 
-                Comunicados:
-                    true,
+                Comunicados: true,
 
-                Seguridad:
-                    true,
+                Seguridad: true,
 
-                Infraestructura:
-                    true,
+                Infraestructura: true,
 
-                Tickets:
-                    true,
+                Tickets: true,
 
-                Permisos:
-                    true,
+                Permisos: true,
 
-                Configuracion:
-                    true
-
+                Configuracion: true
             }
-
         };
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        CREAR PERMISOS DENEGADOS
-    ========================================= */
+    ========================================================= */
 
     function crearPermisosDenegados(
         correo = "",
@@ -1109,54 +1044,32 @@
 
             permisos: {
 
-                Oficina:
-                    false,
+                Oficina: false,
 
-                Personal:
-                    false,
+                Personal: false,
 
-                Reservas:
-                    false,
+                Reservas: false,
 
-                Salas:
-                    false,
+                Salas: false,
 
-                Comunicados:
-                    false,
+                Comunicados: false,
 
-                Seguridad:
-                    false,
+                Seguridad: false,
 
-                Infraestructura:
-                    false,
+                Infraestructura: false,
 
-                Tickets:
-                    false,
+                Tickets: false,
 
-                Permisos:
-                    false,
+                Permisos: false,
 
-                Configuracion:
-                    false
-
+                Configuracion: false
             }
-
         };
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        APLICAR PERMISOS AL MENÚ
-       USA EXACTAMENTE TU SIDEBAR:
-       
-       <aside class="sidebar">
-           <h2>MENÚ</h2>
-           <ul>
-               <li>...</li>
-           </ul>
-       </aside>
-    ========================================= */
+    ========================================================= */
 
     function aplicarPermisosMenu(
         datos
@@ -1168,15 +1081,17 @@
                 ? datos.permisos
                 : {};
 
+        console.log(
+            "Aplicando permisos al menú:",
+            permisos
+        );
 
         const elementos =
             document.querySelectorAll(
                 ".sidebar li"
             );
 
-
         elementos.forEach(
-
             elemento => {
 
                 const modulo =
@@ -1184,35 +1099,31 @@
                         elemento.textContent
                     );
 
-
                 if (!modulo) {
-
                     return;
-
                 }
 
-
                 const permitido =
-                    permisos[
-                        modulo
-                    ] === true;
-
+                    permisos[modulo] === true;
 
                 elemento.style.display =
                     permitido
                         ? ""
                         : "none";
 
+                console.log(
+                    `Menú ${modulo}:`,
+                    permitido
+                        ? "PERMITIDO"
+                        : "DENEGADO"
+                );
             }
-
         );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER MÓDULO DEL LI
-    ========================================= */
+    ========================================================= */
 
     function obtenerNombreModulo(
         texto
@@ -1223,125 +1134,72 @@
                 texto
             );
 
-
         if (
-            limpio.includes(
-                "oficina"
-            )
+            limpio.includes("oficina")
         ) {
-
             return "Oficina";
-
         }
 
-
         if (
-            limpio.includes(
-                "personal"
-            )
+            limpio.includes("personal")
         ) {
-
             return "Personal";
-
         }
 
-
         if (
-            limpio.includes(
-                "reservas"
-            )
+            limpio.includes("reservas")
         ) {
-
             return "Reservas";
-
         }
 
-
         if (
-            limpio.includes(
-                "salas"
-            )
+            limpio.includes("salas")
         ) {
-
             return "Salas";
-
         }
 
-
         if (
-            limpio.includes(
-                "comunicados"
-            )
+            limpio.includes("comunicados")
         ) {
-
             return "Comunicados";
-
         }
 
-
         if (
-            limpio.includes(
-                "seguridad"
-            )
+            limpio.includes("seguridad")
         ) {
-
             return "Seguridad";
-
         }
 
-
         if (
-            limpio.includes(
-                "infraestructura"
-            )
+            limpio.includes("infraestructura")
         ) {
-
             return "Infraestructura";
-
         }
 
-
         if (
-            limpio.includes(
-                "tickets"
-            )
+            limpio.includes("tickets")
         ) {
-
             return "Tickets";
-
         }
 
-
         if (
-            limpio.includes(
-                "permisos"
-            )
+            limpio.includes("permisos")
         ) {
-
             return "Permisos";
-
         }
-
 
         if (
-            limpio.includes(
-                "configuracion"
-            )
+            limpio.includes("configuracion")
         ) {
-
             return "Configuracion";
-
         }
-
 
         return null;
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        VALIDAR PÁGINA ACTUAL
-    ========================================= */
+    ========================================================= */
 
     function validarPaginaActual(
         datos
@@ -1350,86 +1208,96 @@
         const pagina =
             obtenerPaginaActual();
 
+        console.log(
+            "Página normalizada:",
+            pagina
+        );
 
         /*
-         * Login y raíz no requieren
-         * permiso de módulo.
+         * Login y raíz.
          */
 
         if (
             !pagina ||
-            pagina ===
-            "login.html"
+            pagina === "login.html"
         ) {
 
             return;
-
         }
-
 
         const modulo =
             encontrarPermisoPagina(
                 pagina
             );
 
+        console.log(
+            "Módulo requerido:",
+            modulo
+        );
 
         /*
-         * Archivo no incluido en el mapa:
-         * no aplicar restricción.
+         * Página no incluida en el mapa.
          */
 
         if (!modulo) {
 
+            console.log(
+                "La página no requiere permiso específico."
+            );
+
             return;
-
         }
-
 
         const permitido =
             datos &&
             datos.permisos &&
-            datos.permisos[
-                modulo
-            ] === true;
+            datos.permisos[modulo] === true;
 
-
-        if (
+        console.log(
+            `Permiso para ${modulo}:`,
             permitido
-        ) {
+        );
+
+        if (permitido) {
+
+            console.log(
+                `Acceso permitido a ${modulo}.`
+            );
 
             return;
-
         }
 
-
-        /*
-         * Si no tiene permiso para la página
-         * actual, no se muestra.
-         */
+        console.warn(
+            `Acceso DENEGADO a ${modulo}.`
+        );
 
         bloquearPagina(
             modulo
         );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER PÁGINA ACTUAL
-    ========================================= */
+    ========================================================= */
 
     function obtenerPaginaActual() {
 
         let ruta =
             window.location.pathname;
 
+        /*
+         * Quitar /live-office/
+         */
 
         ruta =
             ruta.replace(
-                /^\/live-office\//,
+                /^\/live-office\/?/i,
                 ""
             );
 
+        /*
+         * Quitar / iniciales restantes.
+         */
 
         ruta =
             ruta.replace(
@@ -1437,16 +1305,28 @@
                 ""
             );
 
+        /*
+         * Si estamos en:
+         *
+         * /live-office/
+         *
+         * se considera index.html.
+         */
 
-        return ruta
-            .toLowerCase();
+        if (
+            ruta === ""
+        ) {
 
+            ruta =
+                "index.html";
+        }
+
+        return ruta.toLowerCase();
     }
 
-
-    /* =========================================
+    /* =========================================================
        BUSCAR PERMISO DE LA PÁGINA
-    ========================================= */
+    ========================================================= */
 
     function encontrarPermisoPagina(
         pagina
@@ -1457,32 +1337,25 @@
                 pagina
             );
 
-
         const entrada =
             Object.entries(
                 PAGINAS_PERMISOS
             ).find(
-
                 ([ruta]) =>
-
                     normalizarRuta(
                         ruta
                     ) ===
                     paginaNormalizada
-
             );
-
 
         return entrada
             ? entrada[1]
             : null;
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        BLOQUEAR PÁGINA
-    ========================================= */
+    ========================================================= */
 
     function bloquearPagina(
         modulo
@@ -1491,11 +1364,9 @@
         const paginaActual =
             obtenerPaginaActual();
 
-
         /*
-         * Si ya estamos en Oficina y no hay
-         * acceso, mostramos bloqueo para evitar
-         * un bucle infinito.
+         * Si estamos en Oficina,
+         * mostrar bloqueo.
          */
 
         if (
@@ -1508,9 +1379,7 @@
             );
 
             return;
-
         }
-
 
         /*
          * Cualquier otro módulo bloqueado
@@ -1520,13 +1389,11 @@
         window.location.replace(
             "/live-office/index.html"
         );
-
     }
 
-
-    /* =========================================
-       BLOQUEO EN LA PÁGINA OFICINA
-    ========================================= */
+    /* =========================================================
+       BLOQUEO EN OFICINA
+    ========================================================= */
 
     function mostrarBloqueoOficina(
         modulo
@@ -1537,17 +1404,12 @@
                 ".content"
             );
 
-
         if (!contenido) {
-
             return;
-
         }
 
+        contenido.innerHTML = `
 
-        contenido.innerHTML =
-
-            `
             <div
                 style="
                     max-width: 600px;
@@ -1592,71 +1454,89 @@
                 </p>
 
             </div>
-            `;
 
+        `;
     }
 
-
-    /* =========================================
+    /* =========================================================
        OBTENER CAMPO SHAREPOINT
-    ========================================= */
+    ========================================================= */
 
     function obtenerCampo(
         registro,
         nombre
     ) {
 
-        if (
-            !registro
-        ) {
-
+        if (!registro) {
             return "";
-
         }
 
-
         const fields =
-            registro.fields ||
-            {};
-
+            registro.fields || {};
 
         const objetivo =
             normalizarTexto(
                 nombre
             );
 
-
         const clave =
             Object.keys(
                 fields
             ).find(
-
                 key =>
-
                     normalizarTexto(
                         key
-                    ) === objetivo
-
+                    ) ===
+                    objetivo
             );
 
-
         if (!clave) {
-
             return "";
-
         }
 
-
-        return fields[
-            clave
-        ];
-
+        return fields[clave];
     }
 
+    /* =========================================================
+       OBTENER CAMPO FLEXIBLE
+       PERMITE VARIOS NOMBRES POSIBLES
+    ========================================================= */
 
-    /* =========================================
+    function obtenerCampoFlexible(
+        registro,
+        nombres
+    ) {
+
+        if (!registro) {
+            return "";
+        }
+
+        for (
+            const nombre of nombres
+        ) {
+
+            const valor =
+                obtenerCampo(
+                    registro,
+                    nombre
+                );
+
+            if (
+                valor !== "" &&
+                valor !== null &&
+                valor !== undefined
+            ) {
+
+                return valor;
+            }
+        }
+
+        return "";
+    }
+
+    /* =========================================================
        VALOR BOOLEANO
-    ========================================= */
+    ========================================================= */
 
     function valorBooleano(
         valor
@@ -1668,17 +1548,22 @@
         ) {
 
             return true;
-
         }
 
+        if (
+            valor === false ||
+            valor === 0
+        ) {
+
+            return false;
+        }
 
         const texto =
             String(
-                valor || ""
+                valor ?? ""
             )
                 .trim()
                 .toLowerCase();
-
 
         return (
 
@@ -1690,23 +1575,24 @@
 
             texto === "sí" ||
 
-            texto === "si"
+            texto === "si" ||
 
+            texto === "checked" ||
+
+            texto === "on"
         );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        NORMALIZAR TEXTO
-    ========================================= */
+    ========================================================= */
 
     function normalizarTexto(
         valor
     ) {
 
         return String(
-            valor || ""
+            valor ?? ""
         )
             .normalize(
                 "NFD"
@@ -1720,37 +1606,33 @@
                 /[^a-z0-9]/g,
                 ""
             );
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        NORMALIZAR CORREO
-    ========================================= */
+    ========================================================= */
 
     function normalizarCorreo(
         correo
     ) {
 
         return String(
-            correo || ""
+            correo ?? ""
         )
             .trim()
             .toLowerCase();
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        NORMALIZAR RUTA
-    ========================================= */
+    ========================================================= */
 
     function normalizarRuta(
         ruta
     ) {
 
         return String(
-            ruta || ""
+            ruta ?? ""
         )
             .replace(
                 /^\/+/,
@@ -1761,13 +1643,11 @@
                 ""
             )
             .toLowerCase();
-
     }
 
-
-    /* =========================================
+    /* =========================================================
        ESCAPAR HTML
-    ========================================= */
+    ========================================================= */
 
     function escaparHTML(
         valor
@@ -1796,7 +1676,7 @@
                 /'/g,
                 "&#039;"
             );
-
     }
 
 })();
+

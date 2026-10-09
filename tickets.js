@@ -61,6 +61,21 @@ const reporteCantidad=document.getElementById("reporteCantidad");
 const reportePeriodo=document.getElementById("reportePeriodo");
 const reporteMensaje=document.getElementById("reporteMensaje");
 
+function esUsuarioTI() {
+    return window.alferzaPermisos?.grupo === "TI";
+}
+
+function aplicarPermisosReportes() {
+    const autorizado = esUsuarioTI();
+    abrirReporte.hidden = !autorizado;
+
+    if (!autorizado && reporteModal.classList.contains("show")) {
+        cerrarReporte();
+    }
+
+    return autorizado;
+}
+
 function escaparHTML(valor){
 if(valor===null||valor===undefined){return "";}
 return String(valor).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
@@ -613,6 +628,7 @@ doc.text(`Página ${pagina} de ${paginas}`,anchoPagina-10,altoPagina-7,{align:"r
 }
 
 function generarInformePDF(){
+if (!aplicarPermisosReportes()) return;
 if(typeof window.jspdf==="undefined"){
 mostrarReporteMensaje("No se pudo cargar la librería PDF.","error");
 return;
@@ -819,6 +835,7 @@ generarReportePDFBtn.innerHTML="🧾 Generar PDF";
 }
 
 function abrirModalReporte(){
+if (!aplicarPermisosReportes()) return;
 establecerMesReporteActual();
 actualizarCantidadReporte();
 reporteMensaje.textContent="";
@@ -934,6 +951,13 @@ window.mostrarDetalleTicket=mostrarDetalleTicket;
 
 establecerMesReporteActual();
 actualizarCantidadReporte();
+
+document.addEventListener("alferza:access-granted", aplicarPermisosReportes);
+
+if (window.alferzaPermisos) {
+    aplicarPermisosReportes();
+}
+
 iniciarTickets();
 
 })();

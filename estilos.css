@@ -1,0 +1,317 @@
+
+/* =========================================================
+   ALFERZA LIVE OFFICE
+   COMPONENTES GLOBALES
+   Header | Navbar | Footer
+========================================================= */
+
+
+/* =========================================================
+   1. VARIABLES GLOBALES
+========================================================= */
+
+:root {
+    --component-bg: #111827;
+    --component-bg-hover: #1f2937;
+    --component-text: #ffffff;
+    --component-text-muted: #9ca3af;
+    --component-border: rgba(255, 255, 255, 0.08);
+    --component-accent: #0a84ff;
+    --component-live: #22c55e;
+
+    --component-transition: 0.2s ease;
+}
+
+
+/* =========================================================
+   2. HEADER GLOBAL
+========================================================= */
+
+/*
+   Aplica la clase .global-header al encabezado compartido.
+   Conserva aquí la estructura y los elementos de tu HTML.
+*/
+
+.global-header {
+    position: relative;
+    z-index: 100;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--component-bg);
+    color: var(--component-text);
+    border-bottom: 1px solid var(--component-border);
+}
+
+.global-header * {
+    box-sizing: border-box;
+}
+
+.global-header a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   3. NAVBAR GLOBAL
+========================================================= */
+
+/*
+   Aplica .global-navbar al contenedor del navbar.
+   Usa .navbar-link para cada enlace y .active para la
+   página seleccionada.
+*/
+
+.global-navbar {
+    position: relative;
+    box-sizing: border-box;
+    background: var(--component-bg);
+    color: var(--component-text);
+}
+
+.global-navbar * {
+    box-sizing: border-box;
+}
+
+.global-navbar a {
+    color: var(--component-text-muted);
+    text-decoration: none;
+    transition:
+        color var(--component-transition),
+        background var(--component-transition);
+}
+
+.global-navbar .navbar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.global-navbar .navbar-link:hover {
+    color: var(--component-text);
+    background: var(--component-bg-hover);
+}
+
+.global-navbar .navbar-link.active {
+    color: var(--component-text);
+    background: rgba(10, 132, 255, 0.16);
+    box-shadow: inset 3px 0 0 var(--component-accent);
+}
+
+
+/* =========================================================
+   4. FOOTER GLOBAL
+========================================================= */
+
+.topbar-footer {
+    position: relative;
+    width: 100%;
+    padding: 14px 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--component-bg);
+    color: var(--component-text);
+    text-align: center;
+    border-top: 1px solid var(--component-border);
+}
+
+.topbar-footer * {
+    box-sizing: border-box;
+}
+
+.footer-main {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.footer-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+.footer-line-primary {
+    animation: footerEnter 0.7s ease both;
+    font-size: 14px;
+}
+
+.footer-line-primary h2 {
+    display: inline;
+    margin: 0;
+    color: var(--component-text);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+}
+
+.footer-line-secondary {
+    color: #d1d5db;
+    font-size: 13px;
+}
+
+.footer-separator {
+    color: #9ca3af;
+}
+
+#footerDay,
+#footerDate {
+    color: #d1d5db;
+    font-size: 14px;
+}
+
+#footerDay {
+    text-transform: capitalize;
+}
+
+#footerTime {
+    color: var(--component-text);
+    font-size: 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.footer-line-secondary strong {
+    color: var(--component-text);
+    font-size: 12px;
+    letter-spacing: 0.8px;
+}
+
+.footer-live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--component-live);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    animation: footerPulse 1.8s ease-in-out infinite;
+}
+
+.footer-shine {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+        110deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.04) 50%,
+        transparent 65%
+    );
+    transform: translateX(-100%);
+    animation: footerShine 7s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   5. ANIMACIONES
+========================================================= */
+
+@keyframes footerEnter {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes footerPulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes footerShine {
+    0%,
+    15% {
+        transform: translateX(-100%);
+    }
+
+    75%,
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+
+/* =========================================================
+   6. RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+    .global-navbar .navbar-link {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 500px) {
+    .topbar-footer {
+        padding: 12px 6px;
+    }
+
+    .footer-line {
+        gap: 5px;
+    }
+
+    .footer-line-primary h2 {
+        font-size: 13px;
+    }
+
+    #footerDay,
+    #footerDate,
+    #footerTime {
+        font-size: 12px;
+    }
+
+    .footer-line-primary {
+        font-size: 12px;
+    }
+
+    .footer-line-secondary {
+        font-size: 12px;
+    }
+}
+
+
+/* =========================================================
+   7. ACCESIBILIDAD
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .footer-line-primary,
+    .footer-live-dot,
+    .footer-shine {
+        animation: none;
+    }
+
+    .global-navbar a {
+        transition: none;
+    }
+}

@@ -1,21 +1,27 @@
-
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
 <title>Infraestructura TI | ALFERZA LIVE OFFICE</title>
 
 <script>
-if (sessionStorage.getItem("alferza_login") !== "true") {
-    window.location.replace("login.html");
-}
+    if (sessionStorage.getItem("alferza_login") !== "true") {
+        window.location.replace("login.html");
+    }
 </script>
 
 <link rel="preconnect" href="https://graph.microsoft.com">
 <link rel="preconnect" href="https://login.microsoftonline.com">
+
 <link rel="stylesheet" href="infraestructura.css?v=5">
+<link rel="stylesheet" href="estilos.css">
 <link rel="stylesheet" href="ticket-widget.css">
+```
+
 </head>
 
 <body>
@@ -84,10 +90,7 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
             </div>
         </section>
 
-        <!-- =====================================================
-             SERVICIOS
-             Visible para todos los usuarios autorizados.
-        ====================================================== -->
+        <!-- SERVICIOS -->
 
         <section class="monitor-section servicios-section">
 
@@ -112,11 +115,7 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
 
         </section>
 
-        <!-- =====================================================
-             INVENTARIO TI
-             Solo debe mostrarse a usuarios autorizados de TI.
-             El ID se coloca exclusivamente en esta sección.
-        ====================================================== -->
+        <!-- INVENTARIO TI -->
 
         <section
             class="monitor-section equipos-section"
@@ -131,7 +130,10 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
                     <p>Inventario de equipos obtenido desde Active Directory.</p>
                 </div>
 
-                <div class="section-heading-actions" style="display:flex;align-items:center;gap:12px;">
+                <div
+                    class="section-heading-actions"
+                    style="display:flex;align-items:center;gap:12px;"
+                >
 
                     <button
                         type="button"
@@ -249,18 +251,37 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
 
         </section>
 
-        <footer class="page-footer">
-            <span>ALFERZA LIVE OFFICE</span>
-            <span>Infraestructura TI</span>
-            <span>© 2026 ALFERZA HOLDING</span>
-        </footer>
-
     </main>
 </div>
 
-<!-- =========================================================
-     MODAL DE GESTIÓN DE TRABAJADORES
-========================================================= -->
+<!-- FOOTER COMPARTIDO -->
+
+<footer class="topbar-footer">
+    <div class="footer-main">
+
+        <div class="footer-line footer-line-primary">
+            <h2>ALFERZA LIVE OFFICE</h2>
+            <span class="footer-separator">-</span>
+            <span id="footerDay">--</span>
+            <span class="footer-separator">|</span>
+            <span id="footerDate">--/--/----</span>
+            <span class="footer-separator">|</span>
+            <strong id="footerTime">--:--:--</strong>
+        </div>
+
+        <div class="footer-line footer-line-secondary">
+            <span>Mesa de ayuda TI</span>
+            <span class="footer-separator">-</span>
+            <span class="footer-live-dot"></span>
+            <strong>EN VIVO</strong>
+        </div>
+
+    </div>
+
+    <div class="footer-shine"></div>
+</footer>
+
+<!-- MODAL DE GESTIÓN DE TRABAJADORES -->
 
 <div id="gestionTrabajadorModal" class="modal-overlay" style="display:none;">
 
@@ -335,19 +356,38 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
         </div>
 
         <div class="modal-footer">
-            <button type="button" id="cancelarGestionTrabajador" class="modal-btn secondary">
+            <button
+                type="button"
+                id="cancelarGestionTrabajador"
+                class="modal-btn secondary"
+            >
                 Cancelar
             </button>
 
-            <button type="button" id="btnEliminarTrabajador" class="modal-btn danger" disabled>
+            <button
+                type="button"
+                id="btnEliminarTrabajador"
+                class="modal-btn danger"
+                disabled
+            >
                 Eliminar
             </button>
 
-            <button type="button" id="btnEditarTrabajador" class="modal-btn secondary" disabled>
+            <button
+                type="button"
+                id="btnEditarTrabajador"
+                class="modal-btn secondary"
+                disabled
+            >
                 Editar
             </button>
 
-            <button type="button" id="btnRegistrarTrabajador" class="modal-btn primary" disabled>
+            <button
+                type="button"
+                id="btnRegistrarTrabajador"
+                class="modal-btn primary"
+                disabled
+            >
                 Registrar
             </button>
         </div>
@@ -355,11 +395,48 @@ if (sessionStorage.getItem("alferza_login") !== "true") {
     </div>
 </div>
 
+<!-- SCRIPTS -->
+
 <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
 <script src="access-control.js"></script>
 <script defer src="infraestructura.js?v=6"></script>
 <script src="ticket-widget.js"></script>
 
+<!-- RELOJ DEL FOOTER -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function actualizarFooter() {
+            const ahora = new Date();
+
+            document.getElementById("footerDay").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    weekday: "long"
+                }).format(ahora);
+
+            document.getElementById("footerDate").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }).format(ahora);
+
+            document.getElementById("footerTime").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false
+                }).format(ahora);
+        }
+
+        actualizarFooter();
+        setInterval(actualizarFooter, 1000);
+    });
+</script>
+
 </body>
 </html>
-

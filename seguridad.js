@@ -8,16 +8,29 @@ const ITEMS_PER_PAGE=20;
 let filtroActivo=null;
 let trabajadorSeleccionado=null;
 
-document.addEventListener("DOMContentLoaded",async()=>{
-try{
-await iniciarSesion();
-await cargarSeguridad();
-actualizarDashboard();
-}catch(error){
-console.error("ERROR SEGURIDAD:",error);
-mostrarError(obtenerMensajeError(error));
+document.addEventListener("DOMContentLoaded", async () => {
+try {
+// Esperar a que access-control.js valide los permisos.
+if (!window.alferzaAccessReady) {
+throw new Error("No se pudo verificar el sistema de permisos.");
 }
+    const acceso = await window.alferzaAccessReady;
+    // No ejecutar Seguridad si el usuario no está autorizado.
+    if (!acceso || acceso.autorizado !== true) {
+        return;
+    }
+
+    await iniciarSesion();
+    await cargarSeguridad();
+    actualizarDashboard();
+
+} catch (error) {
+    console.error("ERROR SEGURIDAD:", error);
+    mostrarError(obtenerMensajeError(error));
+}
+
 });
+
 
 async function iniciarSesion(){
 const redirectResponse=await msalInstance.handleRedirectPromise();

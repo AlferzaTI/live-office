@@ -30,19 +30,6 @@ const PAGINAS={
 const PAGINAS_PUBLICAS=["login.html","blank.html"];
 const CACHE_PERMISOS_MS=5*60*1000;
 
-(function mostrarCargador(){
-const cargador=document.createElement("div");
-cargador.id="alferza-access-loader";
-cargador.style.cssText="position:fixed;inset:0;z-index:2147483647;background:#f4f6fa;display:flex;align-items:center;justify-content:center;font:14px Arial,sans-serif;color:#596579;";
-cargador.textContent="Verificando acceso...";
-(document.documentElement||document).appendChild(cargador);
-})();
-
-function quitarCargador(){
-const cargador=document.getElementById("alferza-access-loader");
-if(cargador){cargador.remove();}
-}
-
 let instanciaMSAL=null;
 let tokenGraph=null;
 
@@ -73,8 +60,6 @@ sessionStorage.setItem("alferza_permisos",JSON.stringify({correo:correo,permisos
 
 function mostrarDenegacion(mensaje,volverAlLogin){
 function renderizar(){
-quitarCargador();
-
 document.body.innerHTML=`
 <main id="alferza-access-denied" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#f4f6fa;font-family:Arial,sans-serif;color:#172033;text-align:center;">
 <section style="width:100%;max-width:460px;padding:36px 28px;background:#fff;border:1px solid #e1e6ef;border-radius:16px;box-sizing:border-box;">
@@ -210,12 +195,28 @@ enlace.setAttribute("tabindex","-1");
 });
 }
 
+(function filtrarMenuDesdeCache(){
+if(sessionStorage.getItem("alferza_login")!=="true"){return;}
+
+let cache=null;
+try{cache=JSON.parse(sessionStorage.getItem("alferza_permisos")||"null");}catch(e){}
+
+if(!cache||!cache.permisos||Date.now()-cache.fecha>=CACHE_PERMISOS_MS){return;}
+
+const aplicar=function(){filtrarMenu(cache.permisos);};
+
+if(document.readyState==="loading"){
+document.addEventListener("DOMContentLoaded",aplicar,{once:true});
+}else{
+aplicar();
+}
+})();
+
 async function validarAcceso(){
 const ruta=window.location.pathname;
 const archivo=ruta.toLowerCase().split("/").pop();
 
 if(PAGINAS_PUBLICAS.includes(archivo)){
-quitarCargador();
 return {autorizado:true,publico:true};
 }
 
@@ -288,7 +289,6 @@ await new Promise(function(resolve){document.addEventListener("DOMContentLoaded"
 }
 
 filtrarMenu(permisos);
-quitarCargador();
 
 window.dispatchEvent(new CustomEvent("alferza:access-granted",{detail:permisos}));
 

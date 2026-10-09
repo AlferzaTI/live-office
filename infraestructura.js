@@ -1541,26 +1541,58 @@ console.error("Error en actualización automática:",error);
 }
 }
 
-function iniciarInfraestructura(){
-cargarDashboard();
+function iniciarInfraestructura() {
+    cargarDashboard();
 
-setTimeout(()=>{
-if(equiposData.length===0&&!document.getElementById("panelDiagnostico")){
-mostrarDiagnostico("Sin respuesta tras 20 s",new Error("Aún no llegan datos. Si ves el botón «Iniciar sesión con Microsoft», púlsalo."));
-}
-},20000);
+    setTimeout(async () => {
+        if (document.getElementById("panelDiagnostico")) {
+            return;
+        }
 
-setInterval(actualizarDashboard,INTERVALO_ACTUALIZACION);
+        // Comprobar si el usuario puede acceder al inventario.
+        const puedeVerInventario =
+            await verificarPermisosInventario();
 
-document.addEventListener("visibilitychange",()=>{
-if(!document.hidden&&Date.now()-ultimaActualizacion>30000){
-actualizarDashboard();
-}
-});
-}
+        // Para usuarios que no son de TI, comprobar los servicios.
+        if (!puedeVerInventario) {
+            if (
+                (!serviciosGrid || !serviciosGrid.children.length) &&
+                !document.getElementById("panelDiagnostico")
+            ) {
+                mostrarDiagnostico(
+                    "Sin respuesta tras 20 s",
+                    new Error(
+                        "Aún no se han cargado los servicios de MonitoreoTI."
+                    )
+                );
+            }
 
-if(document.readyState==="loading"){
-document.addEventListener("DOMContentLoaded",iniciarInfraestructura);
-}else{
-iniciarInfraestructura();
+            return;
+        }
+
+        // Para TI, comprobar tanto los servicios como el inventario.
+        if (
+            equiposData.length === 0 &&
+            (!serviciosGrid || !serviciosGrid.children.length) &&
+            !document.getElementById("panelDiagnostico")
+        ) {
+            mostrarDiagnostico(
+                "Sin respuesta tras 20 s",
+                new Error(
+                    "No se han recibido datos del inventario ni de los servicios."
+                )
+            );
+        }
+    }, 20000);
+
+    setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
+
+    document.addEventListener("visibilitychange", () => {
+        if (
+            !document.hidden &&
+            Date.now() - ultimaActualizacion > 30000
+        ) {
+            actualizarDashboard();
+        }
+    });
 }

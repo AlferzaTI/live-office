@@ -964,9 +964,24 @@ window.mostrarDetalleTicket=mostrarDetalleTicket;
 establecerMesReporteActual();
 actualizarCantidadReporte();
 
-document.addEventListener("alferza:access-granted", aplicarPermisosReportes);
+document.addEventListener(
+    "alferza:access-granted",
+    aplicarPermisosReportes
+);
 
-if (window.alferzaPermisos) {
+if (window.alferzaAccessReady) {
+    window.alferzaAccessReady.then(function(resultado) {
+        if (resultado && resultado.autorizado === true) {
+            aplicarPermisosReportes();
+        } else {
+            abrirReporte.hidden = true;
+            abrirReporte.style.display = "none";
+        }
+    }).catch(function() {
+        abrirReporte.hidden = true;
+        abrirReporte.style.display = "none";
+    });
+} else {
     aplicarPermisosReportes();
 }
 

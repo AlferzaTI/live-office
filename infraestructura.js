@@ -1471,25 +1471,26 @@ const caja=loadingOverlay.querySelector(".loading-content")||loadingOverlay.quer
 if(caja){caja.appendChild(boton);}
 }
 
-
 async function iniciarCargas() {
-    try {
-        // Los servicios se cargan para todos los usuarios autorizados.
-        await cargarServicios();
+    ultimaActualizacion = Date.now();
 
-        // Esperar la resolución de los permisos.
-        const puedeVerInventario =
-            await verificarPermisosInventario();
+    // Los servicios están disponibles para todos los usuarios autorizados.
+    cargarServicios();
 
-        // Inventario y trabajadores: únicamente grupo TI.
-        if (puedeVerInventario) {
-            await cargarEquipos();
-            await obtenerTrabajadores();
-        }
-    } catch (error) {
-        console.error("Error al iniciar las cargas:", error);
+    // El inventario solo se consulta para el grupo TI.
+    if (await verificarPermisosInventario()) {
+        cargarEquipos()
+            .then(() => {
+                if (equiposData.length > 0) {
+                    return obtenerTrabajadores();
+                }
+            })
+            .catch(error => {
+                console.warn("Carga de inventario falló:", error);
+            });
     }
 }
+
 async function cargarDashboard(){
 try{
 if(!msalInstanceInfraestructura){
@@ -1526,75 +1527,40 @@ mostrarBotonLogin("No se pudo cargar el monitoreo.");
 }
 }
 
+async function actualizarDashboard(){
+if(document.hidden||!tokenActual){return;}
 
-async function actualizarDashboard() {
-    try {
-        // Actualizar servicios para todos los usuarios autorizados.
-        await cargarServicios();
+try{
+if(!(await obtenerTokenSilencioso())){return;}
 
-        // Actualizar inventario y trabajadores solo para TI.
-        const puedeVerInventario =
-            await verificarPermisosInventario();
+ultimaActualizacion=Date.now();
 
-        if (puedeVerInventario) {
-            await cargarEquipos();
-            await obtenerTrabajadores();
-        }
-    } catch (error) {
-        console.error("Error al actualizar el dashboard:", error);
-    }
+await Promise.all([cargarServicios(),cargarEquipos()]);
+}catch(error){
+console.error("Error en actualización automática:",error);
+}
 }
 
+function iniciarInfraestructura(){
+cargarDashboard();
 
-function iniciarInfraestructura() {
-    cargarDashboard();
+setTimeout(()=>{
+if(equiposData.length===0&&!document.getElementById("panelDiagnostico")){
+mostrarDiagnostico("Sin respuesta tras 20 s",new Error("Aún no llegan datos. Si ves el botón «Iniciar sesión con Microsoft», púlsalo."));
+}
+},20000);
 
-    setTimeout(async () => {
-        if (document.getElementById("panelDiagnostico")) {
-            return;
-        }
+setInterval(actualizarDashboard,INTERVALO_ACTUALIZACION);
 
-        try {
-            const puedeVerInventario =
-                await verificarPermisosInventario();
+document.addEventListener("visibilitychange",()=>{
+if(!document.hidden&&Date.now()-ultimaActualizacion>30000){
+actualizarDashboard();
+}
+});
+}
 
-            const serviciosVisibles =
-                serviciosGrid &&
-                serviciosGrid.children.length > 0;
-
-            const inventarioVisible =
-                puedeVerInventario &&
-                equiposData.length > 0;
-
-            if (!serviciosVisibles && !inventarioVisible) {
-                mostrarDiagnostico(
-                    "Sin respuesta tras 20 s",
-                    new Error(
-                        "No se han cargado los servicios de MonitoreoTI" +
-                        (puedeVerInventario
-                            ? " ni el inventario."
-                            : ".")
-                    )
-                );
-            }
-        } catch (error) {
-            console.error(
-                "Error al comprobar la carga inicial:",
-                error
-            );
-        }
-    }, 20000);
-
-    setInterval(() => {
-        actualizarDashboard();
-    }, INTERVALO_ACTUALIZACION);
-
-    document.addEventListener("visibilitychange", () => {
-        if (
-            !document.hidden &&
-            Date.now() - ultimaActualizacion > 30000
-        ) {
-            actualizarDashboard();
-        }
-    });
+if(document.readyState==="loading"){
+document.addEventListener("DOMContentLoaded",iniciarInfraestructura);
+}else{
+iniciarInfraestructura();
 }

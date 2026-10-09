@@ -1,17 +1,18 @@
+
 (function () {
+    // =========================================
+    // WIDGET CUPHEAD
+    // =========================================
 
     const widget = document.createElement("div");
-
     widget.id = "cuphead-widget";
 
     const image = document.createElement("img");
-
     image.alt = "Cuphead";
+    image.draggable = false;
 
     widget.appendChild(image);
-
     document.body.appendChild(widget);
-
 
     // =========================================
     // CARGAR LOS 44 FRAMES
@@ -20,17 +21,13 @@
     const frames = [];
 
     for (let i = 1; i <= 44; i++) {
-
         const number = String(i).padStart(4, "0");
-
         const frame = new Image();
 
-        frame.src =
-            `img/Cuphead/Cuphead/cuphead_intro_b_${number}.png`;
+        frame.src = `img/Cuphead/Cuphead/cuphead_intro_b_${number}.png`;
 
         frames.push(frame);
     }
-
 
     // =========================================
     // ANIMACIÓN
@@ -39,7 +36,6 @@
     let currentFrame = 0;
 
     function animateCuphead() {
-
         image.src = frames[currentFrame].src;
 
         currentFrame++;
@@ -49,12 +45,10 @@
         }
     }
 
-
-    // Primer frame
+    // Mostrar el primer frame
     animateCuphead();
 
-
-    // Velocidad
+    // Velocidad de animación
     setInterval(animateCuphead, 80);
-
 })();
+

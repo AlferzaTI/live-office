@@ -207,6 +207,7 @@ to{opacity:1;transform:translateX(0)}
 
 /* ==========================================
    FOOTER ALFERZA LIVE OFFICE
+   TEMA OSCURO: HEADER Y SIDEBAR
 ========================================== */
 
 .topbar-footer {
@@ -215,59 +216,56 @@ to{opacity:1;transform:translateX(0)}
     padding: 24px 20px;
     box-sizing: border-box;
     overflow: hidden;
-    color: #fff;
+
+    /* Negro/gris oscuro, sin degradado azul */
+    background: #111827;
+    color: #ffffff;
+
     text-align: center;
-
-    /* Mismo degradado de tickets-header */
-    background: linear-gradient(
-        135deg,
-        #00205c 0%,
-        #07377f 48%,
-        #0a84ff 100%
-    );
-
-    box-shadow: 0 -8px 25px rgba(0, 32, 92, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Todo centrado vertical y horizontalmente */
+/* Contenido completamente centrado */
 .footer-main {
     position: relative;
     z-index: 2;
+
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+
     width: 100%;
     gap: 12px;
     text-align: center;
 }
 
-/* ALFERZA LIVE OFFICE + descripción */
+/* Marca */
 .footer-logo {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 100%;
     gap: 5px;
-    text-align: center;
+
     animation: footerEnter 0.7s ease both;
 }
 
 .footer-logo h2 {
     margin: 0;
-    color: #fff;
+    color: #ffffff;
     font-size: 16px;
     font-weight: 800;
     letter-spacing: 1.2px;
 }
 
 .footer-logo span {
-    color: rgba(255, 255, 255, 0.75);
+    color: #9ca3af;
     font-size: 12px;
 }
 
-/* Día, fecha y hora */
+/* Fecha y hora */
 .footer-clock {
     display: flex;
     justify-content: center;
@@ -275,13 +273,14 @@ to{opacity:1;transform:translateX(0)}
     flex-wrap: wrap;
     gap: 10px;
     width: 100%;
-    color: rgba(255, 255, 255, 0.9);
+
+    color: #d1d5db;
     font-size: 12px;
     text-align: center;
 }
 
 .footer-separator {
-    color: rgba(255, 255, 255, 0.45);
+    color: #6b7280;
 }
 
 #footerDay {
@@ -289,20 +288,21 @@ to{opacity:1;transform:translateX(0)}
 }
 
 #footerTime {
-    color: #fff;
+    color: #ffffff;
     font-size: 13px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
-/* Indicador EN VIVO */
+/* Estado EN VIVO */
 .footer-live {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
     width: 100%;
-    color: #fff;
+
+    color: #ffffff;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1px;
@@ -313,23 +313,26 @@ to{opacity:1;transform:translateX(0)}
     height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    background: #22c55e;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+
     animation: footerPulse 1.8s ease-in-out infinite;
 }
 
-/* Brillo animado */
+/* Brillo sutil animado */
 .footer-shine {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
+
     background: linear-gradient(
         110deg,
         transparent 35%,
-        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.04) 50%,
         transparent 65%
     );
+
     transform: translateX(-100%);
     animation: footerShine 7s ease-in-out infinite;
 }
@@ -338,8 +341,9 @@ to{opacity:1;transform:translateX(0)}
 @keyframes footerEnter {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -351,6 +355,7 @@ to{opacity:1;transform:translateX(0)}
         opacity: 1;
         transform: scale(1);
     }
+
     50% {
         opacity: 0.45;
         transform: scale(0.8);
@@ -361,6 +366,7 @@ to{opacity:1;transform:translateX(0)}
     0%, 15% {
         transform: translateX(-100%);
     }
+
     75%, 100% {
         transform: translateX(100%);
     }

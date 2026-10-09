@@ -1480,26 +1480,27 @@ console.error("Error en actualización automática:",error);
 }
 }
 
-function iniciarInfraestructura(){
-cargarDashboard();
 
-setTimeout(()=>{
-if(equiposData.length===0&&!document.getElementById("panelDiagnostico")){
-mostrarDiagnostico("Sin respuesta tras 20 s",new Error("Aún no llegan datos. Si ves el botón «Iniciar sesión con Microsoft», púlsalo."));
-}
-},20000);
+function iniciarInfraestructura() {
+    cargarDashboard();
 
-setInterval(actualizarDashboard,INTERVALO_ACTUALIZACION);
+    setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
 
-document.addEventListener("visibilitychange",()=>{
-if(!document.hidden&&Date.now()-ultimaActualizacion>30000){
-actualizarDashboard();
-}
-});
+    document.addEventListener("visibilitychange", () => {
+        if (
+            !document.hidden &&
+            Date.now() - ultimaActualizacion > 30000
+        ) {
+            actualizarDashboard();
+        }
+    });
 }
 
-if(document.readyState==="loading"){
-document.addEventListener("DOMContentLoaded",iniciarInfraestructura);
-}else{
-iniciarInfraestructura();
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        iniciarInfraestructura
+    );
+} else {
+    iniciarInfraestructura();
 }

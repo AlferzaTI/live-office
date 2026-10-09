@@ -1,725 +1,215 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Comunicados | ALFERZA LIVE OFFICE</title>
-
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="comunicados.css">
-    <link rel="stylesheet" href="ticket-widget.css">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comunicados | ALFERZA LIVE OFFICE</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="comunicados.css">
+<link rel="stylesheet" href="ticket-widget.css">
 </head>
-
 <body>
 
+<header class="topbar">
+<div class="logo">
+<h1>ALFERZA LIVE OFFICE</h1>
+<span>Comunicados internos</span>
+</div>
+<div class="live-status">
+<span class="live-status-dot"></span>
+<span>EN VIVO</span>
+</div>
+</header>
 
-    <!-- ==========================================
-         BARRA SUPERIOR
-    =========================================== -->
+<div class="container">
 
-    <header class="topbar">
+<aside class="sidebar">
+<h2>MENÚ</h2>
+<ul>
+<li onclick="window.location.href='index.html'">🏢 Oficina</li>
+<li onclick="window.location.href='personal.html'">👥 Personal</li>
+<li onclick="window.location.href='reserva.html'">📝 Reservas</li>
+<li onclick="window.location.href='salas/salas.html'">📅 Salas</li>
+<li class="active">📢 Comunicados</li>
+<li onclick="window.location.href='seguridad.html'">🔐 Seguridad</li>
+<li onclick="window.location.href='infraestructura.html'">🏗️ Infraestructura</li>
+<li onclick="window.location.href='tickets.html'">🎫 Tickets</li>
+<li onclick="window.location.href='permisos.html'">🔐 Permisos</li>
+<li onclick="window.location.href='configuracion.html'">⚙️ Configuración</li>
+</ul>
+</aside>
 
-        <div class="logo">
-
-            <h1>ALFERZA LIVE OFFICE</h1>
-
-            <span>
-                Comunicados internos
-            </span>
-
-        </div>
-
-        <div class="live-status">
-
-            <span class="live-status-dot"></span>
-
-            <span>EN VIVO</span>
-
-        </div>
-
-    </header>
-
-
-
-    <!-- ==========================================
-         CONTENIDO PRINCIPAL
-    =========================================== -->
-
-    <div class="container">
-
-
-        <!-- ==========================================
-             MENÚ LATERAL
-        =========================================== -->
-
-       <aside class="sidebar">
-
-        <h2>
-            MENÚ
-        </h2>
-
-
-        <ul>
-
-            <li
-                onclick="window.location.href='index.html'"
-            >
-                🏢 Oficina
-            </li>
-
-
-            <li
-                onclick="window.location.href='personal.html'"
-            >
-                👥 Personal
-            </li>
-
-
-            <li
-                onclick="window.location.href='reserva.html'"
-            >
-                📝 Reservas
-            </li>
-
-
-            <li
-                onclick="window.location.href='salas/salas.html'"
-            >
-                📅 Salas
-            </li>
-
-
-            <li class="active">
-                📢 Comunicados
-
-            </li>
-
-            <li onclick="window.location.href='seguridad.html'">
-                🔐 Seguridad
-            </li>
-
-            <li onclick="window.location.href='infraestructura.html'">
-                🏗️ Infraestructura
-            </li>
-
-            <li onclick="window.location.href='tickets.html'">
-                🎫 Tickets
-            </li>
-
-            <li
-                onclick="window.location.href='permisos.html'"
-            >
-                🔐 Permisos
-            </li>
-
-
-            <li onclick="window.location.href='configuracion.html'">
-                    ⚙️ Configuración
-            </li>
-
-        </ul>
-
-    </aside>
-
-
-
-        <!-- ==========================================
-             CONTENIDO
-        =========================================== -->
-
-        <main class="content">
-
-
-            <!-- ==========================================
-                 ENCABEZADO DE COMUNICADOS
-            =========================================== -->
-
-            <!-- ==========================================
-     ENCABEZADO DE COMUNICADOS
-=========================================== -->
+<main class="content">
 
 <section class="comunicados-header">
-
-    <div class="comunicados-header-content">
-
-        <div class="comunicados-header-icon">
-            <span>☰</span>
-        </div>
-
-        <div class="comunicados-header-text">
-
-            <div class="comunicados-breadcrumb">
-                OFICINA
-                <span>/</span>
-                COMUNICADOS
-            </div>
-
-            <h2>
-                Comunicados
-            </h2>
-
-            <p>
-                Información, avisos y comunicaciones internas
-                para todos los colaboradores de ALFERZA.
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <div class="comunicados-header-date">
-
-        <div class="date-icon">
-            📢
-        </div>
-
-        <div>
-            <span>ACTUALIZACIONES</span>
-
-            <strong>
-                COMUNICADOS INTERNOS
-            </strong>
-        </div>
-
-    </div>
-
+<div class="comunicados-header-content">
+<div class="comunicados-header-icon"><span>☰</span></div>
+<div class="comunicados-header-text">
+<div class="comunicados-breadcrumb">
+OFICINA
+<span>/</span>
+COMUNICADOS
+</div>
+<h2>Comunicados</h2>
+<p>Información, avisos y comunicaciones internas para todos los colaboradores de ALFERZA.</p>
+</div>
+</div>
+<div class="comunicados-header-date">
+<div class="date-icon">📢</div>
+<div>
+<span>ACTUALIZACIONES</span>
+<strong>COMUNICADOS INTERNOS</strong>
+</div>
+</div>
 </section>
 
-
-
-            <!-- ==========================================
-                 GRID DE COMUNICADOS
-            =========================================== -->
-
-            <div class="comunicados-grid">
-
-
-                <!-- ==========================================
-                     COMUNICADO 1
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/comunicado1.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            11 de septiembre de 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Seguridad de la información, prevención
-                            de phishing y uso del sistema de reserva
-                            de salas ALFERZA.
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 2
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/comunicado2.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            Comunicado interno
-                        </span>
-
-                        <h3>
-                            Información importante
-                        </h3>
-
-                        <p>
-                            Revisa las últimas comunicaciones
-                            de ALFERZA.
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 3
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/comunicado3.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            Comunicado interno
-                        </span>
-
-                        <h3>
-                            Nuevo comunicado
-                        </h3>
-
-                        <p>
-                            Información importante para
-                            todos los colaboradores.
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 4
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO5.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            Comunicado interno
-                        </span>
-
-                        <h3>
-                            Cumpleaños Setiembre
-                        </h3>
-
-                        <p>
-                            Celebracion de los cumpleaños de los colaboradores
-                            de Alferza del mes de Setiembre
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 7
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO7.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            22 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Problemas de Conexion Oficina Alferza
-                        </h3>
-
-                        <p>
-                            Comunicado interno sobre la conexion de internet
-                            de las oficinas
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- ==========================================
-                     COMUNICADO 6
-                =========================================== -->
-
-                <article class="comunicado-card">
-
-                    <img
-                        src="comunicados/COMUNICADO6.jpeg"
-                        alt="Comunicado ALFERZA"
-                        class="comunicado-imagen"
-                        onclick="abrirComunicado(this.src)"
-                    >
-
-                    <div class="comunicado-info">
-
-                        <span class="comunicado-fecha">
-                            15 DE SETIEMBRE DEL 2026
-                        </span>
-
-                        <h3>
-                            Capacitación obligatoria
-                        </h3>
-
-                        <p>
-                            Capacitacion sobre seguridad de la informacion,
-                            prevencion de phishing y uso de sistema de reserva
-                            de salas Alferza
-                        </p>
-
-                    </div>
-
-                </article>
-
-
-            </div>
-
-        </main>
-
-    </div>
-
-
-
-    <!-- ==========================================
-         VISOR DE COMUNICADO
-    =========================================== -->
-
-    <div
-        id="visorComunicado"
-        class="visor"
-        onclick="cerrarComunicado()"
-    >
-
-        <span
-            class="visor-cerrar"
-            onclick="cerrarComunicado()"
-        >
-            &times;
-        </span>
-
-
-        <img
-            id="imagenGrande"
-            src=""
-            alt="Comunicado ampliado"
-            onclick="event.stopPropagation()"
-        >
-
-    </div>
-
-
-
-    <!-- ==========================================
-         FOOTER
-    =========================================== -->
-
-    <footer>
-
-        ALFERZA LIVE OFFICE · Comunicados internos
-
-    </footer>
-
-
-
-    <!-- ==========================================
-         JAVASCRIPT
-    =========================================== -->
-
-    <script>
-
-        function abrirComunicado(imagen) {
-
-            const visor =
-                document.getElementById("visorComunicado");
-
-            const imagenGrande =
-                document.getElementById("imagenGrande");
-
-
-            imagenGrande.src = imagen;
-
-            visor.classList.add("mostrar");
-
-            document.body.style.overflow = "hidden";
-
-        }
-
-
-        function cerrarComunicado() {
-
-            const visor =
-                document.getElementById("visorComunicado");
-
-
-            visor.classList.remove("mostrar");
-
-            document.body.style.overflow = "";
-
-        }
-
-
-        document.addEventListener("keydown", function(event) {
-
-            if (event.key === "Escape") {
-
-                cerrarComunicado();
-
-            }
-
-        });
-
-    </script>
-    <script src="auth.js"></script>
-    <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
-    <script src="access-control.js"></script>
-
-    <script src="ticket-widget.js"></script>
-
+<div class="comunicados-grid">
+
+<article class="comunicado-card">
+<img src="comunicados/comunicado1.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">11 de septiembre de 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Seguridad de la información, prevención de phishing y uso del sistema de reserva de salas ALFERZA.</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/comunicado2.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">Comunicado interno</span>
+<h3>Información importante</h3>
+<p>Revisa las últimas comunicaciones de ALFERZA.</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/comunicado3.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">Comunicado interno</span>
+<h3>Nuevo comunicado</h3>
+<p>Información importante para todos los colaboradores.</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO5.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">Comunicado interno</span>
+<h3>Cumpleaños Setiembre</h3>
+<p>Celebracion de los cumpleaños de los colaboradores de Alferza del mes de Setiembre</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO7.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">22 DE SETIEMBRE DEL 2026</span>
+<h3>Problemas de Conexion Oficina Alferza</h3>
+<p>Comunicado interno sobre la conexion de internet de las oficinas</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+<article class="comunicado-card">
+<img src="comunicados/COMUNICADO6.jpeg" alt="Comunicado ALFERZA" class="comunicado-imagen" onclick="abrirComunicado(this.src)">
+<div class="comunicado-info">
+<span class="comunicado-fecha">15 DE SETIEMBRE DEL 2026</span>
+<h3>Capacitación obligatoria</h3>
+<p>Capacitacion sobre seguridad de la informacion, prevencion de phishing y uso de sistema de reserva de salas Alferza</p>
+</div>
+</article>
+
+</div>
+
+</main>
+</div>
+
+<div id="visorComunicado" class="visor" onclick="cerrarComunicado()">
+<span class="visor-cerrar" onclick="cerrarComunicado()">&times;</span>
+<img id="imagenGrande" src="" alt="Comunicado ampliado" onclick="event.stopPropagation()">
+</div>
+
+<footer>ALFERZA LIVE OFFICE · Comunicados internos</footer>
+
+<script>
+function abrirComunicado(imagen){
+const visor=document.getElementById("visorComunicado");
+const imagenGrande=document.getElementById("imagenGrande");
+
+imagenGrande.src=imagen;
+visor.classList.add("mostrar");
+document.body.style.overflow="hidden";
+}
+
+function cerrarComunicado(){
+const visor=document.getElementById("visorComunicado");
+visor.classList.remove("mostrar");
+document.body.style.overflow="";
+}
+
+document.addEventListener("keydown",function(event){
+if(event.key==="Escape"){cerrarComunicado();}
+});
+</script>
+
+<script src="auth.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+<script src="access-control.js"></script>
+<script src="ticket-widget.js"></script>
 
 </body>
-
 </html>

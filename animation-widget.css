@@ -1,45 +1,41 @@
 
-/* =========================================
-   CUPHEAD WIDGET FIJO
-========================================= */
+/* WIDGET CUPHEAD: FIJO EN LA PANTALLA */
 
 #cuphead-widget {
     position: fixed !important;
+    top: 8px !important;
+    bottom: auto !important;
+    left: 12px !important;
+    right: auto !important;
 
-    top: 8px;
-    left: 12px;
+    width: 60px !important;
+    height: auto !important;
 
-    width: 60px;
-    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
 
-    z-index: 999999;
-    pointer-events: none;
+    z-index: 2147483647 !important;
+    pointer-events: none !important;
 
-    margin: 0;
-    padding: 0;
-
-    display: block;
+    transform: none !important;
 }
-
-/* Imagen animada */
 
 #cuphead-widget img {
     display: block;
-
     width: 100%;
     height: auto;
-
     object-fit: contain;
-    user-select: none;
-    -webkit-user-drag: none;
+    margin: 0;
+    padding: 0;
 }
 
-/* Reducir tamaño en pantallas pequeñas */
+/* Tamaño reducido en móviles */
 
 @media (max-width: 768px) {
     #cuphead-widget {
-        top: 6px;
-        left: 8px;
-        width: 45px;
+        top: 6px !important;
+        left: 8px !important;
+        width: 45px !important;
     }
 }
+

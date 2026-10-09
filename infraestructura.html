@@ -73,21 +73,25 @@ if(sessionStorage.getItem("alferza_login")!=="true"){window.location.replace("lo
 </div>
 </section>
 
-<section class="monitor-section equipos-section" id="inventarioTISection">
-<div class="section-heading">
-<div class="section-title-group">
-<span class="section-kicker">SERVICIOS</span>
-<h2>Estado de servicios</h2>
-<p>Estado actual de los servicios tecnológicos monitoreados.</p>
-</div>
-<div id="estadoGeneral" class="section-status online">● OPERATIVO</div>
-</div>
-<div id="serviciosGrid" class="service-grid">
-<div class="service-card service-loading">
-<div class="loading-spinner small"></div>
-<span>Cargando servicios...</span>
-</div>
-</div>
+<section class="monitor-section servicios-section">
+    <div class="section-heading">
+        <div class="section-title-group">
+            <span class="section-kicker">SERVICIOS</span>
+            <h2>Estado de servicios</h2>
+            <p>Estado actual de los servicios tecnológicos monitoreados.</p>
+        </div>
+
+        <div id="estadoGeneral" class="section-status online">
+            ● OPERATIVO
+        </div>
+    </div>
+
+    <div id="serviciosGrid" class="service-grid">
+        <div class="service-card service-loading">
+            <div class="loading-spinner small"></div>
+            <span>Cargando servicios...</span>
+        </div>
+    </div>
 </section>
 
 <section class="monitor-section equipos-section">

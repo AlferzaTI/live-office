@@ -1,17 +1,13 @@
 /* =========================================================
    CONTROL DE ACCESO AL INVENTARIO TI
-   El inventario solo se muestra al grupo TI.
 ========================================================= */
 
 (function controlarAccesoInventario() {
     const inventario = document.getElementById("inventarioTISection");
 
-    if (!inventario) {
-        return;
-    }
+    if (!inventario) return;
 
-    // Ocultar inicialmente para evitar que aparezca antes
-    // de que access-control.js determine los permisos.
+    // Ocultar únicamente el inventario mientras se validan permisos.
     inventario.style.display = "none";
 
     function actualizarVisibilidadInventario() {
@@ -20,47 +16,24 @@
             .trim()
             .toUpperCase();
 
-        const autorizado = grupo === "TI";
-
-        inventario.style.display = autorizado ? "" : "none";
-
-        // Si el usuario no pertenece a TI, cerrar el modal
-        // de gestión si estuviera abierto.
-        if (!autorizado) {
-            const modal = document.getElementById(
-                "gestionTrabajadorModal"
-            );
-
-            if (modal) {
-                modal.style.display = "none";
-            }
-        }
+        // Solo TI puede ver el inventario.
+        inventario.style.display = grupo === "TI" ? "" : "none";
     }
 
-    // Aplicar los permisos cuando el sistema de acceso
-    // confirme la identidad del usuario.
     window.addEventListener(
         "alferza:access-granted",
         actualizarVisibilidadInventario
     );
 
-    // Comprobar si los permisos ya fueron cargados.
-    actualizarVisibilidadInventario();
-
-    // Volver a comprobar cuando termine la inicialización
-    // del control de acceso, si expone esta promesa.
     if (window.alferzaAccessReady &&
         typeof window.alferzaAccessReady.then === "function") {
         window.alferzaAccessReady
             .then(actualizarVisibilidadInventario)
-            .catch(error => {
-                console.error(
-                    "No se pudieron verificar los permisos del inventario:",
-                    error
-                );
-
+            .catch(() => {
                 inventario.style.display = "none";
             });
+    } else {
+        actualizarVisibilidadInventario();
     }
 })();
 

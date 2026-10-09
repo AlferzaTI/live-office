@@ -1,963 +1,270 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Seguridad | ALFERZA LIVE OFFICE
-    </title>
-
-
-    <!-- ==========================================
-         COMPROBAR ACCESO
-    ========================================== -->
-
-    <script>
-
-        if (
-            sessionStorage.getItem("alferza_login") !== "true"
-        ) {
-
-            window.location.replace(
-                "login.html"
-            );
-
-        }
-
-    </script>
-
-
-    <!-- ==========================================
-         ESTILOS
-    ========================================== -->
-
-    <link
-        rel="stylesheet"
-        href="seguridad.css?v=7"
-    >
-
-    <link
-        rel="stylesheet"
-        href="ticket-widget.css"
-    >
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguridad | ALFERZA LIVE OFFICE</title>
+<script>
+if(sessionStorage.getItem("alferza_login")!=="true"){window.location.replace("login.html");}
+</script>
+<link rel="stylesheet" href="seguridad.css?v=7">
+<link rel="stylesheet" href="ticket-widget.css">
 </head>
-
-
 <body>
 
-
-<!-- ==========================================
-     BARRA SUPERIOR
-========================================== -->
-
 <header class="topbar">
-
-    <div class="logo">
-
-        <h1>
-            ALFERZA LIVE OFFICE
-        </h1>
-
-        <span>
-            Monitoreo en tiempo real
-        </span>
-
-    </div>
-
-
-    <div class="live-status">
-
-        <span class="live-status-dot"></span>
-
-        <span>
-            EN VIVO
-        </span>
-
-    </div>
-
+<div class="logo">
+<h1>ALFERZA LIVE OFFICE</h1>
+<span>Monitoreo en tiempo real</span>
+</div>
+<div class="live-status">
+<span class="live-status-dot"></span>
+<span>EN VIVO</span>
+</div>
 </header>
-
-
-
-<!-- ==========================================
-     CONTENEDOR
-========================================== -->
 
 <div class="container">
 
-
-    <!-- ======================================
-         MENÚ LATERAL
-    ====================================== -->
-
-    <aside class="sidebar">
-
-        <h2>
-            MENÚ
-        </h2>
-
-
-        <ul>
-
-            <li
-                onclick="window.location.href='index.html'"
-            >
-                🏢 Oficina
-            </li>
-
-
-            <li
-                onclick="window.location.href='personal.html'"
-            >
-                👥 Personal
-            </li>
-
-
-            <li
-                onclick="window.location.href='reserva.html'"
-            >
-                📝 Reservas
-            </li>
-
-
-            <li
-                onclick="window.location.href='salas/salas.html'"
-            >
-                📅 Salas
-            </li>
-
-
-            <li
-                onclick="window.location.href='comunicados.html'"
-            >
-                📢 Comunicados
-            </li>
-
-            <li class="active">
-                🔐 Seguridad
-
-            </li>
-
-            <li onclick="window.location.href='infraestructura.html'">
-                🏗️ Infraestructura
-            </li>
-
-            <li
-                onclick="window.location.href='tickets.html'"
-            >
-                🎫 Tickets
-            </li>
-
-            <li
-                onclick="window.location.href='permisos.html'"
-            >
-                🔐 Permisos
-            </li>
-
-
-            <li onclick="window.location.href='configuracion.html'">
-                    ⚙️ Configuración
-            </li>
-
-        </ul>
-
-    </aside>
-
-
-
-    <!-- ======================================
-         CONTENIDO
-    ====================================== -->
-
-    <main class="content">
-
-
-        <!-- ==================================
-             ENCABEZADO
-        ================================== -->
-
-        <div class="page-header">
-
-            <div>
-
-                <h2>
-                    Seguridad
-                </h2>
-
-                <p>
-                    Directorio y actividad administrativa de Microsoft 365
-                </p>
-
-            </div>
-
-
-            <button
-                class="refresh-button"
-                id="refreshButton"
-            >
-
-                ↻
-
-                Actualizar
-
-            </button>
-
-        </div>
-
-
-
-        <!-- ==================================
-             ESTADÍSTICAS / FILTROS
-        ================================== -->
-
-        <section class="stats">
-
-
-            <!-- USUARIOS -->
-
-            <div
-                class="stat blue filter-card"
-                data-filter="usuarios"
-                role="button"
-                tabindex="0"
-            >
-
-                <span id="totalUsuarios">
-                    —
-                </span>
-
-                <small>
-                    Usuarios registrados
-                </small>
-
-            </div>
-
-
-
-            <!-- CUENTAS BLOQUEADAS -->
-
-            <div
-                class="stat red filter-card"
-                data-filter="bloqueadas"
-                role="button"
-                tabindex="0"
-            >
-
-                <span id="cuentasBloqueadas">
-                    —
-                </span>
-
-                <small>
-                    Cuentas bloqueadas
-                </small>
-
-            </div>
-
-
-
-            <!-- AUDITORÍA -->
-
-            <div
-                class="stat purple filter-card"
-                data-filter="auditoria"
-                role="button"
-                tabindex="0"
-            >
-
-                <span id="eventosAuditoria">
-                    —
-                </span>
-
-                <small>
-                    Eventos de auditoría
-                </small>
-
-            </div>
-
-
-
-            <!-- DEPARTAMENTOS -->
-
-            <div
-                class="stat green filter-card"
-                data-filter="departamentos"
-                role="button"
-                tabindex="0"
-            >
-
-                <span id="totalDepartamentos">
-                    —
-                </span>
-
-                <small>
-                    Departamentos
-                </small>
-
-            </div>
-
-
-        </section>
-
-
-
-        <!-- ==================================
-             BUSCADOR DE TRABAJADORES
-        ================================== -->
-
-        <div class="worker-search">
-
-            <h3>
-                Buscar trabajador
-            </h3>
-
-
-            <div class="search-box">
-
-                <span class="search-icon">
-                    🔎
-                </span>
-
-
-                <input
-                    type="text"
-                    id="workerSearch"
-                    placeholder="Buscar por nombre, usuario, correo o departamento..."
-                    autocomplete="off"
-                >
-
-
-                <button
-                    type="button"
-                    id="clearWorkerSearch"
-                    class="clear-search"
-                    title="Limpiar búsqueda"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div
-                id="workerSearchResult"
-                class="worker-search-result"
-            ></div>
-
-        </div>
-
-
-
-        <!-- ==================================
-             GRID PRINCIPAL
-        ================================== -->
-
-        <section class="dashboard-grid">
-
-
-            <!-- ==================================
-                 1. USUARIOS REGISTRADOS
-            ================================== -->
-
-            <div
-                class="dashboard-card filter-section"
-                data-section="usuarios"
-            >
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            DIRECTORIO
-                        </span>
-
-                        <h3>
-                            Usuarios registrados
-                        </h3>
-
-                    </div>
-
-
-                    <span
-                        class="counter blue-counter"
-                        id="usersCounter"
-                    >
-                        —
-                    </span>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table class="directory-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Usuario
-                                </th>
-
-                                <th>
-                                    Correo electrónico
-                                </th>
-
-                                <th>
-                                    Departamento
-                                </th>
-
-                                <th>
-                                    Estado
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="usersTable">
-
-                            <tr>
-
-                                <td
-                                    colspan="4"
-                                    class="loading-cell"
-                                >
-                                    Cargando usuarios...
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div
-                    class="pagination"
-                    id="usersPagination"
-                ></div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 2. USUARIOS POR DEPARTAMENTO
-            ================================== -->
-
-            <div
-                class="dashboard-card filter-section"
-                data-section="departamentos"
-            >
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            DIRECTORIO
-                        </span>
-
-                        <h3>
-                            Usuarios por departamento
-                        </h3>
-
-                    </div>
-
-
-                    <span
-                        class="counter green-counter"
-                        id="departmentsCounter"
-                    >
-                        —
-                    </span>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table class="department-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Departamento
-                                </th>
-
-                                <th>
-                                    Usuarios
-                                </th>
-
-                                <th>
-                                    Distribución
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="departmentTable">
-
-                            <tr>
-
-                                <td
-                                    colspan="3"
-                                    class="loading-cell"
-                                >
-                                    Cargando departamentos...
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div
-                    class="pagination"
-                    id="departmentsPagination"
-                ></div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 3. RESUMEN DE ACTIVIDAD
-            ================================== -->
-
-            <div
-                class="dashboard-card filter-section"
-                data-section="auditoria"
-            >
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            AUDITORÍA
-                        </span>
-
-                        <h3>
-                            Resumen de actividad
-                        </h3>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="audit-summary"
-                    id="auditSummary"
-                >
-
-                    <div class="loading">
-                        Cargando información...
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 4. CUENTAS BLOQUEADAS
-            ================================== -->
-
-            <div
-                class="dashboard-card filter-section"
-                data-section="bloqueadas"
-            >
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            CUENTAS
-                        </span>
-
-                        <h3>
-                            Cuentas bloqueadas
-                        </h3>
-
-                    </div>
-
-
-                    <span
-                        class="counter red-counter"
-                        id="blockedCounter"
-                    >
-                        —
-                    </span>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table class="directory-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Usuario
-                                </th>
-
-                                <th>
-                                    Correo electrónico
-                                </th>
-
-                                <th>
-                                    Departamento
-                                </th>
-
-                                <th>
-                                    Estado
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="blockedTable">
-
-                            <tr>
-
-                                <td
-                                    colspan="4"
-                                    class="loading-cell"
-                                >
-                                    Cargando cuentas...
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div
-                    class="pagination"
-                    id="blockedPagination"
-                ></div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 5. RESUMEN DE USUARIOS
-            ================================== -->
-
-            <div class="dashboard-card">
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            DIRECTORIO
-                        </span>
-
-                        <h3>
-                            Resumen de usuarios
-                        </h3>
-
-                    </div>
-
-                </div>
-
-
-                <div class="directory-summary">
-
-
-                    <div class="summary-row">
-
-                        <div class="summary-icon blue-icon">
-                            👥
-                        </div>
-
-                        <div>
-
-                            <strong id="summaryUsers">
-                                —
-                            </strong>
-
-                            <small>
-                                Usuarios registrados
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="summary-row">
-
-                        <div class="summary-icon red-icon">
-                            🔒
-                        </div>
-
-                        <div>
-
-                            <strong id="summaryBlocked">
-                                —
-                            </strong>
-
-                            <small>
-                                Cuentas deshabilitadas
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="summary-row">
-
-                        <div class="summary-icon purple-icon">
-                            📋
-                        </div>
-
-                        <div>
-
-                            <strong id="summaryAudit">
-                                —
-                            </strong>
-
-                            <small>
-                                Eventos últimos 30 días
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="summary-row">
-
-                        <div class="summary-icon green-icon">
-                            🏢
-                        </div>
-
-                        <div>
-
-                            <strong id="summaryDepartments">
-                                —
-                            </strong>
-
-                            <small>
-                                Departamentos identificados
-                            </small>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 6. ACTIVIDAD RECIENTE / MONITOREO
-            ================================== -->
-
-            <div
-                class="dashboard-card wide-card filter-section"
-                data-section="auditoria"
-            >
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            MONITOREO
-                        </span>
-
-                        <h3>
-                            Actividad reciente
-                        </h3>
-
-                    </div>
-
-
-                    <span
-                        class="counter audit-counter"
-                        id="auditCounter"
-                    >
-                        —
-                    </span>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table class="audit-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Acción
-                                </th>
-
-                                <th>
-                                    Realizado por
-                                </th>
-
-                                <th>
-                                    Recurso afectado
-                                </th>
-
-                                <th>
-                                    Fecha
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="auditTable">
-
-                            <tr>
-
-                                <td
-                                    colspan="4"
-                                    class="loading-cell"
-                                >
-                                    Cargando eventos...
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div
-                    class="pagination"
-                    id="auditPagination"
-                ></div>
-
-            </div>
-
-
-
-            <!-- ==================================
-                 7. INFORMACIÓN
-            ================================== -->
-
-            <div class="dashboard-card wide-card">
-
-                <div class="information-box">
-
-                    <div class="information-icon">
-                        ✓
-                    </div>
-
-
-                    <div>
-
-                        <strong>
-                            Datos disponibles
-                        </strong>
-
-                        <p>
-                            Este panel utiliza información disponible
-                            directamente desde Microsoft Graph. La
-                            auditoría muestra actividad del directorio
-                            registrada durante los últimos 30 días.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-        </section>
-
-
-    </main>
-
+<aside class="sidebar">
+<h2>MENÚ</h2>
+<ul>
+<li onclick="window.location.href='index.html'">🏢 Oficina</li>
+<li onclick="window.location.href='personal.html'">👥 Personal</li>
+<li onclick="window.location.href='reserva.html'">📝 Reservas</li>
+<li onclick="window.location.href='salas/salas.html'">📅 Salas</li>
+<li onclick="window.location.href='comunicados.html'">📢 Comunicados</li>
+<li class="active">🔐 Seguridad</li>
+<li onclick="window.location.href='infraestructura.html'">🏗️ Infraestructura</li>
+<li onclick="window.location.href='tickets.html'">🎫 Tickets</li>
+<li onclick="window.location.href='permisos.html'">🔐 Permisos</li>
+<li onclick="window.location.href='configuracion.html'">⚙️ Configuración</li>
+</ul>
+</aside>
+
+<main class="content">
+
+<div class="page-header">
+<div>
+<h2>Seguridad</h2>
+<p>Directorio y actividad administrativa de Microsoft 365</p>
+</div>
+<button class="refresh-button" id="refreshButton">↻ Actualizar</button>
 </div>
 
+<section class="stats">
+<div class="stat blue filter-card" data-filter="usuarios" role="button" tabindex="0">
+<span id="totalUsuarios">—</span>
+<small>Usuarios registrados</small>
+</div>
+<div class="stat red filter-card" data-filter="bloqueadas" role="button" tabindex="0">
+<span id="cuentasBloqueadas">—</span>
+<small>Cuentas bloqueadas</small>
+</div>
+<div class="stat purple filter-card" data-filter="auditoria" role="button" tabindex="0">
+<span id="eventosAuditoria">—</span>
+<small>Eventos de auditoría</small>
+</div>
+<div class="stat green filter-card" data-filter="departamentos" role="button" tabindex="0">
+<span id="totalDepartamentos">—</span>
+<small>Departamentos</small>
+</div>
+</section>
+
+<div class="worker-search">
+<h3>Buscar trabajador</h3>
+<div class="search-box">
+<span class="search-icon">🔎</span>
+<input type="text" id="workerSearch" placeholder="Buscar por nombre, usuario, correo o departamento..." autocomplete="off">
+<button type="button" id="clearWorkerSearch" class="clear-search" title="Limpiar búsqueda">×</button>
+</div>
+<div id="workerSearchResult" class="worker-search-result"></div>
+</div>
+
+<section class="dashboard-grid">
+
+<div class="dashboard-card filter-section" data-section="usuarios">
+<div class="card-header">
+<div>
+<span class="card-label">DIRECTORIO</span>
+<h3>Usuarios registrados</h3>
+</div>
+<span class="counter blue-counter" id="usersCounter">—</span>
+</div>
+<div class="table-container">
+<table class="directory-table">
+<thead>
+<tr>
+<th>Usuario</th>
+<th>Correo electrónico</th>
+<th>Departamento</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody id="usersTable">
+<tr><td colspan="4" class="loading-cell">Cargando usuarios...</td></tr>
+</tbody>
+</table>
+</div>
+<div class="pagination" id="usersPagination"></div>
+</div>
+
+<div class="dashboard-card filter-section" data-section="departamentos">
+<div class="card-header">
+<div>
+<span class="card-label">DIRECTORIO</span>
+<h3>Usuarios por departamento</h3>
+</div>
+<span class="counter green-counter" id="departmentsCounter">—</span>
+</div>
+<div class="table-container">
+<table class="department-table">
+<thead>
+<tr>
+<th>Departamento</th>
+<th>Usuarios</th>
+<th>Distribución</th>
+</tr>
+</thead>
+<tbody id="departmentTable">
+<tr><td colspan="3" class="loading-cell">Cargando departamentos...</td></tr>
+</tbody>
+</table>
+</div>
+<div class="pagination" id="departmentsPagination"></div>
+</div>
+
+<div class="dashboard-card filter-section" data-section="auditoria">
+<div class="card-header">
+<div>
+<span class="card-label">AUDITORÍA</span>
+<h3>Resumen de actividad</h3>
+</div>
+</div>
+<div class="audit-summary" id="auditSummary">
+<div class="loading">Cargando información...</div>
+</div>
+</div>
+
+<div class="dashboard-card filter-section" data-section="bloqueadas">
+<div class="card-header">
+<div>
+<span class="card-label">CUENTAS</span>
+<h3>Cuentas bloqueadas</h3>
+</div>
+<span class="counter red-counter" id="blockedCounter">—</span>
+</div>
+<div class="table-container">
+<table class="directory-table">
+<thead>
+<tr>
+<th>Usuario</th>
+<th>Correo electrónico</th>
+<th>Departamento</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody id="blockedTable">
+<tr><td colspan="4" class="loading-cell">Cargando cuentas...</td></tr>
+</tbody>
+</table>
+</div>
+<div class="pagination" id="blockedPagination"></div>
+</div>
+
+<div class="dashboard-card">
+<div class="card-header">
+<div>
+<span class="card-label">DIRECTORIO</span>
+<h3>Resumen de usuarios</h3>
+</div>
+</div>
+<div class="directory-summary">
+
+<div class="summary-row">
+<div class="summary-icon blue-icon">👥</div>
+<div>
+<strong id="summaryUsers">—</strong>
+<small>Usuarios registrados</small>
+</div>
+</div>
+
+<div class="summary-row">
+<div class="summary-icon red-icon">🔒</div>
+<div>
+<strong id="summaryBlocked">—</strong>
+<small>Cuentas deshabilitadas</small>
+</div>
+</div>
+
+<div class="summary-row">
+<div class="summary-icon purple-icon">📋</div>
+<div>
+<strong id="summaryAudit">—</strong>
+<small>Eventos últimos 30 días</small>
+</div>
+</div>
+
+<div class="summary-row">
+<div class="summary-icon green-icon">🏢</div>
+<div>
+<strong id="summaryDepartments">—</strong>
+<small>Departamentos identificados</small>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="dashboard-card wide-card filter-section" data-section="auditoria">
+<div class="card-header">
+<div>
+<span class="card-label">MONITOREO</span>
+<h3>Actividad reciente</h3>
+</div>
+<span class="counter audit-counter" id="auditCounter">—</span>
+</div>
+<div class="table-container">
+<table class="audit-table">
+<thead>
+<tr>
+<th>Acción</th>
+<th>Realizado por</th>
+<th>Recurso afectado</th>
+<th>Fecha</th>
+</tr>
+</thead>
+<tbody id="auditTable">
+<tr><td colspan="4" class="loading-cell">Cargando eventos...</td></tr>
+</tbody>
+</table>
+</div>
+<div class="pagination" id="auditPagination"></div>
+</div>
+
+<div class="dashboard-card wide-card">
+<div class="information-box">
+<div class="information-icon">✓</div>
+<div>
+<strong>Datos disponibles</strong>
+<p>Este panel utiliza información disponible directamente desde Microsoft Graph. La auditoría muestra actividad del directorio registrada durante los últimos 30 días.</p>
+</div>
+</div>
+</div>
+
+</section>
+
+</main>
+</div>
+
+<footer>ALFERZA LIVE OFFICE · Teams Presence Dashboard</footer>
 
 
-<!-- ==========================================
-     FOOTER
-========================================== -->
-
-<footer>
-
-    ALFERZA LIVE OFFICE · Teams Presence Dashboard
-
-</footer>
-
-
-
-<!-- ==========================================
-     SCRIPTS
-========================================== -->
-
-<script
-    src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
-></script>
-
-<script
-    src="seguridad.js?v=7"
-></script>
-
- <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
- <script src="access-control.js"></script>
-
-    <script src="ticket-widget.js"></script>
-
+<script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+<script src="access-control.js?v=2"></script>
+<script src="seguridad.js?v=8"></script>
+<script src="ticket-widget.js"></script>
+</body>
+</html>
 
 </body>
-
 </html>

@@ -1,41 +1,31 @@
-
-/* WIDGET CUPHEAD: FIJO EN LA PANTALLA */
-
 #cuphead-widget {
     position: fixed !important;
     top: 8px !important;
-    bottom: auto !important;
     left: 12px !important;
     right: auto !important;
+    bottom: auto !important;
 
-    width: 60px !important;
-    height: auto !important;
+    width: 90px !important;
+    height: 90px !important;
 
+    z-index: 2147483647 !important;
+
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
 
-    z-index: 2147483647 !important;
-    pointer-events: none !important;
-
-    transform: none !important;
+    overflow: visible !important;
+    pointer-events: none;
 }
 
 #cuphead-widget img {
-    display: block;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    margin: 0;
-    padding: 0;
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    object-fit: contain !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
 }
-
-/* Tamaño reducido en móviles */
-
-@media (max-width: 768px) {
-    #cuphead-widget {
-        top: 6px !important;
-        left: 8px !important;
-        width: 45px !important;
-    }
-}
-

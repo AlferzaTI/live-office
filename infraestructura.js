@@ -1471,26 +1471,25 @@ const caja=loadingOverlay.querySelector(".loading-content")||loadingOverlay.quer
 if(caja){caja.appendChild(boton);}
 }
 
+
 async function iniciarCargas() {
-    ultimaActualizacion = Date.now();
+    try {
+        // Los servicios se cargan para todos los usuarios autorizados.
+        await cargarServicios();
 
-    // Los servicios están disponibles para todos los usuarios autorizados.
-    cargarServicios();
+        // Esperar la resolución de los permisos.
+        const puedeVerInventario =
+            await verificarPermisosInventario();
 
-    // El inventario solo se consulta para el grupo TI.
-    if (await verificarPermisosInventario()) {
-        cargarEquipos()
-            .then(() => {
-                if (equiposData.length > 0) {
-                    return obtenerTrabajadores();
-                }
-            })
-            .catch(error => {
-                console.warn("Carga de inventario falló:", error);
-            });
+        // Inventario y trabajadores: únicamente grupo TI.
+        if (puedeVerInventario) {
+            await cargarEquipos();
+            await obtenerTrabajadores();
+        }
+    } catch (error) {
+        console.error("Error al iniciar las cargas:", error);
     }
 }
-
 async function cargarDashboard(){
 try{
 if(!msalInstanceInfraestructura){
@@ -1527,19 +1526,25 @@ mostrarBotonLogin("No se pudo cargar el monitoreo.");
 }
 }
 
-async function actualizarDashboard(){
-if(document.hidden||!tokenActual){return;}
 
-try{
-if(!(await obtenerTokenSilencioso())){return;}
+async function actualizarDashboard() {
+    try {
+        // Actualizar servicios para todos los usuarios autorizados.
+        await cargarServicios();
 
-ultimaActualizacion=Date.now();
+        // Actualizar inventario y trabajadores solo para TI.
+        const puedeVerInventario =
+            await verificarPermisosInventario();
 
-await Promise.all([cargarServicios(),cargarEquipos()]);
-}catch(error){
-console.error("Error en actualización automática:",error);
+        if (puedeVerInventario) {
+            await cargarEquipos();
+            await obtenerTrabajadores();
+        }
+    } catch (error) {
+        console.error("Error al actualizar el dashboard:", error);
+    }
 }
-}
+
 
 function iniciarInfraestructura() {
     cargarDashboard();
@@ -1549,43 +1554,40 @@ function iniciarInfraestructura() {
             return;
         }
 
-        // Comprobar si el usuario puede acceder al inventario.
-        const puedeVerInventario =
-            await verificarPermisosInventario();
+        try {
+            const puedeVerInventario =
+                await verificarPermisosInventario();
 
-        // Para usuarios que no son de TI, comprobar los servicios.
-        if (!puedeVerInventario) {
-            if (
-                (!serviciosGrid || !serviciosGrid.children.length) &&
-                !document.getElementById("panelDiagnostico")
-            ) {
+            const serviciosVisibles =
+                serviciosGrid &&
+                serviciosGrid.children.length > 0;
+
+            const inventarioVisible =
+                puedeVerInventario &&
+                equiposData.length > 0;
+
+            if (!serviciosVisibles && !inventarioVisible) {
                 mostrarDiagnostico(
                     "Sin respuesta tras 20 s",
                     new Error(
-                        "Aún no se han cargado los servicios de MonitoreoTI."
+                        "No se han cargado los servicios de MonitoreoTI" +
+                        (puedeVerInventario
+                            ? " ni el inventario."
+                            : ".")
                     )
                 );
             }
-
-            return;
-        }
-
-        // Para TI, comprobar tanto los servicios como el inventario.
-        if (
-            equiposData.length === 0 &&
-            (!serviciosGrid || !serviciosGrid.children.length) &&
-            !document.getElementById("panelDiagnostico")
-        ) {
-            mostrarDiagnostico(
-                "Sin respuesta tras 20 s",
-                new Error(
-                    "No se han recibido datos del inventario ni de los servicios."
-                )
+        } catch (error) {
+            console.error(
+                "Error al comprobar la carga inicial:",
+                error
             );
         }
     }, 20000);
 
-    setInterval(actualizarDashboard, INTERVALO_ACTUALIZACION);
+    setInterval(() => {
+        actualizarDashboard();
+    }, INTERVALO_ACTUALIZACION);
 
     document.addEventListener("visibilitychange", () => {
         if (

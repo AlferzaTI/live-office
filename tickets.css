@@ -206,270 +206,219 @@ to{opacity:1;transform:translateX(0)}
 
 
 /* ==========================================
-   FOOTER - ALFERZA LIVE OFFICE
+   FOOTER ALFERZA LIVE OFFICE
 ========================================== */
 
 .topbar-footer {
     position: relative;
     width: 100%;
-    min-height: 100px;
-    padding: 19px 38px 0;
+    min-height: 76px;
+    padding: 14px 30px;
     box-sizing: border-box;
     overflow: hidden;
-    color: #ffffff;
-    background: #00205c;
+    color: #fff;
+    background: linear-gradient(
+        135deg,
+        #00205c 0%,
+        #07377f 48%,
+        #0a84ff 100%
+    );
     font-family: inherit;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Contenido principal */
-.footer-content {
+.footer-main {
     position: relative;
     z-index: 2;
-    display: flex;
-    justify-content: space-between;
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
     align-items: center;
-    gap: 25px;
-    min-height: 55px;
+    gap: 20px;
 }
 
-/* Marca */
-.footer-brand {
+/* Marca: mismo estilo que el header */
+.footer-logo {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    animation: footerBrandIn 0.8s ease both;
+    gap: 4px;
+    animation: footerLogoEnter 0.8s ease both;
 }
 
-.footer-brand h2 {
+.footer-logo h2 {
     margin: 0;
-    color: #ffffff;
+    color: #fff;
     font-size: 16px;
-    line-height: 1.2;
     font-weight: 800;
     letter-spacing: 1.2px;
 }
 
-.footer-brand > span {
-    color: rgba(255, 255, 255, 0.65);
+.footer-logo span {
+    color: rgba(255, 255, 255, 0.7);
     font-size: 11px;
-    letter-spacing: 0.3px;
 }
 
-/* Fecha, hora y estado */
-.footer-info {
+/* Fecha y hora centradas */
+.footer-clock {
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-end;
-    gap: 28px;
-    animation: footerInfoIn 0.9s ease both;
-}
-
-.footer-date-block,
-.footer-time-block {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.footer-label {
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.footer-date-block strong,
-.footer-time-block strong {
-    color: #ffffff;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
+    text-align: center;
+    animation: footerClockEnter 1s ease both;
 }
 
-.footer-time-block strong {
-    font-size: 15px;
+.footer-separator {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+#footerDay {
+    text-transform: capitalize;
+}
+
+#footerTime {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
     letter-spacing: 1px;
     font-variant-numeric: tabular-nums;
 }
 
-/* Indicador */
-.footer-status {
+/* EN VIVO */
+.footer-live {
     display: flex;
+    justify-content: flex-end;
     align-items: center;
-    gap: 8px;
-    padding-left: 20px;
-    border-left: 1px solid rgba(255, 255, 255, 0.17);
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 9px;
+    gap: 9px;
+    color: #fff;
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.7px;
+    letter-spacing: 1px;
     white-space: nowrap;
 }
 
-.footer-status-dot {
-    width: 7px;
-    height: 7px;
+.footer-live-dot {
+    width: 8px;
+    height: 8px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #35e6a0;
-    box-shadow: 0 0 10px rgba(53, 230, 160, 0.65);
-    animation: footerStatusPulse 2s ease-in-out infinite;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    animation: footerLivePulse 1.8s ease-in-out infinite;
 }
 
-/* Franja inferior */
-.footer-bottom {
-    position: relative;
-    z-index: 2;
-    min-height: 32px;
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.48);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.55px;
-}
-
-/* Animación distinta a la entrada del header */
-.footer-animation {
+/* Brillo animado: conserva el degradado corporativo */
+.footer-shine {
     position: absolute;
+    top: 0;
     bottom: 0;
-    left: -30%;
-    width: 30%;
-    height: 2px;
+    left: -45%;
+    width: 25%;
+    z-index: 1;
+    pointer-events: none;
     background: linear-gradient(
-        90deg,
+        110deg,
         transparent,
-        #0a84ff,
-        #ffffff,
-        #0a84ff,
+        rgba(255, 255, 255, 0.07),
+        rgba(255, 255, 255, 0.16),
+        rgba(255, 255, 255, 0.07),
         transparent
     );
-    animation: footerBorderFlow 6s linear infinite;
-    pointer-events: none;
+    transform: skewX(-20deg);
+    animation: footerShineMove 7s ease-in-out infinite;
 }
 
-/* Animaciones */
-@keyframes footerBrandIn {
+@keyframes footerLogoEnter {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateX(-12px);
     }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
+@keyframes footerClockEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-@keyframes footerInfoIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes footerBorderFlow {
-    0% {
-        left: -30%;
-    }
-
-    100% {
-        left: 100%;
-    }
-}
-
-@keyframes footerStatusPulse {
+@keyframes footerLivePulse {
     0%, 100% {
         opacity: 1;
         transform: scale(1);
     }
-
     50% {
         opacity: 0.45;
         transform: scale(0.8);
     }
 }
 
-/* Adaptación para tablets */
-@media (max-width: 900px) {
-    .topbar-footer {
-        padding-right: 25px;
-        padding-left: 25px;
+@keyframes footerShineMove {
+    0%, 10% {
+        left: -45%;
     }
-
-    .footer-content {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 18px;
-        padding-bottom: 15px;
-    }
-
-    .footer-info {
-        width: 100%;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 18px;
-    }
-
-    .footer-status {
-        padding-left: 0;
-        border-left: 0;
+    65%, 100% {
+        left: 125%;
     }
 }
 
-/* Adaptación para móviles */
+/* Responsive */
+@media (max-width: 850px) {
+    .footer-main {
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+    }
+
+    .footer-clock {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: flex-start;
+        padding-top: 8px;
+    }
+
+    .footer-live {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}
+
 @media (max-width: 500px) {
     .topbar-footer {
-        padding: 18px 18px 0;
+        padding: 16px 18px;
     }
 
-    .footer-brand h2 {
-        font-size: 14px;
+    .footer-logo h2 {
+        font-size: 13px;
+        letter-spacing: 0.8px;
     }
 
-    .footer-info {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 18px 12px;
-    }
-
-    .footer-date-block strong {
+    .footer-clock {
+        justify-content: flex-start;
+        gap: 7px;
         font-size: 11px;
     }
 
-    .footer-time-block strong {
-        font-size: 13px;
-    }
-
-    .footer-status {
-        grid-column: 1 / -1;
-    }
-
-    .footer-bottom {
-        align-items: flex-start;
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-        padding: 10px 0;
-        font-size: 8px;
+    .footer-live {
+        font-size: 10px;
     }
 }
 
-/* Respetar preferencias de movimiento */
 @media (prefers-reduced-motion: reduce) {
-    .footer-brand,
-    .footer-info,
-    .footer-animation,
-    .footer-status-dot {
+    .footer-logo,
+    .footer-clock,
+    .footer-live-dot,
+    .footer-shine {
         animation: none;
     }
 }

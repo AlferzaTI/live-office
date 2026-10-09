@@ -62,12 +62,24 @@ const reportePeriodo=document.getElementById("reportePeriodo");
 const reporteMensaje=document.getElementById("reporteMensaje");
 
 function esUsuarioTI() {
-    return window.alferzaPermisos?.grupo === "TI";
+    const permisos = window.alferzaPermisos;
+
+    if (!permisos) {
+        return false;
+    }
+
+    return String(permisos.grupo || "").trim().toUpperCase() === "TI";
 }
 
 function aplicarPermisosReportes() {
+    if (!abrirReporte || !reporteModal) {
+        return false;
+    }
+
     const autorizado = esUsuarioTI();
+
     abrirReporte.hidden = !autorizado;
+    abrirReporte.style.display = autorizado ? "" : "none";
 
     if (!autorizado && reporteModal.classList.contains("show")) {
         cerrarReporte();

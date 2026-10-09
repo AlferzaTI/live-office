@@ -1,315 +1,435 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
 <title>Salas | ALFERZA LIVE OFFICE</title>
+
 <script>
-(function(){
-if(sessionStorage.getItem("alferza_login")!=="true"){
-window.location.replace("/live-office/login.html");
-}
-})();
+    (function () {
+        if (sessionStorage.getItem("alferza_login") !== "true") {
+            window.location.replace("/live-office/login.html");
+        }
+    })();
 </script>
+
 <link rel="stylesheet" href="../styles.css">
-<link rel="stylesheet" href="../ticket-widget.css">
 <link rel="stylesheet" href="salas.css?v=20260921c">
+<link rel="stylesheet" href="../estilos.css">
+<link rel="stylesheet" href="../ticket-widget.css">
+
+
 </head>
+
 <body>
 
+
 <header class="topbar">
-<div class="logo">
-<h1>ALFERZA LIVE OFFICE</h1>
-<span>Monitoreo en tiempo real</span>
-</div>
-<div class="live-status">
-<span class="live-status-dot"></span>
-<span>EN VIVO</span>
-</div>
+    <div class="logo">
+        <h1>ALFERZA LIVE OFFICE</h1>
+        <span>Monitoreo en tiempo real</span>
+    </div>
+
+    <div class="live-status">
+        <span class="live-status-dot"></span>
+        <span>EN VIVO</span>
+    </div>
 </header>
 
 <div class="container">
 
-<aside class="sidebar">
-<h2>MENÚ</h2>
-<ul>
-<li onclick="window.location.href='../index.html'">🏢 Oficina</li>
-<li onclick="window.location.href='../personal.html'">👥 Personal</li>
-<li onclick="window.location.href='../reserva.html'">📝 Reservas</li>
-<li class="active">📅 Salas</li>
-<li onclick="window.location.href='../comunicados.html'">📢 Comunicados</li>
-<li onclick="window.location.href='../seguridad.html'">🔐 Seguridad</li>
-<li onclick="window.location.href='../infraestructura.html'">🏗️ Infraestructura</li>
-<li onclick="window.location.href='../tickets.html'">🎫 Tickets</li>
-<li onclick="window.location.href='../permisos.html'">🔐 Permisos</li>
-<li onclick="window.location.href='../configuracion.html'">⚙️ Configuración</li>
-</ul>
-</aside>
+    <aside class="sidebar">
+        <h2>MENÚ</h2>
 
-<main class="page">
+        <ul>
+            <li onclick="window.location.href='../index.html'">🏢 Oficina</li>
+            <li onclick="window.location.href='../personal.html'">👥 Personal</li>
+            <li onclick="window.location.href='../reserva.html'">📝 Reservas</li>
+            <li class="active">📅 Salas</li>
+            <li onclick="window.location.href='../comunicados.html'">📢 Comunicados</li>
+            <li onclick="window.location.href='../seguridad.html'">🔐 Seguridad</li>
+            <li onclick="window.location.href='../infraestructura.html'">🏗️ Infraestructura</li>
+            <li onclick="window.location.href='../tickets.html'">🎫 Tickets</li>
+            <li onclick="window.location.href='../permisos.html'">🔐 Permisos</li>
+            <li onclick="window.location.href='../configuracion.html'">⚙️ Configuración</li>
+        </ul>
+    </aside>
 
-<header class="page-header">
-<div class="header-glow"></div>
+    <main class="page">
 
-<div class="header-left">
-<div class="breadcrumb">
-<span>OFICINA</span>
-<span class="breadcrumb-separator">/</span>
-<strong>SALAS</strong>
+        <header class="page-header">
+            <div class="header-glow"></div>
+
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <span>OFICINA</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <strong>SALAS</strong>
+                </div>
+
+                <div class="title-wrapper">
+                    <div class="title-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <div class="title-content">
+                        <h1>Salas Corporativas</h1>
+                        <p>Monitoreo de reservas y ocupación de espacios.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-date">
+                <div class="date-icon"><span></span></div>
+                <div>
+                    <span class="date-label">HOY</span>
+                    <strong id="fechaActual">21 SEP 2026</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+
+            <article class="stat-card stat-blue">
+                <div class="stat-card-glow"></div>
+
+                <div class="stat-top">
+                    <div>
+                        <span class="stat-label">Total de salas</span>
+                        <span class="stat-mini-label">ESPACIOS DISPONIBLES</span>
+                    </div>
+                    <div class="stat-icon blue">
+                        <span class="building-icon"></span>
+                    </div>
+                </div>
+
+                <div class="stat-value">
+                    <strong id="totalSalas">3</strong>
+                    <span>espacios</span>
+                </div>
+
+                <div class="stat-description">Salas registradas en el sistema</div>
+                <div class="stat-line"></div>
+            </article>
+
+            <article class="stat-card stat-purple">
+                <div class="stat-card-glow"></div>
+
+                <div class="stat-top">
+                    <div>
+                        <span class="stat-label">Reservas de hoy</span>
+                        <span class="stat-mini-label">AGENDA DEL DÍA</span>
+                    </div>
+                    <div class="stat-icon purple">
+                        <span class="calendar-icon"></span>
+                    </div>
+                </div>
+
+                <div class="stat-value">
+                    <strong id="reservasHoy">0</strong>
+                    <span>reservas</span>
+                </div>
+
+                <div class="stat-description">Reservas registradas para hoy</div>
+                <div class="stat-line"></div>
+            </article>
+
+            <article class="stat-card stat-green">
+                <div class="stat-card-glow"></div>
+
+                <div class="stat-top">
+                    <div>
+                        <span class="stat-label">Reservas activas</span>
+                        <span class="stat-mini-label">EN TIEMPO REAL</span>
+                    </div>
+                    <div class="stat-icon green">
+                        <span class="active-icon"></span>
+                    </div>
+                </div>
+
+                <div class="stat-value">
+                    <strong id="reservasActivas">0</strong>
+                    <span>activas</span>
+                </div>
+
+                <div class="stat-description">Reservas actualmente vigentes</div>
+                <div class="stat-line"></div>
+            </article>
+
+            <article class="stat-card stat-red">
+                <div class="stat-card-glow"></div>
+
+                <div class="stat-top">
+                    <div>
+                        <span class="stat-label">Canceladas</span>
+                        <span class="stat-mini-label">ESTADO DE RESERVAS</span>
+                    </div>
+                    <div class="stat-icon red">
+                        <span class="cancel-icon"></span>
+                    </div>
+                </div>
+
+                <div class="stat-value">
+                    <strong id="reservasCanceladas">0</strong>
+                    <span>reservas</span>
+                </div>
+
+                <div class="stat-description">Reservas canceladas registradas</div>
+                <div class="stat-line"></div>
+            </article>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-header">
+                <div class="section-heading">
+                    <span class="section-kicker">
+                        <span class="kicker-dot"></span>
+                        ESPACIOS CORPORATIVOS
+                    </span>
+
+                    <h2>Estado de las salas</h2>
+                    <p>Consulta la disponibilidad actual de cada espacio.</p>
+                </div>
+
+                <div class="legend">
+                    <span><i class="legend-dot available-dot"></i>Disponible</span>
+                    <span><i class="legend-dot busy-dot"></i>Ocupada</span>
+                </div>
+            </div>
+
+            <div class="salas-grid">
+
+                <article class="sala-card sala-card-blue">
+                    <div class="sala-card-top-line"></div>
+
+                    <div class="sala-header">
+                        <div class="sala-number"><span>02</span></div>
+                        <div class="sala-status available">
+                            <i></i>
+                            <span>Disponible</span>
+                        </div>
+                    </div>
+
+                    <div class="sala-content">
+                        <div class="sala-info">
+                            <span class="room-category">SALA DE REUNIONES</span>
+                            <h3>Sala 2</h3>
+                            <p class="location">
+                                <span class="location-icon"></span>Piso 2
+                            </p>
+                        </div>
+
+                        <div class="reservation-count">
+                            <strong id="sala2Reservas">0</strong>
+                            <span>reservas hoy</span>
+                        </div>
+                    </div>
+
+                    <div class="room-progress"><span></span></div>
+
+                    <div class="sala-footer">
+                        <span>Estado actual</span>
+                        <strong class="text-green">Disponible</strong>
+                    </div>
+                </article>
+
+                <article class="sala-card sala-card-purple">
+                    <div class="sala-card-top-line"></div>
+
+                    <div class="sala-header">
+                        <div class="sala-number"><span>03</span></div>
+                        <div class="sala-status busy">
+                            <i></i>
+                            <span>Ocupada</span>
+                        </div>
+                    </div>
+
+                    <div class="sala-content">
+                        <div class="sala-info">
+                            <span class="room-category">SALA DE REUNIONES</span>
+                            <h3>Sala 3</h3>
+                            <p class="location">
+                                <span class="location-icon"></span>Piso 3
+                            </p>
+                        </div>
+
+                        <div class="reservation-count">
+                            <strong id="sala3Reservas">0</strong>
+                            <span>reservas hoy</span>
+                        </div>
+                    </div>
+
+                    <div class="room-progress"><span></span></div>
+
+                    <div class="sala-footer">
+                        <span>Estado actual</span>
+                        <strong class="text-red">Ocupada</strong>
+                    </div>
+                </article>
+
+                <article class="sala-card sala-card-orange">
+                    <div class="sala-card-top-line"></div>
+
+                    <div class="sala-header">
+                        <div class="sala-number dining"><span>CO</span></div>
+                        <div class="sala-status available">
+                            <i></i>
+                            <span>Disponible</span>
+                        </div>
+                    </div>
+
+                    <div class="sala-content">
+                        <div class="sala-info">
+                            <span class="room-category">ESPACIO COMÚN</span>
+                            <h3>Comedor</h3>
+                            <p class="location">
+                                <span class="location-icon"></span>Piso 3
+                            </p>
+                        </div>
+
+                        <div class="reservation-count">
+                            <strong id="comedorReservas">0</strong>
+                            <span>reservas hoy</span>
+                        </div>
+                    </div>
+
+                    <div class="room-progress"><span></span></div>
+
+                    <div class="sala-footer">
+                        <span>Estado actual</span>
+                        <strong class="text-green">Disponible</strong>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="reservas-section">
+            <div class="reservas-card">
+                <div class="reservas-card-glow"></div>
+
+                <div class="reservas-header">
+                    <div class="reservas-title">
+                        <span class="section-kicker">
+                            <span class="kicker-dot"></span>
+                            AGENDA
+                        </span>
+
+                        <h2>Reservas registradas</h2>
+                        <p>Historial de reservas correspondientes al día actual.</p>
+                    </div>
+
+                    <div class="reservation-total">
+                        <strong id="totalReservasLabel">0</strong>
+                        <span>registros</span>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><span>SALA</span></th>
+                                <th><span>FECHA</span></th>
+                                <th><span>HORARIO</span></th>
+                                <th><span>SOLICITANTE</span></th>
+                                <th><span>ESTADO</span></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tablaReservas"></tbody>
+                    </table>
+                </div>
+
+                <div id="emptyState" class="empty-state" hidden>
+                    <div class="empty-icon"><span></span></div>
+                    <strong>No hay reservas registradas</strong>
+                    <span>No existen reservas para mostrar.</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
 </div>
 
-<div class="title-wrapper">
-<div class="title-icon">
-<span></span>
-<span></span>
-<span></span>
-</div>
-<div class="title-content">
-<h1>Salas Corporativas</h1>
-<p>Monitoreo de reservas y ocupación de espacios.</p>
-</div>
-</div>
-</div>
+<!-- FOOTER COMPARTIDO -->
 
-<div class="header-date">
-<div class="date-icon"><span></span></div>
-<div>
-<span class="date-label">HOY</span>
-<strong id="fechaActual">21 SEP 2026</strong>
-</div>
-</div>
-</header>
+<footer class="topbar-footer">
+    <div class="footer-main">
 
-<section class="stats-grid">
+        <div class="footer-line footer-line-primary">
+            <h2>ALFERZA LIVE OFFICE</h2>
+            <span class="footer-separator">-</span>
+            <span id="footerDay">--</span>
+            <span class="footer-separator">|</span>
+            <span id="footerDate">--/--/----</span>
+            <span class="footer-separator">|</span>
+            <strong id="footerTime">--:--:--</strong>
+        </div>
 
-<article class="stat-card stat-blue">
-<div class="stat-card-glow"></div>
-<div class="stat-top">
-<div>
-<span class="stat-label">Total de salas</span>
-<span class="stat-mini-label">ESPACIOS DISPONIBLES</span>
-</div>
-<div class="stat-icon blue"><span class="building-icon"></span></div>
-</div>
-<div class="stat-value">
-<strong id="totalSalas">3</strong>
-<span>espacios</span>
-</div>
-<div class="stat-description">Salas registradas en el sistema</div>
-<div class="stat-line"></div>
-</article>
+        <div class="footer-line footer-line-secondary">
+            <span>Mesa de ayuda TI</span>
+            <span class="footer-separator">-</span>
+            <span class="footer-live-dot"></span>
+            <strong>EN VIVO</strong>
+        </div>
 
-<article class="stat-card stat-purple">
-<div class="stat-card-glow"></div>
-<div class="stat-top">
-<div>
-<span class="stat-label">Reservas de hoy</span>
-<span class="stat-mini-label">AGENDA DEL DÍA</span>
-</div>
-<div class="stat-icon purple"><span class="calendar-icon"></span></div>
-</div>
-<div class="stat-value">
-<strong id="reservasHoy">0</strong>
-<span>reservas</span>
-</div>
-<div class="stat-description">Reservas registradas para hoy</div>
-<div class="stat-line"></div>
-</article>
+    </div>
 
-<article class="stat-card stat-green">
-<div class="stat-card-glow"></div>
-<div class="stat-top">
-<div>
-<span class="stat-label">Reservas activas</span>
-<span class="stat-mini-label">EN TIEMPO REAL</span>
-</div>
-<div class="stat-icon green"><span class="active-icon"></span></div>
-</div>
-<div class="stat-value">
-<strong id="reservasActivas">0</strong>
-<span>activas</span>
-</div>
-<div class="stat-description">Reservas actualmente vigentes</div>
-<div class="stat-line"></div>
-</article>
-
-<article class="stat-card stat-red">
-<div class="stat-card-glow"></div>
-<div class="stat-top">
-<div>
-<span class="stat-label">Canceladas</span>
-<span class="stat-mini-label">ESTADO DE RESERVAS</span>
-</div>
-<div class="stat-icon red"><span class="cancel-icon"></span></div>
-</div>
-<div class="stat-value">
-<strong id="reservasCanceladas">0</strong>
-<span>reservas</span>
-</div>
-<div class="stat-description">Reservas canceladas registradas</div>
-<div class="stat-line"></div>
-</article>
-
-</section>
-
-<section class="section">
-<div class="section-header">
-<div class="section-heading">
-<span class="section-kicker">
-<span class="kicker-dot"></span>
-ESPACIOS CORPORATIVOS
-</span>
-<h2>Estado de las salas</h2>
-<p>Consulta la disponibilidad actual de cada espacio.</p>
-</div>
-
-<div class="legend">
-<span><i class="legend-dot available-dot"></i>Disponible</span>
-<span><i class="legend-dot busy-dot"></i>Ocupada</span>
-</div>
-</div>
-
-<div class="salas-grid">
-
-<article class="sala-card sala-card-blue">
-<div class="sala-card-top-line"></div>
-<div class="sala-header">
-<div class="sala-number"><span>02</span></div>
-<div class="sala-status available"><i></i><span>Disponible</span></div>
-</div>
-<div class="sala-content">
-<div class="sala-info">
-<span class="room-category">SALA DE REUNIONES</span>
-<h3>Sala 2</h3>
-<p class="location"><span class="location-icon"></span>Piso 2</p>
-</div>
-<div class="reservation-count">
-<strong id="sala2Reservas">0</strong>
-<span>reservas hoy</span>
-</div>
-</div>
-<div class="room-progress"><span></span></div>
-<div class="sala-footer">
-<span>Estado actual</span>
-<strong class="text-green">Disponible</strong>
-</div>
-</article>
-
-<article class="sala-card sala-card-purple">
-<div class="sala-card-top-line"></div>
-<div class="sala-header">
-<div class="sala-number"><span>03</span></div>
-<div class="sala-status busy"><i></i><span>Ocupada</span></div>
-</div>
-<div class="sala-content">
-<div class="sala-info">
-<span class="room-category">SALA DE REUNIONES</span>
-<h3>Sala 3</h3>
-<p class="location"><span class="location-icon"></span>Piso 3</p>
-</div>
-<div class="reservation-count">
-<strong id="sala3Reservas">0</strong>
-<span>reservas hoy</span>
-</div>
-</div>
-<div class="room-progress"><span></span></div>
-<div class="sala-footer">
-<span>Estado actual</span>
-<strong class="text-red">Ocupada</strong>
-</div>
-</article>
-
-<article class="sala-card sala-card-orange">
-<div class="sala-card-top-line"></div>
-<div class="sala-header">
-<div class="sala-number dining"><span>CO</span></div>
-<div class="sala-status available"><i></i><span>Disponible</span></div>
-</div>
-<div class="sala-content">
-<div class="sala-info">
-<span class="room-category">ESPACIO COMÚN</span>
-<h3>Comedor</h3>
-<p class="location"><span class="location-icon"></span>Piso 3</p>
-</div>
-<div class="reservation-count">
-<strong id="comedorReservas">0</strong>
-<span>reservas hoy</span>
-</div>
-</div>
-<div class="room-progress"><span></span></div>
-<div class="sala-footer">
-<span>Estado actual</span>
-<strong class="text-green">Disponible</strong>
-</div>
-</article>
-
-</div>
-</section>
-
-<section class="reservas-section">
-<div class="reservas-card">
-<div class="reservas-card-glow"></div>
-
-<div class="reservas-header">
-<div class="reservas-title">
-<span class="section-kicker">
-<span class="kicker-dot"></span>
-AGENDA
-</span>
-<h2>Reservas registradas</h2>
-<p>Historial de reservas correspondientes al día actual.</p>
-</div>
-<div class="reservation-total">
-<strong id="totalReservasLabel">0</strong>
-<span>registros</span>
-</div>
-</div>
-
-<div class="table-wrapper">
-<table>
-<thead>
-<tr>
-<th><span>SALA</span></th>
-<th><span>FECHA</span></th>
-<th><span>HORARIO</span></th>
-<th><span>SOLICITANTE</span></th>
-<th><span>ESTADO</span></th>
-</tr>
-</thead>
-<tbody id="tablaReservas"></tbody>
-</table>
-</div>
-
-<div id="emptyState" class="empty-state" hidden>
-<div class="empty-icon"><span></span></div>
-<strong>No hay reservas registradas</strong>
-<span>No existen reservas para mostrar.</span>
-</div>
-</div>
-</section>
-
-<footer class="page-footer">
-<div class="footer-brand">
-<span class="footer-logo">A</span>
-<div>
-<strong>ALFERZA LIVE OFFICE</strong>
-<span>Sistema de gestión corporativa</span>
-</div>
-</div>
-<div class="footer-status">
-<span class="footer-status-dot"></span>
-Sistema operativo
-</div>
+    <div class="footer-shine"></div>
 </footer>
 
-</main>
-</div>
+<!-- SCRIPTS ORIGINALES -->
 
-<script src="../auth.js"></script>
 <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+<script src="../auth.js"></script>
 <script src="../access-control.js"></script>
 <script type="module" src="salas.js?v=20260921c"></script>
 <script src="../ticket-widget.js"></script>
+
+<!-- RELOJ DEL FOOTER -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function actualizarFooter() {
+            const ahora = new Date();
+
+            document.getElementById("footerDay").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    weekday: "long"
+                }).format(ahora);
+
+            document.getElementById("footerDate").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                }).format(ahora);
+
+            document.getElementById("footerTime").textContent =
+                new Intl.DateTimeFormat("es-PE", {
+                    timeZone: "America/Lima",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false
+                }).format(ahora);
+        }
+
+        actualizarFooter();
+        setInterval(actualizarFooter, 1000);
+    });
+</script>
+
 
 </body>
 </html>

@@ -431,6 +431,44 @@
 
     <div class="footer-shine"></div>
 </footer>
+<script>
+(function () {
+    function actualizarFooter() {
+        const ahora = new Date();
+
+        const opciones = {
+            timeZone: "America/Lima"
+        };
+
+        const dia = new Intl.DateTimeFormat("es-PE", {
+            ...opciones,
+            weekday: "long"
+        }).format(ahora);
+
+        const fecha = new Intl.DateTimeFormat("es-PE", {
+            ...opciones,
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        }).format(ahora);
+
+        const hora = new Intl.DateTimeFormat("es-PE", {
+            ...opciones,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        }).format(ahora);
+
+        document.getElementById("footerDay").textContent = dia;
+        document.getElementById("footerDate").textContent = fecha;
+        document.getElementById("footerTime").textContent = hora;
+    }
+
+    actualizarFooter();
+    setInterval(actualizarFooter, 1000);
+})();
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>

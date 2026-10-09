@@ -409,62 +409,28 @@
 
 <footer class="topbar-footer">
     <div class="footer-main">
-        <div class="footer-logo">
-            <h2>ALFERZA LIVE OFFICE</h2>
-            <span>Mesa de ayuda TI</span>
-        </div>
 
-        <div class="footer-clock">
-            <span id="footerDay">Cargando...</span>
+        <div class="footer-line footer-line-primary">
+            <h2>ALFERZA LIVE OFFICE</h2>
+            <span class="footer-separator">-</span>
+            <span id="footerDay">viernes</span>
             <span class="footer-separator">|</span>
-            <span id="footerDate">--/--/----</span>
+            <span id="footerDate">09/10/2026</span>
             <span class="footer-separator">|</span>
             <strong id="footerTime">--:--:--</strong>
         </div>
 
-        <div class="footer-live">
+        <div class="footer-line footer-line-secondary">
+            <span>Mesa de ayuda TI</span>
+            <span class="footer-separator">-</span>
             <span class="footer-live-dot"></span>
-            <span>EN VIVO</span>
+            <strong>EN VIVO</strong>
         </div>
+
     </div>
 
     <div class="footer-shine"></div>
 </footer>
-
-<script>
-(function () {
-    const day = document.getElementById("footerDay");
-    const date = document.getElementById("footerDate");
-    const time = document.getElementById("footerTime");
-
-    function updateFooterClock() {
-        const now = new Date();
-
-        day.textContent = new Intl.DateTimeFormat("es-PE", {
-            timeZone: "America/Lima",
-            weekday: "long"
-        }).format(now);
-
-        date.textContent = new Intl.DateTimeFormat("es-PE", {
-            timeZone: "America/Lima",
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric"
-        }).format(now);
-
-        time.textContent = new Intl.DateTimeFormat("es-PE", {
-            timeZone: "America/Lima",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false
-        }).format(now);
-    }
-
-    updateFooterClock();
-    setInterval(updateFooterClock, 1000);
-})();
-</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>

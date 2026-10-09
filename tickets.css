@@ -204,79 +204,54 @@ to{opacity:1;transform:translateX(0)}
 .refresh-button,.report-button{width:100%}
 }
 
-
-/* ==========================================
-   FOOTER ALFERZA LIVE OFFICE
-   TEMA OSCURO: HEADER Y SIDEBAR
-========================================== */
-
 .topbar-footer {
     position: relative;
     width: 100%;
-    padding: 24px 20px;
+    padding: 12px 16px;
     box-sizing: border-box;
     overflow: hidden;
-
-    /* Negro/gris oscuro, sin degradado azul */
     background: #111827;
     color: #ffffff;
-
     text-align: center;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Contenido completamente centrado */
 .footer-main {
     position: relative;
     z-index: 2;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
+    gap: 6px;
     width: 100%;
-    gap: 12px;
-    text-align: center;
 }
 
-/* Marca */
-.footer-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    gap: 5px;
-
-    animation: footerEnter 0.7s ease both;
-}
-
-.footer-logo h2 {
-    margin: 0;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-}
-
-.footer-logo span {
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-/* Fecha y hora */
-.footer-clock {
+.footer-line {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 7px;
     width: 100%;
-
-    color: #d1d5db;
-    font-size: 12px;
     text-align: center;
+}
+
+.footer-line-primary {
+    animation: footerEnter 0.7s ease both;
+}
+
+.footer-line-primary h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.footer-line-secondary {
+    color: #9ca3af;
+    font-size: 11px;
 }
 
 .footer-separator {
@@ -285,65 +260,57 @@ to{opacity:1;transform:translateX(0)}
 
 #footerDay {
     text-transform: capitalize;
+    color: #d1d5db;
+}
+
+#footerDate {
+    color: #d1d5db;
 }
 
 #footerTime {
     color: #ffffff;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
-/* Estado EN VIVO */
-.footer-live {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-
+.footer-line-secondary strong {
     color: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
+    font-size: 10px;
+    letter-spacing: 0.8px;
 }
 
 .footer-live-dot {
-    width: 8px;
-    height: 8px;
+    display: inline-block;
+    width: 7px;
+    height: 7px;
     flex-shrink: 0;
     border-radius: 50%;
     background: #22c55e;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
     animation: footerPulse 1.8s ease-in-out infinite;
 }
 
-/* Brillo sutil animado */
 .footer-shine {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-
     background: linear-gradient(
         110deg,
         transparent 35%,
         rgba(255, 255, 255, 0.04) 50%,
         transparent 65%
     );
-
     transform: translateX(-100%);
     animation: footerShine 7s ease-in-out infinite;
 }
 
-/* Animaciones */
 @keyframes footerEnter {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(5px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -355,7 +322,6 @@ to{opacity:1;transform:translateX(0)}
         opacity: 1;
         transform: scale(1);
     }
-
     50% {
         opacity: 0.45;
         transform: scale(0.8);
@@ -366,31 +332,32 @@ to{opacity:1;transform:translateX(0)}
     0%, 15% {
         transform: translateX(-100%);
     }
-
     75%, 100% {
         transform: translateX(100%);
     }
 }
 
-/* Responsive */
 @media (max-width: 500px) {
     .topbar-footer {
-        padding: 22px 12px;
+        padding: 10px 8px;
     }
 
-    .footer-logo h2 {
-        font-size: 14px;
+    .footer-line {
+        gap: 5px;
     }
 
-    .footer-clock {
-        gap: 7px;
+    .footer-line-primary h2 {
         font-size: 11px;
+    }
+
+    .footer-line-primary,
+    .footer-line-secondary {
+        font-size: 10px;
     }
 }
 
-/* Accesibilidad */
 @media (prefers-reduced-motion: reduce) {
-    .footer-logo,
+    .footer-line-primary,
     .footer-live-dot,
     .footer-shine {
         animation: none;

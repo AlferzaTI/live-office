@@ -70,6 +70,7 @@
     const usuarioNombre = document.getElementById("usuarioNombre");
     const usuarioCorreo = document.getElementById("usuarioCorreo");
 
+    const registrosSection = document.getElementById("registrosSection");
     const ticketsTableBody = document.getElementById("ticketsTableBody");
     const ticketsEmpty = document.getElementById("ticketsEmpty");
 
@@ -106,42 +107,53 @@
     const reporteMensaje = document.getElementById("reporteMensaje");
 
     /* =========================================================
-       PERMISOS DE REPORTES
-       Solo el grupo TI puede generar informes.
+       PERMISOS DE REGISTROS Y REPORTES
+       TI: acceso a registros y reportes.
+       Normal: puede crear tickets, pero no ver los registros.
     ========================================================= */
 
-    // Ocultar inmediatamente, antes de que termine la validación.
+    // Denegar visualización mientras se validan los permisos.
+    if (registrosSection) {
+        registrosSection.style.display = "none";
+    }
+
     if (abrirReporte) {
         abrirReporte.hidden = true;
         abrirReporte.style.display = "none";
     }
 
     function esUsuarioTI() {
-        const permisos = window.alferzaPermisos;
+        const grupo = String(
+            window.alferzaPermisos?.grupo || ""
+        ).trim().toUpperCase();
 
-        return Boolean(
-            permisos &&
-            String(permisos.grupo || "").trim().toUpperCase() === "TI"
-        );
+        return grupo === "TI";
     }
 
     function aplicarPermisosReportes() {
-        if (!abrirReporte || !reporteModal) {
-            return false;
-        }
-
         const autorizado = esUsuarioTI();
 
-        abrirReporte.hidden = !autorizado;
-        abrirReporte.style.display = autorizado ? "" : "none";
+        // Controlar la sección completa: título, filtros, tabla y botones.
+        if (registrosSection) {
+            registrosSection.style.display = autorizado ? "" : "none";
+        }
 
-        if (!autorizado && reporteModal.classList.contains("show")) {
+        // Controlar también el botón de reportes.
+        if (abrirReporte) {
+            abrirReporte.hidden = !autorizado;
+            abrirReporte.style.display = autorizado ? "" : "none";
+        }
+
+        // Cerrar el reporte si el usuario no tiene permisos.
+        if (!autorizado && reporteModal) {
             cerrarReporte();
         }
 
         console.log(
             "[Tickets] Grupo:",
             window.alferzaPermisos?.grupo || "SIN VALIDAR",
+            "| Registros permitidos:",
+            autorizado,
             "| Reportes permitidos:",
             autorizado
         );
@@ -150,7 +162,7 @@
     }
 
     function inicializarPermisosReportes() {
-        // Captura la validación si todavía está en curso.
+        // Capturar el evento de validación de acceso.
         document.addEventListener(
             "alferza:access-granted",
             function (event) {
@@ -162,7 +174,7 @@
             }
         );
 
-        // También cubre el caso en que el evento ya se haya disparado.
+        // Cubrir el caso en que la validación ya esté en curso.
         if (window.alferzaAccessReady) {
             window.alferzaAccessReady
                 .then(function (resultado) {
@@ -172,31 +184,33 @@
                         resultado.permisos
                     ) {
                         window.alferzaPermisos = resultado.permisos;
-                        aplicarPermisosReportes();
-                        return;
+                    } else if (!esUsuarioTI()) {
+                        window.alferzaPermisos = {
+                            grupo: "Normal",
+                            modulos: []
+                        };
                     }
 
-                    if (abrirReporte) {
-                        abrirReporte.hidden = true;
-                        abrirReporte.style.display = "none";
-                    }
+                    aplicarPermisosReportes();
                 })
                 .catch(function (error) {
                     console.error(
-                        "[Tickets] Error validando permisos de reportes:",
+                        "[Tickets] Error validando permisos:",
                         error
                     );
 
-                    if (abrirReporte) {
-                        abrirReporte.hidden = true;
-                        abrirReporte.style.display = "none";
-                    }
+                    window.alferzaPermisos = {
+                        grupo: "Normal",
+                        modulos: []
+                    };
+
+                    aplicarPermisosReportes();
                 });
 
             return;
         }
 
-        // Si no existe el mecanismo de validación, denegar por defecto.
+        // Sin permisos confirmados, ocultar la sección.
         aplicarPermisosReportes();
     }
 
@@ -550,6 +564,12 @@
     ========================================================= */
 
     async function cargarTickets() {
+        // Evitar consultas desde los controles de registros para usuarios normales.
+        if (!esUsuarioTI()) {
+            aplicarPermisosReportes();
+            return;
+        }
+
         try {
             ticketsTableBody.innerHTML = `
                 <tr>
@@ -586,6 +606,7 @@
 
             renderizarTickets();
             actualizarResumen();
+            actualizarCantidadReporte();
         } catch (error) {
             console.error("Error cargando tickets:", error);
 
@@ -603,6 +624,10 @@
     }
 
     function renderizarTickets() {
+        if (!esUsuarioTI()) {
+            return;
+        }
+
         const busqueda = buscarTicket.value.toLowerCase().trim();
         const estadoFiltro = filtroEstado.value;
         const prioridadFiltro = filtroPrioridad.value;
@@ -720,6 +745,7 @@
 
     /* =========================================================
        CREACIÓN DE TICKETS
+       DISPONIBLE PARA TODOS LOS USUARIOS AUTENTICADOS
     ========================================================= */
 
     function generarTicketID() {
@@ -796,7 +822,10 @@
             ticketForm.reset();
             ticketPrioridad.value = "Media";
 
-            await cargarTickets();
+            // Los usuarios normales pueden crear tickets sin ver registros.
+            if (esUsuarioTI()) {
+                await cargarTickets();
+            }
         } catch (error) {
             console.error("Error creando ticket:", error);
 
@@ -826,6 +855,10 @@
     ========================================================= */
 
     function mostrarDetalleTicket(itemId) {
+        if (!esUsuarioTI()) {
+            return;
+        }
+
         const ticket = ticketsData.find(function (item) {
             return String(item.id) === String(itemId);
         });
@@ -891,6 +924,10 @@
             event.stopPropagation();
         }
 
+        if (!esUsuarioTI()) {
+            return;
+        }
+
         const ticket = ticketsData.find(function (item) {
             return String(item.id) === String(itemId);
         });
@@ -937,7 +974,7 @@
     }
 
     async function guardarResultadoTicket() {
-        if (!ticketSeleccionadoResolver) {
+        if (!esUsuarioTI() || !ticketSeleccionadoResolver) {
             return;
         }
 
@@ -1102,7 +1139,7 @@
     }
 
     function actualizarCantidadReporte() {
-        if (!reporteMes) {
+        if (!reporteMes || !reporteCantidad || !reportePeriodo) {
             return;
         }
 
@@ -1180,7 +1217,7 @@
     ========================================================= */
 
     function generarInformePDF() {
-        // Segunda comprobación: no basta con ocultar el botón.
+        // Verificación de permisos antes de generar el archivo.
         if (!aplicarPermisosReportes()) {
             return;
         }
@@ -1188,6 +1225,14 @@
         if (typeof window.jspdf === "undefined") {
             mostrarReporteMensaje(
                 "No se pudo cargar la librería PDF.",
+                "error"
+            );
+            return;
+        }
+
+        if (typeof generarReportePDFBtn === "undefined" || !generarReportePDFBtn) {
+            mostrarReporteMensaje(
+                "No se encontró el botón para generar el PDF.",
                 "error"
             );
             return;
@@ -1604,7 +1649,6 @@
     }
 
     function abrirModalReporte() {
-        // Evitar que un usuario normal abra el modal manualmente.
         if (!aplicarPermisosReportes()) {
             return;
         }
@@ -1624,11 +1668,17 @@
     }
 
     function cerrarReporte() {
+        if (!reporteModal) {
+            return;
+        }
+
         reporteModal.classList.remove("show");
         document.body.style.overflow = "";
 
-        reporteMensaje.textContent = "";
-        reporteMensaje.className = "ticket-message";
+        if (reporteMensaje) {
+            reporteMensaje.textContent = "";
+            reporteMensaje.className = "ticket-message";
+        }
     }
 
     /* =========================================================
@@ -1652,6 +1702,11 @@
     function mostrarBotonLogin(texto) {
         usuarioNombre.textContent = "Sesión de Microsoft requerida";
         usuarioCorreo.textContent = texto;
+
+        // No mostrar datos de registros mientras no exista sesión válida.
+        if (registrosSection) {
+            registrosSection.style.display = "none";
+        }
 
         ticketsTableBody.innerHTML = `
             <tr>
@@ -1703,13 +1758,20 @@
         try {
             if (!(await esperarCuenta())) {
                 mostrarBotonLogin(
-                    "Inicia sesión para ver y crear tickets"
+                    "Inicia sesión para crear tickets"
                 );
                 return;
             }
 
             await obtenerUsuarioActual();
-            await cargarTickets();
+
+            // La consulta de registros solo se ejecuta para el grupo TI.
+            if (esUsuarioTI()) {
+                await cargarTickets();
+            } else {
+                ticketsData = [];
+                actualizarResumen();
+            }
         } catch (error) {
             console.error("Error inicializando Tickets:", error);
 
@@ -1735,7 +1797,12 @@
 
     ticketForm.addEventListener("submit", crearTicket);
 
-    actualizarTickets.addEventListener("click", cargarTickets);
+    actualizarTickets.addEventListener("click", function () {
+        if (aplicarPermisosReportes()) {
+            cargarTickets();
+        }
+    });
+
     abrirReporte.addEventListener("click", abrirModalReporte);
 
     buscarTicket.addEventListener("input", renderizarTickets);

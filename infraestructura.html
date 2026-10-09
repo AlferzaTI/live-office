@@ -1,236 +1,358 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Infraestructura TI | ALFERZA LIVE OFFICE</title>
+
 <script>
-if(sessionStorage.getItem("alferza_login")!=="true"){window.location.replace("login.html");}
+if (sessionStorage.getItem("alferza_login") !== "true") {
+    window.location.replace("login.html");
+}
 </script>
+
 <link rel="preconnect" href="https://graph.microsoft.com">
 <link rel="preconnect" href="https://login.microsoftonline.com">
 <link rel="stylesheet" href="infraestructura.css?v=5">
 <link rel="stylesheet" href="ticket-widget.css">
 </head>
+
 <body>
 
 <div id="loadingOverlay" class="loading-overlay" style="display:none;">
-<div class="loading-content">
-<div class="gear-spinner">⚙️</div>
-<p id="loadingMessage">Cargando monitoreo...</p>
-<span class="loading-subtitle">ALFERZA LIVE OFFICE</span>
-</div>
+    <div class="loading-content">
+        <div class="gear-spinner">⚙️</div>
+        <p id="loadingMessage">Cargando monitoreo...</p>
+        <span class="loading-subtitle">ALFERZA LIVE OFFICE</span>
+    </div>
 </div>
 
 <header class="topbar">
-<div class="logo">
-<h1>ALFERZA LIVE OFFICE</h1>
-<span>Monitoreo en tiempo real</span>
-</div>
-<div class="live-status">
-<span class="live-status-dot"></span>
-<span>EN VIVO</span>
-</div>
+    <div class="logo">
+        <h1>ALFERZA LIVE OFFICE</h1>
+        <span>Monitoreo en tiempo real</span>
+    </div>
+
+    <div class="live-status">
+        <span class="live-status-dot"></span>
+        <span>EN VIVO</span>
+    </div>
 </header>
 
 <div class="container">
 
-<aside class="sidebar">
-<h2>MENÚ</h2>
-<ul>
-<li onclick="window.location.href='index.html'">🏢 Oficina</li>
-<li onclick="window.location.href='personal.html'">👥 Personal</li>
-<li onclick="window.location.href='reserva.html'">📝 Reservas</li>
-<li onclick="window.location.href='salas/salas.html'">📅 Salas</li>
-<li onclick="window.location.href='comunicados.html'">📢 Comunicados</li>
-<li onclick="window.location.href='seguridad.html'">🔐 Seguridad</li>
-<li class="active">🏗️ Infraestructura</li>
-<li onclick="window.location.href='tickets.html'">🎫 Tickets</li>
-<li onclick="window.location.href='permisos.html'">🔐 Permisos</li>
-<li onclick="window.location.href='configuracion.html'">⚙️ Configuración</li>
-</ul>
-</aside>
+    <aside class="sidebar">
+        <h2>MENÚ</h2>
 
-<main class="content">
+        <ul>
+            <li onclick="window.location.href='index.html'">🏢 Oficina</li>
+            <li onclick="window.location.href='personal.html'">👥 Personal</li>
+            <li onclick="window.location.href='reserva.html'">📝 Reservas</li>
+            <li onclick="window.location.href='salas/salas.html'">📅 Salas</li>
+            <li onclick="window.location.href='comunicados.html'">📢 Comunicados</li>
+            <li onclick="window.location.href='seguridad.html'">🔐 Seguridad</li>
+            <li class="active">🏗️ Infraestructura</li>
+            <li onclick="window.location.href='tickets.html'">🎫 Tickets</li>
+            <li onclick="window.location.href='permisos.html'">🔐 Permisos</li>
+            <li onclick="window.location.href='configuracion.html'">⚙️ Configuración</li>
+        </ul>
+    </aside>
 
-<section class="page-header">
-<div class="page-header-main">
-<span class="page-label">INFRAESTRUCTURA TI</span>
-<h1>Centro de Monitoreo TI</h1>
-<p>Supervisión de servicios tecnológicos e inventario de equipos de la organización.</p>
-</div>
-<div class="last-update">
-<div class="update-icon">🕐</div>
-<div class="update-content">
-<span class="update-label">ÚLTIMA REVISIÓN</span>
-<strong id="lastUpdate">--</strong>
-<small>Datos obtenidos desde SharePoint</small>
-</div>
-<div class="update-indicator">
-<span class="update-dot"></span>
-<span>Actualizado</span>
-</div>
-</div>
-</section>
+    <main class="content">
 
-<section class="monitor-section servicios-section">
-    <div class="section-heading">
-        <div class="section-title-group">
-            <span class="section-kicker">SERVICIOS</span>
-            <h2>Estado de servicios</h2>
-            <p>Estado actual de los servicios tecnológicos monitoreados.</p>
-        </div>
+        <section class="page-header">
+            <div class="page-header-main">
+                <span class="page-label">INFRAESTRUCTURA TI</span>
+                <h1>Centro de Monitoreo TI</h1>
+                <p>Supervisión de servicios tecnológicos e inventario de equipos de la organización.</p>
+            </div>
 
-        <div id="estadoGeneral" class="section-status online">
-            ● OPERATIVO
-        </div>
-    </div>
+            <div class="last-update">
+                <div class="update-icon">🕐</div>
 
-    <div id="serviciosGrid" class="service-grid">
-        <div class="service-card service-loading">
-            <div class="loading-spinner small"></div>
-            <span>Cargando servicios...</span>
-        </div>
-    </div>
-</section>
+                <div class="update-content">
+                    <span class="update-label">ÚLTIMA REVISIÓN</span>
+                    <strong id="lastUpdate">--</strong>
+                    <small>Datos obtenidos desde SharePoint</small>
+                </div>
 
-<section class="monitor-section equipos-section">
+                <div class="update-indicator">
+                    <span class="update-dot"></span>
+                    <span>Actualizado</span>
+                </div>
+            </div>
+        </section>
 
-<div class="section-heading">
-<div class="section-title-group">
-<span class="section-kicker">INVENTARIO TI</span>
-<h2>Equipos registrados</h2>
-<p>Inventario de equipos obtenido desde Active Directory.</p>
-</div>
-<div class="section-heading-actions" style="display:flex;align-items:center;gap:12px;">
-<button type="button" id="btnGestionarTrabajadores" class="modal-btn primary" style="white-space:nowrap;padding:10px 16px;cursor:pointer;">
-👤 Gestionar trabajadores
-</button>
-<div id="equiposEstado" class="section-status online">● ACTUALIZADO</div>
-</div>
+        <!-- =====================================================
+             SERVICIOS
+             Visible para todos los usuarios autorizados.
+        ====================================================== -->
+
+        <section class="monitor-section servicios-section">
+
+            <div class="section-heading">
+                <div class="section-title-group">
+                    <span class="section-kicker">SERVICIOS</span>
+                    <h2>Estado de servicios</h2>
+                    <p>Estado actual de los servicios tecnológicos monitoreados.</p>
+                </div>
+
+                <div id="estadoGeneral" class="section-status online">
+                    ● OPERATIVO
+                </div>
+            </div>
+
+            <div id="serviciosGrid" class="service-grid">
+                <div class="service-card service-loading">
+                    <div class="loading-spinner small"></div>
+                    <span>Cargando servicios...</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INVENTARIO TI
+             Solo debe mostrarse a usuarios autorizados de TI.
+             El ID se coloca exclusivamente en esta sección.
+        ====================================================== -->
+
+        <section
+            class="monitor-section equipos-section"
+            id="inventarioTISection"
+        >
+
+            <div class="section-heading">
+
+                <div class="section-title-group">
+                    <span class="section-kicker">INVENTARIO TI</span>
+                    <h2>Equipos registrados</h2>
+                    <p>Inventario de equipos obtenido desde Active Directory.</p>
+                </div>
+
+                <div class="section-heading-actions" style="display:flex;align-items:center;gap:12px;">
+
+                    <button
+                        type="button"
+                        id="btnGestionarTrabajadores"
+                        class="modal-btn primary"
+                        style="white-space:nowrap;padding:10px 16px;cursor:pointer;"
+                    >
+                        👤 Gestionar trabajadores
+                    </button>
+
+                    <div id="equiposEstado" class="section-status online">
+                        ● ACTUALIZADO
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="equipos-summary">
+
+                <div class="equipment-stat">
+                    <div class="equipment-stat-icon total">🖥️</div>
+                    <div>
+                        <span>Total</span>
+                        <strong id="totalEquipos">0</strong>
+                    </div>
+                </div>
+
+                <div class="equipment-stat">
+                    <div class="equipment-stat-icon online">✓</div>
+                    <div>
+                        <span>Conectados</span>
+                        <strong id="equiposConectados">0</strong>
+                    </div>
+                </div>
+
+                <div class="equipment-stat">
+                    <div class="equipment-stat-icon offline">!</div>
+                    <div>
+                        <span>Desconectados</span>
+                        <strong id="equiposDesconectados">0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="equipos-controls">
+
+                <div class="search-wrapper">
+                    <span class="search-icon">🔎</span>
+                    <input
+                        type="text"
+                        id="buscarEquipo"
+                        placeholder="Buscar por equipo, IP o DNS..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="filter-wrapper">
+                    <label for="filtroEstadoEquipo">Estado</label>
+                    <select id="filtroEstadoEquipo">
+                        <option value="todos">Todos los estados</option>
+                        <option value="Conectado">Conectado</option>
+                        <option value="Desconectado">Desconectado</option>
+                        <option value="No verificable">No verificable</option>
+                    </select>
+                </div>
+
+                <div class="filter-wrapper">
+                    <label for="filtroAreaEquipo">Área</label>
+                    <select id="filtroAreaEquipo">
+                        <option value="todos">Todas las áreas</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="equipos-results">
+                <span id="equiposResultados">Cargando equipos...</span>
+            </div>
+
+            <div class="equipos-table-container">
+
+                <table class="equipos-table">
+                    <thead>
+                        <tr>
+                            <th>EQUIPO</th>
+                            <th>ESTADO</th>
+                            <th>TRABAJADOR</th>
+                            <th>IP</th>
+                            <th>SISTEMA OPERATIVO</th>
+                            <th>ÁREA / OU</th>
+                            <th>ÚLTIMO REGISTRO AD</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="equiposTableBody">
+                        <tr>
+                            <td colspan="7" class="equipos-loading">
+                                <div class="table-loading">
+                                    <div class="loading-spinner small"></div>
+                                    <span>Cargando inventario...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div id="equiposEmpty" class="equipos-empty" style="display:none;">
+                    <div class="empty-icon">🖥️</div>
+                    <strong>No se encontraron equipos</strong>
+                    <span>Prueba cambiando los filtros de búsqueda.</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="page-footer">
+            <span>ALFERZA LIVE OFFICE</span>
+            <span>Infraestructura TI</span>
+            <span>© 2026 ALFERZA HOLDING</span>
+        </footer>
+
+    </main>
 </div>
 
-<div class="equipos-summary">
-<div class="equipment-stat">
-<div class="equipment-stat-icon total">🖥️</div>
-<div><span>Total</span><strong id="totalEquipos">0</strong></div>
-</div>
-<div class="equipment-stat">
-<div class="equipment-stat-icon online">✓</div>
-<div><span>Conectados</span><strong id="equiposConectados">0</strong></div>
-</div>
-<div class="equipment-stat">
-<div class="equipment-stat-icon offline">!</div>
-<div><span>Desconectados</span><strong id="equiposDesconectados">0</strong></div>
-</div>
-</div>
-
-<div class="equipos-controls">
-<div class="search-wrapper">
-<span class="search-icon">🔎</span>
-<input type="text" id="buscarEquipo" placeholder="Buscar por equipo, IP o DNS..." autocomplete="off">
-</div>
-<div class="filter-wrapper">
-<label for="filtroEstadoEquipo">Estado</label>
-<select id="filtroEstadoEquipo">
-<option value="todos">Todos los estados</option>
-<option value="Conectado">Conectado</option>
-<option value="Desconectado">Desconectado</option>
-<option value="No verificable">No verificable</option>
-</select>
-</div>
-<div class="filter-wrapper">
-<label for="filtroAreaEquipo">Área</label>
-<select id="filtroAreaEquipo">
-<option value="todos">Todas las áreas</option>
-</select>
-</div>
-</div>
-
-<div class="equipos-results">
-<span id="equiposResultados">Cargando equipos...</span>
-</div>
-
-<div class="equipos-table-container">
-<table class="equipos-table">
-<thead>
-<tr>
-<th>EQUIPO</th>
-<th>ESTADO</th>
-<th>TRABAJADOR</th>
-<th>IP</th>
-<th>SISTEMA OPERATIVO</th>
-<th>ÁREA / OU</th>
-<th>ÚLTIMO REGISTRO AD</th>
-</tr>
-</thead>
-<tbody id="equiposTableBody">
-<tr>
-<td colspan="7" class="equipos-loading">
-<div class="table-loading">
-<div class="loading-spinner small"></div>
-<span>Cargando inventario...</span>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-<div id="equiposEmpty" class="equipos-empty" style="display:none;">
-<div class="empty-icon">🖥️</div>
-<strong>No se encontraron equipos</strong>
-<span>Prueba cambiando los filtros de búsqueda.</span>
-</div>
-</div>
-
-</section>
-
-<footer class="page-footer">
-<span>ALFERZA LIVE OFFICE</span>
-<span>Infraestructura TI</span>
-<span>© 2026 ALFERZA HOLDING</span>
-</footer>
-
-</main>
-</div>
+<!-- =========================================================
+     MODAL DE GESTIÓN DE TRABAJADORES
+========================================================= -->
 
 <div id="gestionTrabajadorModal" class="modal-overlay" style="display:none;">
-<div class="trabajador-modal">
 
-<div class="modal-header">
-<div>
-<span class="modal-kicker">GESTIÓN DE ASIGNACIÓN</span>
-<h3>Gestionar trabajador</h3>
-</div>
-<button type="button" id="cerrarGestionTrabajadorModal" class="modal-close" aria-label="Cerrar">×</button>
-</div>
+    <div class="trabajador-modal">
 
-<div class="modal-body">
-<label for="gestionIP" class="modal-label">Dirección IP</label>
-<div style="display:flex;gap:8px;margin-bottom:20px;">
-<input type="text" id="gestionIP" class="modal-input" placeholder="Ej. 192.168.1.25" autocomplete="off" style="margin-bottom:0;">
-<button type="button" id="buscarEquipoIP" class="modal-btn primary" style="white-space:nowrap;cursor:pointer;">Buscar</button>
-</div>
+        <div class="modal-header">
+            <div>
+                <span class="modal-kicker">GESTIÓN DE ASIGNACIÓN</span>
+                <h3>Gestionar trabajador</h3>
+            </div>
 
-<div id="equipoEncontrado" class="modal-equipo" style="display:none;margin-bottom:20px;">
-<span>EQUIPO ENCONTRADO</span>
-<strong id="gestionEquipoNombre">--</strong>
-<small id="gestionEquipoDetalle">--</small>
-</div>
+            <button
+                type="button"
+                id="cerrarGestionTrabajadorModal"
+                class="modal-close"
+                aria-label="Cerrar"
+            >×</button>
+        </div>
 
-<label for="gestionTrabajador" class="modal-label">Trabajador</label>
-<input type="text" id="gestionTrabajador" class="modal-input" placeholder="Ingrese nombre y apellido" autocomplete="off" maxlength="150" disabled>
+        <div class="modal-body">
 
-<div id="gestionTrabajadorMensaje" class="modal-error" style="display:none;"></div>
-</div>
+            <label for="gestionIP" class="modal-label">Dirección IP</label>
 
-<div class="modal-footer">
-<button type="button" id="cancelarGestionTrabajador" class="modal-btn secondary">Cancelar</button>
-<button type="button" id="btnEliminarTrabajador" class="modal-btn danger" disabled>Eliminar</button>
-<button type="button" id="btnEditarTrabajador" class="modal-btn secondary" disabled>Editar</button>
-<button type="button" id="btnRegistrarTrabajador" class="modal-btn primary" disabled>Registrar</button>
-</div>
+            <div style="display:flex;gap:8px;margin-bottom:20px;">
+                <input
+                    type="text"
+                    id="gestionIP"
+                    class="modal-input"
+                    placeholder="Ej. 192.168.1.25"
+                    autocomplete="off"
+                    style="margin-bottom:0;"
+                >
 
-</div>
+                <button
+                    type="button"
+                    id="buscarEquipoIP"
+                    class="modal-btn primary"
+                    style="white-space:nowrap;cursor:pointer;"
+                >
+                    Buscar
+                </button>
+            </div>
+
+            <div
+                id="equipoEncontrado"
+                class="modal-equipo"
+                style="display:none;margin-bottom:20px;"
+            >
+                <span>EQUIPO ENCONTRADO</span>
+                <strong id="gestionEquipoNombre">--</strong>
+                <small id="gestionEquipoDetalle">--</small>
+            </div>
+
+            <label for="gestionTrabajador" class="modal-label">Trabajador</label>
+
+            <input
+                type="text"
+                id="gestionTrabajador"
+                class="modal-input"
+                placeholder="Ingrese nombre y apellido"
+                autocomplete="off"
+                maxlength="150"
+                disabled
+            >
+
+            <div
+                id="gestionTrabajadorMensaje"
+                class="modal-error"
+                style="display:none;"
+            ></div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" id="cancelarGestionTrabajador" class="modal-btn secondary">
+                Cancelar
+            </button>
+
+            <button type="button" id="btnEliminarTrabajador" class="modal-btn danger" disabled>
+                Eliminar
+            </button>
+
+            <button type="button" id="btnEditarTrabajador" class="modal-btn secondary" disabled>
+                Editar
+            </button>
+
+            <button type="button" id="btnRegistrarTrabajador" class="modal-btn primary" disabled>
+                Registrar
+            </button>
+        </div>
+
+    </div>
 </div>
 
 <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
@@ -240,3 +362,4 @@ if(sessionStorage.getItem("alferza_login")!=="true"){window.location.replace("lo
 
 </body>
 </html>
+

@@ -344,29 +344,16 @@ throw error;
 return promesaSitio;
 }
 
-function obtenerDriveSharePoint(){
-if(!promesaDrive){
-promesaDrive=(async()=>{
-const sitio=await obtenerSitioSharePoint();
-const clave="drive:"+sitio.id;
-const guardado=leerCache(clave);
-if(guardado&&guardado.id){return guardado;}
+function obtenerDriveSharePoint() {
+    if (!promesaDrive) {
+        promesaDrive = Promise.resolve({
+            id: "b!1l0EwOKXpU24cUGYaNjPRiTQWIyIIChCkDDL197LcoOFOD7ThItqTIJ_Z1KoYrrS"
+        });
+    }
 
-const response=await graphFetch(`https://graph.microsoft.com/v1.0/sites/${sitio.id}/drive?$select=id`);
-if(!response.ok){
-throw new Error(`No se pudo obtener el drive de SharePoint. ${response.status} ${await response.text()}`);
+    return promesaDrive;
 }
 
-const drive=await response.json();
-guardarCache(clave,{id:drive.id});
-return {id:drive.id};
-})().catch(error=>{
-promesaDrive=null;
-throw error;
-});
-}
-return promesaDrive;
-}
 
 let ubicacionEquipos=null;
 

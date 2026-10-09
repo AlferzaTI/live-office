@@ -1302,140 +1302,79 @@ async function verificarPermisosInventario() {
 }
 
 
-async function cargarEquipos() {
-    // El inventario es exclusivo del grupo TI.
-    if (!(await verificarPermisosInventario())) {
-        return;
-    }
+async function cargarEquipos(){
+if(cargandoEquipos){return;}
 
-    if (cargandoEquipos) {
-        return;
-    }
+cargandoEquipos=true;
 
-    cargandoEquipos = true;
+try{
+equiposEstado.textContent="● ACTUALIZANDO";
+equiposEstado.className="section-status warning";
 
-    try {
-        // Revalidar antes de consultar los datos.
-        if (!(await verificarPermisosInventario())) {
-            return;
-        }
+const equipos=await obtenerEquiposDesdeSharePoint();
 
-        equiposEstado.textContent = "● ACTUALIZANDO";
-        equiposEstado.className = "section-status warning";
-
-        const equipos = await obtenerEquiposDesdeSharePoint();
-
-        // Evitar mostrar los datos si los permisos cambiaron durante la carga.
-        if (!(await verificarPermisosInventario())) {
-            equiposData = [];
-            equiposFiltrados = [];
-
-            if (equiposTableBody) {
-                equiposTableBody.innerHTML = "";
-            }
-
-            if (equiposEstado) {
-                equiposEstado.textContent = "● RESTRINGIDO";
-                equiposEstado.className = "section-status warning";
-            }
-
-            return;
-        }
-
-        if (equipos) {
-            aplicarDatosEquipos(equipos);
-
-            guardarCache("equipos", {
-                etag: etagEquipos,
-                datos: equipos
-            });
-        }
-
-        if (lastUpdate) {
-            lastUpdate.textContent = obtenerFechaActual();
-        }
-
-        equiposEstado.textContent = "● ACTUALIZADO";
-        equiposEstado.className = "section-status online";
-
-    } catch (error) {
-        console.error("Error cargando equipos:", error);
-
-        // Mostrar diagnósticos solo a usuarios autorizados de TI.
-        if (await verificarPermisosInventario()) {
-            mostrarDiagnostico("Inventario (equipos.json)", error);
-
-            if (equiposData.length > 0) {
-                equiposEstado.textContent = "● SIN ACTUALIZAR";
-                equiposEstado.className = "section-status warning";
-            } else {
-                equiposEstado.textContent = "● ERROR";
-                equiposEstado.className = "section-status offline";
-
-                if (equiposTableBody) {
-                    equiposTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="equipos-loading">
-                                <div class="table-loading">
-                                    <span>No se pudo cargar el inventario.</span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }
-
-                if (equiposResultados) {
-                    equiposResultados.textContent =
-                        "Error al obtener los equipos.";
-                }
-            }
-        }
-    } finally {
-        cargandoEquipos = false;
-    }
+if(equipos){
+aplicarDatosEquipos(equipos);
+guardarCache("equipos",{etag:etagEquipos,datos:equipos});
 }
 
-async function cargarServicios() {
-    try {
-        // Los servicios están disponibles para todos los usuarios autorizados.
-        const servicios = await obtenerMonitoreoTI();
+lastUpdate.textContent=obtenerFechaActual();
+equiposEstado.textContent="● ACTUALIZADO";
+equiposEstado.className="section-status online";
+}catch(error){
+console.error("Error cargando equipos:",error);
+mostrarDiagnostico("Inventario (equipos.json)",error);
 
-        renderizarServicios(servicios);
+if(equiposData.length>0){
+equiposEstado.textContent="● SIN ACTUALIZAR";
+equiposEstado.className="section-status warning";
+}else{
+equiposEstado.textContent="● ERROR";
+equiposEstado.className="section-status offline";
 
-    } catch (error) {
-        console.error("Error cargando servicios:", error);
+equiposTableBody.innerHTML=`
+<tr>
+<td colspan="7" class="equipos-loading">
+<div class="table-loading"><span>No se pudo cargar el inventario.</span></div>
+</td>
+</tr>
+`;
 
-        mostrarDiagnostico(
-            "Servicios (lista " + SHAREPOINT_LIST_SERVICIOS + ")",
-            error
-        );
+if(equiposResultados){
+equiposResultados.textContent="Error al obtener los equipos.";
+}
+}
+}finally{
+cargandoEquipos=false;
+}
+}
 
-        if (serviciosGrid) {
-            serviciosGrid.innerHTML = `
-                <div class="service-card offline">
-                    <div class="service-main">
-                        <div class="service-icon">⚠️</div>
-                        <div class="service-info">
-                            <div class="service-heading">
-                                <h3>Error de conexión</h3>
-                                <span class="service-status offline">
-                                    <span class="status-dot"></span>ERROR
-                                </span>
-                            </div>
-                            <p>
-                                No se pudieron obtener los servicios desde SharePoint.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+async function cargarServicios(){
+try{
+const servicios=await obtenerMonitoreoTI();
+renderizarServicios(servicios);
+}catch(error){
+console.error("Error cargando servicios:",error);
+mostrarDiagnostico("Servicios (lista "+SHAREPOINT_LIST_SERVICIOS+")",error);
 
-        if (estadoGeneral) {
-            estadoGeneral.textContent = "● ERROR";
-            estadoGeneral.className = "section-status offline";
-        }
-    }
+serviciosGrid.innerHTML=`
+<div class="service-card offline">
+<div class="service-main">
+<div class="service-icon">⚠️</div>
+<div class="service-info">
+<div class="service-heading">
+<h3>Error de conexión</h3>
+<span class="service-status offline"><span class="status-dot"></span>ERROR</span>
+</div>
+<p>No se pudieron obtener los servicios desde SharePoint.</p>
+</div>
+</div>
+</div>
+`;
+
+estadoGeneral.textContent="● ERROR";
+estadoGeneral.className="section-status offline";
+}
 }
 
 function mostrarBotonLogin(mensaje){

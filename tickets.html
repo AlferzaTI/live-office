@@ -404,7 +404,76 @@
     </div>
 </div>
 
-<footer>ALFERZA LIVE OFFICE · Mesa de ayuda TI</footer>
+
+<footer class="topbar-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <h2>ALFERZA LIVE OFFICE</h2>
+            <span>Mesa de ayuda TI</span>
+        </div>
+
+        <div class="footer-info">
+            <div class="footer-date-block">
+                <span class="footer-label">FECHA ACTUAL</span>
+                <strong id="footerDate">Cargando fecha...</strong>
+            </div>
+
+            <div class="footer-time-block">
+                <span class="footer-label">HORA PERÚ</span>
+                <strong id="footerTime">--:--:--</strong>
+            </div>
+
+            <div class="footer-status">
+                <span class="footer-status-dot"></span>
+                <span>SISTEMA DE SOPORTE</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>ALFERZA HOLDING · ÁREA DE TECNOLOGÍAS DE LA INFORMACIÓN</span>
+        <span id="footerDay"></span>
+    </div>
+
+    <div class="footer-animation"></div>
+</footer>
+
+<script>
+(function () {
+    const dateElement = document.getElementById("footerDate");
+    const timeElement = document.getElementById("footerTime");
+    const dayElement = document.getElementById("footerDay");
+
+    if (!dateElement || !timeElement || !dayElement) return;
+
+    function updateFooterClock() {
+        const now = new Date();
+
+        dateElement.textContent = new Intl.DateTimeFormat("es-PE", {
+            timeZone: "America/Lima",
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        }).format(now);
+
+        timeElement.textContent = new Intl.DateTimeFormat("es-PE", {
+            timeZone: "America/Lima",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
+        }).format(now);
+
+        dayElement.textContent = new Intl.DateTimeFormat("es-PE", {
+            timeZone: "America/Lima",
+            weekday: "long"
+        }).format(now).toUpperCase();
+    }
+
+    updateFooterClock();
+    setInterval(updateFooterClock, 1000);
+})();
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>

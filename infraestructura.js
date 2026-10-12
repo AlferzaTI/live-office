@@ -949,7 +949,12 @@ function actualizarResumenEquipos() {
     console.log("Total de equipos:", total);
     console.log("Conectados:", conectados);
     console.log("Desconectados:", desconectados);
-    console.log("Estados encontrados:", estados);
+    console.table(
+    Object.entries(estados).map(([estado, cantidad]) => ({
+        Estado: estado,
+        Cantidad: cantidad
+    }))
+);
     console.log("Sin clasificar:", total - conectados - desconectados);
 
     if (totalEquipos) totalEquipos.textContent = total;

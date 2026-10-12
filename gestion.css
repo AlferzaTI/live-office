@@ -1,0 +1,141 @@
+#gestionTrabajadorModal{background:rgba(15,23,42,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+
+#gestionTrabajadorModal .trabajador-modal{position:relative;width:min(520px,94vw);max-height:92vh;display:flex;flex-direction:column;background:#fff;border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(15,23,42,.35);animation:gtEntrada .28s cubic-bezier(.2,.8,.2,1)}
+
+#gestionTrabajadorModal .modal-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 24px;background:linear-gradient(135deg,#00205c 0%,#07377f 55%,#0a84ff 100%);color:#fff}
+
+#gestionTrabajadorModal .modal-kicker{display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.9px;color:rgba(255,255,255,.72)}
+
+#gestionTrabajadorModal .modal-header h3{margin:0;font-size:20px;font-weight:800;color:#fff}
+
+#gestionTrabajadorModal .modal-close{width:34px;height:34px;flex-shrink:0;border:0;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:20px;line-height:1;cursor:pointer;transition:background .2s}
+
+#gestionTrabajadorModal .modal-close:hover{background:rgba(255,255,255,.26)}
+
+#gestionTrabajadorModal .modal-body{padding:22px 24px;background:#f8fafc;overflow-y:auto}
+
+#gestionTrabajadorModal .modal-label{display:block;margin-bottom:7px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#475569}
+
+#gestionTrabajadorModal .modal-body > div:first-of-type{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px !important}
+
+#gestionTrabajadorModal .ip-field{position:relative;flex:1;min-width:0}
+
+#gestionTrabajadorModal .modal-input{width:100%;height:46px;box-sizing:border-box;margin:0;padding:0 14px;border:1.5px solid #cbd5e1;border-radius:13px;background:#fff;color:#0f172a;font-family:inherit;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+
+#gestionTrabajadorModal .modal-input:focus{border-color:#0a84ff;box-shadow:0 0 0 4px rgba(10,132,255,.15)}
+
+#gestionTrabajadorModal .modal-input:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed}
+
+#gestionTrabajadorModal .modal-input.solo-lectura{background:#f1f5f9;border-style:dashed;color:#334155;cursor:default}
+
+#gestionTrabajadorModal #buscarEquipoIP{height:46px}
+
+#gestionTrabajadorModal .modal-equipo{display:flex;flex-direction:column;gap:3px;margin-bottom:20px;padding:14px 16px 14px 18px;background:#fff;border:1px solid #e2e8f0;border-left:4px solid #0a84ff;border-radius:14px;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+
+#gestionTrabajadorModal .modal-equipo.asignado{border-left-color:#16a34a}
+
+#gestionTrabajadorModal .modal-equipo span{font-size:10px;font-weight:800;letter-spacing:.7px;color:#64748b}
+
+#gestionTrabajadorModal .modal-equipo strong{font-size:17px;color:#0f172a}
+
+#gestionTrabajadorModal .modal-equipo small{font-size:12px;color:#64748b}
+
+#gestionTrabajadorModal .gt-sugerencias{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:40;max-height:300px;overflow-y:auto;padding:6px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,.18);animation:gtDesliza .18s ease}
+
+#gestionTrabajadorModal .gt-sugerencias[hidden]{display:none}
+
+#gestionTrabajadorModal .gt-sugerencia{width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 12px;border:0;border-radius:10px;background:transparent;text-align:left;cursor:pointer;font-family:inherit;transition:background .15s}
+
+#gestionTrabajadorModal .gt-sugerencia:hover,
+#gestionTrabajadorModal .gt-sugerencia.activa{background:#eff6ff}
+
+#gestionTrabajadorModal .gt-sug-ip{font-family:Consolas,"Courier New",monospace;font-size:13px;font-weight:700;color:#00205c;white-space:nowrap}
+
+#gestionTrabajadorModal .gt-sug-ip mark{padding:0 2px;border-radius:4px;background:#fde68a;color:inherit}
+
+#gestionTrabajadorModal .gt-sug-info{display:flex;flex-direction:column;min-width:0}
+
+#gestionTrabajadorModal .gt-sug-info strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#0f172a}
+
+#gestionTrabajadorModal .gt-sug-info small{font-size:11px;color:#64748b}
+
+#gestionTrabajadorModal .gt-sug-tag{max-width:140px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+#gestionTrabajadorModal .gt-sug-tag.asignado{background:#dcfce7;color:#166534}
+
+#gestionTrabajadorModal .gt-sug-tag.libre{background:#f1f5f9;color:#475569}
+
+#gestionTrabajadorModal .gt-sug-estado{padding:14px;text-align:center;font-size:13px;color:#64748b}
+
+#gestionTrabajadorModal .modal-footer{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding:16px 24px;background:#fff;border-top:1px solid #e2e8f0}
+
+#gestionTrabajadorModal .modal-btn{height:42px;padding:0 18px;border:1.5px solid transparent;border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s,opacity .2s}
+
+#gestionTrabajadorModal .modal-btn:hover:not(:disabled){transform:translateY(-1px)}
+
+#gestionTrabajadorModal .modal-btn:disabled{opacity:.4;cursor:not-allowed}
+
+#gestionTrabajadorModal .modal-btn.primary{color:#fff;background:linear-gradient(135deg,#0a84ff,#0066d6);box-shadow:0 8px 18px rgba(10,132,255,.28)}
+
+#gestionTrabajadorModal .modal-btn.secondary{color:#334155;background:#fff;border-color:#cbd5e1}
+
+#gestionTrabajadorModal .modal-btn.secondary:hover:not(:disabled){background:#f1f5f9}
+
+#gestionTrabajadorModal .modal-btn.danger{color:#b42318;background:#fff1f0;border-color:#fecaca}
+
+#gestionTrabajadorModal .modal-btn.danger:hover:not(:disabled){background:#fee2e2}
+
+#gestionTrabajadorModal #btnEliminarTrabajador{margin-right:auto}
+
+#gestionTrabajadorModal .modal-error.gt-msg{margin-top:6px;padding:11px 14px;border-radius:12px;font-size:13px;font-weight:600;line-height:1.45}
+
+#gestionTrabajadorModal .gt-msg.error{color:#b42318;background:#fef2f2;border:1px solid #fecaca}
+
+#gestionTrabajadorModal .gt-msg.success{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0}
+
+#gestionTrabajadorModal .gt-msg.info{color:#1e40af;background:#eff6ff;border:1px solid #bfdbfe}
+
+#gestionTrabajadorModal .gt-exito{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#15803d 0%,#16a34a 55%,#22c55e 100%);color:#fff;opacity:0;pointer-events:none;transition:opacity .3s ease}
+
+#gestionTrabajadorModal .gt-exito.mostrar{opacity:1;pointer-events:auto}
+
+#gestionTrabajadorModal .gt-exito-card{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+
+#gestionTrabajadorModal .gt-check{width:84px;height:84px}
+
+#gestionTrabajadorModal .gt-check-circulo{stroke:#fff;stroke-width:2.5;stroke-dasharray:151;stroke-dashoffset:151}
+
+#gestionTrabajadorModal .gt-check-marca{stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40}
+
+#gestionTrabajadorModal .gt-exito.mostrar .gt-check-circulo{animation:gtCirculo .6s ease forwards}
+
+#gestionTrabajadorModal .gt-exito.mostrar .gt-check-marca{animation:gtMarca .4s .55s ease forwards}
+
+#gestionTrabajadorModal .gt-exito-card strong{font-size:19px;font-weight:800}
+
+#gestionTrabajadorModal .gt-exito-card span{font-size:13px;opacity:.85}
+
+@keyframes gtEntrada{
+from{opacity:0;transform:translateY(12px) scale(.98)}
+to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+@keyframes gtDesliza{
+from{opacity:0;transform:translateY(-4px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes gtCirculo{
+to{stroke-dashoffset:0}
+}
+
+@keyframes gtMarca{
+to{stroke-dashoffset:0}
+}
+
+@media (max-width:520px){
+#gestionTrabajadorModal .modal-body > div:first-of-type{flex-direction:column}
+#gestionTrabajadorModal #buscarEquipoIP{width:100%}
+#gestionTrabajadorModal #btnEliminarTrabajador{margin-right:0;width:100%}
+#gestionTrabajadorModal .modal-footer .modal-btn{flex:1 1 auto}
+}

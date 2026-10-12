@@ -100,7 +100,8 @@ let ubicacionEquipos = null;
 /* =========================================================
    ELEMENTOS HTML
 ========================================================= */
-
+const equiposNoVerificables =
+    document.getElementById("equiposNoVerificables");
 const loadingOverlay = document.getElementById("loadingOverlay");
 const loadingMessage = document.getElementById("loadingMessage");
 
@@ -927,6 +928,7 @@ function renderizarServicios(items) {
 ========================================================= */
 
 
+
 function actualizarResumenEquipos() {
     const total = equiposData.length;
 
@@ -938,31 +940,35 @@ function actualizarResumenEquipos() {
         equipo => normalizarTexto(equipo.Estado) === "desconectado"
     ).length;
 
-    // Diagnóstico de todos los estados del inventario.
-    const estados = {};
+    const noVerificables = equiposData.filter(
+        equipo => normalizarTexto(equipo.Estado) === "no verificable"
+    ).length;
 
-    equiposData.forEach(equipo => {
-        const estado = String(equipo.Estado ?? "(vacío)").trim();
-        estados[estado] = (estados[estado] || 0) + 1;
-    });
+    if (totalEquipos) {
+        totalEquipos.textContent = total;
+    }
 
-    console.log("Total de equipos:", total);
-    console.log("Conectados:", conectados);
-    console.log("Desconectados:", desconectados);
-    console.table(
-    Object.entries(estados).map(([estado, cantidad]) => ({
-        Estado: estado,
-        Cantidad: cantidad
-    }))
-);
-    console.log("Sin clasificar:", total - conectados - desconectados);
+    if (equiposConectados) {
+        equiposConectados.textContent = conectados;
+    }
 
-    if (totalEquipos) totalEquipos.textContent = total;
-    if (equiposConectados) equiposConectados.textContent = conectados;
     if (equiposDesconectados) {
         equiposDesconectados.textContent = desconectados;
     }
+
+    if (equiposNoVerificables) {
+        equiposNoVerificables.textContent = noVerificables;
+    }
+
+    console.log("Resumen del inventario:", {
+        total,
+        conectados,
+        desconectados,
+        noVerificables,
+        suma: conectados + desconectados + noVerificables
+    });
 }
+
 
 function actualizarFiltroAreas() {
     const areas = [

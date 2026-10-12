@@ -926,6 +926,7 @@ function renderizarServicios(items) {
    TABLA DE INVENTARIO
 ========================================================= */
 
+
 function actualizarResumenEquipos() {
     const total = equiposData.length;
 
@@ -937,9 +938,25 @@ function actualizarResumenEquipos() {
         equipo => normalizarTexto(equipo.Estado) === "desconectado"
     ).length;
 
-    totalEquipos.textContent = total;
-    equiposConectados.textContent = conectados;
-    equiposDesconectados.textContent = desconectados;
+    // Diagnóstico de todos los estados del inventario.
+    const estados = {};
+
+    equiposData.forEach(equipo => {
+        const estado = String(equipo.Estado ?? "(vacío)").trim();
+        estados[estado] = (estados[estado] || 0) + 1;
+    });
+
+    console.log("Total de equipos:", total);
+    console.log("Conectados:", conectados);
+    console.log("Desconectados:", desconectados);
+    console.log("Estados encontrados:", estados);
+    console.log("Sin clasificar:", total - conectados - desconectados);
+
+    if (totalEquipos) totalEquipos.textContent = total;
+    if (equiposConectados) equiposConectados.textContent = conectados;
+    if (equiposDesconectados) {
+        equiposDesconectados.textContent = desconectados;
+    }
 }
 
 function actualizarFiltroAreas() {

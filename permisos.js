@@ -659,22 +659,16 @@ async function obtenerToken() {
 
     try {
 
-        const resultado =
-            await msalInstance
-                .acquireTokenSilent({
+        await msalInstance.acquireTokenSilent({
 
-                    scopes:
-                        SCOPES_GRAPH,
+            scopes:
+                scopes,
 
-                    account:
-                        cuentaActual
+            account:
+                cuenta
 
-                });
+        });
 
-
-        return resultado.accessToken;
-
-    }
 
     catch (error) {
 

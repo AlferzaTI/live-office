@@ -1,14 +1,23 @@
+
 "use strict";
 
 /* =========================================================
    ALFERZA LIVE OFFICE
    ASISTENTE DE SOPORTE TI
-   Conexión con backend Node.js + Ollama + SharePoint
+   Caché de respuestas + memoria de conversación
 ========================================================= */
 
 (function () {
     const API_URL = "http://localhost:3000/api/chat";
+
     const STORAGE_KEY = "alferza_chatbot_conversation_id";
+    const HISTORY_PREFIX = "alferza_chat_history_";
+    const CACHE_PREFIX = "alferza_chat_cache_";
+
+    const MAX_CARACTERES = 1000;
+    const MAX_HISTORIAL_ENVIADO = 6;
+    const MAX_LINEAS_VISIBLES = 3;
+    const MAX_ENTRADAS_CACHE = 100;
 
     const elements = {
         form: document.getElementById("chatForm"),
@@ -31,17 +40,52 @@
         !elements.characterCount
     ) {
         console.error(
-            "[ALFERZA CHATBOT] No se encontraron todos los elementos del chat."
+            "[ALFERZA CHATBOT] Faltan elementos HTML del chat."
         );
         return;
     }
 
     let procesandoMensaje = false;
     let conversationId = obtenerConversationId();
+    let historial = cargarHistorial();
+    let cache = cargarCache();
 
     /* =====================================================
-       1. IDENTIFICADOR DE CONVERSACIÓN
+       1. ALMACENAMIENTO SEGURO DE SESIÓN
     ===================================================== */
+
+    function leerStorage(clave, valorPredeterminado) {
+        try {
+            const valor = sessionStorage.getItem(clave);
+
+            return valor
+                ? JSON.parse(valor)
+                : valorPredeterminado;
+        } catch (error) {
+            console.warn(
+                "[ALFERZA] No se pudo leer el almacenamiento."
+            );
+
+            return valorPredeterminado;
+        }
+    }
+
+    function guardarStorage(clave, valor) {
+        try {
+            sessionStorage.setItem(
+                clave,
+                JSON.stringify(valor)
+            );
+
+            return true;
+        } catch (error) {
+            console.warn(
+                "[ALFERZA] No se pudo guardar la sesión."
+            );
+
+            return false;
+        }
+    }
 
     function generarId() {
         if (
@@ -63,33 +107,268 @@
 
             if (!id) {
                 id = generarId();
+
                 sessionStorage.setItem(STORAGE_KEY, id);
             }
 
             return id;
         } catch (error) {
-            console.warn(
-                "[ALFERZA CHATBOT] No se pudo acceder a sessionStorage."
-            );
-
             return generarId();
         }
     }
 
-    function crearNuevaConversacion() {
-        conversationId = generarId();
+    function claveHistorial() {
+        return HISTORY_PREFIX + conversationId;
+    }
 
-        try {
-            sessionStorage.setItem(STORAGE_KEY, conversationId);
-        } catch (error) {
-            console.warn(
-                "[ALFERZA CHATBOT] No se pudo guardar el identificador."
-            );
-        }
+    function claveCache() {
+        return CACHE_PREFIX + conversationId;
+    }
+
+    function cargarHistorial() {
+        const datos = leerStorage(
+            HISTORY_PREFIX + conversationId,
+            []
+        );
+
+        return Array.isArray(datos) ? datos : [];
+    }
+
+    function guardarHistorial() {
+        guardarStorage(claveHistorial(), historial);
+    }
+
+    function cargarCache() {
+        const datos = leerStorage(
+            CACHE_PREFIX + conversationId,
+            {}
+        );
+
+        return datos &&
+            typeof datos === "object" &&
+            !Array.isArray(datos)
+                ? datos
+                : {};
+    }
+
+    function guardarCache() {
+        guardarStorage(claveCache(), cache);
     }
 
     /* =====================================================
-       2. MENSAJES DE LA INTERFAZ
+       2. CLASIFICACIÓN DE CONSULTAS ACTUALES
+       No reutilizar respuestas web potencialmente obsoletas.
+    ===================================================== */
+
+    function necesitaInternet(pregunta) {
+        return /\b(clima|tiempo|temperatura|pronóstico|pronostico|lluvia|llover|llueve|humedad|viento|meteorológico|meteorologica|meteorología|noticias|actualmente|hoy|ahora|último|última|ultimos|ultimas|cotización|cotizacion|precio actual|tipo de cambio|resultados en vivo|versión actual|version actual|este año|este mes|202[6-9])\b/i.test(
+            pregunta
+        );
+    }
+
+    function normalizarPregunta(pregunta) {
+        return String(pregunta || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[¿?¡!.,;:]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function esCacheable(pregunta) {
+        // No reutilizar automáticamente información actual de Internet.
+        return !necesitaInternet(pregunta);
+    }
+
+    /* =====================================================
+       3. CACHÉ DE RESPUESTAS
+       Las preguntas repetidas no llegan al backend.
+    ===================================================== */
+
+    function obtenerRespuestaCache(pregunta) {
+        if (!esCacheable(pregunta)) {
+            return null;
+        }
+
+        const clave = normalizarPregunta(pregunta);
+        const entrada = cache[clave];
+
+        if (!entrada || typeof entrada.text !== "string") {
+            return null;
+        }
+
+        return entrada;
+    }
+
+    function guardarRespuestaCache(pregunta, respuesta) {
+        if (
+            !esCacheable(pregunta) ||
+            !respuesta ||
+            !respuesta.text ||
+            respuesta.mode === "error"
+        ) {
+            return;
+        }
+
+        const clave = normalizarPregunta(pregunta);
+
+        cache[clave] = {
+            text: respuesta.text,
+            mode: respuesta.mode || "general",
+            savedAt: Date.now()
+        };
+
+        // Mantener un máximo de entradas en caché.
+        const claves = Object.keys(cache);
+
+        while (claves.length > MAX_ENTRADAS_CACHE) {
+            const masAntigua = claves.shift();
+            delete cache[masAntigua];
+        }
+
+        guardarCache();
+    }
+
+    /* =====================================================
+       4. HISTORIAL DE CONVERSACIÓN
+       Se conserva en el navegador durante la sesión.
+    ===================================================== */
+
+    function registrarHistorial(role, content) {
+        historial.push({
+            role,
+            content: String(content || ""),
+            timestamp: Date.now()
+        });
+
+        guardarHistorial();
+    }
+
+    function obtenerHistorialParaBackend() {
+        // Conservamos el historial completo localmente,
+        // pero enviamos solo los mensajes recientes.
+        return historial
+            .slice(-MAX_HISTORIAL_ENVIADO)
+            .map(mensaje => ({
+                role: mensaje.role,
+                content: mensaje.content
+            }));
+    }
+
+    /* =====================================================
+       5. ESTILOS DE ANIMACIÓN Y RESPUESTA CORTA
+    ===================================================== */
+
+    function instalarEstilos() {
+        if (document.getElementById("alferza-chat-dynamic-styles")) {
+            return;
+        }
+
+        const estilos = document.createElement("style");
+        estilos.id = "alferza-chat-dynamic-styles";
+
+        estilos.textContent = `
+            #typingIndicator {
+                transition: opacity 0.2s ease;
+            }
+
+            #typingIndicator:not([hidden]) {
+                animation: alferzaTypingPulse 1.2s ease-in-out infinite;
+            }
+
+            .alferza-typing-dots {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                margin-left: 5px;
+            }
+
+            .alferza-typing-dots span {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: currentColor;
+                animation: alferzaDotBounce 1s infinite ease-in-out;
+            }
+
+            .alferza-typing-dots span:nth-child(2) {
+                animation-delay: 0.15s;
+            }
+
+            .alferza-typing-dots span:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+
+            .message-bubble.limited-response {
+                display: -webkit-box;
+                -webkit-line-clamp: ${MAX_LINEAS_VISIBLES};
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                overflow-wrap: anywhere;
+                white-space: pre-line;
+            }
+
+            .message-row.bot .message-avatar {
+                transition: transform 0.2s ease;
+            }
+
+            .message-row.bot:hover .message-avatar {
+                transform: scale(1.05);
+            }
+
+            @keyframes alferzaTypingPulse {
+                0%, 100% { opacity: 0.65; }
+                50% { opacity: 1; }
+            }
+
+            @keyframes alferzaDotBounce {
+                0%, 60%, 100% {
+                    transform: translateY(0);
+                    opacity: 0.45;
+                }
+                30% {
+                    transform: translateY(-4px);
+                    opacity: 1;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                #typingIndicator,
+                .alferza-typing-dots span,
+                .message-row.bot .message-avatar {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            }
+        `;
+
+        document.head.appendChild(estilos);
+
+        // Agregar puntos animados al indicador existente.
+        if (!elements.typing.querySelector(".alferza-typing-dots")) {
+            const puntos = document.createElement("span");
+            puntos.className = "alferza-typing-dots";
+            puntos.setAttribute("aria-hidden", "true");
+
+            for (let i = 0; i < 3; i++) {
+                puntos.appendChild(
+                    document.createElement("span")
+                );
+            }
+
+            elements.typing.appendChild(puntos);
+        }
+
+        elements.typing.setAttribute("role", "status");
+        elements.typing.setAttribute(
+            "aria-label",
+            "ALFERZA está generando una respuesta"
+        );
+    }
+
+    /* =====================================================
+       6. MENSAJES DE LA INTERFAZ
     ===================================================== */
 
     function obtenerHora() {
@@ -100,7 +379,7 @@
         }).format(new Date());
     }
 
-    function agregarMensaje(tipo, texto) {
+    function agregarMensaje(tipo, texto, opciones = {}) {
         const fila = document.createElement("div");
         fila.className = `message-row ${tipo}`;
 
@@ -116,8 +395,13 @@
         const burbuja = document.createElement("div");
         burbuja.className = "message-bubble";
 
-        // Nunca interpretar la respuesta de la IA como HTML.
+        // No interpretar respuestas como HTML.
         burbuja.textContent = String(texto || "");
+
+        if (tipo === "bot" && opciones.limitarLineas) {
+            burbuja.classList.add("limited-response");
+            burbuja.title = "Respuesta breve de ALFERZA";
+        }
 
         const hora = document.createElement("span");
         hora.className = "message-time";
@@ -147,7 +431,7 @@
     }
 
     /* =====================================================
-       3. ESTADO DE LA INTERFAZ
+       7. ESTADO DE LA INTERFAZ
     ===================================================== */
 
     function mostrarEscritura(visible) {
@@ -168,7 +452,7 @@
         const cantidad = elements.input.value.length;
 
         elements.characterCount.textContent =
-            `${cantidad}/1000`;
+            `${cantidad}/${MAX_CARACTERES}`;
 
         elements.input.style.height = "auto";
         elements.input.style.height =
@@ -176,7 +460,7 @@
     }
 
     /* =====================================================
-       4. INTERPRETAR LA RESPUESTA DEL BACKEND
+       8. RESPUESTA DEL BACKEND
     ===================================================== */
 
     function obtenerTextoRespuesta(datos) {
@@ -213,6 +497,7 @@
                     fuente.archivo ||
                     fuente.fuente ||
                     fuente.source ||
+                    fuente.title ||
                     ""
                 );
             }
@@ -224,12 +509,12 @@
             return "";
         }
 
-        return "\n\nFuentes consultadas:\n" +
-            [...new Set(nombres)].join("\n");
+        return "\n\nFuentes: " +
+            [...new Set(nombres)].slice(0, 2).join(", ");
     }
 
     /* =====================================================
-       5. CONSULTAR LA IA DEL BACKEND
+       9. CONSULTAR EL BACKEND
     ===================================================== */
 
     async function consultarBackend(mensaje) {
@@ -240,7 +525,11 @@
             },
             body: JSON.stringify({
                 conversationId: conversationId,
-                message: mensaje
+                message: mensaje,
+
+                // El backend debe leer este campo para utilizar
+                // el contexto de mensajes anteriores.
+                history: obtenerHistorialParaBackend()
             })
         });
 
@@ -266,11 +555,10 @@
 
         if (!texto) {
             throw new Error(
-                "El servidor respondió, pero no devolvió el texto de la respuesta."
+                "El servidor no devolvió el texto de la respuesta."
             );
         }
 
-        // Permite conservar el ID que devuelve el servidor.
         if (datos.conversationId) {
             conversationId = datos.conversationId;
 
@@ -281,16 +569,19 @@
                 );
             } catch (error) {
                 console.warn(
-                    "[ALFERZA CHATBOT] No se pudo guardar la sesión."
+                    "[ALFERZA] No se pudo guardar el identificador."
                 );
             }
         }
 
-        return texto + obtenerFuentes(datos);
+        return {
+            text: texto + obtenerFuentes(datos),
+            mode: datos.mode || datos.modo || "general"
+        };
     }
 
     /* =====================================================
-       6. PROCESAR Y ENVIAR MENSAJES
+       10. ENVIAR MENSAJES CON CACHÉ
     ===================================================== */
 
     async function enviarMensaje(mensaje) {
@@ -300,10 +591,10 @@
             return;
         }
 
-        if (texto.length > 1000) {
+        if (texto.length > MAX_CARACTERES) {
             agregarMensaje(
                 "bot",
-                "La consulta supera el límite de 1000 caracteres."
+                `La consulta supera el límite de ${MAX_CARACTERES} caracteres.`
             );
             return;
         }
@@ -311,34 +602,67 @@
         procesandoMensaje = true;
 
         agregarMensaje("user", texto);
+        registrarHistorial("user", texto);
 
         elements.input.value = "";
         actualizarContador();
         mostrarEscritura(true);
 
         try {
-            const respuesta = await consultarBackend(texto);
+            const respuestaGuardada = obtenerRespuestaCache(texto);
 
-            agregarMensaje("bot", respuesta);
+            if (respuestaGuardada) {
+                console.info(
+                    "[ALFERZA] Caché utilizada. No se llamó al backend."
+                );
+
+                agregarMensaje(
+                    "bot",
+                    respuestaGuardada.text,
+                    { limitarLineas: true }
+                );
+
+                registrarHistorial(
+                    "assistant",
+                    respuestaGuardada.text
+                );
+
+                return;
+            }
 
             console.info(
-                "[ALFERZA CHATBOT] Respuesta recibida correctamente."
+                "[ALFERZA] Enviando consulta al backend."
+            );
+
+            const respuesta = await consultarBackend(texto);
+
+            agregarMensaje(
+                "bot",
+                respuesta.text,
+                { limitarLineas: true }
+            );
+
+            registrarHistorial(
+                "assistant",
+                respuesta.text
+            );
+
+            guardarRespuestaCache(texto, respuesta);
+
+            console.info(
+                "[ALFERZA] Respuesta recibida correctamente."
             );
         } catch (error) {
             console.error(
-                "[ALFERZA CHATBOT] Error de conexión:",
+                "[ALFERZA CHATBOT] Error:",
                 error
             );
 
             agregarMensaje(
                 "bot",
-                "No pude comunicarme con el servicio de inteligencia artificial.\n\n" +
-                "Verifica que:\n" +
-                "1. El backend Node.js esté ejecutándose.\n" +
-                "2. El servicio de Ollama esté disponible.\n" +
-                "3. La dirección del backend sea accesible desde este navegador.\n\n" +
-                "Tu consulta no se ha confirmado como procesada. " +
-                "Corrige la conexión e inténtalo nuevamente."
+                "No pude obtener una respuesta.\n\n" +
+                "Verifica que el backend Node.js y Ollama estén funcionando. " +
+                "Si el problema continúa, revisa la terminal del backend."
             );
         } finally {
             mostrarEscritura(false);
@@ -353,7 +677,7 @@
     }
 
     /* =====================================================
-       7. EVENTOS DEL CHAT
+       11. EVENTOS DEL CHAT
     ===================================================== */
 
     elements.form.addEventListener("submit", function (evento) {
@@ -394,8 +718,7 @@
     });
 
     /* =====================================================
-       8. NUEVA CONVERSACIÓN
-       No elimina el historial de SQLite.
+       12. NUEVA CONVERSACIÓN
     ===================================================== */
 
     elements.clearButton.addEventListener("click", function () {
@@ -403,7 +726,23 @@
             return;
         }
 
-        crearNuevaConversacion();
+        conversationId = generarId();
+        historial = [];
+        cache = {};
+
+        try {
+            sessionStorage.setItem(
+                STORAGE_KEY,
+                conversationId
+            );
+        } catch (error) {
+            console.warn(
+                "[ALFERZA] No se pudo guardar la nueva conversación."
+            );
+        }
+
+        guardarHistorial();
+        guardarCache();
 
         elements.messages.replaceChildren();
 
@@ -411,33 +750,40 @@
             "bot",
             "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
             "He iniciado una conversación nueva. " +
-            "Puedo ayudarte con los procedimientos de TI disponibles.\n\n" +
             "¿Qué necesitas resolver hoy?"
         );
 
         elements.input.value = "";
         actualizarContador();
         elements.input.focus();
+
+        console.info(
+            "[ALFERZA] Nueva conversación iniciada."
+        );
     });
 
     /* =====================================================
-       9. INICIALIZACIÓN
+       13. INICIALIZACIÓN
     ===================================================== */
 
     function iniciarChatbot() {
+        instalarEstilos();
         actualizarContador();
 
         agregarMensaje(
             "bot",
             "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
-            "Estoy conectado al servicio de soporte cuando el backend está disponible. " +
-            "Puedo consultar los procedimientos de TI indexados desde SharePoint.\n\n" +
-            "Cuéntame qué necesitas resolver."
+            "Puedo ayudarte con tus consultas y los procedimientos " +
+            "internos disponibles."
         );
 
         console.info(
-            "[ALFERZA CHATBOT] Interfaz inicializada.",
-            { conversationId: conversationId }
+            "[ALFERZA CHATBOT] Inicializado.",
+            {
+                conversationId: conversationId,
+                mensajesGuardados: historial.length,
+                respuestasEnCache: Object.keys(cache).length
+            }
         );
     }
 

@@ -4,7 +4,8 @@
 /* =========================================================
    ALFERZA LIVE OFFICE
    ASISTENTE DE SOPORTE TI
-   Caché de respuestas + memoria de conversación
+   Respuestas completas + caché + historial
+   Desplazamiento automático mejorado
 ========================================================= */
 
 (function () {
@@ -16,7 +17,6 @@
 
     const MAX_CARACTERES = 1000;
     const MAX_HISTORIAL_ENVIADO = 6;
-    const MAX_LINEAS_VISIBLES = 3;
     const MAX_ENTRADAS_CACHE = 100;
 
     const elements = {
@@ -51,7 +51,7 @@
     let cache = cargarCache();
 
     /* =====================================================
-       1. ALMACENAMIENTO SEGURO DE SESIÓN
+       1. ALMACENAMIENTO DE SESIÓN
     ===================================================== */
 
     function leerStorage(clave, valorPredeterminado) {
@@ -157,7 +157,6 @@
 
     /* =====================================================
        2. CLASIFICACIÓN DE CONSULTAS ACTUALES
-       No reutilizar respuestas web potencialmente obsoletas.
     ===================================================== */
 
     function necesitaInternet(pregunta) {
@@ -177,13 +176,11 @@
     }
 
     function esCacheable(pregunta) {
-        // No reutilizar automáticamente información actual de Internet.
         return !necesitaInternet(pregunta);
     }
 
     /* =====================================================
        3. CACHÉ DE RESPUESTAS
-       Las preguntas repetidas no llegan al backend.
     ===================================================== */
 
     function obtenerRespuestaCache(pregunta) {
@@ -219,7 +216,6 @@
             savedAt: Date.now()
         };
 
-        // Mantener un máximo de entradas en caché.
         const claves = Object.keys(cache);
 
         while (claves.length > MAX_ENTRADAS_CACHE) {
@@ -232,7 +228,6 @@
 
     /* =====================================================
        4. HISTORIAL DE CONVERSACIÓN
-       Se conserva en el navegador durante la sesión.
     ===================================================== */
 
     function registrarHistorial(role, content) {
@@ -246,22 +241,27 @@
     }
 
     function obtenerHistorialParaBackend() {
-        // Conservamos el historial completo localmente,
-        // pero enviamos solo los mensajes recientes.
         return historial
             .slice(-MAX_HISTORIAL_ENVIADO)
-            .map(mensaje => ({
-                role: mensaje.role,
-                content: mensaje.content
-            }));
+            .map(function (mensaje) {
+                return {
+                    role: mensaje.role,
+                    content: mensaje.content
+                };
+            });
     }
 
     /* =====================================================
-       5. ESTILOS DE ANIMACIÓN Y RESPUESTA CORTA
+       5. ESTILOS DINÁMICOS
+       Sin límite de líneas.
     ===================================================== */
 
     function instalarEstilos() {
-        if (document.getElementById("alferza-chat-dynamic-styles")) {
+        if (
+            document.getElementById(
+                "alferza-chat-dynamic-styles"
+            )
+        ) {
             return;
         }
 
@@ -300,13 +300,22 @@
                 animation-delay: 0.3s;
             }
 
+            /* Mostrar siempre la respuesta completa. */
+            .message-bubble,
             .message-bubble.limited-response {
-                display: -webkit-box;
-                -webkit-line-clamp: ${MAX_LINEAS_VISIBLES};
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                display: block;
+                height: auto;
+                max-height: none;
+                overflow: visible;
+                -webkit-line-clamp: unset;
+                -webkit-box-orient: initial;
+                white-space: pre-wrap;
                 overflow-wrap: anywhere;
-                white-space: pre-line;
+                word-break: normal;
+            }
+
+            .message-row {
+                max-width: 98%;
             }
 
             .message-row.bot .message-avatar {
@@ -345,8 +354,11 @@
 
         document.head.appendChild(estilos);
 
-        // Agregar puntos animados al indicador existente.
-        if (!elements.typing.querySelector(".alferza-typing-dots")) {
+        if (
+            !elements.typing.querySelector(
+                ".alferza-typing-dots"
+            )
+        ) {
             const puntos = document.createElement("span");
             puntos.className = "alferza-typing-dots";
             puntos.setAttribute("aria-hidden", "true");
@@ -368,7 +380,41 @@
     }
 
     /* =====================================================
-       6. MENSAJES DE LA INTERFAZ
+       6. DESPLAZAMIENTO AUTOMÁTICO
+       Mantiene visible el último mensaje.
+    ===================================================== */
+
+    function desplazarAlFinal(inmediato = false) {
+        const desplazar = function () {
+            elements.messages.scrollTop =
+                elements.messages.scrollHeight;
+
+            // Mantener visible el indicador de escritura
+            // si está dentro del área de mensajes.
+            if (
+                !elements.typing.hidden &&
+                elements.messages.contains(elements.typing)
+            ) {
+                elements.typing.scrollIntoView({
+                    block: "nearest",
+                    behavior: "auto"
+                });
+            }
+        };
+
+        if (inmediato) {
+            desplazar();
+        }
+
+        requestAnimationFrame(function () {
+            desplazar();
+
+            requestAnimationFrame(desplazar);
+        });
+    }
+
+    /* =====================================================
+       7. MENSAJES DE LA INTERFAZ
     ===================================================== */
 
     function obtenerHora() {
@@ -379,7 +425,7 @@
         }).format(new Date());
     }
 
-    function agregarMensaje(tipo, texto, opciones = {}) {
+    function agregarMensaje(tipo, texto) {
         const fila = document.createElement("div");
         fila.className = `message-row ${tipo}`;
 
@@ -395,13 +441,9 @@
         const burbuja = document.createElement("div");
         burbuja.className = "message-bubble";
 
-        // No interpretar respuestas como HTML.
+        // Mostrar el contenido como texto seguro.
+        // No interpretar la respuesta como HTML.
         burbuja.textContent = String(texto || "");
-
-        if (tipo === "bot" && opciones.limitarLineas) {
-            burbuja.classList.add("limited-response");
-            burbuja.title = "Respuesta breve de ALFERZA";
-        }
 
         const hora = document.createElement("span");
         hora.className = "message-time";
@@ -414,6 +456,7 @@
             avatar.className = "message-avatar";
             avatar.textContent = "A";
             avatar.setAttribute("aria-hidden", "true");
+
             fila.append(avatar);
         }
 
@@ -425,13 +468,8 @@
         return fila;
     }
 
-    function desplazarAlFinal() {
-        elements.messages.scrollTop =
-            elements.messages.scrollHeight;
-    }
-
     /* =====================================================
-       7. ESTADO DE LA INTERFAZ
+       8. ESTADO DE LA INTERFAZ
     ===================================================== */
 
     function mostrarEscritura(visible) {
@@ -455,23 +493,34 @@
             `${cantidad}/${MAX_CARACTERES}`;
 
         elements.input.style.height = "auto";
+
         elements.input.style.height =
             `${Math.min(elements.input.scrollHeight, 120)}px`;
     }
 
     /* =====================================================
-       8. RESPUESTA DEL BACKEND
+       9. RESPUESTA DEL BACKEND
     ===================================================== */
 
     function obtenerTextoRespuesta(datos) {
-        return (
-            datos.respuesta ||
-            datos.answer ||
-            datos.response ||
-            datos.mensaje ||
-            datos.message ||
-            ""
-        );
+        const posiblesRespuestas = [
+            datos.respuesta,
+            datos.answer,
+            datos.response,
+            datos.mensaje,
+            datos.message
+        ];
+
+        for (const respuesta of posiblesRespuestas) {
+            if (
+                typeof respuesta === "string" &&
+                respuesta.trim()
+            ) {
+                return respuesta.trim();
+            }
+        }
+
+        return "";
     }
 
     function obtenerFuentes(datos) {
@@ -510,11 +559,11 @@
         }
 
         return "\n\nFuentes: " +
-            [...new Set(nombres)].slice(0, 2).join(", ");
+            [...new Set(nombres)].join(", ");
     }
 
     /* =====================================================
-       9. CONSULTAR EL BACKEND
+       10. CONSULTAR EL BACKEND
     ===================================================== */
 
     async function consultarBackend(mensaje) {
@@ -526,9 +575,6 @@
             body: JSON.stringify({
                 conversationId: conversationId,
                 message: mensaje,
-
-                // El backend debe leer este campo para utilizar
-                // el contexto de mensajes anteriores.
                 history: obtenerHistorialParaBackend()
             })
         });
@@ -581,7 +627,8 @@
     }
 
     /* =====================================================
-       10. ENVIAR MENSAJES CON CACHÉ
+       11. ENVIAR MENSAJES
+       Sin recortar respuestas de caché ni del backend.
     ===================================================== */
 
     async function enviarMensaje(mensaje) {
@@ -607,19 +654,20 @@
         elements.input.value = "";
         actualizarContador();
         mostrarEscritura(true);
+        desplazarAlFinal();
 
         try {
-            const respuestaGuardada = obtenerRespuestaCache(texto);
+            const respuestaGuardada =
+                obtenerRespuestaCache(texto);
 
             if (respuestaGuardada) {
                 console.info(
-                    "[ALFERZA] Caché utilizada. No se llamó al backend."
+                    "[ALFERZA] Caché utilizada."
                 );
 
                 agregarMensaje(
                     "bot",
-                    respuestaGuardada.text,
-                    { limitarLineas: true }
+                    respuestaGuardada.text
                 );
 
                 registrarHistorial(
@@ -638,8 +686,7 @@
 
             agregarMensaje(
                 "bot",
-                respuesta.text,
-                { limitarLineas: true }
+                respuesta.text
             );
 
             registrarHistorial(
@@ -661,7 +708,7 @@
             agregarMensaje(
                 "bot",
                 "No pude obtener una respuesta.\n\n" +
-                "Verifica que el backend Node.js y Ollama estén funcionando. " +
+                "Verifica que el backend Node.js esté funcionando. " +
                 "Si el problema continúa, revisa la terminal del backend."
             );
         } finally {
@@ -672,18 +719,23 @@
             elements.sendButton.disabled = false;
 
             actualizarContador();
+            desplazarAlFinal();
+
             elements.input.focus();
         }
     }
 
     /* =====================================================
-       11. EVENTOS DEL CHAT
+       12. EVENTOS DEL CHAT
     ===================================================== */
 
-    elements.form.addEventListener("submit", function (evento) {
-        evento.preventDefault();
-        enviarMensaje(elements.input.value);
-    });
+    elements.form.addEventListener(
+        "submit",
+        function (evento) {
+            evento.preventDefault();
+            enviarMensaje(elements.input.value);
+        }
+    );
 
     elements.input.addEventListener(
         "input",
@@ -718,52 +770,57 @@
     });
 
     /* =====================================================
-       12. NUEVA CONVERSACIÓN
+       13. NUEVA CONVERSACIÓN
     ===================================================== */
 
-    elements.clearButton.addEventListener("click", function () {
-        if (procesandoMensaje) {
-            return;
-        }
+    elements.clearButton.addEventListener(
+        "click",
+        function () {
+            if (procesandoMensaje) {
+                return;
+            }
 
-        conversationId = generarId();
-        historial = [];
-        cache = {};
+            conversationId = generarId();
+            historial = [];
+            cache = {};
 
-        try {
-            sessionStorage.setItem(
-                STORAGE_KEY,
-                conversationId
+            try {
+                sessionStorage.setItem(
+                    STORAGE_KEY,
+                    conversationId
+                );
+            } catch (error) {
+                console.warn(
+                    "[ALFERZA] No se pudo guardar la nueva conversación."
+                );
+            }
+
+            guardarHistorial();
+            guardarCache();
+
+            elements.messages.replaceChildren();
+
+            agregarMensaje(
+                "bot",
+                "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
+                "He iniciado una conversación nueva. " +
+                "¿Qué necesitas resolver hoy?"
             );
-        } catch (error) {
-            console.warn(
-                "[ALFERZA] No se pudo guardar la nueva conversación."
+
+            elements.input.value = "";
+            actualizarContador();
+            desplazarAlFinal();
+
+            elements.input.focus();
+
+            console.info(
+                "[ALFERZA] Nueva conversación iniciada."
             );
         }
-
-        guardarHistorial();
-        guardarCache();
-
-        elements.messages.replaceChildren();
-
-        agregarMensaje(
-            "bot",
-            "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
-            "He iniciado una conversación nueva. " +
-            "¿Qué necesitas resolver hoy?"
-        );
-
-        elements.input.value = "";
-        actualizarContador();
-        elements.input.focus();
-
-        console.info(
-            "[ALFERZA] Nueva conversación iniciada."
-        );
-    });
+    );
 
     /* =====================================================
-       13. INICIALIZACIÓN
+       14. INICIALIZACIÓN
     ===================================================== */
 
     function iniciarChatbot() {
@@ -776,6 +833,8 @@
             "Puedo ayudarte con tus consultas y los procedimientos " +
             "internos disponibles."
         );
+
+        desplazarAlFinal();
 
         console.info(
             "[ALFERZA CHATBOT] Inicializado.",

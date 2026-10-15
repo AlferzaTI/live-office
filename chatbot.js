@@ -1,10 +1,10 @@
-
 "use strict";
 
 /* =========================================================
    ALFERZA LIVE OFFICE - ASISTENTE DE SOPORTE TI
-   Sin backend Node.js y sin OpenAI.
-   Microsoft Graph + SharePoint PDF + Microsoft Lists.
+   HTML + CSS + JavaScript
+   Microsoft Graph + SharePoint PDF + Microsoft Lists
+   Sin backend Node.js. Sin OpenAI.
 ========================================================= */
 
 (function () {
@@ -23,14 +23,12 @@
             "Sites.ReadWrite.All"
         ],
 
-        // Sitio que contiene los procedimientos PDF.
         documentos: {
             hostname: "alferzaholding.sharepoint.com",
             rutaSitio: "/sites/TI",
             carpeta: "Procedimientos-TI"
         },
 
-        // Sitio personal donde se encuentra la lista.
         lista: {
             hostname: "alferzaholding-my.sharepoint.com",
             rutaSitio: "/personal/soporte1_alferza_pe",
@@ -51,7 +49,6 @@
     };
 
     const GRAPH = "https://graph.microsoft.com/v1.0";
-
     const STORAGE_KEY = "alferza_chatbot_conversation_id";
     const HISTORY_PREFIX = "alferza_chat_history_";
     const CACHE_PREFIX = "alferza_chat_cache_";
@@ -76,9 +73,7 @@
         !elements.typing ||
         !elements.characterCount
     ) {
-        console.error(
-            "[ALFERZA CHATBOT] Faltan elementos HTML del chat."
-        );
+        console.error("[ALFERZA] Faltan elementos HTML del chat.");
         return;
     }
 
@@ -86,28 +81,30 @@
     let cuenta = null;
     let tokenActual = null;
     let tokenExpira = 0;
-
     let usuario = null;
+
     let conversationId = obtenerConversationId();
     let historial = cargarHistorialLocal();
     let cache = cargarCache();
 
     let procesandoMensaje = false;
     let inicializado = false;
+    let listaDisponible = false;
 
     let siteDocumentosId = null;
     let siteListaId = null;
     let driveDocumentosId = null;
     let listaId = null;
-
+    let nombreSitioLista = "";
     let columnasLista = {};
+
     let documentosIndexados = [];
     let indexacionEnCurso = null;
     let pdfJsCargado = false;
     let ultimaCargaDocumentos = 0;
 
     /* =====================================================
-       1. UTILIDADES Y ALMACENAMIENTO LOCAL
+       1. ALMACENAMIENTO Y UTILIDADES
     ===================================================== */
 
     function leerStorage(clave, predeterminado) {
@@ -161,11 +158,7 @@
     }
 
     function cargarHistorialLocal() {
-        const datos = leerStorage(
-            HISTORY_PREFIX + conversationId,
-            []
-        );
-
+        const datos = leerStorage(claveHistorial(), []);
         return Array.isArray(datos) ? datos : [];
     }
 
@@ -174,13 +167,9 @@
     }
 
     function cargarCache() {
-        const datos = leerStorage(CACHE_PREFIX + conversationId, {});
-
-        return datos &&
-            typeof datos === "object" &&
-            !Array.isArray(datos)
-                ? datos
-                : {};
+        const datos = leerStorage(claveCache(), {});
+        return datos && typeof datos === "object" &&
+            !Array.isArray(datos) ? datos : {};
     }
 
     function guardarCache() {
@@ -197,10 +186,6 @@
             .trim();
     }
 
-    function escaparOData(valor) {
-        return String(valor || "").replace(/'/g, "''");
-    }
-
     function nombreInterno(nombre) {
         return String(nombre || "")
             .toLowerCase()
@@ -209,48 +194,50 @@
             .replace(/[^a-z0-9]/g, "");
     }
 
-    function esErrorPermisos(error) {
-        const texto = String(error && error.message || "").toLowerCase();
-
-        return texto.includes("consent") ||
-            texto.includes("permission") ||
-            texto.includes("forbidden") ||
-            texto.includes("403") ||
-            texto.includes("401") ||
-            texto.includes("interaction_required");
-    }
-
     function mensajeErrorAmigable(error) {
-        const texto = String(error && error.message || "");
+        const texto = String(error?.message || "");
+        const minusculas = texto.toLowerCase();
 
-        if (texto.includes("interaction_required")) {
+        if (
+            minusculas.includes("interaction_required") ||
+            minusculas.includes("login_required")
+        ) {
             return "Microsoft necesita que vuelvas a iniciar sesión. " +
                 "Recarga la página e inténtalo nuevamente.";
         }
 
-        if (texto.includes("403") || texto.toLowerCase().includes("forbidden")) {
-            return "Microsoft ha denegado el acceso. Revisa los permisos " +
-                "Sites.Read.All y Sites.ReadWrite.All de la aplicación y " +
-                "el acceso del usuario a SharePoint.";
+        if (
+            texto.includes("403") ||
+            minusculas.includes("forbidden")
+        ) {
+            return "Microsoft ha denegado el acceso. Comprueba los permisos " +
+                "de Microsoft Graph y el acceso de tu usuario a SharePoint.";
         }
 
         if (texto.includes("401")) {
-            return "La sesión de Microsoft ha caducado. " +
-                "Vuelve a iniciar sesión.";
+            return "La sesión de Microsoft ha caducado. Vuelve a iniciar sesión.";
+        }
+
+        if (
+            minusculas.includes("failed to fetch") ||
+            minusculas.includes("networkerror")
+        ) {
+            return "No se pudo conectar con Microsoft Graph. Comprueba " +
+                "tu conexión y la configuración de la aplicación.";
         }
 
         return texto || "Se produjo un error desconocido.";
     }
 
     /* =====================================================
-       2. MSAL Y MICROSOFT GRAPH
+       2. AUTENTICACIÓN MSAL
     ===================================================== */
 
     async function inicializarMSAL() {
         if (typeof msal === "undefined") {
             throw new Error(
-                "No se ha cargado MSAL. Incluye msal-browser.min.js " +
-                "antes de chatbot.js en tu HTML."
+                "MSAL no está cargado. Incluye msal-browser.min.js " +
+                "antes de chatbot.js en el HTML."
             );
         }
 
@@ -278,16 +265,17 @@
 
         const cuentas = msalApp.getAllAccounts();
 
-        if (cuentas.length > 0) {
-            cuenta = cuentas[0];
+        if (cuentas.length) {
+            cuenta =
+                msalApp.getActiveAccount() ||
+                cuentas[0];
+
             msalApp.setActiveAccount(cuenta);
         } else {
-            // Reutiliza la sesión existente de ALFERZA.
-            // alferza_login no sustituye la autenticación de Graph.
             if (sessionStorage.getItem("alferza_login") !== "true") {
                 throw new Error(
-                    "No hay una sesión activa de ALFERZA. " +
-                    "Inicia sesión en el portal."
+                    "No hay una sesión activa de ALFERZA. Inicia sesión " +
+                    "en el portal antes de abrir el asistente."
                 );
             }
 
@@ -301,7 +289,9 @@
 
         await obtenerToken(true);
 
-        const perfil = await graphFetch("/me?$select=id,displayName,mail,userPrincipalName");
+        const perfil = await graphFetch(
+            "/me?$select=id,displayName,mail,userPrincipalName"
+        );
 
         usuario = {
             id: perfil.id,
@@ -312,7 +302,7 @@
         if (!usuario.correo) {
             throw new Error(
                 "Microsoft no devolvió el correo del usuario. " +
-                "No se puede guardar el historial de forma segura."
+                "No se puede identificar al propietario del historial."
             );
         }
 
@@ -372,6 +362,10 @@
         }
     }
 
+    /* =====================================================
+       3. MICROSOFT GRAPH
+    ===================================================== */
+
     async function graphFetch(ruta, opciones, reintento) {
         opciones = opciones || {};
         reintento = reintento || false;
@@ -405,15 +399,15 @@
         }
 
         if (!respuesta.ok) {
-            let detalle = "";
+            // Leer el cuerpo una sola vez para no perder el detalle del error.
+            const cuerpo = await respuesta.text().catch(() => "");
+            let detalle = cuerpo;
 
             try {
-                const json = await respuesta.json();
-                detalle = json.error && json.error.message
-                    ? json.error.message
-                    : JSON.stringify(json);
+                const json = JSON.parse(cuerpo);
+                detalle = json.error?.message || cuerpo;
             } catch (_) {
-                detalle = await respuesta.text().catch(() => "");
+                // La respuesta no era JSON.
             }
 
             throw new Error(
@@ -448,30 +442,37 @@
         return resultados;
     }
 
-    /* =====================================================
-       3. RESOLVER SITIOS, LISTA Y COLUMNAS
-    ===================================================== */
-
     async function resolverSitio(hostname, ruta) {
+        const rutaLimpia = ruta.startsWith("/")
+            ? ruta
+            : "/" + ruta;
+
         const url =
-            "/sites/" + hostname + ":" + ruta +
+            "/sites/" + hostname + ":" + rutaLimpia +
             "?$select=id,displayName,webUrl";
 
-        const sitio = await graphFetch(url);
-        return sitio.id;
+        return graphFetch(url);
     }
 
+    /* =====================================================
+       4. RESOLVER SHAREPOINT Y BUSCAR LA LISTA
+    ===================================================== */
+
     async function prepararSharePoint() {
-        siteDocumentosId = await resolverSitio(
+        const sitioDocumentos = await resolverSitio(
             CONFIG.documentos.hostname,
             CONFIG.documentos.rutaSitio
         );
 
-        siteListaId = await resolverSitio(
-            CONFIG.lista.hostname,
-            CONFIG.lista.rutaSitio
-        );
+        siteDocumentosId = sitioDocumentos.id;
 
+        console.info("[ALFERZA] Sitio de documentos:", {
+            nombre: sitioDocumentos.displayName,
+            url: sitioDocumentos.webUrl,
+            id: sitioDocumentos.id
+        });
+
+        // Resolver la biblioteca de documentos.
         const drives = await obtenerTodasLasPaginas(
             "/sites/" + siteDocumentosId +
             "/drives?$select=id,name,webUrl,driveType"
@@ -484,41 +485,133 @@
         });
 
         if (!drive) {
-            const predeterminado = await graphFetch(
+            drive = await graphFetch(
                 "/sites/" + siteDocumentosId +
                 "/drive?$select=id,name,webUrl"
             );
-
-            drive = predeterminado;
         }
 
-        if (!drive || !drive.id) {
+        if (!drive?.id) {
             throw new Error(
-                "No encontré la biblioteca Documentos compartidos " +
-                "en el sitio de SharePoint /sites/TI."
+                "No encontré una biblioteca de documentos en " +
+                sitioDocumentos.webUrl
             );
         }
 
         driveDocumentosId = drive.id;
 
-        const listas = await obtenerTodasLasPaginas(
-            "/sites/" + siteListaId +
-            "/lists?$select=id,displayName,list"
-        );
+        console.info("[ALFERZA] Biblioteca:", drive.name, drive.webUrl);
 
-        const lista = listas.find(function (l) {
-            return normalizar(l.displayName) ===
-                normalizar(CONFIG.lista.nombre);
-        });
+        // Buscar la lista primero en el sitio configurado y luego
+        // en el sitio de documentos.
+        const candidatos = [];
+        const erroresSitios = [];
 
-        if (!lista) {
-            throw new Error(
-                "No se encontró la lista " + CONFIG.lista.nombre +
-                ". Comprueba el nombre y los permisos de SharePoint."
+        try {
+            const sitioLista = await resolverSitio(
+                CONFIG.lista.hostname,
+                CONFIG.lista.rutaSitio
+            );
+
+            candidatos.push(sitioLista);
+
+            console.info("[ALFERZA] Sitio configurado para la lista:", {
+                nombre: sitioLista.displayName,
+                url: sitioLista.webUrl,
+                id: sitioLista.id
+            });
+        } catch (error) {
+            erroresSitios.push(
+                "Sitio configurado: " + error.message
+            );
+
+            console.warn(
+                "[ALFERZA] No se pudo resolver el sitio configurado para " +
+                "la lista:",
+                error
             );
         }
 
-        listaId = lista.id;
+        // Evitar consultar dos veces el mismo sitio.
+        if (
+            siteDocumentosId &&
+            !candidatos.some(s => s.id === siteDocumentosId)
+        ) {
+            candidatos.push(sitioDocumentos);
+        }
+
+        let encontrada = null;
+        const diagnostico = [];
+
+        for (const sitio of candidatos) {
+            try {
+                const listas = await obtenerTodasLasPaginas(
+                    "/sites/" + sitio.id +
+                    "/lists?$select=id,displayName,webUrl,list"
+                );
+
+                const nombres = listas.map(l => l.displayName || "(sin nombre)");
+
+                diagnostico.push({
+                    sitio: sitio.webUrl,
+                    listas: nombres
+                });
+
+                console.info(
+                    "[ALFERZA] Listas encontradas en",
+                    sitio.webUrl,
+                    nombres
+                );
+
+                encontrada = listas.find(function (lista) {
+                    return normalizar(lista.displayName) ===
+                        normalizar(CONFIG.lista.nombre);
+                });
+
+                if (encontrada) {
+                    siteListaId = sitio.id;
+                    nombreSitioLista = sitio.webUrl;
+                    break;
+                }
+            } catch (error) {
+                erroresSitios.push(
+                    sitio.webUrl + ": " + error.message
+                );
+
+                console.error(
+                    "[ALFERZA] Error al enumerar las listas de",
+                    sitio.webUrl,
+                    error
+                );
+            }
+        }
+
+        if (!encontrada) {
+            listaId = null;
+            listaDisponible = false;
+
+            console.error(
+                "[ALFERZA] No se encontró la lista configurada.",
+                {
+                    listaBuscada: CONFIG.lista.nombre,
+                    sitiosConsultados: diagnostico,
+                    errores: erroresSitios
+                }
+            );
+
+            // No bloqueamos la búsqueda de PDF por la lista.
+            // El chatbot podrá responder, pero avisará si no puede guardar.
+            return false;
+        }
+
+        listaId = encontrada.id;
+        listaDisponible = true;
+
+        console.info("[ALFERZA] Lista localizada:", {
+            nombre: encontrada.displayName,
+            id: encontrada.id,
+            sitio: nombreSitioLista
+        });
 
         const columnas = await obtenerTodasLasPaginas(
             "/sites/" + siteListaId +
@@ -528,17 +621,22 @@
 
         columnasLista = {};
 
-        columnas.forEach(function (columna) {
-            const clave = nombreInterno(columna.displayName);
-            columnasLista[clave] = columna.name;
+        columnas.forEach(function (c) {
+            if (c.hidden) return;
+
+            // Guardamos tanto el nombre visible como el nombre interno.
+            if (c.displayName) {
+                columnasLista[nombreInterno(c.displayName)] = c.name;
+            }
+
+            if (c.name) {
+                columnasLista[nombreInterno(c.name)] = c.name;
+            }
         });
 
-        console.info("[ALFERZA] SharePoint preparado.", {
-            documentosSite: siteDocumentosId,
-            listaSite: siteListaId,
-            lista: CONFIG.lista.nombre,
-            columnas: Object.keys(columnasLista)
-        });
+        console.info("[ALFERZA] Columnas de la lista:", columnasLista);
+
+        return true;
     }
 
     function columna(nombre) {
@@ -546,35 +644,22 @@
     }
 
     /* =====================================================
-       4. CARGAR PDF.JS
+       5. PDF.JS
     ===================================================== */
 
     async function cargarPdfJs() {
-        if (pdfJsCargado && window.pdfjsLib) {
-            return;
-        }
+        if (pdfJsCargado && window.pdfjsLib) return;
 
         if (!window.pdfjsLib) {
             await new Promise(function (resolve, reject) {
-                const existente = document.querySelector(
-                    'script[data-alferza-pdfjs="true"]'
-                );
-
-                if (existente) {
-                    existente.addEventListener("load", resolve, { once: true });
-                    existente.addEventListener("error", reject, { once: true });
-                    return;
-                }
-
                 const script = document.createElement("script");
+
                 script.src = CONFIG.pdfJsUrl;
                 script.async = true;
-                script.dataset.alferzaPdfjs = "true";
                 script.onload = resolve;
                 script.onerror = function () {
                     reject(new Error(
-                        "No se pudo cargar PDF.js. Comprueba la conexión " +
-                        "y que el CDN esté permitido."
+                        "No se pudo cargar PDF.js desde el CDN."
                     ));
                 };
 
@@ -593,23 +678,31 @@
     }
 
     /* =====================================================
-       5. BUSCAR PDF EN PROCEDIMIENTOS-TI
+       6. LOCALIZAR Y LEER LOS PDF
     ===================================================== */
 
     async function listarArchivosCarpeta() {
         const driveId = driveDocumentosId;
         const carpeta = CONFIG.documentos.carpeta;
+        let carpetaItem = null;
 
-        // Primero intentamos encontrar la carpeta en la raíz.
-        let carpetaItem;
-
+        // Primero buscamos la carpeta por ruta.
         try {
             carpetaItem = await graphFetch(
                 "/drives/" + driveId +
                 "/root:/" + encodeURIComponent(carpeta) +
                 "?$select=id,name,folder,webUrl"
             );
-        } catch (_) {
+        } catch (error) {
+            console.warn(
+                "[ALFERZA] No se encontró la carpeta por ruta; " +
+                "se intentará buscar en la raíz.",
+                error.message
+            );
+        }
+
+        // Si la ruta no funcionó, buscar por nombre en la raíz.
+        if (!carpetaItem?.id) {
             const raiz = await obtenerTodasLasPaginas(
                 "/drives/" + driveId +
                 "/root/children?$select=id,name,folder,file,webUrl"
@@ -621,10 +714,11 @@
             });
         }
 
-        if (!carpetaItem || !carpetaItem.id) {
+        if (!carpetaItem?.id) {
             throw new Error(
-                "No encontré la carpeta " + carpeta +
-                " en la biblioteca de documentos. Verifica la ruta."
+                "No encontré la carpeta '" + carpeta +
+                "' en la biblioteca '" + (driveDocumentosId || "") +
+                "'. Comprueba el nombre y la ubicación."
             );
         }
 
@@ -635,10 +729,7 @@
         while (pendientes.length) {
             const idCarpeta = pendientes.shift();
 
-            if (visitadas.has(idCarpeta)) {
-                continue;
-            }
-
+            if (visitadas.has(idCarpeta)) continue;
             visitadas.add(idCarpeta);
 
             const elementos = await obtenerTodasLasPaginas(
@@ -650,14 +741,16 @@
             for (const item of elementos) {
                 if (item.folder) {
                     pendientes.push(item.id);
-                } else if (
-                    item.file &&
-                    /\.pdf$/i.test(item.name || "")
-                ) {
+                } else if (item.file && /\.pdf$/i.test(item.name || "")) {
                     archivos.push(item);
                 }
             }
         }
+
+        console.info(
+            "[ALFERZA] PDF encontrados:",
+            archivos.map(a => a.name)
+        );
 
         return archivos;
     }
@@ -669,6 +762,7 @@
         );
 
         const buffer = await respuesta.arrayBuffer();
+
         const pdf = await window.pdfjsLib.getDocument({
             data: new Uint8Array(buffer)
         }).promise;
@@ -684,9 +778,7 @@
             const contenido = await pagina.getTextContent();
 
             const texto = contenido.items
-                .map(function (item) {
-                    return item.str || "";
-                })
+                .map(item => item.str || "")
                 .join(" ")
                 .replace(/\s+/g, " ")
                 .trim();
@@ -716,13 +808,9 @@
             }
         }
 
-        if (actual.length) {
-            fragmentos.push(actual.join(" "));
-        }
+        if (actual.length) fragmentos.push(actual.join(" "));
 
-        return fragmentos.filter(function (t) {
-            return t.trim().length > 35;
-        });
+        return fragmentos.filter(t => t.trim().length > 35);
     }
 
     async function indexarDocumentos(forzar) {
@@ -734,9 +822,7 @@
             return documentosIndexados;
         }
 
-        if (indexacionEnCurso) {
-            return indexacionEnCurso;
-        }
+        if (indexacionEnCurso) return indexacionEnCurso;
 
         indexacionEnCurso = (async function () {
             await cargarPdfJs();
@@ -745,7 +831,7 @@
 
             if (!archivos.length) {
                 throw new Error(
-                    "No hay archivos PDF en " +
+                    "No hay archivos PDF en la carpeta " +
                     CONFIG.documentos.carpeta + "."
                 );
             }
@@ -758,20 +844,16 @@
                     const paginas = await extraerTextoPdf(archivo);
 
                     for (const pagina of paginas) {
-                        const fragmentos = dividirEnFragmentos(
-                            pagina.texto,
-                            900
-                        );
-
-                        fragmentos.forEach(function (fragmento) {
-                            indice.push({
-                                archivo: archivo.name,
-                                webUrl: archivo.webUrl || "",
-                                pagina: pagina.pagina,
-                                texto: fragmento,
-                                normalizado: normalizar(fragmento)
+                        dividirEnFragmentos(pagina.texto, 900)
+                            .forEach(function (fragmento) {
+                                indice.push({
+                                    archivo: archivo.name,
+                                    webUrl: archivo.webUrl || "",
+                                    pagina: pagina.pagina,
+                                    texto: fragmento,
+                                    normalizado: normalizar(fragmento)
+                                });
                             });
-                        });
                     }
 
                     console.info(
@@ -782,6 +864,7 @@
                     );
                 } catch (error) {
                     errores.push(archivo.name);
+
                     console.warn(
                         "[ALFERZA] No se pudo leer el PDF:",
                         archivo.name,
@@ -817,7 +900,7 @@
     }
 
     /* =====================================================
-       6. BÚSQUEDA LOCAL DE FRAGMENTOS RELEVANTES
+       7. BUSCADOR DE CONTENIDO
     ===================================================== */
 
     const PALABRAS_IGNORADAS = new Set([
@@ -826,73 +909,57 @@
         "esto", "ese", "esa", "eso", "hay", "ser", "hacer",
         "tengo", "tiene", "puedo", "puede", "quiero", "necesito",
         "donde", "cuando", "cual", "cuales", "quien", "porque",
-        "sobre", "entre", "desde", "hasta", "muy", "más", "mas",
+        "sobre", "entre", "desde", "hasta", "muy", "mas",
         "mi", "mis", "tu", "tus", "su", "sus", "el", "la",
         "un", "y", "o", "a", "de", "en", "es", "al", "me",
-        "te", "se", "lo", "le", "ya", "si", "no", "qué",
-        "cómo", "por favor", "hola", "buenos", "buenas"
+        "te", "se", "lo", "le", "ya", "si", "no", "hola",
+        "buenos", "buenas"
     ]);
 
     function palabrasClave(texto) {
         return [...new Set(
             normalizar(texto)
                 .split(/\s+/)
-                .filter(function (palabra) {
-                    return palabra.length >= 2 &&
-                        !PALABRAS_IGNORADAS.has(palabra);
-                })
+                .filter(p =>
+                    p.length >= 2 && !PALABRAS_IGNORADAS.has(p)
+                )
         )];
     }
 
     function buscarFragmentos(pregunta) {
         const terminos = palabrasClave(pregunta);
+        if (!terminos.length) return [];
 
-        if (!terminos.length) {
-            return [];
-        }
+        const resultados = documentosIndexados
+            .map(function (fragmento) {
+                let puntuacion = 0;
 
-        const resultados = documentosIndexados.map(function (fragmento) {
-            let puntuacion = 0;
-
-            for (const termino of terminos) {
-                if (fragmento.normalizado.includes(termino)) {
-                    puntuacion += termino.length >= 7 ? 3 : 1;
+                for (const termino of terminos) {
+                    if (fragmento.normalizado.includes(termino)) {
+                        puntuacion += termino.length >= 7 ? 3 : 1;
+                    }
                 }
-            }
 
-            const cobertura = puntuacion / Math.max(terminos.length, 1);
+                return {
+                    ...fragmento,
+                    puntuacion: puntuacion
+                };
+            })
+            .filter(fragmento => fragmento.puntuacion > 0)
+            .sort((a, b) => b.puntuacion - a.puntuacion);
 
-            return {
-                ...fragmento,
-                puntuacion: puntuacion,
-                cobertura: cobertura
-            };
-        }).filter(function (fragmento) {
-            return fragmento.puntuacion > 0;
-        });
-
-        resultados.sort(function (a, b) {
-            return b.puntuacion - a.puntuacion;
-        });
-
-        // Evitar devolver fragmentos casi idénticos del mismo PDF.
         const seleccionados = [];
         const paginasUsadas = new Set();
 
         for (const resultado of resultados) {
-            const clave =
-                resultado.archivo + "|" + resultado.pagina;
+            const clave = resultado.archivo + "|" + resultado.pagina;
 
-            if (paginasUsadas.has(clave)) {
-                continue;
-            }
+            if (paginasUsadas.has(clave)) continue;
 
             paginasUsadas.add(clave);
             seleccionados.push(resultado);
 
-            if (seleccionados.length >= CONFIG.maxResultados) {
-                break;
-            }
+            if (seleccionados.length >= CONFIG.maxResultados) break;
         }
 
         return seleccionados;
@@ -907,44 +974,37 @@
                     "No encontré información suficientemente relacionada " +
                     "con tu consulta en los procedimientos PDF disponibles.\n\n" +
                     "Prueba con el nombre del sistema, equipo, error o " +
-                    "procedimiento que necesitas. También puedes indicar " +
-                    "más detalles del problema.",
+                    "procedimiento. También puedes indicar más detalles.",
                 mode: "sin-resultados",
                 fuentes: []
             };
         }
 
-        const bloques = resultados.map(function (resultado, indice) {
+        const bloques = resultados.map(function (r, i) {
             return (
-                (indice + 1) + ". " + resultado.archivo +
-                " (página " + resultado.pagina + ")\n" +
-                resultado.texto
+                (i + 1) + ". " + r.archivo +
+                " (página " + r.pagina + ")\n" +
+                r.texto
             );
-        });
-
-        const fuentes = resultados.map(function (resultado) {
-            return {
-                titulo: resultado.archivo,
-                pagina: resultado.pagina,
-                url: resultado.webUrl
-            };
         });
 
         return {
             text:
                 "Encontré información relacionada en tus procedimientos " +
-                "de TI:\n\n" +
-                bloques.join("\n\n") +
-                "\n\nNota: estos son fragmentos del documento original. " +
-                "Si necesitas pasos adicionales, dime qué parte quieres " +
-                "aclarar.",
+                "de TI:\n\n" + bloques.join("\n\n") +
+                "\n\nEstos son fragmentos de los documentos originales. " +
+                "Puedes pedirme que busque otro término o procedimiento.",
             mode: "sharepoint",
-            fuentes: fuentes
+            fuentes: resultados.map(r => ({
+                titulo: r.archivo,
+                pagina: r.pagina,
+                url: r.webUrl
+            }))
         };
     }
 
     /* =====================================================
-       7. HISTORIAL REMOTO EN MICROSOFT LISTS
+       8. HISTORIAL Y CONTEXTO
     ===================================================== */
 
     function agregarHistorial(role, content) {
@@ -954,53 +1014,48 @@
             timestamp: Date.now()
         });
 
-        // El historial local sirve para el contexto inmediato.
-        if (historial.length > 100) {
-            historial = historial.slice(-100);
-        }
-
+        if (historial.length > 100) historial = historial.slice(-100);
         guardarHistorialLocal();
     }
 
     function historialContexto() {
-        return historial
-            .slice(-CONFIG.maxMensajesContexto)
-            .map(function (mensaje) {
-                return {
-                    role: mensaje.role,
-                    content: mensaje.content
-                };
-            });
+        return historial.slice(-CONFIG.maxMensajesContexto).map(m => ({
+            role: m.role,
+            content: m.content
+        }));
     }
 
     function enriquecerPreguntaConContexto(pregunta) {
         const actual = normalizar(pregunta);
 
-        // Si la pregunta parece un seguimiento corto, usar la última
-        // pregunta del usuario para aportar contexto a la búsqueda.
         const seguimiento =
-            /^(y |y si |y como |y cómo |eso |ese |esa |lo mismo|tambien|también|por que|por qué|donde|dónde|como hago|cómo hago|explica|amplia|amplía|detalla|continua|continúa)/i
+            /^(y |y si |y como |eso |ese |esa |lo mismo|tambien|por que |donde |como hago |explica|amplia|detalla|continua)/i
                 .test(actual) ||
             actual.split(/\s+/).length <= 3;
 
-        if (!seguimiento) {
-            return pregunta;
-        }
+        if (!seguimiento) return pregunta;
 
         const ultimaPregunta = [...historial]
             .reverse()
-            .find(function (mensaje) {
-                return mensaje.role === "user";
-            });
+            .find(m => m.role === "user");
 
-        if (!ultimaPregunta) {
-            return pregunta;
-        }
-
-        return ultimaPregunta.content + " " + pregunta;
+        return ultimaPregunta
+            ? ultimaPregunta.content + " " + pregunta
+            : pregunta;
     }
 
+    /* =====================================================
+       9. HISTORIAL REMOTO EN MICROSOFT LISTS
+    ===================================================== */
+
     async function cargarHistorialRemoto() {
+        if (!listaDisponible || !listaId || !siteListaId) {
+            console.warn(
+                "[ALFERZA] Historial remoto desactivado: la lista no está localizada."
+            );
+            return;
+        }
+
         const colConversation = columna("ConversationId");
         const colCorreo = columna("UsuarioCorreo");
         const colPregunta = columna("MensajeUsuario");
@@ -1014,18 +1069,17 @@
             !colRespuesta
         ) {
             console.warn(
-                "[ALFERZA] Faltan columnas necesarias para recuperar " +
-                "el historial remoto. Se conservará el historial local."
+                "[ALFERZA] La lista no tiene todas las columnas necesarias " +
+                "para recuperar el historial. Se usará el historial local."
             );
             return;
         }
 
-        // Filtrar en Graph por usuario y conversación.
-        // No descargar conversaciones de otros usuarios.
         const filtro =
             "fields/" + colConversation + " eq '" +
-            escaparOData(conversationId) + "' and fields/" +
-            colCorreo + " eq '" + escaparOData(usuario.correo) + "'";
+            conversationId.replace(/'/g, "''") +
+            "' and fields/" + colCorreo + " eq '" +
+            usuario.correo.replace(/'/g, "''") + "'";
 
         const seleccion = [
             colConversation,
@@ -1039,8 +1093,8 @@
             "/sites/" + siteListaId +
             "/lists/" + listaId +
             "/items?$expand=fields($select=" +
-            encodeURIComponent(seleccion) + ")" +
-            "&$filter=" + encodeURIComponent(filtro) +
+            encodeURIComponent(seleccion) +
+            ")&$filter=" + encodeURIComponent(filtro) +
             "&$top=100";
 
         try {
@@ -1051,12 +1105,13 @@
                 const campos = registro.fields || {};
                 const pregunta = campos[colPregunta];
                 const respuesta = campos[colRespuesta];
+                const timestamp = Date.parse(campos[colFecha] || "") || 0;
 
                 if (pregunta) {
                     remoto.push({
                         role: "user",
                         content: String(pregunta),
-                        timestamp: Date.parse(campos[colFecha] || "") || 0
+                        timestamp: timestamp
                     });
                 }
 
@@ -1064,87 +1119,85 @@
                     remoto.push({
                         role: "assistant",
                         content: String(respuesta),
-                        timestamp: Date.parse(campos[colFecha] || "") || 0
+                        timestamp: timestamp
                     });
                 }
             });
 
-            remoto.sort(function (a, b) {
-                return a.timestamp - b.timestamp;
-            });
+            remoto.sort((a, b) => a.timestamp - b.timestamp);
 
             if (remoto.length) {
                 historial = remoto.slice(-100);
                 guardarHistorialLocal();
             }
+
+            console.info(
+                "[ALFERZA] Mensajes remotos recuperados:",
+                remoto.length
+            );
         } catch (error) {
-            // No se consultan todos los registros como alternativa,
-            // porque eso podría exponer el historial de otros usuarios.
+            // No descargar todos los registros: podrían ser de otros usuarios.
             console.warn(
-                "[ALFERZA] No se pudo recuperar el historial remoto " +
-                "con el filtro por usuario y conversación:",
+                "[ALFERZA] No se pudo recuperar el historial remoto:",
                 error
             );
         }
     }
 
     async function guardarIntercambio(pregunta, respuesta, fuentes, tema) {
-        const col = {
-            titulo: columna("Title"),
-            conversationId: columna("ConversationId"),
-            correo: columna("UsuarioCorreo"),
-            pregunta: columna("MensajeUsuario"),
-            respuesta: columna("RespuestaBot"),
-            fecha: columna("Fecha"),
-            documento: columna("DocumentoOrigen"),
-            tema: columna("Tema")
-        };
+        if (!listaDisponible || !listaId || !siteListaId) {
+            throw new Error(
+                "El chatbot respondió, pero no se encontró la lista " +
+                CONFIG.lista.nombre +
+                ". Revisa en la consola los sitios y nombres de listas encontrados."
+            );
+        }
 
         const campos = {};
 
-        if (col.titulo) {
-            campos[col.titulo] = pregunta.slice(0, 255);
+        const colTitulo = columna("Title") || columna("Título");
+        const colConversation = columna("ConversationId");
+        const colCorreo = columna("UsuarioCorreo");
+        const colPregunta = columna("MensajeUsuario");
+        const colRespuesta = columna("RespuestaBot");
+        const colFecha = columna("Fecha");
+        const colDocumento = columna("DocumentoOrigen");
+        const colTema = columna("Tema");
+
+        if (colTitulo) campos[colTitulo] = pregunta.slice(0, 255);
+        if (colConversation) campos[colConversation] = conversationId;
+        if (colCorreo) campos[colCorreo] = usuario.correo;
+        if (colPregunta) campos[colPregunta] = pregunta;
+        if (colRespuesta) campos[colRespuesta] = respuesta;
+
+        if (colFecha) {
+            campos[colFecha] = new Date().toISOString();
         }
 
-        if (col.conversationId) {
-            campos[col.conversationId] = conversationId;
-        }
-
-        if (col.correo) {
-            campos[col.correo] = usuario.correo;
-        }
-
-        if (col.pregunta) {
-            campos[col.pregunta] = pregunta;
-        }
-
-        if (col.respuesta) {
-            campos[col.respuesta] = respuesta;
-        }
-
-        if (col.fecha) {
-            campos[col.fecha] = new Date().toISOString();
-        }
-
-        if (col.documento) {
-            campos[col.documento] = (fuentes || [])
-                .map(function (fuente) {
-                    return fuente.titulo +
-                        (fuente.pagina ? " (p. " + fuente.pagina + ")" : "");
-                })
+        if (colDocumento) {
+            campos[colDocumento] = (fuentes || [])
+                .map(f =>
+                    f.titulo + (f.pagina ? " (p. " + f.pagina + ")" : "")
+                )
                 .join("; ")
                 .slice(0, 255);
         }
 
-        if (col.tema) {
-            campos[col.tema] = String(tema || "Soporte TI").slice(0, 255);
+        if (colTema) {
+            campos[colTema] = String(tema || "Soporte TI").slice(0, 255);
         }
 
-        if (!col.pregunta || !col.respuesta || !col.correo || !col.conversationId) {
+        const faltantes = [];
+
+        if (!colConversation) faltantes.push("ConversationId");
+        if (!colCorreo) faltantes.push("UsuarioCorreo");
+        if (!colPregunta) faltantes.push("MensajeUsuario");
+        if (!colRespuesta) faltantes.push("RespuestaBot");
+
+        if (faltantes.length) {
             throw new Error(
-                "La lista ConversacionesCHATBOT no tiene todas las columnas " +
-                "requeridas. Debe incluir UsuarioCorreo, ConversationId, " +
-                "MensajeUsuario y RespuestaBot."
+                "Faltan columnas en la lista: " + faltantes.join(", ") +
+                ". Revisa los nombres de las columnas en Microsoft Lists."
             );
         }
 
@@ -1153,9 +1206,7 @@
             "/lists/" + listaId + "/items",
             {
                 method: "POST",
-                body: JSON.stringify({
-                    fields: campos
-                })
+                body: JSON.stringify({ fields: campos })
             }
         );
 
@@ -1163,16 +1214,14 @@
     }
 
     /* =====================================================
-       8. CACHÉ DE RESPUESTAS
+       10. CACHÉ DE RESPUESTAS
     ===================================================== */
 
     function obtenerRespuestaCache(pregunta) {
         const clave = normalizar(pregunta);
         const entrada = cache[clave];
 
-        if (!entrada || typeof entrada.text !== "string") {
-            return null;
-        }
+        if (!entrada || typeof entrada.text !== "string") return null;
 
         if (
             !entrada.savedAt ||
@@ -1187,13 +1236,9 @@
     }
 
     function guardarRespuestaCache(pregunta, respuesta) {
-        if (!respuesta || !respuesta.text) {
-            return;
-        }
+        if (!respuesta?.text) return;
 
-        const clave = normalizar(pregunta);
-
-        cache[clave] = {
+        cache[normalizar(pregunta)] = {
             text: respuesta.text,
             mode: respuesta.mode || "sharepoint",
             fuentes: respuesta.fuentes || [],
@@ -1210,13 +1255,11 @@
     }
 
     /* =====================================================
-       9. ESTILOS DINÁMICOS Y DESPLAZAMIENTO
+       11. ESTILOS, MENSAJES Y DESPLAZAMIENTO
     ===================================================== */
 
     function instalarEstilos() {
-        if (document.getElementById("alferza-chat-dynamic-styles")) {
-            return;
-        }
+        if (document.getElementById("alferza-chat-dynamic-styles")) return;
 
         const estilos = document.createElement("style");
         estilos.id = "alferza-chat-dynamic-styles";
@@ -1228,29 +1271,6 @@
 
             #typingIndicator:not([hidden]) {
                 animation: alferzaTypingPulse 1.2s ease-in-out infinite;
-            }
-
-            .alferza-typing-dots {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                margin-left: 5px;
-            }
-
-            .alferza-typing-dots span {
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: currentColor;
-                animation: alferzaDotBounce 1s infinite ease-in-out;
-            }
-
-            .alferza-typing-dots span:nth-child(2) {
-                animation-delay: .15s;
-            }
-
-            .alferza-typing-dots span:nth-child(3) {
-                animation-delay: .3s;
             }
 
             .message-bubble,
@@ -1275,20 +1295,8 @@
                 50% { opacity: 1; }
             }
 
-            @keyframes alferzaDotBounce {
-                0%, 60%, 100% {
-                    transform: translateY(0);
-                    opacity: .45;
-                }
-                30% {
-                    transform: translateY(-4px);
-                    opacity: 1;
-                }
-            }
-
             @media (prefers-reduced-motion: reduce) {
-                #typingIndicator,
-                .alferza-typing-dots span {
+                #typingIndicator {
                     animation: none !important;
                     transition: none !important;
                 }
@@ -1296,55 +1304,20 @@
         `;
 
         document.head.appendChild(estilos);
-
-        if (!elements.typing.querySelector(".alferza-typing-dots")) {
-            const puntos = document.createElement("span");
-            puntos.className = "alferza-typing-dots";
-            puntos.setAttribute("aria-hidden", "true");
-
-            for (let i = 0; i < 3; i++) {
-                puntos.appendChild(document.createElement("span"));
-            }
-
-            elements.typing.appendChild(puntos);
-        }
-
-        elements.typing.setAttribute("role", "status");
-        elements.typing.setAttribute(
-            "aria-label",
-            "ALFERZA está buscando en los procedimientos"
-        );
     }
 
     function desplazarAlFinal(inmediato) {
         const desplazar = function () {
-            elements.messages.scrollTop =
-                elements.messages.scrollHeight;
-
-            if (
-                !elements.typing.hidden &&
-                elements.messages.contains(elements.typing)
-            ) {
-                elements.typing.scrollIntoView({
-                    block: "nearest",
-                    behavior: "auto"
-                });
-            }
+            elements.messages.scrollTop = elements.messages.scrollHeight;
         };
 
-        if (inmediato) {
-            desplazar();
-        }
+        if (inmediato) desplazar();
 
         requestAnimationFrame(function () {
             desplazar();
             requestAnimationFrame(desplazar);
         });
     }
-
-    /* =====================================================
-       10. MENSAJES DE LA INTERFAZ
-    ===================================================== */
 
     function obtenerHora() {
         return new Intl.DateTimeFormat("es-PE", {
@@ -1363,9 +1336,7 @@
 
         const nombre = document.createElement("span");
         nombre.className = "message-name";
-        nombre.textContent = tipo === "user"
-            ? "Tú"
-            : "Asistente ALFERZA";
+        nombre.textContent = tipo === "user" ? "Tú" : "Asistente ALFERZA";
 
         const burbuja = document.createElement("div");
         burbuja.className = "message-bubble";
@@ -1387,7 +1358,6 @@
 
         fila.append(contenido);
         elements.messages.append(fila);
-
         desplazarAlFinal();
 
         return fila;
@@ -1398,13 +1368,11 @@
         elements.sendButton.disabled = visible;
         elements.input.disabled = visible;
 
-        elements.suggestions.forEach(function (boton) {
+        elements.suggestions.forEach(boton => {
             boton.disabled = visible;
         });
 
-        if (visible) {
-            desplazarAlFinal();
-        }
+        if (visible) desplazarAlFinal();
     }
 
     function actualizarContador() {
@@ -1418,38 +1386,29 @@
             Math.min(elements.input.scrollHeight, 120) + "px";
     }
 
-    function mostrarFuentesComoEnlaces(fuentes) {
-        if (!fuentes || !fuentes.length) {
-            return "";
-        }
+    function mostrarFuentesComoTexto(fuentes) {
+        if (!fuentes?.length) return "";
 
         return "\n\nDocumentos consultados:\n" +
             fuentes.map(function (fuente) {
-                const pagina = fuente.pagina
-                    ? " (página " + fuente.pagina + ")"
-                    : "";
-
-                return "• " + fuente.titulo + pagina;
+                return "• " + fuente.titulo +
+                    (fuente.pagina ? " (página " + fuente.pagina + ")" : "");
             }).join("\n");
     }
 
     /* =====================================================
-       11. PROCESAR CONSULTA SIN BACKEND NI IA
+       12. CONSULTA Y ENVÍO
     ===================================================== */
 
     async function consultarDocumentos(mensaje) {
-        const preguntaConContexto =
-            enriquecerPreguntaConContexto(mensaje);
+        const pregunta = enriquecerPreguntaConContexto(mensaje);
 
         await indexarDocumentos(false);
 
-        const resultado = respuestaDesdeDocumentos(
-            preguntaConContexto
-        );
+        const resultado = respuestaDesdeDocumentos(pregunta);
 
         return {
-            text: resultado.text +
-                mostrarFuentesComoEnlaces(resultado.fuentes),
+            text: resultado.text + mostrarFuentesComoTexto(resultado.fuentes),
             mode: resultado.mode,
             fuentes: resultado.fuentes
         };
@@ -1458,9 +1417,7 @@
     async function enviarMensaje(mensaje) {
         const texto = String(mensaje || "").trim();
 
-        if (!texto || procesandoMensaje) {
-            return;
-        }
+        if (!texto || procesandoMensaje) return;
 
         if (texto.length > CONFIG.maxCaracteres) {
             agregarMensaje(
@@ -1474,14 +1431,13 @@
         if (!inicializado) {
             agregarMensaje(
                 "bot",
-                "Estoy terminando de conectarme con Microsoft 365. " +
-                "Espera unos segundos y vuelve a intentarlo."
+                "El asistente todavía está conectándose con Microsoft 365. " +
+                "Espera unos segundos e inténtalo nuevamente."
             );
             return;
         }
 
         procesandoMensaje = true;
-
         agregarMensaje("user", texto);
         agregarHistorial("user", texto);
 
@@ -1489,43 +1445,34 @@
         actualizarContador();
         mostrarEscritura(true);
 
-        let respuestaFinal = null;
-
         try {
-            const respuestaGuardada = obtenerRespuestaCache(texto);
+            let respuesta = obtenerRespuestaCache(texto);
 
-            if (respuestaGuardada) {
-                respuestaFinal = {
-                    text: respuestaGuardada.text,
-                    mode: respuestaGuardada.mode,
-                    fuentes: respuestaGuardada.fuentes || []
-                };
-            } else {
-                respuestaFinal = await consultarDocumentos(texto);
-                guardarRespuestaCache(texto, respuestaFinal);
+            if (!respuesta) {
+                respuesta = await consultarDocumentos(texto);
+                guardarRespuestaCache(texto, respuesta);
             }
 
-            agregarMensaje("bot", respuestaFinal.text);
-            agregarHistorial("assistant", respuestaFinal.text);
+            agregarMensaje("bot", respuesta.text);
+            agregarHistorial("assistant", respuesta.text);
 
-            // La respuesta se muestra aunque el guardado falle.
             try {
                 await guardarIntercambio(
                     texto,
-                    respuestaFinal.text,
-                    respuestaFinal.fuentes,
-                    respuestaFinal.mode
+                    respuesta.text,
+                    respuesta.fuentes,
+                    respuesta.mode
                 );
             } catch (errorGuardar) {
                 console.error(
-                    "[ALFERZA] No se pudo guardar la conversación:",
+                    "[ALFERZA] Error guardando en Microsoft Lists:",
                     errorGuardar
                 );
 
                 agregarMensaje(
                     "bot",
-                    "Aviso: pude responder, pero no logré guardar " +
-                    "este intercambio en Microsoft Lists. " +
+                    "Aviso: la respuesta se generó, pero no se pudo guardar " +
+                    "en Microsoft Lists.\n\n" +
                     mensajeErrorAmigable(errorGuardar)
                 );
             }
@@ -1542,7 +1489,8 @@
             ) {
                 textoError +=
                     "\n\nComprueba que los procedimientos estén en la carpeta " +
-                    "Procedimientos-TI y que los PDF permitan seleccionar texto.";
+                    CONFIG.documentos.carpeta +
+                    " y que los PDF permitan seleccionar texto.";
             }
 
             agregarMensaje("bot", textoError);
@@ -1558,7 +1506,7 @@
     }
 
     /* =====================================================
-       12. EVENTOS DEL CHAT
+       13. EVENTOS
     ===================================================== */
 
     elements.form.addEventListener("submit", function (evento) {
@@ -1584,22 +1532,14 @@
 
     elements.suggestions.forEach(function (boton) {
         boton.addEventListener("click", function () {
-            const pregunta = boton.dataset.question;
-
-            if (pregunta) {
-                enviarMensaje(pregunta);
+            if (boton.dataset.question) {
+                enviarMensaje(boton.dataset.question);
             }
         });
     });
 
-    /* =====================================================
-       13. NUEVA CONVERSACIÓN
-    ===================================================== */
-
     elements.clearButton.addEventListener("click", function () {
-        if (procesandoMensaje) {
-            return;
-        }
+        if (procesandoMensaje) return;
 
         conversationId = generarId();
         historial = [];
@@ -1607,21 +1547,17 @@
 
         try {
             sessionStorage.setItem(STORAGE_KEY, conversationId);
-        } catch (_) {
-            // El chat sigue funcionando durante esta sesión.
-        }
+        } catch (_) {}
 
         guardarHistorialLocal();
         guardarCache();
-
         elements.messages.replaceChildren();
 
         agregarMensaje(
             "bot",
             "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
-            "He iniciado una conversación nueva. " +
-            "Puedo buscar información en los procedimientos internos. " +
-            "¿Qué necesitas resolver hoy?"
+            "He iniciado una conversación nueva. Puedo buscar información " +
+            "en los procedimientos internos. ¿Qué necesitas resolver hoy?"
         );
 
         elements.input.value = "";
@@ -1649,8 +1585,21 @@
 
         try {
             await inicializarMSAL();
+
+            // Si no encuentra la lista, todavía permite buscar en los PDF.
             await prepararSharePoint();
-            await cargarHistorialRemoto();
+
+            if (listaDisponible) {
+                await cargarHistorialRemoto();
+            } else {
+                agregarMensaje(
+                    "bot",
+                    "Aviso: no pude localizar la lista " +
+                    CONFIG.lista.nombre +
+                    ". Podrás consultar los procedimientos, pero el guardado " +
+                    "remoto estará desactivado hasta corregir la ubicación de la lista."
+                );
+            }
 
             inicializado = true;
 
@@ -1661,10 +1610,12 @@
                 "disponibles en SharePoint."
             );
 
-            console.info("[ALFERZA CHATBOT] Listo.", {
+            console.info("[ALFERZA CHATBOT] Inicialización completada.", {
                 conversationId: conversationId,
                 usuario: usuario.correo,
-                mensajesGuardados: historial.length,
+                listaDisponible: listaDisponible,
+                sitioLista: nombreSitioLista || "No localizado",
+                mensajesLocales: historial.length,
                 respuestasEnCache: Object.keys(cache).length
             });
         } catch (error) {
@@ -1677,8 +1628,7 @@
                 "bot",
                 "No pude conectarme correctamente con Microsoft 365.\n\n" +
                 mensajeErrorAmigable(error) +
-                "\n\nRevisa la consola del navegador (F12 > Console) " +
-                "para ver el detalle técnico."
+                "\n\nAbre F12 > Console para ver el detalle técnico."
             );
         } finally {
             mostrarEscritura(false);

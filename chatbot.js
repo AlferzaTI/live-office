@@ -1186,13 +1186,141 @@
     return false;
   }
 
-  async function guardarIntercambio(item) {
-    if (!estado.listaId || !estado.sitioListaId) {
-      avisar(
-        "No se guardó en Microsoft Lists porque la lista configurada no fue encontrada."
-      );
+
+async function guardarIntercambio(item) {
+  if (!estado.listaId || !estado.sitioListaId) {
+    console.error(
+      "[ALFERZA GUARDADO] No se puede guardar: lista no encontrada.",
+      {
+        nombreEsperado: CONFIG.lista.nombre,
+        sitioListaId: estado.sitioListaId,
+        listaId: estado.listaId
+      }
+    );
+    return false;
+  }
+
+  try {
+    // Consultar las columnas reales de la lista.
+    const columnas = await obtenerPaginas(
+      `/sites/${estado.sitioListaId}/lists/${estado.listaId}/columns?$select=name,displayName,required,hidden,readOnly`
+    );
+
+    estado.columnas = columnas;
+
+    console.log(
+      "[ALFERZA GUARDADO] Columnas detectadas:",
+      columnas.map(c => ({
+        interno: c.name,
+        visible: c.displayName,
+        requerido: c.required
+      }))
+    );
+
+    const fields = {};
+
+    function localizarColumna(nombres) {
+      const buscados = nombres.map(normalizarNombreColumna);
+
+      return columnas.find(c => {
+        if (c.hidden || c.readOnly) return false;
+
+        return buscados.includes(normalizarNombreColumna(c.name)) ||
+          buscados.includes(normalizarNombreColumna(c.displayName));
+      });
+    }
+
+    function agregarCampo(nombres, valor) {
+      const columna = localizarColumna(nombres);
+
+      if (columna && valor !== undefined && valor !== null) {
+        fields[columna.name] = String(valor);
+        return true;
+      }
+
       return false;
     }
+
+    // SharePoint normalmente exige el campo Title.
+    const columnaTitulo = localizarColumna(["Title", "Título"]);
+
+    if (columnaTitulo) {
+      fields[columnaTitulo.name] =
+        `Chat ALFERZA - ${new Date().toLocaleString("es-PE")}`;
+    }
+
+    agregarCampo(
+      ["ConversacionId", "ConversationId", "IdConversacion"],
+      estado.conversacionId
+    );
+
+    agregarCampo(
+      ["Usuario", "Correo", "Email", "UsuarioCorreo"],
+      estado.usuario
+    );
+
+    agregarCampo(
+      ["Pregunta", "Consulta", "Mensaje"],
+      item.pregunta
+    );
+
+    agregarCampo(
+      ["Respuesta", "RespuestaBot"],
+      item.respuesta
+    );
+
+    agregarCampo(
+      ["Fuentes", "Documentos", "Referencias"],
+      (item.fuentes || []).join("; ")
+    );
+
+    agregarCampo(
+      ["Fecha", "FechaHora", "FechaCreacion"],
+      item.fecha || new Date().toISOString()
+    );
+
+    // No intentar crear un registro vacío.
+    if (Object.keys(fields).length === 0) {
+      throw new Error(
+        "No se encontró ninguna columna compatible. Revisa las columnas de la lista."
+      );
+    }
+
+    console.log(
+      "[ALFERZA GUARDADO] Enviando registro:",
+      fields
+    );
+
+    const creado = await graphFetch(
+      `/sites/${estado.sitioListaId}/lists/${estado.listaId}/items`,
+      {
+        method: "POST",
+        body: JSON.stringify({ fields })
+      }
+    );
+
+    console.log(
+      "[ALFERZA GUARDADO] REGISTRO CREADO CORRECTAMENTE:",
+      creado
+    );
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "[ALFERZA GUARDADO] ERROR REAL AL GUARDAR:",
+      error
+    );
+
+    mostrarMensaje(
+      "Aviso: la respuesta se generó, pero no se pudo confirmar su guardado en Microsoft Lists. Revisa la consola.",
+      "bot"
+    );
+
+    return false;
+  }
+}
+
 
     const fields = {};
 

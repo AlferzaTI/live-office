@@ -5,92 +5,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00205c">
+    <meta name="description" content="Asistente de soporte TI de ALFERZA LIVE OFFICE">
+
     <title>Asistente TI | ALFERZA</title>
+
     <link rel="stylesheet" href="chatbot.css">
+
+    <!-- 1. Cargar la biblioteca de autenticación Microsoft -->
+    <script
+        src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
+        defer>
+    </script>
+
+    <!-- 2. Cargar el chatbot después de MSAL -->
     <script src="chatbot.js" defer></script>
 </head>
+
 <body>
     <main class="chatbot-app">
+
         <header class="chat-header">
             <div class="brand-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3 14.3 9.7 21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"
-                          stroke="currentColor" stroke-width="1.8"
-                          stroke-linejoin="round"/>
+                    <path
+                        d="M12 3 14.3 9.7 21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"/>
                 </svg>
             </div>
 
             <div class="header-info">
                 <h1>Asistente ALFERZA</h1>
+
                 <div class="assistant-status">
                     <span class="status-dot"></span>
                     <span>Asistente de soporte TI</span>
                 </div>
             </div>
 
-            <button id="clearChat" class="icon-button"
-                    type="button" title="Nueva conversación"
-                    aria-label="Iniciar nueva conversación">
+            <button
+                id="clearChat"
+                class="icon-button"
+                type="button"
+                title="Nueva conversación"
+                aria-label="Iniciar nueva conversación">
+
                 <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M4 7V3m0 0h4M4 3l4 4M5 12a7 7 0 1 0 2-5"
-                          stroke="currentColor" stroke-width="1.8"
-                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path
+                        d="M4 7V3m0 0h4M4 3l4 4M5 12a7 7 0 1 0 2-5"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"/>
                 </svg>
             </button>
         </header>
 
         <section class="chat-content">
+
             <div class="welcome-panel">
-                <span class="welcome-label">ALFERZA HOLDING · ÁREA DE TI</span>
+                <span class="welcome-label">
+                    ALFERZA HOLDING · ÁREA DE TI
+                </span>
+
                 <h2>¿En qué puedo ayudarte?</h2>
+
                 <p>
                     Puedo orientarte con problemas informáticos,
                     instalaciones y consultas de soporte.
                 </p>
             </div>
 
-            <div id="messages"
-                 class="messages"
-                 role="log"
-                 aria-live="polite"
-                 aria-label="Conversación con el asistente">
+            <div
+                id="messages"
+                class="messages"
+                role="log"
+                aria-live="polite"
+                aria-label="Conversación con el asistente">
             </div>
 
-            <div id="typingIndicator" class="typing-indicator" hidden>
-                <span></span><span></span><span></span>
-                <span class="typing-label">Preparando respuesta...</span>
+            <div
+                id="typingIndicator"
+                class="typing-indicator"
+                hidden>
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+                <span class="typing-label">
+                    Preparando respuesta...
+                </span>
             </div>
 
             <div class="suggestions-section">
-                <p class="suggestions-title">CONSULTAS FRECUENTES</p>
+                <p class="suggestions-title">
+                    CONSULTAS FRECUENTES
+                </p>
 
                 <div class="suggestions">
-                    <button class="suggestion-button" data-question="Necesito instalar un programa">
+
+                    <button
+                        type="button"
+                        class="suggestion-button"
+                        data-question="Necesito instalar un programa">
+
                         <span class="suggestion-icon">↓</span>
                         <span>Instalar software</span>
                     </button>
 
-                    <button class="suggestion-button" data-question="Tengo problemas con mi conexión a internet">
+                    <button
+                        type="button"
+                        class="suggestion-button"
+                        data-question="Tengo problemas con mi conexión a internet">
+
                         <span class="suggestion-icon">⌁</span>
                         <span>Problemas de red</span>
                     </button>
 
-                    <button class="suggestion-button" data-question="Tengo problemas con Outlook">
+                    <button
+                        type="button"
+                        class="suggestion-button"
+                        data-question="Tengo problemas con Outlook">
+
                         <span class="suggestion-icon">✉</span>
                         <span>Outlook y correo</span>
                     </button>
 
-                    <button class="suggestion-button" data-question="Necesito registrar un ticket de soporte">
+                    <button
+                        type="button"
+                        class="suggestion-button"
+                        data-question="Necesito registrar un ticket de soporte">
+
                         <span class="suggestion-icon">＋</span>
                         <span>Solicitar soporte</span>
                     </button>
+
                 </div>
             </div>
+
         </section>
 
         <footer class="chat-footer">
+
             <form id="chatForm" class="composer">
-                <label for="messageInput" class="sr-only">
+
+                <label
+                    for="messageInput"
+                    class="sr-only">
                     Escribe tu consulta
                 </label>
 
@@ -100,16 +163,25 @@
                     maxlength="1000"
                     placeholder="Escribe tu consulta..."
                     autocomplete="off"
-                    required></textarea>
+                    required>
+                </textarea>
 
-                <button id="sendButton" class="send-button"
-                        type="submit" aria-label="Enviar mensaje">
+                <button
+                    id="sendButton"
+                    class="send-button"
+                    type="submit"
+                    aria-label="Enviar mensaje">
+
                     <svg viewBox="0 0 24 24" fill="none">
-                        <path d="M22 2 15 22l-4-9-9-4 20-7ZM22 2 11 13"
-                              stroke="currentColor" stroke-width="1.8"
-                              stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M22 2 15 22l-4-9-9-4 20-7ZM22 2 11 13"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
                     </svg>
                 </button>
+
             </form>
 
             <div class="footer-note">
@@ -121,7 +193,9 @@
                 Asistente en fase inicial. Verifica los procedimientos
                 antes de realizar cambios en tu equipo.
             </p>
+
         </footer>
+
     </main>
 </body>
 </html>

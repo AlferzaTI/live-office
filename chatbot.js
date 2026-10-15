@@ -1186,7 +1186,7 @@
     return false;
   }
 
-
+  
 async function guardarIntercambio(item) {
   if (!estado.listaId || !estado.sitioListaId) {
     console.error(
@@ -1321,74 +1321,6 @@ async function guardarIntercambio(item) {
   }
 }
 
-
-    const fields = {};
-
-    establecerCampo(
-      fields,
-      ["Title", "Título"],
-      `Chat ${new Date().toLocaleString("es-PE")}`.slice(0, 255)
-    );
-
-    establecerCampo(
-      fields,
-      ["ConversacionId", "ConversationId", "IdConversacion"],
-      estado.conversacionId
-    );
-
-    establecerCampo(
-      fields,
-      ["Usuario", "Correo", "Email", "UsuarioCorreo"],
-      estado.usuario
-    );
-
-    establecerCampo(
-      fields,
-      ["Pregunta", "Consulta", "Mensaje"],
-      item.pregunta
-    );
-
-    establecerCampo(
-      fields,
-      ["Respuesta", "RespuestaBot"],
-      item.respuesta
-    );
-
-    establecerCampo(
-      fields,
-      ["Fuentes", "Documentos", "Referencias"],
-      (item.fuentes || []).join("; ").slice(0, 2000)
-    );
-
-    establecerCampo(
-      fields,
-      ["Fecha", "FechaHora", "FechaCreacion"],
-      item.fecha
-    );
-
-    if (!Object.keys(fields).length) {
-      avisar(
-        "La lista existe, pero no se reconocieron columnas compatibles para guardar el mensaje."
-      );
-      return false;
-    }
-
-    try {
-      await graphFetch(
-        `/sites/${estado.sitioListaId}/lists/${estado.listaId}/items`,
-        {
-          method: "POST",
-          body: JSON.stringify({ fields })
-        }
-      );
-
-      registrar("Intercambio guardado en Microsoft Lists.");
-      return true;
-    } catch (error) {
-      avisar("No se pudo guardar el intercambio en Microsoft Lists:", error);
-      return false;
-    }
-  }
 
   async function cargarHistorialRemoto() {
     if (!estado.listaId || !estado.sitioListaId) return;

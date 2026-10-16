@@ -936,3 +936,104 @@ button {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================================
+   ALFERZA: RESPUESTAS ORDENADAS Y LEGIBLES
+========================================================= */
+
+.message-row {
+    width: fit-content;
+    max-width: 96%;
+    min-width: 0;
+}
+
+.message-content {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.message-bubble {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.75;
+}
+
+.response-formatted {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.response-formatted p {
+    margin: 0 0 10px;
+}
+
+.response-formatted p:last-child {
+    margin-bottom: 0;
+}
+
+.response-formatted .response-heading {
+    display: block;
+    margin: 14px 0 8px;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.response-formatted .response-heading:first-child {
+    margin-top: 0;
+}
+
+.response-formatted .response-list {
+    display: block;
+    margin: 8px 0 12px;
+    padding-left: 24px;
+}
+
+.response-formatted ul {
+    list-style-type: disc;
+}
+
+.response-formatted ol {
+    list-style-type: decimal;
+}
+
+.response-formatted li {
+    margin: 0 0 7px;
+    padding-left: 3px;
+}
+
+.response-formatted strong {
+    color: var(--navy);
+    font-weight: 750;
+}
+
+.message-sources {
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+#alferzaLoadingStatus {
+    flex-shrink: 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .message-row {
+        max-width: 100%;
+    }
+
+    .response-formatted .response-heading {
+        font-size: 13px;
+    }
+
+    .response-formatted .response-list {
+        padding-left: 20px;
+    }
+}

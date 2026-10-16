@@ -40,7 +40,7 @@
     },
 
     ollama: {
-      url: "http://192.168.2.30:11434/api/chat",
+      url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
       model: "llama3:latest",
       timeoutMs: 120000,
       temperature: 0.3

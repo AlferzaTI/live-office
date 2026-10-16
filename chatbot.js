@@ -452,26 +452,92 @@
     return corte.slice(0, espacio > 0 ? espacio : maximo).trim() + "…";
   }
 
-  function responder(consulta) {
-    const resultados = buscar(consulta);
-    const sinRespuesta = (msg) => ({ respuesta: msg, fuentes: [] });
+  
+function responder(consulta) {
+  const pregunta = String(consulta || "").trim();
+  const texto = normalizar(pregunta);
+  const sinRespuesta = (msg) => ({ respuesta: msg, fuentes: [] });
 
-    if (!resultados.length)
-      return sinRespuesta("No encontré una respuesta suficientemente clara en los PDF disponibles. Prueba con el nombre del procedimiento, el área o una palabra específica.");
-    if (resultados[0].puntuacion < 2)
-      return sinRespuesta("No encontré información suficiente en los documentos para responder con seguridad. ¿Puedes indicar el procedimiento o tema exacto?");
-
-    const porFragmento = Math.floor(CFG.maxChars / resultados.length);
-    const partes = resultados.map((r) => ({
-      texto: recortar(r.texto, porFragmento),
-      ref: `${r.documento}, pág. ${r.pagina}`
-    })).filter((p) => p.texto);
-
-    let respuesta = partes.map((p) => p.texto).join("\n\n");
-    if (respuesta.length > CFG.maxChars) respuesta = recortar(respuesta, CFG.maxChars);
-
-    return { respuesta, fuentes: partes.map((p) => p.ref) };
+  if (!pregunta) {
+    return sinRespuesta("Escribe tu consulta y te ayudo.");
   }
+
+  // 1. Conversación normal: no buscar en los PDF.
+  const saludos = [
+    /^hola\b/,
+    /^buenas\b/,
+    /^buenos dias\b/,
+    /^buenas tardes\b/,
+    /^buenas noches\b/,
+    /^hey\b/,
+    /^que tal\b/,
+    /^habla\b/,
+    /^causa\b/,
+    /^causita\b/,
+    /^como estas\b/,
+    /^como te va\b/,
+    /^que haces\b/
+  ];
+
+  if (saludos.some((patron) => patron.test(texto))) {
+    return {
+      respuesta: /como estas|como te va|que tal|que haces/.test(texto)
+        ? "¡Todo bien, causita! 😄 Aquí listo para ayudarte. ¿Qué necesitas consultar?"
+        : "¡Habla, causita! 😄 Soy el asistente de ALFERZA. ¿Qué necesitas?",
+      fuentes: []
+    };
+  }
+
+  // 2. Agradecimientos.
+  if (/^(gracias|muchas gracias|te agradezco|genial gracias)\b/.test(texto)) {
+    return sinRespuesta("¡De nada! Aquí estoy para ayudarte.");
+  }
+
+  // 3. Despedidas.
+  if (/^(chau|chao|adios|hasta luego|nos vemos)\b/.test(texto)) {
+    return sinRespuesta("¡Listo! Cuando necesites ayuda, aquí estaré.");
+  }
+
+  // 4. Buscar información documental solo para consultas reales.
+  const resultados = buscar(pregunta);
+
+  if (!resultados.length) {
+    return sinRespuesta(
+      "No encontré información suficientemente relacionada con tu consulta en los PDF disponibles. Prueba indicando el nombre del procedimiento, el sistema o el problema específico."
+    );
+  }
+
+  // Evitar responder con fragmentos de coincidencia débil.
+  if (resultados[0].puntuacion < 4) {
+    return sinRespuesta(
+      "No encontré información suficientemente relacionada con esa pregunta. ¿Puedes especificar qué procedimiento, sistema o problema de TI necesitas consultar?"
+    );
+  }
+
+  const relevantes = resultados.filter(
+    (r) => r.puntuacion >= Math.max(4, resultados[0].puntuacion * 0.5)
+  );
+
+  const porFragmento = Math.floor(
+    CFG.maxChars / Math.max(1, relevantes.length)
+  );
+
+  const partes = relevantes.map((r) => ({
+    texto: recortar(r.texto, porFragmento),
+    ref: `${r.documento}, pág. ${r.pagina}`
+  })).filter((p) => p.texto);
+
+  if (!partes.length) {
+    return sinRespuesta(
+      "No encontré contenido suficiente para responder con seguridad."
+    );
+  }
+
+  return {
+    respuesta: partes.map((p) => p.texto).join("\n\n"),
+    fuentes: [...new Set(partes.map((p) => p.ref))]
+  };
+}
 
   // ===== GUARDADO Y HISTORIAL REMOTO =====
   async function guardarIntercambio(item) {

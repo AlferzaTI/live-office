@@ -1,1643 +1,679 @@
-
 "use strict";
 
 (() => {
-  // =========================================================
-  // ALFERZA CHATBOT — búsqueda documental y contexto conversacional
-  // Sin backend propio ni OpenAI.
-  // =========================================================
-
-  const CONFIG = {
+  // ===== CONFIGURACIÓN =====
+  const CFG = {
     clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
     tenantId: "dbab984f-4bb1-4b60-9dff-da59f54acdf1",
-
-    redirectUri:
-      window.location.hostname === "localhost"
-        ? "http://localhost:5500/blank.html"
-        : "https://alferzati.github.io/live-office/blank.html",
-
+    redirectUri: location.hostname === "localhost"
+      ? "http://localhost:5500/blank.html"
+      : "https://alferzati.github.io/live-office/blank.html",
     scopes: ["User.Read", "Sites.Read.All", "Sites.ReadWrite.All"],
-
-    documentos: {
-      hostname: "alferzaholding.sharepoint.com",
-      rutaSitio: "/sites/TI",
-      carpeta: "Procedimientos-TI"
-    },
-
-    lista: {
-      hostname: "alferzaholding-my.sharepoint.com",
-      rutaSitio: "/personal/soporte1_alferza_pe",
-      nombre: "ConversacionesCHATBOT"
-    },
-
-    pdfJsUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
-
-    pdfWorkerUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
-
-    maxMensajesContexto: 8,
-    maxFragmentosRespuesta: 2,
-    maxCaracteresRespuesta: 900,
-    maxCaracteresFragmento: 1000,
+    docs: { host: "alferzaholding.sharepoint.com", site: "/sites/TI", folder: "Procedimientos-TI" },
+    lista: { host: "alferzaholding-my.sharepoint.com", site: "/personal/soporte1_alferza_pe", name: "Conversaciones-CHATBOT" },
+    pdfJs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+    pdfWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+    msalJs: "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js",
     maxPaginasPdf: 300,
-    cacheMs: 15 * 60 * 1000
+    cacheMs: 15 * 60 * 1000,
+    maxCtx: 8,
+    maxFragmentos: 2,
+    maxChars: 900,
+    chunkChars: 1000,
+    overlap: 160,
+    maxHistorial: 50
   };
 
   const GRAPH = "https://graph.microsoft.com/v1.0";
-  const STORAGE_HISTORY = "alferza_chat_history_v2";
-  const STORAGE_CONVERSATION = "alferza_chat_conversation_v2";
-  const STORAGE_INDEX = "alferza_pdf_index_v2";
+  const KEYS = { history: "alferza_chat_history_v2", conv: "alferza_chat_conversation_v2", index: "alferza_pdf_index_v2" };
+  const STOPWORDS = new Set(("para como donde cuando cual cuales quiero necesito puedo debo tengo hacer sobre desde hasta este esta estos estas con por una uno unos unas los las del que sin hay ser son fue fueron tambien informacion procedimiento procedimientos documento documentos").split(" "));
 
-  const estado = {
-    msal: null,
-    cuenta: null,
-    usuario: "",
-    sitioDocumentosId: null,
-    sitioListaId: null,
-    driveId: null,
-    listaId: null,
-    columnas: [],
-    documentos: [],
-    fragmentos: [],
-    historial: [],
-    conversacionId: "",
-    inicializado: false,
-    inicializando: false,
-    enviando: false,
-    pdfJs: null,
-    ultimaPregunta: "",
-    ultimoTema: "",
-    cargaCompleta: false
+  const S = {
+    msal: null, account: null, user: "", sitioDocs: null, sitioLista: null,
+    driveId: null, listaId: null, columnas: [], docs: [], fragmentos: [],
+    historial: [], convId: "", ready: false, initing: false, busy: false, pdfJs: null
   };
 
-  const $ = (selector) => document.querySelector(selector);
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+  const log = (...a) => console.log("[ALFERZA]", ...a);
+  const warn = (...a) => console.warn("[ALFERZA]", ...a);
 
-  function normalizar(texto) {
-    return String(texto || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9@._/-]+/g, " ")
-      .trim();
-  }
+  const normalizar = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9@._/-]+/g, " ").trim();
+  const normCol = (t) => normalizar(t).replace(/\s/g, "");
+  const escapar = (t) => String(t ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const uid = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  function escaparHTML(texto) {
-    return String(texto ?? "").replace(/[&<>"']/g, (caracter) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[caracter]);
-  }
+  const leer = (k, def) => { try { return JSON.parse(sessionStorage.getItem(k)) ?? def; } catch { return def; } };
+  const guardar = (k, v) => { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { warn("sessionStorage:", e); } };
 
-  function generarId() {
-    if (window.crypto && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
+  // ===== INTERFAZ =====
+  function mostrar(texto, tipo = "bot", fuentes = []) {
+    const cont = $("#messages");
+    if (!cont) return;
 
-    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  }
-
-  function leerJSON(clave, defecto) {
-    try {
-      const valor = sessionStorage.getItem(clave);
-      return valor ? JSON.parse(valor) : defecto;
-    } catch {
-      return defecto;
-    }
-  }
-
-  function guardarJSON(clave, valor) {
-    try {
-      sessionStorage.setItem(clave, JSON.stringify(valor));
-    } catch (error) {
-      console.warn("[ALFERZA] No se pudo guardar en sessionStorage:", error);
-    }
-  }
-
-  function fechaISO() {
-    return new Date().toISOString();
-  }
-
-  function registrar(...datos) {
-    console.log("[ALFERZA CHATBOT]", ...datos);
-  }
-
-  function avisar(...datos) {
-    console.warn("[ALFERZA CHATBOT]", ...datos);
-  }
-
-  // ---------------------------------------------------------
-  // INTERFAZ
-  // ---------------------------------------------------------
-
-  function mostrarMensaje(texto, tipo = "bot", fuentes = []) {
-    const contenedor = $("#messages");
-    if (!contenedor) {
-      console.warn("No se encontró el elemento #messages.");
-      return;
-    }
-
-    const mensaje = document.createElement("div");
-    mensaje.className = `message ${tipo}-message`;
-    mensaje.dataset.tipo = tipo;
-
-    const cuerpo = document.createElement("div");
-    cuerpo.className = "message-content";
-    cuerpo.textContent = texto;
-    mensaje.appendChild(cuerpo);
+    const msg = document.createElement("div");
+    msg.className = `message ${tipo}-message`;
+    msg.dataset.tipo = tipo;
+    msg.innerHTML = `<div class="message-content">${escapar(texto)}</div>`;
 
     if (fuentes.length && tipo === "bot") {
-      const pie = document.createElement("div");
-      pie.className = "message-sources";
-      pie.style.fontSize = "12px";
-      pie.style.opacity = "0.8";
-      pie.style.marginTop = "8px";
-      pie.textContent =
-        "Fuentes: " + [...new Set(fuentes)].join(", ");
-      mensaje.appendChild(pie);
+      msg.insertAdjacentHTML("beforeend",
+        `<div class="message-sources" style="font-size:12px;opacity:.8;margin-top:8px">Fuentes: ${escapar([...new Set(fuentes)].join(", "))}</div>`);
     }
 
-    contenedor.appendChild(mensaje);
-    contenedor.scrollTop = contenedor.scrollHeight;
-    return mensaje;
+    cont.appendChild(msg);
+    cont.scrollTop = cont.scrollHeight;
   }
 
-  function mostrarEscribiendo(visible) {
-    const indicador = $("#typingIndicator");
-    if (indicador) {
-      indicador.style.display = visible ? "" : "none";
-    }
-  }
-
-  function actualizarContador() {
-    const entrada = $("#messageInput");
-    const contador = $("#characterCount");
-
-    if (entrada && contador) {
-      contador.textContent = String(entrada.value.length);
-    }
-  }
-
-  function limpiarInterfazMensajes() {
-    const contenedor = $("#messages");
-    if (!contenedor) return;
-
-    contenedor.replaceChildren();
-  }
-
-  function mostrarEstadoCarga(texto) {
-    const contenedor = $("#messages");
-    if (!contenedor) return;
-
+  function estadoCarga(texto) {
+    const cont = $("#messages");
+    if (!cont) return;
     let aviso = $("#alferzaLoadingStatus");
-
     if (!aviso) {
-      aviso = document.createElement("div");
-      aviso.id = "alferzaLoadingStatus";
-      aviso.style.fontSize = "13px";
-      aviso.style.opacity = "0.8";
-      aviso.style.padding = "8px 12px";
-      contenedor.appendChild(aviso);
+      aviso = Object.assign(document.createElement("div"), { id: "alferzaLoadingStatus" });
+      aviso.style.cssText = "font-size:13px;opacity:.8;padding:8px 12px";
+      cont.appendChild(aviso);
     }
-
     aviso.textContent = texto;
   }
 
-  function ocultarEstadoCarga() {
-    $("#alferzaLoadingStatus")?.remove();
-  }
+  const ocultarCarga = () => $("#alferzaLoadingStatus")?.remove();
+  const escribiendo = (v) => { const i = $("#typingIndicator"); if (i) i.style.display = v ? "" : "none"; };
+  const actualizarContador = () => {
+    const e = $("#messageInput"), c = $("#characterCount");
+    if (e && c) c.textContent = String(e.value.length);
+  };
+  const setBoton = () => { const b = $("#sendButton"); if (b) b.disabled = S.busy; };
 
-  function renderizarHistorial() {
-    limpiarInterfazMensajes();
-
-    if (!estado.historial.length) {
-      mostrarMensaje(
-        "Hola. Soy el asistente documental de ALFERZA. ¿Qué procedimiento o información necesitas consultar?",
-        "bot"
-      );
+  function renderHistorial() {
+    $("#messages")?.replaceChildren();
+    if (!S.historial.length) {
+      mostrar("Hola. Soy el asistente documental de ALFERZA. ¿Qué procedimiento o información necesitas consultar?");
       return;
     }
-
-    for (const item of estado.historial) {
-      mostrarMensaje(item.pregunta, "user");
-      mostrarMensaje(
-        item.respuesta,
-        "bot",
-        Array.isArray(item.fuentes) ? item.fuentes : []
-      );
+    for (const it of S.historial) {
+      mostrar(it.pregunta, "user");
+      mostrar(it.respuesta, "bot", it.fuentes || []);
     }
   }
 
-  function establecerEstadoBoton() {
-    const boton = $("#sendButton");
-    if (boton) {
-      boton.disabled = estado.enviando;
-    }
-  }
-
-  // ---------------------------------------------------------
-  // MSAL Y MICROSOFT GRAPH
-  // ---------------------------------------------------------
-
-  async function cargarMSAL() {
-    if (window.msal) return;
-
-    await new Promise((resolve, reject) => {
-      const existente = document.querySelector(
-        'script[src*="msal-browser"]'
-      );
-
-      if (existente) {
-        existente.addEventListener("load", resolve, { once: true });
-        existente.addEventListener(
-          "error",
-          () => reject(new Error("No se pudo cargar MSAL.")),
-          { once: true }
-        );
-
-        if (window.msal) resolve();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src =
-        "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js";
-      script.onload = resolve;
-      script.onerror = () =>
-        reject(new Error("No se pudo cargar la biblioteca MSAL."));
-      document.head.appendChild(script);
+  // ===== MSAL Y GRAPH =====
+  async function cargarScript(src, global) {
+    if (window[global]) return;
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = res;
+      s.onerror = () => rej(new Error(`No se pudo cargar ${src}`));
+      document.head.appendChild(s);
     });
-
-    if (!window.msal) {
-      throw new Error("MSAL no está disponible.");
-    }
+    if (!window[global]) throw new Error(`${global} no está disponible.`);
   }
 
-  async function inicializarMSAL() {
-    await cargarMSAL();
+  async function iniciarMSAL() {
+    await cargarScript(CFG.msalJs, "msal");
 
-    estado.msal = new msal.PublicClientApplication({
+    S.msal = new msal.PublicClientApplication({
       auth: {
-        clientId: CONFIG.clientId,
-        authority:
-          `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-        redirectUri: CONFIG.redirectUri,
+        clientId: CFG.clientId,
+        authority: `https://login.microsoftonline.com/${CFG.tenantId}`,
+        redirectUri: CFG.redirectUri,
         navigateToLoginRequestUrl: false
       },
-      cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false
-      }
+      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
     });
 
-    if (typeof estado.msal.initialize === "function") {
-      await estado.msal.initialize();
+    await S.msal.initialize?.();
+    const redirect = await S.msal.handleRedirectPromise();
+    S.account = redirect?.account || S.msal.getAllAccounts()[0] || null;
+
+    if (!S.account) {
+      const login = await S.msal.loginPopup({ scopes: CFG.scopes, prompt: "select_account" });
+      S.account = login.account;
     }
+    if (!S.account) throw new Error("No se pudo identificar la cuenta Microsoft.");
 
-    const resultadoRedirect = await estado.msal.handleRedirectPromise();
-    const cuentas = estado.msal.getAllAccounts();
-
-    estado.cuenta =
-      resultadoRedirect?.account ||
-      cuentas[0] ||
-      null;
-
-    if (!estado.cuenta) {
-      const login = await estado.msal.loginPopup({
-        scopes: CONFIG.scopes,
-        prompt: "select_account"
-      });
-
-      estado.cuenta = login.account;
-    }
-
-    if (!estado.cuenta) {
-      throw new Error("No se pudo identificar la cuenta Microsoft.");
-    }
-
-    estado.usuario =
-      estado.cuenta.username ||
-      estado.cuenta.name ||
-      "";
-
-    registrar("Sesión Microsoft lista:", estado.usuario);
+    S.user = S.account.username || S.account.name || "";
+    log("Sesión lista:", S.user);
   }
 
-  async function obtenerToken() {
-    if (!estado.msal || !estado.cuenta) {
-      throw new Error("La sesión de Microsoft no está inicializada.");
-    }
-
+  async function token() {
     try {
-      const resultado = await estado.msal.acquireTokenSilent({
-        scopes: CONFIG.scopes,
-        account: estado.cuenta
-      });
-
-      return resultado.accessToken;
-    } catch (error) {
-      if (
-        error.name === "InteractionRequiredAuthError" ||
-        error.errorCode === "interaction_required"
-      ) {
-        const resultado = await estado.msal.acquireTokenPopup({
-          scopes: CONFIG.scopes,
-          account: estado.cuenta
-        });
-
-        return resultado.accessToken;
+      return (await S.msal.acquireTokenSilent({ scopes: CFG.scopes, account: S.account })).accessToken;
+    } catch (e) {
+      if (e.name === "InteractionRequiredAuthError" || e.errorCode === "interaction_required") {
+        return (await S.msal.acquireTokenPopup({ scopes: CFG.scopes, account: S.account })).accessToken;
       }
-
-      throw error;
+      throw e;
     }
   }
 
-  async function graphFetch(url, opciones = {}) {
-    const token = await obtenerToken();
-    const urlCompleta = url.startsWith("https://")
-      ? url
-      : `${GRAPH}${url}`;
-
-    const respuesta = await fetch(urlCompleta, {
-      ...opciones,
+  async function graph(url, opts = {}) {
+    const t = await token();
+    const res = await fetch(url.startsWith("https://") ? url : GRAPH + url, {
+      ...opts,
       headers: {
-        Authorization: `Bearer ${token}`,
-        ...(opciones.body ? { "Content-Type": "application/json" } : {}),
-        ...(opciones.headers || {})
+        Authorization: `Bearer ${t}`,
+        ...(opts.body ? { "Content-Type": "application/json" } : {}),
+        ...(opts.headers || {})
       }
     });
 
-    if (!respuesta.ok) {
-      const cuerpo = await respuesta.text();
-      let detalle = cuerpo;
-
-      try {
-        const json = JSON.parse(cuerpo);
-        detalle = json?.error?.message || cuerpo;
-      } catch {
-        // El cuerpo no era JSON.
-      }
-
-      throw new Error(
-        `Graph ${respuesta.status}: ${detalle || respuesta.statusText}`
-      );
+    if (!res.ok) {
+      const txt = await res.text();
+      let detalle = txt;
+      try { detalle = JSON.parse(txt)?.error?.message || txt; } catch {}
+      throw new Error(`Graph ${res.status}: ${detalle || res.statusText}`);
     }
+    if (res.status === 204) return null;
+    return (res.headers.get("content-type") || "").includes("application/json") ? res.json() : res;
+  }
 
-    if (respuesta.status === 204) return null;
-
-    const tipo = respuesta.headers.get("content-type") || "";
-
-    if (tipo.includes("application/json")) {
-      return respuesta.json();
+  async function paginar(url) {
+    const out = [];
+    let next = url;
+    while (next) {
+      const p = await graph(next);
+      out.push(...(p.value || []));
+      next = p["@odata.nextLink"] || null;
     }
-
-    return respuesta;
+    return out;
   }
 
-  async function obtenerPaginas(url) {
-    const resultados = [];
-    let siguiente = url;
+  const resolverSitio = (host, ruta) =>
+    graph(`/sites/${host}:${ruta.replace(/\/+$/, "")}?$select=id,displayName,webUrl`);
 
-    while (siguiente) {
-      const pagina = await graphFetch(siguiente);
-      resultados.push(...(pagina.value || []));
-      siguiente = pagina["@odata.nextLink"] || null;
-    }
-
-    return resultados;
-  }
-
-  async function resolverSitio(hostname, ruta) {
-    const rutaLimpia = ruta.replace(/\/+$/, "");
-
-    return graphFetch(
-      `/sites/${hostname}:${rutaLimpia}?$select=id,displayName,webUrl`
-    );
-  }
-
-  // ---------------------------------------------------------
-  // CONFIGURACIÓN DE SHAREPOINT Y LISTS
-  // ---------------------------------------------------------
-
-  function normalizarNombreColumna(texto) {
-    return normalizar(texto).replace(/\s/g, "");
-  }
-
+  // ===== SHAREPOINT =====
   async function encontrarLista() {
-    const sitios = [];
+    const sitios = [S.sitioLista?.id, S.sitioDocs?.id].filter(Boolean);
+    const unicos = [...new Set(sitios)];
 
-    if (estado.sitioListaId) {
-      sitios.push({
-        id: estado.sitioListaId,
-        nombre: "sitio configurado para la lista"
-      });
-    }
-
-    if (
-      estado.sitioDocumentosId &&
-      !sitios.some((sitio) => sitio.id === estado.sitioDocumentosId)
-    ) {
-      sitios.push({
-        id: estado.sitioDocumentosId,
-        nombre: "sitio de documentos"
-      });
-    }
-
-    const listasDetectadas = [];
-
-    for (const sitio of sitios) {
+    for (const sitioId of unicos) {
       try {
-        const datos = await graphFetch(
-          `/sites/${sitio.id}/lists?$select=id,displayName,webUrl,list`
-        );
-
-        const listas = datos.value || [];
-
-        listasDetectadas.push(
-          ...listas.map((lista) => ({
-            nombre: lista.displayName,
-            sitio: sitio.nombre
-          }))
-        );
-
-        const encontrada = listas.find(
-          (lista) =>
-            normalizar(lista.displayName) ===
-            normalizar(CONFIG.lista.nombre)
-        );
-
-        if (encontrada) {
-          estado.listaId = encontrada.id;
-          estado.sitioListaId = sitio.id;
-
-          registrar(
-            "Lista encontrada:",
-            encontrada.displayName,
-            "en",
-            sitio.nombre
-          );
-
+        const listas = (await graph(`/sites/${sitioId}/lists?$select=id,displayName`)).value || [];
+        const hit = listas.find((l) => normalizar(l.displayName) === normalizar(CFG.lista.name));
+        if (hit) {
+          S.listaId = hit.id;
+          S.sitioLista = { id: sitioId };
+          log("Lista encontrada:", hit.displayName);
           return true;
         }
-      } catch (error) {
-        avisar(`No se pudieron consultar listas en ${sitio.nombre}:`, error);
-      }
+      } catch (e) { warn(`No se consultaron listas en ${sitioId}:`, e); }
     }
-
-    estado.listaId = null;
-
-    avisar(
-      `No se encontró la lista "${CONFIG.lista.nombre}". Listas detectadas:`,
-      listasDetectadas
-    );
-
+    S.listaId = null;
+    warn(`No se encontró la lista "${CFG.lista.name}".`);
     return false;
   }
 
+  async function cargarColumnas() {
+    if (!S.listaId || !S.sitioLista) return;
+    S.columnas = await paginar(
+      `/sites/${S.sitioLista.id}/lists/${S.listaId}/columns?$select=name,displayName,required,hidden,readOnly`
+    );
+  }
+
   async function prepararSharePoint() {
-    const sitioDocs = await resolverSitio(
-      CONFIG.documentos.hostname,
-      CONFIG.documentos.rutaSitio
-    );
+    S.sitioDocs = await resolverSitio(CFG.docs.host, CFG.docs.site);
 
-    estado.sitioDocumentosId = sitioDocs.id;
-    registrar("Sitio documental:", sitioDocs.webUrl);
+    const drives = await paginar(`/sites/${S.sitioDocs.id}/drives?$select=id,name,driveType`);
+    const drive = drives.find((d) => /documentos compartidos|shared documents|documentos/i.test(d.name))
+      || drives.find((d) => d.driveType === "documentLibrary") || drives[0];
+    if (!drive) throw new Error("No se encontró una biblioteca documental.");
+    S.driveId = drive.id;
 
-    const drives = await obtenerPaginas(
-      `/sites/${estado.sitioDocumentosId}/drives?$select=id,name,driveType,webUrl`
-    );
+    try { S.sitioLista = await resolverSitio(CFG.lista.host, CFG.lista.site); }
+    catch (e) { warn("No se resolvió el sitio de la lista:", e); }
 
-    const drive =
-      drives.find((d) =>
-        /documentos compartidos|shared documents|documentos/i.test(d.name)
-      ) ||
-      drives.find((d) => d.driveType === "documentLibrary") ||
-      drives[0];
-
-    if (!drive) {
-      throw new Error("No se encontró una biblioteca documental en SharePoint.");
-    }
-
-    estado.driveId = drive.id;
-    registrar("Biblioteca documental:", drive.name);
-
-    try {
-      const sitioLista = await resolverSitio(
-        CONFIG.lista.hostname,
-        CONFIG.lista.rutaSitio
-      );
-
-      estado.sitioListaId = sitioLista.id;
-      registrar("Sitio de listas:", sitioLista.webUrl);
-    } catch (error) {
-      avisar(
-        "No se pudo resolver el sitio configurado para la lista.",
-        error
-      );
-    }
-
-    const listaEncontrada = await encontrarLista();
-
-    if (listaEncontrada) {
-      try {
-        const columnas = await obtenerPaginas(
-          `/sites/${estado.sitioListaId}/lists/${estado.listaId}/columns?$select=name,displayName,required,hidden,readOnly`
-        );
-
-        estado.columnas = columnas;
-        registrar(
-          "Columnas de la lista:",
-          columnas.map((c) => ({
-            nombre: c.name,
-            displayName: c.displayName,
-            required: c.required
-          }))
-        );
-      } catch (error) {
-        avisar("No se pudieron leer las columnas de la lista:", error);
-        estado.columnas = [];
-      }
-    } else {
-      avisar(
-        "El chatbot podrá buscar en los PDF, pero no podrá guardar en la lista hasta encontrarla."
-      );
-    }
+    if (await encontrarLista()) await cargarColumnas();
+    else warn("El chatbot buscará en PDF, pero no podrá guardar hasta encontrar la lista.");
   }
 
-  // ---------------------------------------------------------
-  // CARGA DE PDF.JS Y LECTURA DE DOCUMENTOS
-  // ---------------------------------------------------------
+  async function listarPDF(carpetaId, ruta = "") {
+    const items = await paginar(
+      `/drives/${S.driveId}/items/${carpetaId}/children?$select=id,name,file,folder,size,webUrl`
+    );
+    const out = [];
+    for (const it of items) {
+      const r = ruta ? `${ruta}/${it.name}` : it.name;
+      if (it.folder) out.push(...await listarPDF(it.id, r));
+      else if (it.file && /\.pdf$/i.test(it.name))
+        out.push({ id: it.id, nombre: it.name, ruta: r, webUrl: it.webUrl });
+    }
+    return out;
+  }
 
+  async function encontrarCarpeta() {
+    const nombre = CFG.docs.folder;
+    try {
+      const r = await graph(`/drives/${S.driveId}/root:/${encodeURIComponent(nombre)}?$select=id,name,folder`);
+      if (r.folder) return r;
+    } catch (e) { warn("Ruta exacta no encontrada:", e.message); }
+
+    const raiz = await paginar(`/drives/${S.driveId}/root/children?$select=id,name,folder`);
+    const hit = raiz.find((i) => i.folder && normalizar(i.name) === normalizar(nombre));
+    if (!hit) throw new Error(`No se encontró la carpeta "${nombre}".`);
+    return hit;
+  }
+
+  // ===== PDF =====
   async function cargarPdfJs() {
-    if (window.pdfjsLib) {
-      estado.pdfJs = window.pdfjsLib;
-      estado.pdfJs.GlobalWorkerOptions.workerSrc = CONFIG.pdfWorkerUrl;
-      return estado.pdfJs;
-    }
+    if (!window.pdfjsLib) await cargarScript(CFG.pdfJs, "pdfjsLib");
+    S.pdfJs = window.pdfjsLib;
+    S.pdfJs.GlobalWorkerOptions.workerSrc = CFG.pdfWorker;
+  }
 
-    await new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = CONFIG.pdfJsUrl;
-      script.onload = resolve;
-      script.onerror = () =>
-        reject(new Error("No se pudo cargar PDF.js."));
-      document.head.appendChild(script);
+  async function descargarBytes(id) {
+    const t = await token();
+    const res = await fetch(`${GRAPH}/drives/${S.driveId}/items/${id}/content`, {
+      headers: { Authorization: `Bearer ${t}` }
     });
-
-    if (!window.pdfjsLib) {
-      throw new Error("PDF.js se cargó, pero pdfjsLib no está disponible.");
-    }
-
-    estado.pdfJs = window.pdfjsLib;
-    estado.pdfJs.GlobalWorkerOptions.workerSrc = CONFIG.pdfWorkerUrl;
-
-    return estado.pdfJs;
+    if (!res.ok) throw new Error(`No se pudo descargar el PDF (${res.status}).`);
+    return new Uint8Array(await res.arrayBuffer());
   }
 
-  async function listarArchivosCarpeta(carpetaId, ruta = "") {
-    const elementos = [];
-    const pagina = await obtenerPaginas(
-      `/drives/${estado.driveId}/items/${carpetaId}/children?$select=id,name,file,folder,size,webUrl`
-    );
-
-    for (const item of pagina) {
-      const rutaActual = ruta
-        ? `${ruta}/${item.name}`
-        : item.name;
-
-      if (item.folder) {
-        const subelementos = await listarArchivosCarpeta(
-          item.id,
-          rutaActual
-        );
-
-        elementos.push(...subelementos);
-      } else if (
-        item.file &&
-        /\.pdf$/i.test(item.name)
-      ) {
-        elementos.push({
-          id: item.id,
-          nombre: item.name,
-          ruta: rutaActual,
-          webUrl: item.webUrl,
-          size: item.size || 0
-        });
-      }
-    }
-
-    return elementos;
-  }
-
-  async function encontrarCarpetaDocumental() {
-    const carpeta = CONFIG.documentos.carpeta;
-
-    const urlCodificada = encodeURIComponent(carpeta).replace(/%2F/g, "/");
-
-    try {
-      const resultado = await graphFetch(
-        `/drives/${estado.driveId}/root:/${urlCodificada}?$select=id,name,folder,webUrl`
-      );
-
-      if (resultado.folder) return resultado;
-    } catch (error) {
-      avisar("No se encontró la carpeta por su ruta exacta:", error.message);
-    }
-
-    const raiz = await obtenerPaginas(
-      `/drives/${estado.driveId}/root/children?$select=id,name,folder,webUrl`
-    );
-
-    const encontrada = raiz.find(
-      (item) =>
-        item.folder &&
-        normalizar(item.name) === normalizar(carpeta)
-    );
-
-    if (!encontrada) {
-      throw new Error(
-        `No se encontró la carpeta "${carpeta}" en la biblioteca ${estado.driveId}.`
-      );
-    }
-
-    return encontrada;
-  }
-
-  async function descargarPDF(id) {
-    const token = await obtenerToken();
-
-    const respuesta = await fetch(
-      `${GRAPH}/drives/${estado.driveId}/items/${id}/content`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    if (!respuesta.ok) {
-      throw new Error(
-        `No se pudo descargar el PDF (${respuesta.status}).`
-      );
-    }
-
-    return new Uint8Array(await respuesta.arrayBuffer());
-  }
-
-  function crearFragmentos(texto, documento, pagina) {
-    const limpio = String(texto || "")
-      .replace(/\s+/g, " ")
-      .trim();
-
+  function fragmentar(texto, documento, pagina) {
+    const limpio = String(texto || "").replace(/\s+/g, " ").trim();
     if (!limpio) return [];
 
-    const longitud = CONFIG.maxCaracteresFragmento;
-    const solapamiento = 160;
-    const fragmentos = [];
-
+    const L = CFG.chunkChars;
+    const out = [];
     let inicio = 0;
 
     while (inicio < limpio.length) {
-      let fin = Math.min(inicio + longitud, limpio.length);
-
+      let fin = Math.min(inicio + L, limpio.length);
       if (fin < limpio.length) {
-        const punto = limpio.lastIndexOf(". ", fin);
-        const salto = limpio.lastIndexOf("; ", fin);
-        const corte = Math.max(punto, salto);
-
-        if (corte > inicio + longitud * 0.55) {
-          fin = corte + 1;
-        }
+        const corte = Math.max(limpio.lastIndexOf(". ", fin), limpio.lastIndexOf("; ", fin));
+        if (corte > inicio + L * 0.55) fin = corte + 1;
       }
-
       const contenido = limpio.slice(inicio, fin).trim();
-
-      if (contenido.length > 30) {
-        fragmentos.push({
-          documento,
-          pagina,
-          texto: contenido
-        });
-      }
-
+      if (contenido.length > 30) out.push({ documento, pagina, texto: contenido });
       if (fin >= limpio.length) break;
-
-      inicio = Math.max(fin - solapamiento, inicio + 1);
+      inicio = Math.max(fin - CFG.overlap, inicio + 1);
     }
-
-    return fragmentos;
+    return out;
   }
 
   async function extraerPDF(archivo) {
-    const datos = await descargarPDF(archivo.id);
-    const pdf = await estado.pdfJs.getDocument({ data: datos }).promise;
+    const pdf = await S.pdfJs.getDocument({ data: await descargarBytes(archivo.id) }).promise;
+    const limite = Math.min(pdf.numPages, CFG.maxPaginasPdf);
     const fragmentos = [];
 
-    const limite = Math.min(
-      pdf.numPages,
-      CONFIG.maxPaginasPdf
-    );
-
-    for (let numero = 1; numero <= limite; numero++) {
-      const pagina = await pdf.getPage(numero);
-      const contenido = await pagina.getTextContent();
-
-      const texto = contenido.items
-        .map((item) => item.str || "")
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      fragmentos.push(
-        ...crearFragmentos(texto, archivo.nombre, numero)
-      );
+    for (let n = 1; n <= limite; n++) {
+      const page = await pdf.getPage(n);
+      const { items } = await page.getTextContent();
+      const texto = items.map((i) => i.str || "").join(" ");
+      fragmentos.push(...fragmentar(texto, archivo.nombre, n));
     }
 
-    registrar(
-      `PDF leído: ${archivo.nombre}`,
-      `Páginas: ${limite}/${pdf.numPages}`,
-      `Fragmentos: ${fragmentos.length}`
-    );
-
-    if (!fragmentos.length) {
-      avisar(
-        `El PDF "${archivo.nombre}" no produjo texto. Podría ser un escaneo sin OCR.`
-      );
-    }
+    if (!fragmentos.length) warn(`"${archivo.nombre}" no produjo texto (¿escaneo sin OCR?).`);
+    log(`PDF leído: ${archivo.nombre} (${limite}/${pdf.numPages} págs, ${fragmentos.length} fragmentos)`);
 
     return {
-      nombre: archivo.nombre,
-      id: archivo.id,
-      webUrl: archivo.webUrl,
-      paginas: pdf.numPages,
+      meta: { id: archivo.id, nombre: archivo.nombre, webUrl: archivo.webUrl, paginas: pdf.numPages, fragmentos: fragmentos.length },
       fragmentos
     };
   }
 
+  function indiceValido(cache, archivos) {
+    return cache && Date.now() - cache.timestamp < CFG.cacheMs
+      && cache.archivos?.length === archivos.length
+      && archivos.every((a) => cache.archivos.some((c) => c.id === a.id && c.nombre === a.nombre))
+      && cache.fragmentos?.length > 0;
+  }
+
   async function cargarDocumentos() {
     await cargarPdfJs();
+    estadoCarga("Buscando documentos PDF en SharePoint…");
 
-    mostrarEstadoCarga("Buscando documentos PDF en SharePoint…");
+    const carpeta = await encontrarCarpeta();
+    const archivos = await listarPDF(carpeta.id);
+    if (!archivos.length) throw new Error(`No hay PDF en "${CFG.docs.folder}".`);
 
-    const carpeta = await encontrarCarpetaDocumental();
-    const archivos = await listarArchivosCarpeta(carpeta.id);
-
-    if (!archivos.length) {
-      throw new Error(
-        `No se encontraron archivos PDF dentro de "${CONFIG.documentos.carpeta}".`
-      );
-    }
-
-    registrar(
-      "PDF encontrados en SharePoint:",
-      archivos.map((a) => a.ruta)
-    );
-
-    const cache = leerJSON(STORAGE_INDEX, null);
-    const cacheValida =
-      cache &&
-      cache.timestamp &&
-      Date.now() - cache.timestamp < CONFIG.cacheMs &&
-      cache.archivos &&
-      cache.archivos.length === archivos.length &&
-      archivos.every((a) =>
-        cache.archivos.some(
-          (c) => c.id === a.id && c.nombre === a.nombre
-        )
-      ) &&
-      Array.isArray(cache.fragmentos) &&
-      cache.fragmentos.length > 0;
-
-    if (cacheValida) {
-      estado.fragmentos = cache.fragmentos;
-      estado.documentos = cache.archivos;
-      estado.cargaCompleta = true;
-
-      registrar(
-        "Índice de PDF recuperado de caché:",
-        estado.documentos.map((d) => d.nombre)
-      );
-
-      ocultarEstadoCarga();
+    const cache = leer(KEYS.index, null);
+    if (indiceValido(cache, archivos)) {
+      S.fragmentos = cache.fragmentos;
+      S.docs = cache.archivos;
+      log("Índice recuperado de caché.");
       return;
     }
 
-    estado.fragmentos = [];
-    estado.documentos = [];
+    S.fragmentos = [];
+    S.docs = [];
 
     for (let i = 0; i < archivos.length; i++) {
-      const archivo = archivos[i];
-
-      mostrarEstadoCarga(
-        `Leyendo PDF ${i + 1} de ${archivos.length}: ${archivo.nombre}`
-      );
-
+      estadoCarga(`Leyendo PDF ${i + 1} de ${archivos.length}: ${archivos[i].nombre}`);
       try {
-        const resultado = await extraerPDF(archivo);
-
-        estado.documentos.push({
-          id: resultado.id,
-          nombre: resultado.nombre,
-          webUrl: resultado.webUrl,
-          paginas: resultado.paginas,
-          fragmentos: resultado.fragmentos.length
-        });
-
-        estado.fragmentos.push(...resultado.fragmentos);
-      } catch (error) {
-        avisar(`Error al leer "${archivo.nombre}":`, error);
-      }
+        const { meta, fragmentos } = await extraerPDF(archivos[i]);
+        S.docs.push(meta);
+        S.fragmentos.push(...fragmentos);
+      } catch (e) { warn(`Error al leer "${archivos[i].nombre}":`, e); }
     }
 
-    if (!estado.fragmentos.length) {
-      throw new Error(
-        "No se pudo extraer texto de los PDF. Revisa permisos, contenido y si los archivos requieren OCR."
-      );
-    }
+    if (!S.fragmentos.length) throw new Error("No se pudo extraer texto de los PDF.");
 
-    estado.cargaCompleta = true;
-
-    guardarJSON(STORAGE_INDEX, {
-      timestamp: Date.now(),
-      archivos: estado.documentos,
-      fragmentos: estado.fragmentos
-    });
-
-    registrar("RESUMEN DE INDEXACIÓN", {
-      pdfEncontrados: archivos.length,
-      pdfLeidos: estado.documentos.length,
-      nombres: estado.documentos.map((d) => d.nombre),
-      fragmentosTotales: estado.fragmentos.length
-    });
-
-    ocultarEstadoCarga();
+    guardar(KEYS.index, { timestamp: Date.now(), archivos: S.docs, fragmentos: S.fragmentos });
+    log(`Indexación completa: ${S.docs.length}/${archivos.length} PDF, ${S.fragmentos.length} fragmentos.`);
   }
 
-  // ---------------------------------------------------------
-  // HISTORIAL LOCAL Y CONTEXTO CONVERSACIONAL
-  // ---------------------------------------------------------
+  // ===== HISTORIAL Y CONTEXTO =====
+  function iniciarHistorialLocal() {
+    S.convId = sessionStorage.getItem(KEYS.conv) || uid();
+    sessionStorage.setItem(KEYS.conv, S.convId);
 
-  function inicializarHistorialLocal() {
-    estado.conversacionId =
-      sessionStorage.getItem(STORAGE_CONVERSATION) ||
-      generarId();
-
-    sessionStorage.setItem(
-      STORAGE_CONVERSATION,
-      estado.conversacionId
-    );
-
-    const guardado = leerJSON(STORAGE_HISTORY, []);
-
-    estado.historial = Array.isArray(guardado)
-      ? guardado.filter(
-          (item) =>
-            item &&
-            typeof item.pregunta === "string" &&
-            typeof item.respuesta === "string"
-        )
-      : [];
-
-    estado.historial = estado.historial.slice(-50);
+    const guardado = leer(KEYS.history, []);
+    S.historial = (Array.isArray(guardado) ? guardado : [])
+      .filter((i) => typeof i?.pregunta === "string" && typeof i?.respuesta === "string")
+      .slice(-CFG.maxHistorial);
   }
 
-  function guardarHistorialLocal() {
-    guardarJSON(STORAGE_HISTORY, estado.historial.slice(-50));
-  }
+  const guardarHistorialLocal = () => guardar(KEYS.history, S.historial.slice(-CFG.maxHistorial));
 
-  function obtenerContextoConversacion() {
-    return estado.historial
-      .slice(-CONFIG.maxMensajesContexto)
-      .map((item) => ({
-        pregunta: item.pregunta,
-        respuesta: item.respuesta
-      }));
-  }
-
-  function esPreguntaDeSeguimiento(pregunta) {
-    const texto = normalizar(pregunta);
-
+  function esSeguimiento(pregunta) {
+    const t = normalizar(pregunta);
     const indicadores = [
-      "y que pasa",
-      "y si",
-      "y como",
-      "como hago eso",
-      "cual es el procedimiento",
-      "ese procedimiento",
-      "ese documento",
-      "esa informacion",
-      "lo anterior",
-      "explicame mas",
-      "detalla mas",
-      "continua",
-      "por que",
-      "y despues",
-      "que requisitos",
-      "cuales son los pasos",
-      "donde se hace",
-      "quien lo hace",
-      "cuanto demora",
-      "que necesito",
-      "y el siguiente paso",
-      "a que te refieres"
+      "y que pasa", "y si", "y como", "como hago eso", "cual es el procedimiento",
+      "ese procedimiento", "ese documento", "esa informacion", "lo anterior",
+      "explicame mas", "detalla mas", "continua", "por que", "y despues",
+      "que requisitos", "cuales son los pasos", "donde se hace", "quien lo hace",
+      "cuanto demora", "que necesito", "y el siguiente paso", "a que te refieres"
     ];
-
-    return (
-      texto.split(" ").filter(Boolean).length <= 7 ||
-      indicadores.some((indicador) => texto.includes(indicador))
-    );
+    return t.split(" ").filter(Boolean).length <= 7 || indicadores.some((i) => t.includes(i));
   }
 
-  function construirConsultaEfectiva(pregunta) {
-    const contexto = obtenerContextoConversacion();
-    const ultima = contexto[contexto.length - 1];
+  function consultaEfectiva(pregunta) {
+    const ultima = S.historial.slice(-CFG.maxCtx).at(-1);
+    if (!ultima || !esSeguimiento(pregunta)) return pregunta;
 
-    if (!ultima || !esPreguntaDeSeguimiento(pregunta)) {
-      return pregunta;
-    }
+    const palabras = new Set(normalizar(pregunta).split(/\s+/).filter((p) => p.length > 3));
+    const comparte = normalizar(ultima.pregunta).split(/\s+/).filter((p) => p.length > 3)
+      .some((p) => palabras.has(p));
 
-    const preguntaNormalizada = normalizar(pregunta);
-    const tema = ultima.pregunta;
-
-    const palabrasPregunta = new Set(
-      preguntaNormalizada.split(/\s+/).filter((p) => p.length > 3)
-    );
-
-    const preguntaAnterior = normalizar(tema)
-      .split(/\s+/)
-      .filter((p) => p.length > 3);
-
-    const comparteTema = preguntaAnterior.some((p) =>
-      palabrasPregunta.has(p)
-    );
-
-    if (comparteTema) return pregunta;
-
-    return `${tema}. Seguimiento del usuario: ${pregunta}`;
+    return comparte ? pregunta : `${ultima.pregunta}. Seguimiento del usuario: ${pregunta}`;
   }
 
-  function extraerPalabras(texto) {
-    const ignorar = new Set([
-      "para", "como", "donde", "cuando", "cual", "cuales",
-      "quiero", "necesito", "puedo", "debo", "tengo", "hacer",
-      "sobre", "desde", "hasta", "este", "esta", "estos",
-      "estas", "con", "por", "una", "uno", "unos", "unas",
-      "los", "las", "del", "que", "por", "sin", "hay",
-      "ser", "son", "fue", "fueron", "tambien", "informacion",
-      "procedimiento", "procedimientos", "documento", "documentos"
-    ]);
+  const extraerPalabras = (t) => normalizar(t).split(/\s+/)
+    .filter((p) => p.length >= 3 && !STOPWORDS.has(p) && !/^\d+$/.test(p));
 
-    return normalizar(texto)
-      .split(/\s+/)
-      .filter(
-        (palabra) =>
-          palabra.length >= 3 &&
-          !ignorar.has(palabra) &&
-          !/^\d+$/.test(palabra)
-      );
-  }
-
-  // ---------------------------------------------------------
-  // BÚSQUEDA RELEVANTE EN TODOS LOS PDF
-  // ---------------------------------------------------------
-
-  function puntuarFragmento(fragmento, consulta, palabras) {
+  // ===== BÚSQUEDA =====
+  function puntuar(fragmento, consulta, palabras) {
     const texto = normalizar(fragmento.texto);
     const nombre = normalizar(fragmento.documento);
-    let puntos = 0;
+    let pts = 0;
 
-    for (const palabra of palabras) {
-      if (texto.includes(palabra)) puntos += 2;
-      if (nombre.includes(palabra)) puntos += 4;
+    for (const p of palabras) {
+      if (texto.includes(p)) pts += 2;
+      if (nombre.includes(p)) pts += 4;
     }
 
-    const frases = normalizar(consulta)
-      .split(/[?.!,;:]+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 5);
-
-    for (const frase of frases) {
-      if (texto.includes(frase)) puntos += 8;
+    for (const frase of normalizar(consulta).split(/[?.!,;:]+/).map((s) => s.trim()).filter((s) => s.length > 5)) {
+      if (texto.includes(frase)) pts += 8;
     }
 
-    // Las coincidencias en títulos o encabezados tienden a ser útiles.
-    if (
-      /\b(objetivo|alcance|responsable|requisitos|procedimiento|pasos|registro|plazo)\b/i
-        .test(fragmento.texto)
-    ) {
-      puntos += 0.5;
-    }
+    if (/\b(objetivo|alcance|responsable|requisitos|procedimiento|pasos|registro|plazo)\b/i.test(fragmento.texto))
+      pts += 0.5;
 
-    return puntos;
+    return pts;
   }
 
-  function buscarFragmentos(consulta) {
+  function buscar(consulta) {
     const palabras = extraerPalabras(consulta);
+    if (!palabras.length || !S.fragmentos.length) return [];
 
-    if (!palabras.length || !estado.fragmentos.length) {
-      return [];
-    }
-
-    const candidatos = estado.fragmentos
-      .map((fragmento) => ({
-        ...fragmento,
-        puntuacion: puntuarFragmento(
-          fragmento,
-          consulta,
-          palabras
-        )
-      }))
-      .filter((item) => item.puntuacion > 0)
+    const candidatos = S.fragmentos
+      .map((f) => ({ ...f, puntuacion: puntuar(f, consulta, palabras) }))
+      .filter((f) => f.puntuacion > 0)
       .sort((a, b) => b.puntuacion - a.puntuacion);
 
-    const seleccionados = [];
-    const paginasVistas = new Set();
-
-    for (const item of candidatos) {
-      const clave = `${item.documento}|${item.pagina}`;
-
-      // Evita llenar la respuesta con varios fragmentos de la misma página.
-      if (paginasVistas.has(clave)) continue;
-
-      seleccionados.push(item);
-      paginasVistas.add(clave);
-
-      if (
-        seleccionados.length >=
-        CONFIG.maxFragmentosRespuesta
-      ) {
-        break;
-      }
+    const vistos = new Set();
+    const elegidos = [];
+    for (const c of candidatos) {
+      const clave = `${c.documento}|${c.pagina}`;
+      if (vistos.has(clave)) continue;
+      vistos.add(clave);
+      elegidos.push(c);
+      if (elegidos.length >= CFG.maxFragmentos) break;
     }
-
-    return seleccionados;
+    return elegidos;
   }
 
-  function limpiarFragmento(texto) {
-    return String(texto || "")
-      .replace(/\s+/g, " ")
-      .replace(/^[\s:;,.—-]+/, "")
-      .trim();
-  }
-
-  function recortarEnFrase(texto, maximo) {
-    const limpio = limpiarFragmento(texto);
-
+  function recortar(texto, maximo) {
+    const limpio = String(texto || "").replace(/\s+/g, " ").replace(/^[\s:;,.—-]+/, "").trim();
     if (limpio.length <= maximo) return limpio;
 
     const corte = limpio.slice(0, maximo);
-    const ultimaFrase = Math.max(
-      corte.lastIndexOf(". "),
-      corte.lastIndexOf("; "),
-      corte.lastIndexOf(": "),
-      corte.lastIndexOf("? "),
-      corte.lastIndexOf("! ")
-    );
+    const fin = Math.max(corte.lastIndexOf(". "), corte.lastIndexOf("; "), corte.lastIndexOf(": "),
+      corte.lastIndexOf("? "), corte.lastIndexOf("! "));
+    if (fin > maximo * 0.55) return corte.slice(0, fin + 1).trim();
 
-    if (ultimaFrase > maximo * 0.55) {
-      return corte.slice(0, ultimaFrase + 1).trim();
-    }
-
-    const ultimaPalabra = corte.lastIndexOf(" ");
-    return corte.slice(0, ultimaPalabra > 0 ? ultimaPalabra : maximo).trim() + "…";
+    const espacio = corte.lastIndexOf(" ");
+    return corte.slice(0, espacio > 0 ? espacio : maximo).trim() + "…";
   }
 
-  function responderDesdeDocumentos(pregunta, consultaEfectiva) {
-    const resultados = buscarFragmentos(consultaEfectiva);
+  function responder(consulta) {
+    const resultados = buscar(consulta);
+    const sinRespuesta = (msg) => ({ respuesta: msg, fuentes: [] });
 
-    if (!resultados.length) {
-      return {
-        respuesta:
-          "No encontré una respuesta suficientemente clara en los PDF disponibles. Prueba con el nombre del procedimiento, el área o una palabra específica.",
-        fuentes: [],
-        confianza: 0
-      };
-    }
+    if (!resultados.length)
+      return sinRespuesta("No encontré una respuesta suficientemente clara en los PDF disponibles. Prueba con el nombre del procedimiento, el área o una palabra específica.");
+    if (resultados[0].puntuacion < 2)
+      return sinRespuesta("No encontré información suficiente en los documentos para responder con seguridad. ¿Puedes indicar el procedimiento o tema exacto?");
 
-    const mejorPuntuacion = resultados[0].puntuacion;
+    const porFragmento = Math.floor(CFG.maxChars / resultados.length);
+    const partes = resultados.map((r) => ({
+      texto: recortar(r.texto, porFragmento),
+      ref: `${r.documento}, pág. ${r.pagina}`
+    })).filter((p) => p.texto);
 
-    if (mejorPuntuacion < 2) {
-      return {
-        respuesta:
-          "No encontré información suficiente en los documentos para responder con seguridad. ¿Puedes indicar el procedimiento o tema exacto?",
-        fuentes: [],
-        confianza: 0
-      };
-    }
+    let respuesta = partes.map((p) => p.texto).join("\n\n");
+    if (respuesta.length > CFG.maxChars) respuesta = recortar(respuesta, CFG.maxChars);
 
-    const fragmentos = resultados
-      .map((item) => ({
-        texto: recortarEnFrase(
-          item.texto,
-          Math.floor(
-            CONFIG.maxCaracteresRespuesta /
-            resultados.length
-          )
-        ),
-        documento: item.documento,
-        pagina: item.pagina
-      }))
-      .filter((item) => item.texto.length > 0);
-
-    let respuesta = fragmentos
-      .map((item) => item.texto)
-      .join("\n\n");
-
-    if (respuesta.length > CONFIG.maxCaracteresRespuesta) {
-      respuesta = recortarEnFrase(
-        respuesta,
-        CONFIG.maxCaracteresRespuesta
-      );
-    }
-
-    return {
-      respuesta,
-      fuentes: fragmentos.map(
-        (item) => `${item.documento}, pág. ${item.pagina}`
-      ),
-      confianza: mejorPuntuacion
-    };
+    return { respuesta, fuentes: partes.map((p) => p.ref) };
   }
 
-  // ---------------------------------------------------------
-  // GUARDADO EN MICROSOFT LISTS
-  // ---------------------------------------------------------
-
-  function buscarColumna(...nombres) {
-    const buscados = nombres.map(normalizarNombreColumna);
-
-    return estado.columnas.find((columna) => {
-      const nombre = normalizarNombreColumna(columna.name);
-      const display = normalizarNombreColumna(columna.displayName);
-
-      return buscados.includes(nombre) || buscados.includes(display);
-    });
-  }
-
-  function establecerCampo(fields, nombres, valor) {
-    const columna = buscarColumna(...nombres);
-
-    if (columna && !columna.readOnly && !columna.hidden) {
-      fields[columna.name] = valor;
-      return true;
-    }
-
-    return false;
-  }
-
-  
-async function guardarIntercambio(item) {
-  if (!estado.listaId || !estado.sitioListaId) {
-    console.error(
-      "[ALFERZA GUARDADO] No se puede guardar: lista no encontrada.",
-      {
-        nombreEsperado: CONFIG.lista.nombre,
-        sitioListaId: estado.sitioListaId,
-        listaId: estado.listaId
-      }
-    );
-    return false;
-  }
-
-  try {
-    // Consultar las columnas reales de la lista.
-    const columnas = await obtenerPaginas(
-      `/sites/${estado.sitioListaId}/lists/${estado.listaId}/columns?$select=name,displayName,required,hidden,readOnly`
-    );
-
-    estado.columnas = columnas;
-
-    console.log(
-      "[ALFERZA GUARDADO] Columnas detectadas:",
-      columnas.map(c => ({
-        interno: c.name,
-        visible: c.displayName,
-        requerido: c.required
-      }))
-    );
-
-    const fields = {};
-
-    function localizarColumna(nombres) {
-      const buscados = nombres.map(normalizarNombreColumna);
-
-      return columnas.find(c => {
-        if (c.hidden || c.readOnly) return false;
-
-        return buscados.includes(normalizarNombreColumna(c.name)) ||
-          buscados.includes(normalizarNombreColumna(c.displayName));
-      });
-    }
-
-    function agregarCampo(nombres, valor) {
-      const columna = localizarColumna(nombres);
-
-      if (columna && valor !== undefined && valor !== null) {
-        fields[columna.name] = String(valor);
-        return true;
-      }
-
+  // ===== GUARDADO Y HISTORIAL REMOTO =====
+  async function guardarIntercambio(item) {
+    if (!S.listaId || !S.sitioLista) {
+      console.error("[ALFERZA GUARDADO] Lista no encontrada.", { esperada: CFG.lista.name });
       return false;
     }
 
-    // SharePoint normalmente exige el campo Title.
-    const columnaTitulo = localizarColumna(["Title", "Título"]);
+    try {
+      await cargarColumnas();
 
-    if (columnaTitulo) {
-      fields[columnaTitulo.name] =
-        `Chat ALFERZA - ${new Date().toLocaleString("es-PE")}`;
-    }
+      const campos = {};
+      const columna = (nombres) => {
+        const buscados = nombres.map(normCol);
+        return S.columnas.find((c) => !c.hidden && !c.readOnly &&
+          (buscados.includes(normCol(c.name)) || buscados.includes(normCol(c.displayName))));
+      };
+      const set = (nombres, valor) => {
+        const c = columna(nombres);
+        if (c && valor != null) { campos[c.name] = String(valor); return true; }
+        return false;
+      };
 
-    agregarCampo(
-      ["ConversacionId", "ConversationId", "IdConversacion"],
-      estado.conversacionId
-    );
+      const titulo = columna(["Title", "Título"]);
+      if (titulo) campos[titulo.name] = `Chat ALFERZA - ${new Date().toLocaleString("es-PE")}`;
 
-    agregarCampo(
-      ["Usuario", "Correo", "Email", "UsuarioCorreo"],
-      estado.usuario
-    );
+      set(["ConversacionId", "ConversationId", "IdConversacion"], S.convId);
+      set(["Usuario", "Correo", "Email", "UsuarioCorreo"], S.user);
+      set(["Pregunta", "Consulta", "Mensaje"], item.pregunta);
+      set(["Respuesta", "RespuestaBot"], item.respuesta);
+      set(["Fuentes", "Documentos", "Referencias"], (item.fuentes || []).join("; "));
+      set(["Fecha", "FechaHora", "FechaCreacion"], item.fecha);
 
-    agregarCampo(
-      ["Pregunta", "Consulta", "Mensaje"],
-      item.pregunta
-    );
+      if (!Object.keys(campos).length)
+        throw new Error("No se encontró ninguna columna compatible en la lista.");
 
-    agregarCampo(
-      ["Respuesta", "RespuestaBot"],
-      item.respuesta
-    );
-
-    agregarCampo(
-      ["Fuentes", "Documentos", "Referencias"],
-      (item.fuentes || []).join("; ")
-    );
-
-    agregarCampo(
-      ["Fecha", "FechaHora", "FechaCreacion"],
-      item.fecha || new Date().toISOString()
-    );
-
-    // No intentar crear un registro vacío.
-    if (Object.keys(fields).length === 0) {
-      throw new Error(
-        "No se encontró ninguna columna compatible. Revisa las columnas de la lista."
-      );
-    }
-
-    console.log(
-      "[ALFERZA GUARDADO] Enviando registro:",
-      fields
-    );
-
-    const creado = await graphFetch(
-      `/sites/${estado.sitioListaId}/lists/${estado.listaId}/items`,
-      {
+      await graph(`/sites/${S.sitioLista.id}/lists/${S.listaId}/items`, {
         method: "POST",
-        body: JSON.stringify({ fields })
-      }
-    );
-
-    console.log(
-      "[ALFERZA GUARDADO] REGISTRO CREADO CORRECTAMENTE:",
-      creado
-    );
-
-    return true;
-
-  } catch (error) {
-    console.error(
-      "[ALFERZA GUARDADO] ERROR REAL AL GUARDAR:",
-      error
-    );
-
-    mostrarMensaje(
-      "Aviso: la respuesta se generó, pero no se pudo confirmar su guardado en Microsoft Lists. Revisa la consola.",
-      "bot"
-    );
-
-    return false;
+        body: JSON.stringify({ fields: campos })
+      });
+      log("Registro guardado en la lista.");
+      return true;
+    } catch (e) {
+      console.error("[ALFERZA GUARDADO] Error real al guardar:", e);
+      mostrar("Aviso: la respuesta se generó, pero no se pudo confirmar su guardado en Microsoft Lists. Revisa la consola.");
+      return false;
+    }
   }
-}
-
 
   async function cargarHistorialRemoto() {
-    if (!estado.listaId || !estado.sitioListaId) return;
+    if (!S.listaId || !S.sitioLista) return;
 
-    const columnaConversacion = buscarColumna(
-      "ConversacionId",
-      "ConversationId",
-      "IdConversacion"
-    );
+    const col = (...n) => {
+      const b = n.map(normCol);
+      return S.columnas.find((c) => b.includes(normCol(c.name)) || b.includes(normCol(c.displayName)));
+    };
+    const cConv = col("ConversacionId", "ConversationId", "IdConversacion");
+    const cUser = col("Usuario", "Correo", "Email", "UsuarioCorreo");
+    const cPreg = col("Pregunta", "Consulta", "Mensaje");
+    const cResp = col("Respuesta", "RespuestaBot");
+    const cFecha = col("Fecha", "FechaHora", "FechaCreacion");
 
-    const columnaUsuario = buscarColumna(
-      "Usuario",
-      "Correo",
-      "Email",
-      "UsuarioCorreo"
-    );
-
-    const columnaPregunta = buscarColumna(
-      "Pregunta",
-      "Consulta",
-      "Mensaje"
-    );
-
-    const columnaRespuesta = buscarColumna(
-      "Respuesta",
-      "RespuestaBot"
-    );
-
-    const columnaFecha = buscarColumna(
-      "Fecha",
-      "FechaHora",
-      "FechaCreacion"
-    );
-
-    if (!columnaPregunta || !columnaRespuesta) {
-      avisar(
-        "La lista no tiene columnas de pregunta/respuesta reconocibles; se utilizará el historial local."
-      );
+    if (!cPreg || !cResp) {
+      warn("La lista no tiene columnas de pregunta/respuesta; se usa historial local.");
       return;
     }
 
     try {
-      // La consulta no filtra por columnas personalizadas para evitar
-      // errores por nombres internos desconocidos. Se valida localmente.
-      const items = await obtenerPaginas(
-        `/sites/${estado.sitioListaId}/lists/${estado.listaId}/items?$expand=fields&$top=200`
-      );
-
-      const propios = items
-        .map((item) => item.fields || {})
-        .filter((fields) => {
-          const mismoUsuario = !columnaUsuario ||
-            normalizar(fields[columnaUsuario.name]) ===
-              normalizar(estado.usuario);
-
-          const mismaConversacion = !columnaConversacion ||
-            String(fields[columnaConversacion.name] || "") ===
-              estado.conversacionId;
-
-          return mismoUsuario && mismaConversacion;
-        })
-        .map((fields) => ({
-          pregunta: String(fields[columnaPregunta.name] || ""),
-          respuesta: String(fields[columnaRespuesta.name] || ""),
+      const items = await paginar(`/sites/${S.sitioLista.id}/lists/${S.listaId}/items?$expand=fields&$top=200`);
+      const propios = items.map((i) => i.fields || {})
+        .filter((f) =>
+          (!cUser || normalizar(f[cUser.name]) === normalizar(S.user)) &&
+          (!cConv || String(f[cConv.name] || "") === S.convId))
+        .map((f) => ({
+          pregunta: String(f[cPreg.name] || ""),
+          respuesta: String(f[cResp.name] || ""),
           fuentes: [],
-          fecha: columnaFecha
-            ? fields[columnaFecha.name] || ""
-            : ""
+          fecha: cFecha ? f[cFecha.name] || "" : ""
         }))
-        .filter((item) => item.pregunta && item.respuesta);
+        .filter((i) => i.pregunta && i.respuesta);
 
       if (propios.length) {
-        estado.historial = propios.slice(-50);
+        S.historial = propios.slice(-CFG.maxHistorial);
         guardarHistorialLocal();
-        renderizarHistorial();
-
-        registrar(
-          "Historial remoto recuperado:",
-          propios.length,
-          "intercambios"
-        );
+        renderHistorial();
+        log("Historial remoto recuperado:", propios.length);
       }
-    } catch (error) {
-      avisar(
-        "No se pudo recuperar el historial remoto. Se mantiene el historial local.",
-        error
-      );
+    } catch (e) {
+      warn("No se recuperó el historial remoto:", e);
     }
   }
 
-  // ---------------------------------------------------------
-  // FLUJO PRINCIPAL DEL CHAT
-  // ---------------------------------------------------------
-
-  async function procesarPregunta(preguntaOriginal) {
-    const pregunta = String(preguntaOriginal || "").trim();
-
-    if (!pregunta) return;
-
-    if (estado.enviando) return;
-
-    estado.enviando = true;
-    establecerEstadoBoton();
-
-    mostrarMensaje(pregunta, "user");
-    mostrarEscribiendo(true);
-
-    const entrada = $("#messageInput");
-    if (entrada) {
-      entrada.value = "";
-      actualizarContador();
+  // ===== FLUJO =====
+  async function iniciarChatbot() {
+    if (S.ready) return;
+    if (S.initing) {
+      while (S.initing) await new Promise((r) => setTimeout(r, 100));
+      return;
     }
 
+    S.initing = true;
     try {
-      if (!estado.inicializado) {
-        await iniciarChatbot();
-      }
+      iniciarHistorialLocal();
+      await iniciarMSAL();
+      await prepararSharePoint();
+      await cargarDocumentos();
+      await cargarHistorialRemoto();
+      S.ready = true;
+      if (!S.historial.length) renderHistorial();
+    } finally {
+      S.initing = false;
+      ocultarCarga();
+    }
+  }
 
-      const consultaEfectiva = construirConsultaEfectiva(pregunta);
+  async function procesarPregunta(texto) {
+    const pregunta = String(texto || "").trim();
+    if (!pregunta || S.busy) return;
 
-      const resultado = responderDesdeDocumentos(
-        pregunta,
-        consultaEfectiva
-      );
+    S.busy = true;
+    setBoton();
+    mostrar(pregunta, "user");
+    escribiendo(true);
 
-      const item = {
-        pregunta,
-        respuesta: resultado.respuesta,
-        fuentes: resultado.fuentes,
-        fecha: fechaISO()
-      };
+    const entrada = $("#messageInput");
+    if (entrada) { entrada.value = ""; actualizarContador(); }
 
-      estado.historial.push(item);
-      estado.historial = estado.historial.slice(-50);
+    try {
+      if (!S.ready) await iniciarChatbot();
 
+      const { respuesta, fuentes } = responder(consultaEfectiva(pregunta));
+      const item = { pregunta, respuesta, fuentes, fecha: new Date().toISOString() };
+
+      S.historial = [...S.historial, item].slice(-CFG.maxHistorial);
       guardarHistorialLocal();
-
-      mostrarMensaje(
-        resultado.respuesta,
-        "bot",
-        resultado.fuentes
-      );
-
-      estado.ultimaPregunta = pregunta;
-      estado.ultimoTema = pregunta;
+      mostrar(respuesta, "bot", fuentes);
 
       await guardarIntercambio(item);
-    } catch (error) {
-      console.error("[ALFERZA] Error al responder:", error);
-
-      const respuestaError =
-        "No pude completar la consulta. Revisa la conexión con Microsoft 365 y que los documentos estén disponibles.";
-
-      mostrarMensaje(respuestaError, "bot");
+    } catch (e) {
+      console.error("[ALFERZA] Error al responder:", e);
+      mostrar("No pude completar la consulta. Revisa la conexión con Microsoft 365 y que los documentos estén disponibles.");
     } finally {
-      mostrarEscribiendo(false);
-      estado.enviando = false;
-      establecerEstadoBoton();
+      escribiendo(false);
+      S.busy = false;
+      setBoton();
       entrada?.focus();
     }
   }
 
-  async function iniciarChatbot() {
-    if (estado.inicializado) return;
-    if (estado.inicializando) {
-      while (estado.inicializando) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-      return;
-    }
-
-    estado.inicializando = true;
-
-    try {
-      inicializarHistorialLocal();
-
-      if (sessionStorage.getItem("alferza_login") !== "true") {
-        avisar(
-          "No se encontró la marca alferza_login. Se comprobará igualmente la sesión de Microsoft."
-        );
-      }
-
-      await inicializarMSAL();
-      await prepararSharePoint();
-      await cargarDocumentos();
-      await cargarHistorialRemoto();
-
-      estado.inicializado = true;
-
-      registrar("Chatbot inicializado.", {
-        usuario: estado.usuario,
-        documentos: estado.documentos.map((d) => ({
-          nombre: d.nombre,
-          paginas: d.paginas,
-          fragmentos: d.fragmentos
-        })),
-        fragmentosTotales: estado.fragmentos.length,
-        listaDisponible: Boolean(estado.listaId)
-      });
-
-      if (!estado.historial.length) {
-        renderizarHistorial();
-      }
-    } finally {
-      estado.inicializando = false;
-      ocultarEstadoCarga();
-    }
-  }
-
-  // ---------------------------------------------------------
-  // EVENTOS
-  // ---------------------------------------------------------
-
   function conectarEventos() {
-    const formulario = $("#chatForm");
+    const form = $("#chatForm");
     const entrada = $("#messageInput");
-    const botonLimpiar = $("#clearChat");
 
-    if (formulario) {
-      formulario.addEventListener("submit", async (evento) => {
-        evento.preventDefault();
-
-        if (!entrada) return;
-
-        await procesarPregunta(entrada.value);
-      });
-    }
-
-    if (entrada) {
-      entrada.addEventListener("input", actualizarContador);
-
-      entrada.addEventListener("keydown", (evento) => {
-        if (
-          evento.key === "Enter" &&
-          !evento.shiftKey
-        ) {
-          evento.preventDefault();
-          formulario?.requestSubmit();
-        }
-      });
-    }
-
-    if (botonLimpiar) {
-      botonLimpiar.addEventListener("click", () => {
-        estado.historial = [];
-        estado.conversacionId = generarId();
-        estado.ultimaPregunta = "";
-        estado.ultimoTema = "";
-
-        sessionStorage.setItem(
-          STORAGE_CONVERSATION,
-          estado.conversacionId
-        );
-
-        guardarHistorialLocal();
-        renderizarHistorial();
-      });
-    }
-
-    document.querySelectorAll(".suggestion-button").forEach((boton) => {
-      boton.addEventListener("click", async () => {
-        const pregunta =
-          boton.dataset.question ||
-          boton.textContent.trim();
-
-        await procesarPregunta(pregunta);
-      });
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (entrada) procesarPregunta(entrada.value);
     });
+
+    entrada?.addEventListener("input", actualizarContador);
+    entrada?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        form?.requestSubmit();
+      }
+    });
+
+    $("#clearChat")?.addEventListener("click", () => {
+      S.historial = [];
+      S.convId = uid();
+      sessionStorage.setItem(KEYS.conv, S.convId);
+      guardarHistorialLocal();
+      renderHistorial();
+    });
+
+    $$(".suggestion-button").forEach((b) =>
+      b.addEventListener("click", () => procesarPregunta(b.dataset.question || b.textContent.trim())));
 
     actualizarContador();
   }
 
-  // ---------------------------------------------------------
-  // INICIO
-  // ---------------------------------------------------------
-
   async function iniciar() {
     conectarEventos();
-
-    mostrarEstadoCarga("Conectando con Microsoft 365…");
-
+    estadoCarga("Conectando con Microsoft 365…");
     try {
       await iniciarChatbot();
-    } catch (error) {
-      console.error("[ALFERZA] Error de inicialización:", error);
-
-      mostrarEstadoCarga(
-        "No se pudo completar la carga. Revisa la consola para ver el error."
-      );
-
-      mostrarMensaje(
-        "No pude cargar los documentos de ALFERZA. Verifica tu sesión de Microsoft y los permisos de SharePoint.",
-        "bot"
-      );
+    } catch (e) {
+      console.error("[ALFERZA] Error de inicialización:", e);
+      estadoCarga("No se pudo completar la carga. Revisa la consola para ver el error.");
+      mostrar("No pude cargar los documentos de ALFERZA. Verifica tu sesión de Microsoft y los permisos de SharePoint.");
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", iniciar, {
-      once: true
-    });
-  } else {
-    iniciar();
-  }
+  document.readyState === "loading"
+    ? document.addEventListener("DOMContentLoaded", iniciar, { once: true })
+    : iniciar();
 
-  // Diagnóstico opcional desde la consola del navegador.
   window.alferzaChatbotDiagnostico = () => ({
-    inicializado: estado.inicializado,
-    usuario: estado.usuario,
-    listaDisponible: Boolean(estado.listaId),
-    cantidadPDF: estado.documentos.length,
-    documentos: estado.documentos.map((d) => ({
-      nombre: d.nombre,
-      paginas: d.paginas,
-      fragmentos: d.fragmentos
-    })),
-    totalFragmentos: estado.fragmentos.length,
-    mensajesEnHistorial: estado.historial.length
+    listo: S.ready,
+    usuario: S.user,
+    listaDisponible: Boolean(S.listaId),
+    pdf: S.docs.map((d) => ({ nombre: d.nombre, paginas: d.paginas, fragmentos: d.fragmentos })),
+    totalFragmentos: S.fragmentos.length,
+    mensajesEnHistorial: S.historial.length
   });
 })();

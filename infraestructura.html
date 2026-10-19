@@ -313,27 +313,32 @@
 
         <div class="modal-body">
 
-            <label for="gestionIP" class="modal-label">Dirección IP</label>
+            
+<label for="gestionIP" class="modal-label">
+    IP o nombre del equipo
+</label>
 
-            <div style="display:flex;gap:8px;margin-bottom:20px;">
-                <input
-                    type="text"
-                    id="gestionIP"
-                    class="modal-input"
-                    placeholder="Ej. 192.168.1.25"
-                    autocomplete="off"
-                    style="margin-bottom:0;"
-                >
+<div style="display:flex;gap:8px;margin-bottom:20px;">
+    <input
+        type="text"
+        id="gestionIP"
+        class="modal-input"
+        placeholder="Ej. 192.168.1.25 o LAPTOP-VENTAS"
+        autocomplete="off"
+        spellcheck="false"
+        style="margin-bottom:0;min-width:0;flex:1;"
+    >
 
-                <button
-                    type="button"
-                    id="buscarEquipoIP"
-                    class="modal-btn primary"
-                    style="white-space:nowrap;cursor:pointer;"
-                >
-                    Buscar
-                </button>
-            </div>
+    <button
+        type="button"
+        id="buscarEquipoIP"
+        class="modal-btn primary"
+        style="white-space:nowrap;cursor:pointer;"
+    >
+        Buscar
+    </button>
+</div>
+
 
             <div
                 id="equipoEncontrado"

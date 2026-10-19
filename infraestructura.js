@@ -1,1549 +1,1926 @@
-
-"use strict";
-
 /* =========================================================
-   ALFERZA LIVE OFFICE — CHATBOT TI
-   Sin backend propio.
-   Microsoft Graph + Microsoft Lists + PDF.js.
+   CONTROL DE ACCESO AL INVENTARIO TI
 ========================================================= */
 
-(function () {
-    const MSAL_CONFIG = {
-        auth: {
-            clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
-            authority:
-                "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
-            redirectUri: window.location.hostname === "localhost"
-                ? "http://localhost:5500/blank.html"
-                : "https://alferzati.github.io/live-office/blank.html"
-        },
-        cache: {
-            cacheLocation: "sessionStorage",
-            storeAuthStateInCookie: false
-        }
-    };
+(function controlarAccesoInventario() {
+    const inventario = document.getElementById("inventarioTISection");
+    if (!inventario) return;
 
-    const SCOPES_GRAPH = [
-        "User.Read",
-        "Sites.Read.All",
-        "Sites.ReadWrite.All"
-    ];
+    inventario.style.display = "none";
 
-    const GRAPH = "https://graph.microsoft.com/v1.0";
-
-    // Lista de conversaciones: sitio personal.
-    const LIST_SITE_HOST = "alferzaholding-my.sharepoint.com";
-    const LIST_SITE_PATH = "/personal/soporte1_alferza_pe";
-    const LIST_NAME = "ConversacionesCHATBOT";
-
-    // Documentos: sitio de TI.
-    const DOCS_SITE_HOST = "alferzaholding.sharepoint.com";
-    const DOCS_SITE_PATH = "/sites/TI";
-    const DOCS_FOLDER = "Procedimientos-TI";
-
-    const STORAGE_KEY = "alferza_chatbot_conversation_id";
-    const HISTORY_PREFIX = "alferza_chat_history_";
-    const CACHE_PREFIX = "alferza_chat_cache_";
-
-    const MAX_CARACTERES = 1000;
-    const MAX_ENTRADAS_CACHE = 100;
-    const MAX_PDFS = 100;
-
-    const elements = {
-        form: document.getElementById("chatForm"),
-        input: document.getElementById("messageInput"),
-        messages: document.getElementById("messages"),
-        sendButton: document.getElementById("sendButton"),
-        clearButton: document.getElementById("clearChat"),
-        typing: document.getElementById("typingIndicator"),
-        characterCount: document.getElementById("characterCount"),
-        suggestions: document.querySelectorAll(".suggestion-button")
-    };
-
-    if (
-        !elements.form ||
-        !elements.input ||
-        !elements.messages ||
-        !elements.sendButton ||
-        !elements.clearButton ||
-        !elements.typing ||
-        !elements.characterCount
-    ) {
-        console.error("[ALFERZA CHATBOT] Faltan elementos HTML.");
-        return;
+    function actualizarVisibilidadInventario() {
+        const permisos = window.alferzaPermisos || {};
+        const grupo = String(permisos.grupo || "").trim().toUpperCase();
+        inventario.style.display = grupo === "TI" ? "" : "none";
     }
 
-    /* =====================================================
-       VARIABLES
-    ===================================================== */
+    window.addEventListener("alferza:access-granted", actualizarVisibilidadInventario);
 
-    let msalInstance = null;
-    let cuentaActual = null;
-    let tokenActual = null;
-    let usuarioCorreo = "";
-
-    let sitioLista = null;
-    let listaConversaciones = null;
-    let columnasLista = null;
-
-    let sitioDocumentos = null;
-    let driveDocumentos = null;
-    let archivosPDF = [];
-    let indiceDocumentos = [];
-    let promesaIndexacion = null;
-
-    let procesandoMensaje = false;
-    let conversationId = obtenerConversationId();
-    let historial = cargarHistorial();
-    let cache = cargarCache();
-
-    /* =====================================================
-       UTILIDADES
-    ===================================================== */
-
-    function normalizarTexto(valor) {
-        return String(valor || "")
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase()
-            .replace(/\s+/g, " ")
-            .trim();
+    if (window.alferzaAccessReady &&
+        typeof window.alferzaAccessReady.then === "function") {
+        window.alferzaAccessReady
+            .then(actualizarVisibilidadInventario)
+            .catch(() => {
+                inventario.style.display = "none";
+            });
+    } else {
+        actualizarVisibilidadInventario();
     }
+})();
 
-    function generarId() {
-        if (window.crypto?.randomUUID) {
-            return window.crypto.randomUUID();
-        }
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
 
-        return "chat-" + Date.now() + "-" +
-            Math.random().toString(36).slice(2, 12);
+const msalConfigInfraestructura = {
+    auth: {
+        clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
+        authority: "https://login.microsoftonline.com/dbab984f-4bb1-4b60-9dff-da59f54acdf1",
+        redirectUri: "https://alferzati.github.io/live-office/blank.html"
+    },
+    cache: {
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: false
     }
+};
 
-    function obtenerConversationId() {
-        try {
-            let id = sessionStorage.getItem(STORAGE_KEY);
+const msalInstanceInfraestructura =
+    typeof msal !== "undefined"
+        ? new msal.PublicClientApplication(msalConfigInfraestructura)
+        : null;
 
-            if (!id) {
-                id = generarId();
-                sessionStorage.setItem(STORAGE_KEY, id);
-            }
+const SHAREPOINT_HOSTNAME = "alferzaholding-my.sharepoint.com";
+const SHAREPOINT_SITE = "/personal/soporte1_alferza_pe";
+const SHAREPOINT_LIST_SERVICIOS = "MonitoreoTI";
+const SHAREPOINT_LIST_TRABAJADORES = "TrabajadoresEquipos";
+const RUTA_EQUIPOS = "Procedimientos T.I/equipos.json";
 
-            return id;
-        } catch (_) {
-            return generarId();
-        }
+const EQUIPOS_POR_PAGINA = 40;
+const INTERVALO_ACTUALIZACION = 120000;
+
+const SCOPES_GRAPH = [
+    "User.Read",
+    "Sites.Read.All",
+    "Sites.ReadWrite.All"
+];
+
+const CACHE_PREFIJO = "alferza_ti_";
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let cuentaActual = null;
+let tokenActual = null;
+let sitioSharePoint = null;
+let driveSharePoint = null;
+let listaTrabajadores = null;
+let columnasTrabajadores = null;
+
+let trabajadoresData = [];
+let trabajadoresPorEquipo = {};
+let trabajadoresCargados = false;
+let trabajadoresListos = false;
+let cargandoTrabajadores = false;
+
+let equiposData = [];
+let equiposFiltrados = [];
+let paginaActual = 1;
+let equipoSeleccionado = null;
+let equipoGestionSeleccionado = null;
+
+let etagEquipos = null;
+let promesaSitio = null;
+let promesaDrive = null;
+let promesaTrabajadores = null;
+let cargandoEquipos = false;
+let ultimaActualizacion = 0;
+let ubicacionEquipos = null;
+
+/* =========================================================
+   ELEMENTOS HTML
+========================================================= */
+
+const loadingOverlay = document.getElementById("loadingOverlay");
+const loadingMessage = document.getElementById("loadingMessage");
+
+const serviciosGrid = document.getElementById("serviciosGrid");
+const estadoGeneral = document.getElementById("estadoGeneral");
+
+const equiposTableBody = document.getElementById("equiposTableBody");
+const equiposEmpty = document.getElementById("equiposEmpty");
+const equiposResultados = document.getElementById("equiposResultados");
+
+const totalEquipos = document.getElementById("totalEquipos");
+const equiposConectados = document.getElementById("equiposConectados");
+const equiposDesconectados = document.getElementById("equiposDesconectados");
+
+const filtroEstadoEquipo = document.getElementById("filtroEstadoEquipo");
+const filtroAreaEquipo = document.getElementById("filtroAreaEquipo");
+const buscarEquipo = document.getElementById("buscarEquipo");
+const equiposEstado = document.getElementById("equiposEstado");
+const lastUpdate = document.getElementById("lastUpdate");
+
+const gestionTrabajadorModal = document.getElementById("gestionTrabajadorModal");
+const gestionIP = document.getElementById("gestionIP");
+const buscarEquipoIP = document.getElementById("buscarEquipoIP");
+const equipoEncontrado = document.getElementById("equipoEncontrado");
+
+const gestionEquipoNombre = document.getElementById("gestionEquipoNombre");
+const gestionEquipoDetalle = document.getElementById("gestionEquipoDetalle");
+const gestionTrabajador = document.getElementById("gestionTrabajador");
+const gestionTrabajadorMensaje = document.getElementById("gestionTrabajadorMensaje");
+
+const btnGestionarTrabajadores = document.getElementById("btnGestionarTrabajadores");
+const btnRegistrarTrabajador = document.getElementById("btnRegistrarTrabajador");
+const btnEditarTrabajador = document.getElementById("btnEditarTrabajador");
+const btnEliminarTrabajador = document.getElementById("btnEliminarTrabajador");
+
+const cerrarGestionTrabajadorModal =
+    document.getElementById("cerrarGestionTrabajadorModal");
+
+const cancelarGestionTrabajador =
+    document.getElementById("cancelarGestionTrabajador");
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function escaparHTML(valor) {
+    if (valor === null || valor === undefined) return "";
+
+    return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function mostrarLoading() {}
+
+function ocultarLoading() {
+    if (loadingOverlay) {
+        loadingOverlay.style.display = "none";
     }
+}
 
-    function claveHistorial() {
-        return HISTORY_PREFIX + conversationId;
+function obtenerFechaActual() {
+    return new Date().toLocaleString("es-PE", {
+        dateStyle: "short",
+        timeStyle: "medium"
+    });
+}
+
+function normalizarTexto(valor) {
+    return String(valor || "").trim().toLowerCase();
+}
+
+function sinTildes(valor) {
+    return String(valor === null || valor === undefined ? "" : valor)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+/*
+ * Diagnósticos visuales desactivados.
+ * Los errores no generan paneles emergentes.
+ */
+
+function mostrarDiagnostico() {}
+
+/* =========================================================
+   CACHÉ
+========================================================= */
+
+function leerCache(clave) {
+    try {
+        const valor = localStorage.getItem(CACHE_PREFIJO + clave);
+        return valor ? JSON.parse(valor) : null;
+    } catch (error) {
+        return null;
     }
+}
 
-    function claveCache() {
-        return CACHE_PREFIX + conversationId;
+function guardarCache(clave, valor) {
+    try {
+        localStorage.setItem(
+            CACHE_PREFIJO + clave,
+            JSON.stringify(valor)
+        );
+    } catch (error) {
+        // No se muestra ningún mensaje.
     }
+}
 
-    function leerStorage(clave, defecto) {
-        try {
-            const valor = sessionStorage.getItem(clave);
-            return valor ? JSON.parse(valor) : defecto;
-        } catch (_) {
-            return defecto;
-        }
-    }
+/* =========================================================
+   AUTENTICACIÓN MICROSOFT
+========================================================= */
 
-    function guardarStorage(clave, valor) {
-        try {
-            sessionStorage.setItem(clave, JSON.stringify(valor));
-        } catch (_) {
-            console.warn("[ALFERZA] No se pudo guardar en la sesión.");
-        }
-    }
+async function obtenerTokenSilencioso() {
+    if (!msalInstanceInfraestructura) return null;
 
-    function cargarHistorial() {
-        const valor = leerStorage(claveHistorial(), []);
-        return Array.isArray(valor) ? valor : [];
-    }
+    const cuentas = msalInstanceInfraestructura.getAllAccounts();
 
-    function guardarHistorial() {
-        guardarStorage(claveHistorial(), historial);
-    }
+    if (!cuentas.length) return null;
 
-    function cargarCache() {
-        const valor = leerStorage(claveCache(), {});
-        return valor && typeof valor === "object" &&
-            !Array.isArray(valor) ? valor : {};
-    }
+    cuentaActual = cuentas[0];
 
-    function guardarCache() {
-        guardarStorage(claveCache(), cache);
-    }
-
-    function obtenerCorreoCuenta(cuenta) {
-        return String(
-            cuenta?.username ||
-            cuenta?.idTokenClaims?.preferred_username ||
-            cuenta?.idTokenClaims?.email ||
-            ""
-        ).trim().toLowerCase();
-    }
-
-    function escaparOData(valor) {
-        return String(valor || "").replace(/'/g, "''");
-    }
-
-    function normalizarNombreColumna(valor) {
-        return normalizarTexto(valor)
-            .replace(/[^a-z0-9]/g, "");
-    }
-
-    /* =====================================================
-       MSAL Y AUTENTICACIÓN
-    ===================================================== */
-
-    function cargarScript(src) {
-        return new Promise((resolve, reject) => {
-            const existente = [...document.scripts].find(
-                script => script.src === src
-            );
-
-            if (existente) {
-                if (existente.dataset.alferzaLoaded === "true") {
-                    resolve();
-                    return;
-                }
-
-                existente.addEventListener("load", resolve, { once: true });
-                existente.addEventListener(
-                    "error",
-                    () => reject(new Error("No se pudo cargar un script.")),
-                    { once: true }
-                );
-                return;
-            }
-
-            const script = document.createElement("script");
-            script.src = src;
-            script.async = true;
-
-            script.onload = () => {
-                script.dataset.alferzaLoaded = "true";
-                resolve();
-            };
-
-            script.onerror = () => {
-                reject(new Error("No se pudo cargar una biblioteca externa."));
-            };
-
-            document.head.appendChild(script);
-        });
-    }
-
-    async function inicializarMSAL() {
-        if (typeof msal === "undefined") {
-            await cargarScript(
-                "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
-            );
-        }
-
-        msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
-
-        if (typeof msalInstance.initialize === "function") {
-            await msalInstance.initialize();
-        }
-
-        if (typeof msalInstance.handleRedirectPromise === "function") {
-            const resultado = await msalInstance.handleRedirectPromise();
-
-            if (resultado?.account) {
-                cuentaActual = resultado.account;
-            }
-        }
-
-        if (!cuentaActual) {
-            const cuentas = msalInstance.getAllAccounts();
-
-            if (cuentas.length) {
-                cuentaActual = cuentas[0];
-            }
-        }
-
-        if (cuentaActual) {
-            msalInstance.setActiveAccount?.(cuentaActual);
-        }
-
-        return Boolean(cuentaActual);
-    }
-
-    async function obtenerTokenSilencioso() {
-        if (!msalInstance) {
-            await inicializarMSAL();
-        }
-
-        if (!cuentaActual) {
-            const cuentas = msalInstance.getAllAccounts();
-
-            if (cuentas.length) {
-                cuentaActual = cuentas[0];
-            }
-        }
-
-        if (!cuentaActual) {
-            throw new Error(
-                "No hay una cuenta Microsoft autenticada. Inicia sesión en ALFERZA."
-            );
-        }
-
-        try {
-            const respuesta = await msalInstance.acquireTokenSilent({
+    try {
+        const respuesta =
+            await msalInstanceInfraestructura.acquireTokenSilent({
                 scopes: SCOPES_GRAPH,
                 account: cuentaActual
             });
 
-            tokenActual = respuesta.accessToken;
-            cuentaActual = respuesta.account || cuentaActual;
-            usuarioCorreo = obtenerCorreoCuenta(cuentaActual);
-
-            if (!usuarioCorreo) {
-                throw new Error(
-                    "No se pudo identificar el correo de la cuenta Microsoft."
-                );
-            }
-
-            return tokenActual;
-        } catch (error) {
-            tokenActual = null;
-            throw error;
-        }
-    }
-
-    async function iniciarSesionInteractiva() {
-        if (!msalInstance) {
-            await inicializarMSAL();
-        }
-
-        const cuentas = msalInstance.getAllAccounts();
-
-        const respuesta = cuentas.length
-            ? await msalInstance.acquireTokenPopup({
-                scopes: SCOPES_GRAPH,
-                account: cuentas[0]
-            })
-            : await msalInstance.loginPopup({
-                scopes: SCOPES_GRAPH
-            });
-
-        cuentaActual = respuesta.account;
-
-        if (cuentaActual) {
-            msalInstance.setActiveAccount?.(cuentaActual);
-        }
-
-        tokenActual = respuesta.accessToken || null;
-        usuarioCorreo = obtenerCorreoCuenta(cuentaActual);
-
-        if (!tokenActual) {
-            await obtenerTokenSilencioso();
-        }
-
+        tokenActual = respuesta.accessToken;
         return tokenActual;
+    } catch (error) {
+        mostrarDiagnostico();
+        return null;
+    }
+}
+
+async function iniciarSesion(interactivo) {
+    const tokenSilencioso = await obtenerTokenSilencioso();
+
+    if (tokenSilencioso || !interactivo) {
+        return tokenSilencioso;
     }
 
-    /* =====================================================
-       MICROSOFT GRAPH
-    ===================================================== */
+    const respuesta = cuentaActual
+        ? await msalInstanceInfraestructura.acquireTokenPopup({
+            scopes: SCOPES_GRAPH,
+            account: cuentaActual
+        })
+        : await msalInstanceInfraestructura.loginPopup({
+            scopes: SCOPES_GRAPH
+        });
 
-    async function graphFetch(url, opciones = {}, intento = 0) {
-        if (!tokenActual) {
-            await obtenerTokenSilencioso();
-        }
+    cuentaActual = respuesta.account;
+    tokenActual = respuesta.accessToken ||
+        await obtenerTokenSilencioso();
 
-        const { timeoutMs = 30000, ...fetchOptions } = opciones;
-        const controlador = new AbortController();
+    return tokenActual;
+}
 
-        const temporizador = setTimeout(
-            () => controlador.abort(),
-            timeoutMs
-        );
+/* =========================================================
+   MICROSOFT GRAPH
+========================================================= */
 
-        try {
-            const respuesta = await fetch(url, {
-                ...fetchOptions,
-                signal: controlador.signal,
-                headers: {
-                    Authorization: `Bearer ${tokenActual}`,
-                    ...fetchOptions.headers
-                }
-            });
+function registrarFallo(status, url) {
+    // Registro visual desactivado.
+}
 
-            if (
-                (respuesta.status === 429 || respuesta.status === 503) &&
-                intento < 3
-            ) {
-                const retry = Number(
-                    respuesta.headers.get("Retry-After")
-                );
+async function graphFetch(url, opciones, intento) {
+    intento = intento || 0;
 
-                const espera = Math.min(
-                    (retry || 2 ** intento) * 1000,
-                    10000
-                );
+    const { timeoutMs = 30000, ...resto } = opciones || {};
 
-                await new Promise(resolve => setTimeout(resolve, espera));
+    const controlador = new AbortController();
+    const temporizador = setTimeout(
+        () => controlador.abort(),
+        timeoutMs
+    );
 
-                return graphFetch(url, opciones, intento + 1);
+    try {
+        const respuesta = await fetch(url, {
+            ...resto,
+            signal: controlador.signal,
+            headers: {
+                Authorization: `Bearer ${tokenActual}`,
+                ...(resto.headers || {})
             }
-
-            if (respuesta.status === 401 && intento < 1) {
-                await obtenerTokenSilencioso();
-                return graphFetch(url, opciones, intento + 1);
-            }
-
-            return respuesta;
-        } finally {
-            clearTimeout(temporizador);
-        }
-    }
-
-    async function graphJSON(url, opciones = {}) {
-        const respuesta = await graphFetch(url, opciones);
+        });
 
         if (!respuesta.ok) {
-            let detalle = "";
+            registrarFallo(respuesta.status, url);
+        }
 
-            try {
-                const error = await respuesta.json();
-                detalle = error?.error?.message || "";
-            } catch (_) {}
+        if (
+            (respuesta.status === 429 || respuesta.status === 503) &&
+            intento < 3
+        ) {
+            const espera = (
+                parseInt(respuesta.headers.get("Retry-After"), 10) ||
+                2 ** intento
+            ) * 1000;
 
-            if (respuesta.status === 403) {
-                throw new Error(
-                    "Microsoft Graph denegó el acceso. Revisa los permisos y el consentimiento."
-                );
-            }
-
-            if (respuesta.status === 404) {
-                throw new Error(
-                    "No se encontró la lista, carpeta o recurso de SharePoint."
-                );
-            }
-
-            throw new Error(
-                `Error de Microsoft Graph (${respuesta.status}). ` +
-                (detalle || "Comprueba los permisos y la configuración.")
+            await new Promise(resolve =>
+                setTimeout(resolve, Math.min(espera, 10000))
             );
+
+            return graphFetch(url, opciones, intento + 1);
         }
 
-        if (respuesta.status === 204) {
-            return null;
+        if (
+            respuesta.status === 401 &&
+            intento < 1 &&
+            await obtenerTokenSilencioso()
+        ) {
+            return graphFetch(url, opciones, intento + 1);
         }
 
-        return respuesta.json();
+        return respuesta;
+    } finally {
+        clearTimeout(temporizador);
+    }
+}
+
+/* =========================================================
+   SHAREPOINT: SITIO Y DRIVE
+========================================================= */
+
+function obtenerSitioSharePoint() {
+    if (!promesaSitio) {
+        promesaSitio = (async () => {
+            const clave = "sitio:" + SHAREPOINT_SITE;
+            const guardado = leerCache(clave);
+
+            if (guardado && guardado.id) {
+                return guardado;
+            }
+
+            const respuesta = await graphFetch(
+                `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_HOSTNAME}:${SHAREPOINT_SITE}?$select=id`
+            );
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudo obtener el sitio SharePoint.");
+            }
+
+            const sitio = await respuesta.json();
+
+            guardarCache(clave, { id: sitio.id });
+
+            return { id: sitio.id };
+        })().catch(error => {
+            promesaSitio = null;
+            throw error;
+        });
     }
 
-    async function obtenerTodosLosElementos(url) {
+    return promesaSitio;
+}
+
+function obtenerDriveSharePoint() {
+    if (!promesaDrive) {
+        promesaDrive = Promise.resolve({
+            id: "b!1l0EwOKXpU24cUGYaNjPRiTQWIyIIChCkDDL197LcoOFOD7ThItqTIJ_Z1KoYrrS"
+        });
+    }
+
+    return promesaDrive;
+}
+
+/* =========================================================
+   INVENTARIO: EQUIPOS.JSON
+========================================================= */
+
+async function buscarEquiposJson(raiz) {
+    const nombre = RUTA_EQUIPOS.split("/").pop();
+
+    const respuesta = await graphFetch(
+        `${raiz}/root/search(q='${encodeURIComponent(nombre)}')?$select=id,name,eTag,parentReference&$top=25`
+    );
+
+    if (respuesta.ok) {
+        const elementos = (await respuesta.json()).value || [];
+
+        const encontrados = elementos.filter(
+            item => normalizarTexto(item.name) === normalizarTexto(nombre)
+        );
+
+        if (encontrados.length > 0) {
+            const elemento = encontrados[0];
+
+            return {
+                meta: `${raiz}/items/${elemento.id}`,
+                contenido: `${raiz}/items/${elemento.id}/content`,
+                etag: elemento.eTag || null
+            };
+        }
+    }
+
+    throw new Error("No se encontró el archivo de inventario.");
+}
+
+async function leerJsonEquipos(respuesta) {
+    const buffer = await respuesta.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    let codificacion = "utf-8";
+
+    if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+        codificacion = "utf-16le";
+    } else if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+        codificacion = "utf-16be";
+    }
+
+    const texto = new TextDecoder(codificacion)
+        .decode(buffer)
+        .replace(/^\uFEFF/, "");
+
+    let datos;
+
+    try {
+        datos = JSON.parse(texto);
+    } catch (error) {
+        throw new Error("El archivo de inventario no contiene JSON válido.");
+    }
+
+    if (Array.isArray(datos)) return datos;
+
+    if (datos && typeof datos === "object") {
+        for (const clave of [
+            "value",
+            "equipos",
+            "Equipos",
+            "data",
+            "items"
+        ]) {
+            if (Array.isArray(datos[clave])) {
+                return datos[clave];
+            }
+        }
+
+        if (datos.Nombre) return [datos];
+    }
+
+    throw new Error("Formato de inventario no válido.");
+}
+
+async function obtenerEquiposDesdeSharePoint() {
+    const drive = await obtenerDriveSharePoint();
+    const raiz = `https://graph.microsoft.com/v1.0/drives/${drive.id}`;
+
+    const ruta = RUTA_EQUIPOS
+        .split("/")
+        .map(parte => encodeURIComponent(parte))
+        .join("/");
+
+    const candidatos = [];
+
+    if (ubicacionEquipos) {
+        candidatos.push(ubicacionEquipos);
+    }
+
+    candidatos.push({
+        meta: `${raiz}/root:/${ruta}`,
+        contenido: `${raiz}/root:/${ruta}:/content`
+    });
+
+    let ubicacion = null;
+    let etag = null;
+
+    for (const candidato of candidatos) {
+        const respuesta = await graphFetch(
+            `${candidato.meta}?$select=eTag`
+        );
+
+        if (respuesta.ok) {
+            etag = (await respuesta.json()).eTag || null;
+            ubicacion = candidato;
+            break;
+        }
+
+        if (respuesta.status !== 404) {
+            throw new Error("No se pudo consultar el inventario.");
+        }
+    }
+
+    if (!ubicacion) {
+        ubicacion = await buscarEquiposJson(raiz);
+        etag = ubicacion.etag;
+    }
+
+    ubicacionEquipos = ubicacion;
+
+    if (etag && etag === etagEquipos && equiposData.length > 0) {
+        return null;
+    }
+
+    const respuesta = await graphFetch(
+        ubicacion.contenido,
+        { timeoutMs: 90000 }
+    );
+
+    if (!respuesta.ok) {
+        throw new Error("No se pudo descargar el inventario.");
+    }
+
+    const datos = await leerJsonEquipos(respuesta);
+
+    etagEquipos = etag;
+
+    return datos;
+}
+
+/* =========================================================
+   SHAREPOINT: TRABAJADORES Y EQUIPOS
+========================================================= */
+
+async function obtenerListaTrabajadores() {
+    if (listaTrabajadores) return listaTrabajadores;
+
+    const sitio = await obtenerSitioSharePoint();
+
+    const respuesta = await graphFetch(
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists`
+    );
+
+    if (!respuesta.ok) {
+        throw new Error("No se pudieron consultar las listas.");
+    }
+
+    const listas = (await respuesta.json()).value || [];
+
+    listaTrabajadores = listas.find(
+        lista =>
+            normalizarTexto(lista.displayName) ===
+            normalizarTexto(SHAREPOINT_LIST_TRABAJADORES)
+    );
+
+    if (!listaTrabajadores) {
+        throw new Error("No se encontró la lista de trabajadores.");
+    }
+
+    return listaTrabajadores;
+}
+
+async function obtenerColumnasTrabajadores() {
+    if (columnasTrabajadores) return columnasTrabajadores;
+
+    const lista = await obtenerListaTrabajadores();
+    const sitio = await obtenerSitioSharePoint();
+
+    const respuesta = await graphFetch(
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/columns`
+    );
+
+    if (!respuesta.ok) {
+        throw new Error("No se pudieron consultar las columnas.");
+    }
+
+    columnasTrabajadores = (await respuesta.json()).value || [];
+
+    return columnasTrabajadores;
+}
+
+function obtenerNombreInternoColumna(columnas, nombreVisible) {
+    const columna = columnas.find(
+        item =>
+            normalizarTexto(item.displayName) ===
+            normalizarTexto(nombreVisible)
+    );
+
+    return columna ? columna.name : null;
+}
+
+function obtenerTrabajadores() {
+    if (trabajadoresCargados) {
+        return Promise.resolve(trabajadoresPorEquipo);
+    }
+
+    if (!promesaTrabajadores) {
+        promesaTrabajadores = cargarTrabajadoresDesdeSharePoint()
+            .finally(() => {
+                promesaTrabajadores = null;
+            });
+    }
+
+    return promesaTrabajadores;
+}
+
+async function cargarTrabajadoresDesdeSharePoint() {
+    try {
+        const sitio = await obtenerSitioSharePoint();
+        const lista = await obtenerListaTrabajadores();
+
+        let url =
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items` +
+            `?expand=fields($select=Equipo1,NombreTrabajador)&$top=999`;
+
         const elementos = [];
 
         while (url) {
-            const datos = await graphJSON(url);
+            const respuesta = await graphFetch(url);
+
+            if (!respuesta.ok) {
+                throw new Error("Error cargando asignaciones.");
+            }
+
+            const datos = await respuesta.json();
+
             elementos.push(...(datos.value || []));
             url = datos["@odata.nextLink"] || null;
         }
 
-        return elementos;
-    }
+        trabajadoresData = elementos;
+        trabajadoresPorEquipo = {};
 
-    async function obtenerSitio(host, ruta) {
-        const url = `${GRAPH}/sites/${host}:${ruta}?$select=id,webUrl`;
-        return graphJSON(url);
-    }
+        elementos.forEach(elemento => {
+            const fields = elemento.fields || {};
 
-    /* =====================================================
-       LISTA DE CONVERSACIONES
-    ===================================================== */
+            if (fields.Equipo1 && fields.NombreTrabajador) {
+                trabajadoresPorEquipo[
+                    normalizarTexto(fields.Equipo1)
+                ] = {
+                    nombre: fields.NombreTrabajador,
+                    itemId: elemento.id,
+                    equipo: fields.Equipo1
+                };
+            }
+        });
 
-    async function obtenerListaConversaciones() {
-        if (listaConversaciones) {
-            return listaConversaciones;
+        if (
+            elementos.length > 0 &&
+            Object.keys(trabajadoresPorEquipo).length === 0
+        ) {
+            await cargarTrabajadoresConColumnas();
         }
 
-        if (!sitioLista) {
-            sitioLista = await obtenerSitio(
-                LIST_SITE_HOST,
-                LIST_SITE_PATH
-            );
+        trabajadoresCargados = true;
+        trabajadoresListos = true;
+
+        if (equiposData.length > 0) {
+            renderizarTablaEquipos();
         }
 
-        const url =
-            `${GRAPH}/sites/${sitioLista.id}/lists` +
-            `?$select=id,displayName,list&$top=200`;
+        return trabajadoresPorEquipo;
+    } catch (error) {
+        trabajadoresListos = true;
 
-        const listas = await obtenerTodosLosElementos(url);
+        if (equiposData.length > 0) {
+            renderizarTablaEquipos();
+        }
 
-        listaConversaciones = listas.find(
-            lista =>
-                normalizarTexto(lista.displayName) ===
-                normalizarTexto(LIST_NAME)
+        return trabajadoresPorEquipo;
+    }
+}
+
+async function cargarTrabajadoresConColumnas() {
+    const columnas = await obtenerColumnasTrabajadores();
+
+    const campoEquipo = obtenerNombreInternoColumna(
+        columnas,
+        "Equipo1"
+    );
+
+    const campoTrabajador = obtenerNombreInternoColumna(
+        columnas,
+        "Trabajador"
+    );
+
+    if (!campoEquipo || !campoTrabajador) return;
+
+    trabajadoresPorEquipo = {};
+
+    trabajadoresData.forEach(elemento => {
+        const fields = elemento.fields || {};
+        const equipo = fields[campoEquipo];
+        const trabajador = fields[campoTrabajador];
+
+        if (equipo && trabajador) {
+            trabajadoresPorEquipo[normalizarTexto(equipo)] = {
+                nombre: trabajador,
+                itemId: elemento.id,
+                equipo
+            };
+        }
+    });
+}
+
+function obtenerTrabajadorEquipo(nombreEquipo) {
+    return trabajadoresPorEquipo[normalizarTexto(nombreEquipo)] || null;
+}
+
+/* =========================================================
+   MONITOREO DE SERVICIOS
+========================================================= */
+
+async function obtenerMonitoreoTI() {
+    const sitio = await obtenerSitioSharePoint();
+
+    const url =
+        `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/` +
+        `${encodeURIComponent(SHAREPOINT_LIST_SERVICIOS)}/items?expand=fields&$top=999`;
+
+    const respuesta = await graphFetch(url);
+
+    if (!respuesta.ok) {
+        throw new Error("No se pudo consultar el monitoreo.");
+    }
+
+    return (await respuesta.json()).value || [];
+}
+
+function obtenerCampo(fields, nombres, defecto) {
+    const mapa = {};
+
+    Object.keys(fields).forEach(clave => {
+        mapa[sinTildes(clave)] = fields[clave];
+    });
+
+    for (const nombre of nombres) {
+        const valor = mapa[sinTildes(nombre)];
+
+        if (
+            valor !== undefined &&
+            valor !== null &&
+            String(valor).trim() !== ""
+        ) {
+            return valor;
+        }
+    }
+
+    return defecto;
+}
+
+function adivinarDescripcion(fields, excluir) {
+    const claves = excluir.map(sinTildes);
+    let mejor = "";
+
+    Object.entries(fields).forEach(([clave, valor]) => {
+        if (typeof valor !== "string") return;
+        if (clave.startsWith("@") || clave.startsWith("_")) return;
+        if (claves.includes(sinTildes(valor))) return;
+        if (/^\d{4}-\d{2}-\d{2}T/.test(valor)) return;
+
+        if (valor.length > mejor.length) {
+            mejor = valor;
+        }
+    });
+
+    return mejor.length >= 15 ? mejor : "";
+}
+
+function formatearRevision(valor) {
+    if (!valor) return "--";
+
+    const texto = String(valor).trim();
+
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(texto)) {
+        return texto;
+    }
+
+    const fecha = new Date(texto);
+
+    if (isNaN(fecha.getTime())) return texto;
+
+    return fecha.toLocaleString("es-PE", {
+        timeZone: "America/Lima",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    });
+}
+
+function renderizarServicios(items) {
+    if (!serviciosGrid) return;
+
+    if (!items || items.length === 0) {
+        serviciosGrid.innerHTML = `
+            <div class="service-card service-loading">
+                <span>No hay servicios registrados.</span>
+            </div>
+        `;
+
+        estadoGeneral.textContent = "● SIN DATOS";
+        estadoGeneral.className = "section-status warning";
+
+        return;
+    }
+
+    let serviciosOnline = 0;
+
+    serviciosGrid.innerHTML = items.map(item => {
+        const fields = item.fields || {};
+
+        const nombre = obtenerCampo(
+            fields,
+            ["Servicio", "Nombre", "Title", "LinkTitle"],
+            "Servicio"
         );
 
-        if (!listaConversaciones) {
-            throw new Error(
-                `No se encontró la lista ${LIST_NAME} en el sitio configurado.`
-            );
-        }
+        const estado = obtenerCampo(
+            fields,
+            ["Estado", "Status"],
+            "Sin estado"
+        );
 
-        return listaConversaciones;
-    }
+        const descripcion =
+            obtenerCampo(
+                fields,
+                [
+                    "Descripcion",
+                    "Description",
+                    "Detalle",
+                    "Mensaje",
+                    "Observacion",
+                    "Comentario"
+                ],
+                ""
+            ) ||
+            adivinarDescripcion(fields, [nombre, estado]) ||
+            "Sin descripción";
 
-    async function obtenerColumnasLista() {
-        if (columnasLista) {
-            return columnasLista;
-        }
+        const latencia = obtenerCampo(
+            fields,
+            ["Latencia", "Ping", "Tiempo"],
+            "--"
+        );
 
-        const lista = await obtenerListaConversaciones();
-
-        const url =
-            `${GRAPH}/sites/${sitioLista.id}/lists/${lista.id}/columns` +
-            "?$select=id,name,displayName";
-
-        const columnas = await obtenerTodosLosElementos(url);
-
-        columnasLista = {};
-
-        columnas.forEach(columna => {
-            columnasLista[
-                normalizarNombreColumna(columna.displayName)
-            ] = columna.name;
-
-            columnasLista[
-                normalizarNombreColumna(columna.name)
-            ] = columna.name;
-        });
-
-        return columnasLista;
-    }
-
-    function nombreInternoColumna(nombre) {
-        return columnasLista?.[normalizarNombreColumna(nombre)] || null;
-    }
-
-    async function guardarConversacionEnSharePoint(
-        mensajeUsuario,
-        respuestaBot,
-        documentoOrigen,
-        tema
-    ) {
-        const lista = await obtenerListaConversaciones();
-        await obtenerColumnasLista();
-
-        const requeridas = [
-            "ConversationId",
-            "UsuarioCorreo",
-            "MensajeUsuario",
-            "RespuestaBot",
-            "Fecha",
-            "DocumentoOrigen",
-            "Tema"
-        ];
-
-        const campos = {};
-
-        for (const nombre of requeridas) {
-            const interno = nombreInternoColumna(nombre);
-
-            if (!interno) {
-                throw new Error(
-                    `No se encontró la columna "${nombre}" en ${LIST_NAME}.`
-                );
-            }
-        }
-
-        const titleColumna =
-            nombreInternoColumna("Title") ||
-            nombreInternoColumna("Título");
-
-        if (!titleColumna) {
-            throw new Error(
-                "No se encontró la columna predeterminada Title/Título."
-            );
-        }
-
-        campos[titleColumna] =
-            `Chat ${new Date().toLocaleString("es-PE")}`;
-
-        campos[nombreInternoColumna("ConversationId")] = conversationId;
-        campos[nombreInternoColumna("UsuarioCorreo")] = usuarioCorreo;
-        campos[nombreInternoColumna("MensajeUsuario")] = mensajeUsuario;
-        campos[nombreInternoColumna("RespuestaBot")] = respuestaBot;
-        campos[nombreInternoColumna("Fecha")] = new Date().toISOString();
-        campos[nombreInternoColumna("DocumentoOrigen")] =
-            documentoOrigen || "";
-        campos[nombreInternoColumna("Tema")] = tema || "Procedimientos TI";
-
-        const url =
-            `${GRAPH}/sites/${sitioLista.id}/lists/${lista.id}/items`;
-
-        await graphJSON(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ fields: campos })
-        });
-    }
-
-    async function cargarHistorialDesdeSharePoint() {
-        const lista = await obtenerListaConversaciones();
-        await obtenerColumnasLista();
-
-        const campoConversation =
-            nombreInternoColumna("ConversationId");
-        const campoUsuario = nombreInternoColumna("UsuarioCorreo");
-
-        if (!campoConversation || !campoUsuario) {
-            throw new Error("Faltan columnas para consultar el historial.");
-        }
-
-        // Filtrado en Graph para solicitar únicamente la conversación
-        // del usuario autenticado.
-        const filtro =
-            `fields/${campoConversation} eq '${escaparOData(conversationId)}'` +
-            ` and fields/${campoUsuario} eq '${escaparOData(usuarioCorreo)}'`;
-
-        const url =
-            `${GRAPH}/sites/${sitioLista.id}/lists/${lista.id}/items` +
-            `?$expand=fields&$filter=${encodeURIComponent(filtro)}` +
-            "&$top=100";
-
-        const datos = await obtenerTodosLosElementos(url);
-
-        const campoMensaje = nombreInternoColumna("MensajeUsuario");
-        const campoRespuesta = nombreInternoColumna("RespuestaBot");
-        const campoFecha = nombreInternoColumna("Fecha");
-
-        const mensajes = [];
-
-        datos.forEach(item => {
-            const fields = item.fields || {};
-
-            if (fields[campoMensaje]) {
-                mensajes.push({
-                    role: "user",
-                    content: String(fields[campoMensaje]),
-                    timestamp: Date.parse(fields[campoFecha] || "") || 0
-                });
-            }
-
-            if (fields[campoRespuesta]) {
-                mensajes.push({
-                    role: "assistant",
-                    content: String(fields[campoRespuesta]),
-                    timestamp: (Date.parse(fields[campoFecha] || "") || 0) + 1
-                });
-            }
-        });
-
-        mensajes.sort((a, b) => a.timestamp - b.timestamp);
-
-        historial = mensajes;
-        guardarHistorial();
-
-        return mensajes;
-    }
-
-    /* =====================================================
-       SHAREPOINT: DOCUMENTOS PDF
-    ===================================================== */
-
-    async function obtenerDriveDocumentos() {
-        if (driveDocumentos) {
-            return driveDocumentos;
-        }
-
-        if (!sitioDocumentos) {
-            sitioDocumentos = await obtenerSitio(
-                DOCS_SITE_HOST,
-                DOCS_SITE_PATH
-            );
-        }
-
-        const url =
-            `${GRAPH}/sites/${sitioDocumentos.id}/drives` +
-            "?$select=id,name,driveType,webUrl";
-
-        const drives = await obtenerTodosLosElementos(url);
-
-        // La biblioteca puede mostrarse con el nombre localizado
-        // o con su nombre interno en inglés.
-        driveDocumentos = drives.find(drive =>
-            /documentos compartidos|shared documents|documents/i.test(
-                drive.name || ""
+        const revision = formatearRevision(
+            obtenerCampo(
+                fields,
+                [
+                    "UltimaRevision",
+                    "Ultima revision",
+                    "Ultima_revision",
+                    "Fecha",
+                    "FechaRevision"
+                ],
+                null
             )
         );
 
-        if (!driveDocumentos && drives.length === 1) {
-            driveDocumentos = drives[0];
-        }
-
-        if (!driveDocumentos) {
-            throw new Error(
-                "No se pudo identificar la biblioteca de documentos de TI."
-            );
-        }
-
-        return driveDocumentos;
-    }
-
-    async function obtenerPDFsDeCarpeta() {
-        const drive = await obtenerDriveDocumentos();
-
-        const ruta =
-            `${GRAPH}/drives/${drive.id}/root:/` +
-            `${encodeURIComponent(DOCS_FOLDER)}` +
-            ":/children?$select=id,name,size,file,webUrl,parentReference&$top=200";
-
-        const elementos = await obtenerTodosLosElementos(ruta);
-
-        archivosPDF = elementos.filter(item =>
-            item.file &&
-            /\.pdf$/i.test(item.name || "")
-        );
-
-        if (!archivosPDF.length) {
-            throw new Error(
-                `No se encontraron PDF directamente dentro de ${DOCS_FOLDER}.`
-            );
-        }
-
-        return archivosPDF.slice(0, MAX_PDFS);
-    }
-
-    async function cargarPDFJS() {
-        if (window.pdfjsLib) {
-            return window.pdfjsLib;
-        }
-
-        await cargarScript(
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
-        );
-
-        if (!window.pdfjsLib) {
-            throw new Error("No se pudo inicializar PDF.js.");
-        }
-
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-        return window.pdfjsLib;
-    }
-
-    async function extraerTextoPDF(archivo) {
-        const drive = await obtenerDriveDocumentos();
-        const url =
-            `${GRAPH}/drives/${drive.id}/items/${archivo.id}/content`;
-
-        const respuesta = await graphFetch(url, {
-            timeoutMs: 90000
-        });
-
-        if (!respuesta.ok) {
-            throw new Error(
-                `No se pudo descargar el PDF "${archivo.name}".`
-            );
-        }
-
-        const buffer = await respuesta.arrayBuffer();
-        const pdfjs = await cargarPDFJS();
-
-        const documento = await pdfjs.getDocument({
-            data: buffer
-        }).promise;
-
-        const paginas = [];
-
-        for (let numero = 1; numero <= documento.numPages; numero++) {
-            const pagina = await documento.getPage(numero);
-            const contenido = await pagina.getTextContent();
-
-            const textoPagina = contenido.items
-                .map(item => item.str || "")
-                .join(" ");
-
-            paginas.push(textoPagina);
-        }
-
-        return paginas.join("\n").replace(/\s+/g, " ").trim();
-    }
-
-    async function indexarDocumentos() {
-        if (indiceDocumentos.length) {
-            return indiceDocumentos;
-        }
-
-        if (promesaIndexacion) {
-            return promesaIndexacion;
-        }
-
-        promesaIndexacion = (async () => {
-            const archivos = await obtenerPDFsDeCarpeta();
-            const documentos = [];
-
-            for (const archivo of archivos) {
-                try {
-                    const texto = await extraerTextoPDF(archivo);
-
-                    if (texto) {
-                        documentos.push({
-                            id: archivo.id,
-                            nombre: archivo.name,
-                            texto,
-                            normalizado: normalizarTexto(texto),
-                            url: archivo.webUrl || ""
-                        });
-                    }
-                } catch (error) {
-                    console.warn(
-                        "[ALFERZA] No se pudo procesar un PDF:",
-                        archivo.name,
-                        error.message
-                    );
-                }
-            }
-
-            indiceDocumentos = documentos;
-
-            if (!documentos.length) {
-                throw new Error(
-                    "No se pudo extraer texto de los PDF. " +
-                    "Comprueba los permisos y si los archivos contienen texto seleccionable."
-                );
-            }
-
-            return documentos;
-        })();
-
-        try {
-            return await promesaIndexacion;
-        } finally {
-            promesaIndexacion = null;
-        }
-    }
-
-    /* =====================================================
-       BÚSQUEDA LOCAL EN LOS PDF
-    ===================================================== */
-
-    const PALABRAS_VACIAS = new Set([
-        "como", "que", "para", "por", "con", "sin", "una", "uno",
-        "unos", "unas", "los", "las", "del", "de", "el", "la",
-        "y", "o", "en", "un", "al", "es", "son", "se", "me",
-        "mi", "tu", "su", "lo", "le", "les", "necesito", "quiero",
-        "puedo", "puede", "donde", "cuando", "cual", "cuales",
-        "hay", "tiene", "tienen", "hacer", "favor", "hola",
-        "buenos", "buenas", "dias", "tardes", "noches"
-    ]);
-
-    function extraerTerminos(pregunta) {
-        return [...new Set(
-            normalizarTexto(pregunta)
-                .replace(/[^a-z0-9\s.-]/g, " ")
-                .split(/\s+/)
-                .filter(palabra =>
-                    palabra.length >= 3 &&
-                    !PALABRAS_VACIAS.has(palabra)
-                )
-        )];
-    }
-
-    function buscarEnDocumentos(pregunta, documentos) {
-        const terminos = extraerTerminos(pregunta);
-
-        if (!terminos.length) {
-            return null;
-        }
-
-        const resultados = documentos.map(documento => {
-            let puntuacion = 0;
-
-            for (const termino of terminos) {
-                let posicion = 0;
-                let apariciones = 0;
-
-                while (
-                    (posicion = documento.normalizado.indexOf(
-                        termino,
-                        posicion
-                    )) !== -1
-                ) {
-                    apariciones++;
-                    posicion += termino.length;
-
-                    if (apariciones >= 8) break;
-                }
-
-                puntuacion += Math.min(apariciones, 5);
-            }
-
-            const cobertura = terminos.filter(termino =>
-                documento.normalizado.includes(termino)
-            ).length;
-
-            return {
-                documento,
-                puntuacion,
-                cobertura,
-                porcentaje: cobertura / terminos.length
-            };
-        }).filter(resultado =>
-            resultado.puntuacion > 0 &&
-            resultado.porcentaje >= 0.3
-        ).sort((a, b) =>
-            b.puntuacion - a.puntuacion ||
-            b.porcentaje - a.porcentaje
-        );
-
-        if (!resultados.length) {
-            return null;
-        }
-
-        const mejor = resultados[0];
-        const texto = mejor.documento.texto;
-        const normalizado = mejor.documento.normalizado;
-
-        let mejorPosicion = -1;
-        let mejorVentana = -1;
-
-        for (const termino of terminos) {
-            const posicion = normalizado.indexOf(termino);
-
-            if (posicion < 0) continue;
-
-            const inicio = Math.max(0, posicion - 250);
-            const fin = Math.min(texto.length, posicion + 1100);
-            const ventana = texto.slice(inicio, fin);
-
-            const puntuacionVentana = terminos.filter(otro =>
-                normalizarTexto(ventana).includes(otro)
-            ).length;
-
-            if (puntuacionVentana > mejorVentana) {
-                mejorVentana = puntuacionVentana;
-                mejorPosicion = inicio;
-            }
-        }
-
-        if (mejorPosicion < 0) {
-            mejorPosicion = 0;
-        }
-
-        let extracto = texto.slice(
-            mejorPosicion,
-            mejorPosicion + 1500
-        ).trim();
-
-        if (mejorPosicion > 0) {
-            extracto = "… " + extracto;
-        }
-
-        if (mejorPosicion + 1500 < texto.length) {
-            extracto += " …";
-        }
-
-        return {
-            text:
-                "Encontré información relacionada en un procedimiento de ALFERZA:\n\n" +
-                extracto +
-                "\n\nDocumento: " + mejor.documento.nombre +
-                "\n\nEsta respuesta se basa en coincidencias de texto. " +
-                "Verifica el procedimiento completo antes de ejecutar acciones críticas.",
-            source: mejor.documento.nombre,
-            score: mejor.puntuacion,
-            mode: "documentos"
-        };
-    }
-
-    /* =====================================================
-       RESPUESTAS GENERALES SIN IA
-    ===================================================== */
-
-    function responderSaludo(pregunta) {
-        const texto = normalizarTexto(pregunta);
-
-        if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|que tal)[!. ]*$/.test(texto)) {
-            return {
-                text:
-                    "¡Hola! Soy el asistente de TI de ALFERZA. " +
-                    "Puedo buscar información en los procedimientos PDF disponibles. " +
-                    "¿Qué necesitas consultar?",
-                mode: "general"
-            };
-        }
+        const estadoNormalizado = sinTildes(estado);
+        let claseEstado = "neutral";
 
         if (
-            texto.includes("que puedes hacer") ||
-            texto.includes("como puedes ayudar")
+            estadoNormalizado.includes("operativo") ||
+            estadoNormalizado.includes("online") ||
+            estadoNormalizado.includes("conectado")
         ) {
-            return {
-                text:
-                    "Puedo buscar coincidencias en los procedimientos PDF de TI " +
-                    "y guardar esta conversación en SharePoint. " +
-                    "No tengo razonamiento de IA en esta versión; si no encuentro " +
-                    "información suficiente, te lo indicaré.",
-                mode: "general"
-            };
+            claseEstado = "online";
+            serviciosOnline++;
+        } else if (
+            estadoNormalizado.includes("mantenimiento") ||
+            estadoNormalizado.includes("advertencia") ||
+            estadoNormalizado.includes("warning") ||
+            estadoNormalizado.includes("lento")
+        ) {
+            claseEstado = "warning";
+        } else if (
+            estadoNormalizado.includes("caido") ||
+            estadoNormalizado.includes("offline") ||
+            estadoNormalizado.includes("desconectado") ||
+            estadoNormalizado.includes("error")
+        ) {
+            claseEstado = "offline";
         }
 
-        return null;
-    }
+        return `
+            <article class="service-card ${claseEstado}">
+                <div class="service-main">
+                    <div class="service-icon">🖥️</div>
+                    <div class="service-info">
+                        <div class="service-heading">
+                            <h3>${escaparHTML(nombre)}</h3>
+                            <span class="service-status ${claseEstado}">
+                                <span class="status-dot"></span>
+                                ${escaparHTML(estado)}
+                            </span>
+                        </div>
+                        <p>${escaparHTML(descripcion)}</p>
+                    </div>
+                </div>
 
-    /* =====================================================
-       CACHÉ
-    ===================================================== */
+                <div class="service-meta">
+                    <div class="service-latency">
+                        <span>Latencia</span>
+                        <strong>${escaparHTML(latencia)}</strong>
+                    </div>
 
-    function obtenerRespuestaCache(pregunta) {
-        const clave = normalizarTexto(pregunta);
-        const entrada = cache[clave];
-
-        if (!entrada || typeof entrada.text !== "string") {
-            return null;
-        }
-
-        return entrada;
-    }
-
-    function guardarRespuestaCache(pregunta, respuesta) {
-        if (!respuesta?.text || respuesta.mode === "error") {
-            return;
-        }
-
-        cache[normalizarTexto(pregunta)] = {
-            text: respuesta.text,
-            mode: respuesta.mode || "general",
-            source: respuesta.source || "",
-            savedAt: Date.now()
-        };
-
-        const claves = Object.keys(cache).sort(
-            (a, b) => cache[a].savedAt - cache[b].savedAt
-        );
-
-        while (claves.length > MAX_ENTRADAS_CACHE) {
-            delete cache[claves.shift()];
-        }
-
-        guardarCache();
-    }
-
-    /* =====================================================
-       HISTORIAL LOCAL
-    ===================================================== */
-
-    function registrarHistorial(role, content) {
-        historial.push({
-            role,
-            content: String(content || ""),
-            timestamp: Date.now()
-        });
-
-        guardarHistorial();
-    }
-
-    /* =====================================================
-       INTERFAZ
-    ===================================================== */
-
-    function instalarEstilos() {
-        if (document.getElementById("alferza-chat-dynamic-styles")) {
-            return;
-        }
-
-        const estilos = document.createElement("style");
-        estilos.id = "alferza-chat-dynamic-styles";
-
-        estilos.textContent = `
-            #typingIndicator {
-                transition: opacity .2s ease;
-            }
-
-            #typingIndicator:not([hidden]) {
-                animation: alferzaTypingPulse 1.2s ease-in-out infinite;
-            }
-
-            .alferza-typing-dots {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                margin-left: 5px;
-            }
-
-            .alferza-typing-dots span {
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: currentColor;
-                animation: alferzaDotBounce 1s infinite ease-in-out;
-            }
-
-            .alferza-typing-dots span:nth-child(2) {
-                animation-delay: .15s;
-            }
-
-            .alferza-typing-dots span:nth-child(3) {
-                animation-delay: .3s;
-            }
-
-            .message-bubble,
-            .message-bubble.limited-response {
-                display: block;
-                height: auto;
-                max-height: none;
-                overflow: visible;
-                -webkit-line-clamp: unset;
-                white-space: pre-wrap;
-                overflow-wrap: anywhere;
-                word-break: normal;
-            }
-
-            .message-row {
-                max-width: 98%;
-            }
-
-            @keyframes alferzaTypingPulse {
-                0%, 100% { opacity: .65; }
-                50% { opacity: 1; }
-            }
-
-            @keyframes alferzaDotBounce {
-                0%, 60%, 100% {
-                    transform: translateY(0);
-                    opacity: .45;
-                }
-                30% {
-                    transform: translateY(-4px);
-                    opacity: 1;
-                }
-            }
-
-            @media (prefers-reduced-motion: reduce) {
-                #typingIndicator,
-                .alferza-typing-dots span {
-                    animation: none !important;
-                    transition: none !important;
-                }
-            }
+                    <div class="service-revision">
+                        <span class="revision-icon">🕐</span>
+                        <div>
+                            <span>Última revisión</span>
+                            <strong>${escaparHTML(revision)}</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
         `;
+    }).join("");
 
-        document.head.appendChild(estilos);
+    if (serviciosOnline === items.length) {
+        estadoGeneral.textContent = "● OPERATIVO";
+        estadoGeneral.className = "section-status online";
+    } else if (serviciosOnline > 0) {
+        estadoGeneral.textContent = "● REVISAR";
+        estadoGeneral.className = "section-status warning";
+    } else {
+        estadoGeneral.textContent = "● NO DISPONIBLE";
+        estadoGeneral.className = "section-status offline";
+    }
+}
 
-        if (!elements.typing.querySelector(".alferza-typing-dots")) {
+/* =========================================================
+   TABLA DE INVENTARIO
+========================================================= */
+
+
+function actualizarResumenEquipos() {
+    const total = equiposData.length;
+
+    const conectados = equiposData.filter(
+        equipo => normalizarTexto(equipo.Estado) === "conectado"
+    ).length;
+
+    const desconectados = equiposData.filter(
+        equipo => normalizarTexto(equipo.Estado) === "desconectado"
+    ).length;
+
+    // Diagnóstico de todos los estados del inventario.
+    const estados = {};
+
+    equiposData.forEach(equipo => {
+        const estado = String(equipo.Estado ?? "(vacío)").trim();
+        estados[estado] = (estados[estado] || 0) + 1;
+    });
+
+    console.log("Total de equipos:", total);
+    console.log("Conectados:", conectados);
+    console.log("Desconectados:", desconectados);
+    console.table(
+    Object.entries(estados).map(([estado, cantidad]) => ({
+        Estado: estado,
+        Cantidad: cantidad
+    }))
+);
+    console.log("Sin clasificar:", total - conectados - desconectados);
+
+    if (totalEquipos) totalEquipos.textContent = total;
+    if (equiposConectados) equiposConectados.textContent = conectados;
+    if (equiposDesconectados) {
+        equiposDesconectados.textContent = desconectados;
+    }
+}
+
+function actualizarFiltroAreas() {
+    const areas = [
+        ...new Set(equiposData.map(equipo => equipo.Area).filter(Boolean))
+    ].sort((a, b) => String(a).localeCompare(String(b), "es"));
+
+    filtroAreaEquipo.innerHTML =
+        `<option value="todos">Todas las áreas</option>`;
+
+    areas.forEach(area => {
+        const opcion = document.createElement("option");
+        opcion.value = area;
+        opcion.textContent = area;
+        filtroAreaEquipo.appendChild(opcion);
+    });
+}
+
+function aplicarFiltrosEquipos(conservarPagina) {
+    const texto = normalizarTexto(buscarEquipo.value);
+    const estado = filtroEstadoEquipo.value;
+    const area = filtroAreaEquipo.value;
+
+    equiposFiltrados = equiposData.filter(equipo => {
+        const coincideTexto =
+            !texto ||
+            normalizarTexto(equipo.Nombre).includes(texto) ||
+            normalizarTexto(equipo.IP).includes(texto) ||
+            normalizarTexto(equipo.DNSHostName).includes(texto);
+
+        const coincideEstado =
+            estado === "todos" ||
+            String(equipo.Estado || "") === estado;
+
+        const coincideArea =
+            area === "todos" ||
+            String(equipo.Area || "") === area;
+
+        return coincideTexto && coincideEstado && coincideArea;
+    });
+
+    if (conservarPagina !== true) {
+        paginaActual = 1;
+    }
+
+    renderizarTablaEquipos();
+}
+
+function obtenerClaseEstado(estado) {
+    const normalizado = normalizarTexto(estado);
+
+    if (normalizado === "conectado") return "online";
+    if (normalizado === "desconectado") return "offline";
+
+    return "neutral";
+}
+
+function renderizarTablaEquipos() {
+    const totalResultados = equiposFiltrados.length;
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(totalResultados / EQUIPOS_POR_PAGINA)
+    );
+
+    if (paginaActual > totalPaginas) {
+        paginaActual = totalPaginas;
+    }
+
+    const inicio = (paginaActual - 1) * EQUIPOS_POR_PAGINA;
+    const equiposPagina = equiposFiltrados.slice(
+        inicio,
+        inicio + EQUIPOS_POR_PAGINA
+    );
+
+    if (equiposResultados) {
+        equiposResultados.textContent =
+            totalResultados === 0
+                ? "0 equipos encontrados"
+                : `Equipos encontrados: ${totalResultados}`;
+    }
+
+    if (totalResultados === 0) {
+        equiposTableBody.innerHTML = "";
+        equiposEmpty.style.display = "flex";
+        renderizarPaginacion(0);
+        return;
+    }
+
+    equiposEmpty.style.display = "none";
+
+    equiposTableBody.innerHTML = equiposPagina.map(equipo => {
+        const estado = equipo.Estado || "No verificable";
+        const claseEstado = obtenerClaseEstado(estado);
+        const trabajador = obtenerTrabajadorEquipo(equipo.Nombre);
+
+        const trabajadorHTML = trabajador
+            ? `<span class="trabajador-name" title="${escaparHTML(trabajador.nombre)}">${escaparHTML(trabajador.nombre)}</span>`
+            : !trabajadoresListos
+                ? `<span style="color:#98a2b3;font-size:12px;">Cargando…</span>`
+                : `<span style="color:#98a2b3;font-size:12px;">Sin asignar</span>`;
+
+        return `
+            <tr>
+                <td>
+                    <div class="equipo-name">
+                        <div class="equipo-icon">🖥️</div>
+                        <div>
+                            <strong title="${escaparHTML(equipo.Nombre)}">${escaparHTML(equipo.Nombre)}</strong>
+                            <span title="${escaparHTML(equipo.DNSHostName)}">${escaparHTML(equipo.DNSHostName || "Sin DNS")}</span>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <span class="equipo-status ${claseEstado}">
+                        <span class="equipo-status-dot"></span>
+                        ${escaparHTML(estado)}
+                    </span>
+                </td>
+
+                <td class="trabajador-cell">${trabajadorHTML}</td>
+
+                <td>
+                    <span class="equipo-ip">${escaparHTML(equipo.IP || "--")}</span>
+                </td>
+
+                <td>
+                    <div class="equipo-so">
+                        ${escaparHTML(equipo.SistemaOperativo || "--")}
+                        ${equipo.VersionSO
+                            ? `<br><small>${escaparHTML(equipo.VersionSO)}</small>`
+                            : ""}
+                    </div>
+                </td>
+
+                <td>
+                    <span class="equipo-area" title="${escaparHTML(equipo.Area)}">
+                        ${escaparHTML(equipo.Area || "--")}
+                    </span>
+                </td>
+
+                <td>
+                    <span class="equipo-date">${escaparHTML(equipo.UltimoRegistroAD || "--")}</span>
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    renderizarPaginacion(totalPaginas);
+}
+
+function renderizarPaginacion(totalPaginas) {
+    const existente = document.querySelector(".equipos-pagination");
+
+    if (existente) existente.remove();
+    if (totalPaginas <= 1) return;
+
+    const contenedor = document.createElement("div");
+    contenedor.className = "equipos-pagination";
+
+    const anterior = document.createElement("button");
+    anterior.type = "button";
+    anterior.className = "pagination-btn pagination-prev";
+    anterior.innerHTML = "‹";
+    anterior.disabled = paginaActual === 1;
+
+    anterior.addEventListener("click", () => {
+        if (paginaActual > 1) {
+            paginaActual--;
+            renderizarTablaEquipos();
+        }
+    });
+
+    contenedor.appendChild(anterior);
+
+    generarPaginas(paginaActual, totalPaginas).forEach(pagina => {
+        if (pagina === "...") {
             const puntos = document.createElement("span");
-            puntos.className = "alferza-typing-dots";
-            puntos.setAttribute("aria-hidden", "true");
-
-            for (let i = 0; i < 3; i++) {
-                puntos.appendChild(document.createElement("span"));
-            }
-
-            elements.typing.appendChild(puntos);
-        }
-
-        elements.typing.setAttribute("role", "status");
-        elements.typing.setAttribute(
-            "aria-label",
-            "ALFERZA está buscando información"
-        );
-    }
-
-    function desplazarAlFinal() {
-        requestAnimationFrame(() => {
-            elements.messages.scrollTop =
-                elements.messages.scrollHeight;
-        });
-    }
-
-    function obtenerHora() {
-        return new Intl.DateTimeFormat("es-PE", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
-        }).format(new Date());
-    }
-
-    function agregarMensaje(tipo, texto) {
-        const fila = document.createElement("div");
-        fila.className = `message-row ${tipo}`;
-
-        const contenido = document.createElement("div");
-        contenido.className = "message-content";
-
-        const nombre = document.createElement("span");
-        nombre.className = "message-name";
-        nombre.textContent = tipo === "user"
-            ? "Tú"
-            : "Asistente ALFERZA";
-
-        const burbuja = document.createElement("div");
-        burbuja.className = "message-bubble";
-        burbuja.textContent = String(texto || "");
-
-        const hora = document.createElement("span");
-        hora.className = "message-time";
-        hora.textContent = obtenerHora();
-
-        contenido.append(nombre, burbuja, hora);
-
-        if (tipo === "bot") {
-            const avatar = document.createElement("div");
-            avatar.className = "message-avatar";
-            avatar.textContent = "A";
-            avatar.setAttribute("aria-hidden", "true");
-            fila.appendChild(avatar);
-        }
-
-        fila.appendChild(contenido);
-        elements.messages.appendChild(fila);
-
-        desplazarAlFinal();
-        return fila;
-    }
-
-    function mostrarEscritura(visible) {
-        elements.typing.hidden = !visible;
-        elements.sendButton.disabled = visible;
-        elements.input.disabled = visible;
-
-        elements.suggestions.forEach(boton => {
-            boton.disabled = visible;
-        });
-
-        if (visible) {
-            desplazarAlFinal();
-        }
-    }
-
-    function actualizarContador() {
-        elements.characterCount.textContent =
-            `${elements.input.value.length}/${MAX_CARACTERES}`;
-
-        elements.input.style.height = "auto";
-        elements.input.style.height =
-            `${Math.min(elements.input.scrollHeight, 120)}px`;
-    }
-
-    /* =====================================================
-       PROCESAMIENTO DE CONSULTAS
-    ===================================================== */
-
-    async function consultarDocumentos(mensaje) {
-        const respuestaGeneral = responderSaludo(mensaje);
-
-        if (respuestaGeneral) {
-            return respuestaGeneral;
-        }
-
-        const documentos = await indexarDocumentos();
-        const resultado = buscarEnDocumentos(mensaje, documentos);
-
-        if (resultado) {
-            return resultado;
-        }
-
-        return {
-            text:
-                "No encontré coincidencias suficientes en los PDF de " +
-                DOCS_FOLDER + " para responder con seguridad.\n\n" +
-                "Prueba con el nombre del procedimiento, del sistema o del equipo. " +
-                "También puedes consultar directamente el documento en SharePoint.",
-            mode: "sin_coincidencias"
-        };
-    }
-
-    async function enviarMensaje(mensaje) {
-        const texto = String(mensaje || "").trim();
-
-        if (!texto || procesandoMensaje) {
-            return;
-        }
-
-        if (texto.length > MAX_CARACTERES) {
-            agregarMensaje(
-                "bot",
-                `La consulta supera el límite de ${MAX_CARACTERES} caracteres.`
-            );
-            return;
-        }
-
-        procesandoMensaje = true;
-        agregarMensaje("user", texto);
-
-        registrarHistorial("user", texto);
-
-        elements.input.value = "";
-        actualizarContador();
-        mostrarEscritura(true);
-
-        let respuesta;
-        let documentoOrigen = "";
-
-        try {
-            await obtenerTokenSilencioso();
-
-            const cacheada = obtenerRespuestaCache(texto);
-
-            if (cacheada) {
-                respuesta = {
-                    text: cacheada.text,
-                    mode: cacheada.mode,
-                    source: cacheada.source || ""
-                };
-            } else {
-                respuesta = await consultarDocumentos(texto);
-            }
-
-            documentoOrigen = respuesta.source || "";
-
-            // Guardar la pregunta y la respuesta en Microsoft Lists.
-            await guardarConversacionEnSharePoint(
-                texto,
-                respuesta.text,
-                documentoOrigen,
-                respuesta.mode
-            );
-
-            agregarMensaje("bot", respuesta.text);
-            registrarHistorial("assistant", respuesta.text);
-            guardarRespuestaCache(texto, respuesta);
-
-        } catch (error) {
-            console.error("[ALFERZA CHATBOT]", error);
-
-            let mensajeError =
-                "No pude completar la consulta.\n\n" +
-                "Detalle: " + (error.message || "Error desconocido") +
-                "\n\nComprueba tu sesión Microsoft y los permisos de SharePoint.";
-
-            if (
-                /interaction_required|consent_required|login_required/i.test(
-                    String(error.name) + " " + String(error.message)
-                )
-            ) {
-                mensajeError =
-                    "Necesitas autorizar el acceso a Microsoft Graph. " +
-                    "Pulsa el botón de conexión Microsoft que aparecerá abajo.";
-                mostrarBotonConexion();
-            }
-
-            agregarMensaje("bot", mensajeError);
-        } finally {
-            mostrarEscritura(false);
-            procesandoMensaje = false;
-
-            elements.input.disabled = false;
-            elements.sendButton.disabled = false;
-
-            actualizarContador();
-            desplazarAlFinal();
-            elements.input.focus();
-        }
-    }
-
-    /* =====================================================
-       CONEXIÓN INTERACTIVA
-    ===================================================== */
-
-    function mostrarBotonConexion() {
-        if (document.getElementById("alferzaConnectMicrosoft")) {
+            puntos.className = "pagination-ellipsis";
+            puntos.textContent = "...";
+            contenedor.appendChild(puntos);
             return;
         }
 
         const boton = document.createElement("button");
-        boton.id = "alferzaConnectMicrosoft";
         boton.type = "button";
-        boton.className = "suggestion-button";
-        boton.textContent = "Conectar con Microsoft";
+        boton.className = "pagination-btn";
+        boton.textContent = pagina;
 
-        boton.addEventListener("click", async () => {
-            boton.disabled = true;
+        if (pagina === paginaActual) {
+            boton.classList.add("active");
+        }
 
-            try {
-                await iniciarSesionInteractiva();
-                boton.remove();
-
-                agregarMensaje(
-                    "bot",
-                    "Conexión Microsoft realizada. Ya puedes volver a enviar tu consulta."
-                );
-            } catch (error) {
-                console.error("[ALFERZA MSAL]", error);
-                agregarMensaje(
-                    "bot",
-                    "No se pudo completar la conexión Microsoft. " +
-                    "Revisa el registro de la aplicación y los permisos de Graph."
-                );
-            } finally {
-                if (boton.isConnected) {
-                    boton.disabled = false;
-                }
-            }
+        boton.addEventListener("click", () => {
+            paginaActual = pagina;
+            renderizarTablaEquipos();
         });
 
-        elements.messages.appendChild(boton);
-        desplazarAlFinal();
+        contenedor.appendChild(boton);
+    });
+
+    const siguiente = document.createElement("button");
+    siguiente.type = "button";
+    siguiente.className = "pagination-btn pagination-next";
+    siguiente.innerHTML = "›";
+    siguiente.disabled = paginaActual === totalPaginas;
+
+    siguiente.addEventListener("click", () => {
+        if (paginaActual < totalPaginas) {
+            paginaActual++;
+            renderizarTablaEquipos();
+        }
+    });
+
+    contenedor.appendChild(siguiente);
+
+    const tableContainer = document.querySelector(
+        ".equipos-table-container"
+    );
+
+    if (tableContainer) {
+        tableContainer.parentNode.insertBefore(
+            contenedor,
+            tableContainer.nextSibling
+        );
+    }
+}
+
+function generarPaginas(actual, total) {
+    if (total <= 7) {
+        return Array.from({ length: total }, (_, indice) => indice + 1);
     }
 
-    /* =====================================================
-       NUEVA CONVERSACIÓN
-    ===================================================== */
+    const paginas = [1];
 
-    elements.clearButton.addEventListener("click", function () {
-        if (procesandoMensaje) {
+    if (actual > 4) paginas.push("...");
+
+    const inicio = Math.max(2, actual - 1);
+    const fin = Math.min(total - 1, actual + 1);
+
+    for (let pagina = inicio; pagina <= fin; pagina++) {
+        paginas.push(pagina);
+    }
+
+    if (actual < total - 3) paginas.push("...");
+
+    paginas.push(total);
+
+    return paginas;
+}
+
+function aplicarDatosEquipos(equipos) {
+    equiposData = equipos;
+
+    const areaPrevia = filtroAreaEquipo.value;
+
+    actualizarResumenEquipos();
+    actualizarFiltroAreas();
+
+    if ([...filtroAreaEquipo.options].some(
+        opcion => opcion.value === areaPrevia
+    )) {
+        filtroAreaEquipo.value = areaPrevia;
+    }
+
+    aplicarFiltrosEquipos(true);
+}
+
+/* =========================================================
+   GESTIÓN DE TRABAJADORES
+   Mensajes visuales desactivados
+========================================================= */
+
+function mostrarMensajeGestion() {
+    if (gestionTrabajadorMensaje) {
+        gestionTrabajadorMensaje.style.display = "none";
+        gestionTrabajadorMensaje.textContent = "";
+    }
+}
+
+function abrirGestionTrabajadores() {
+    if (!gestionTrabajadorModal) return;
+
+    equipoGestionSeleccionado = null;
+
+    gestionIP.value = "";
+    gestionTrabajador.value = "";
+    gestionTrabajador.disabled = true;
+
+    equipoEncontrado.style.display = "none";
+    mostrarMensajeGestion();
+
+    btnRegistrarTrabajador.disabled = true;
+    btnEditarTrabajador.disabled = true;
+    btnEliminarTrabajador.disabled = true;
+
+    gestionTrabajadorModal.style.display = "flex";
+
+    setTimeout(() => gestionIP.focus(), 100);
+}
+
+function cerrarGestionTrabajadores() {
+    gestionTrabajadorModal.style.display = "none";
+    equipoGestionSeleccionado = null;
+
+    gestionIP.value = "";
+    gestionTrabajador.value = "";
+    gestionTrabajador.disabled = true;
+
+    equipoEncontrado.style.display = "none";
+    mostrarMensajeGestion();
+
+    btnRegistrarTrabajador.disabled = true;
+    btnEditarTrabajador.disabled = true;
+    btnEliminarTrabajador.disabled = true;
+}
+
+async function buscarEquipoPorIP() {
+    const ip = gestionIP.value.trim();
+
+    if (!ip) return;
+
+    mostrarMensajeGestion();
+
+    equipoEncontrado.style.display = "none";
+    gestionTrabajador.disabled = true;
+
+    btnRegistrarTrabajador.disabled = true;
+    btnEditarTrabajador.disabled = true;
+    btnEliminarTrabajador.disabled = true;
+
+    equipoGestionSeleccionado = null;
+
+    buscarEquipoIP.disabled = true;
+    buscarEquipoIP.textContent = "Buscando...";
+
+    try {
+        if (!equiposData || equiposData.length === 0) {
+            await cargarEquipos();
+        }
+
+        const equipo = equiposData.find(
+            item => normalizarTexto(item.IP) === normalizarTexto(ip)
+        );
+
+        if (!equipo) return;
+
+        equipoGestionSeleccionado = equipo;
+
+        gestionEquipoNombre.textContent = equipo.Nombre || "Sin nombre";
+
+        gestionEquipoDetalle.textContent =
+            `${equipo.IP || ip} · ` +
+            `${equipo.DNSHostName || "Sin DNS"} · ` +
+            `${equipo.Area || "Sin área"}`;
+
+        equipoEncontrado.style.display = "flex";
+        gestionTrabajador.disabled = false;
+
+        let trabajador = obtenerTrabajadorEquipo(equipo.Nombre);
+
+        if (!trabajadoresCargados) {
+            try {
+                await obtenerTrabajadores();
+                trabajador = obtenerTrabajadorEquipo(equipo.Nombre);
+            } catch (error) {
+                // Sin mensaje visual.
+            }
+        }
+
+        if (trabajador) {
+            gestionTrabajador.value = trabajador.nombre;
+            btnRegistrarTrabajador.disabled = true;
+            btnEditarTrabajador.disabled = false;
+            btnEliminarTrabajador.disabled = false;
+        } else {
+            gestionTrabajador.value = "";
+            btnRegistrarTrabajador.disabled = false;
+            btnEditarTrabajador.disabled = true;
+            btnEliminarTrabajador.disabled = true;
+        }
+
+        gestionTrabajador.focus();
+    } catch (error) {
+        mostrarMensajeGestion();
+    } finally {
+        buscarEquipoIP.disabled = false;
+        buscarEquipoIP.textContent = "Buscar";
+    }
+}
+
+async function registrarTrabajadorPorIP() {
+    if (!equipoGestionSeleccionado) return;
+
+    const nombre = gestionTrabajador.value.trim();
+
+    if (!nombre) {
+        gestionTrabajador.focus();
+        return;
+    }
+
+    const equipo = equipoGestionSeleccionado;
+
+    let asignacionActual = obtenerTrabajadorEquipo(equipo.Nombre);
+
+    if (!asignacionActual && !trabajadoresCargados) {
+        await obtenerTrabajadores();
+        asignacionActual = obtenerTrabajadorEquipo(equipo.Nombre);
+    }
+
+    if (asignacionActual) return;
+
+    try {
+        btnRegistrarTrabajador.disabled = true;
+        btnRegistrarTrabajador.textContent = "Registrando...";
+
+        const sitio = await obtenerSitioSharePoint();
+        const lista = await obtenerListaTrabajadores();
+        const columnas = await obtenerColumnasTrabajadores();
+
+        const campoEquipo = obtenerNombreInternoColumna(
+            columnas,
+            "Equipo1"
+        );
+
+        const campoTrabajador = obtenerNombreInternoColumna(
+            columnas,
+            "NombreTrabajador"
+        );
+
+        if (!campoEquipo || !campoTrabajador) {
+            throw new Error("No se encontraron las columnas necesarias.");
+        }
+
+        if (
+            campoTrabajador === "Title" ||
+            campoTrabajador === "LinkTitle"
+        ) {
+            throw new Error("La columna del trabajador no es válida.");
+        }
+
+        const fields = {};
+        fields[campoEquipo] = equipo.Nombre;
+        fields[campoTrabajador] = nombre;
+
+        const respuesta = await graphFetch(
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fields })
+            }
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo registrar la asignación.");
+        }
+
+        const resultado = await respuesta.json();
+
+        trabajadoresPorEquipo[normalizarTexto(equipo.Nombre)] = {
+            nombre,
+            itemId: resultado.id,
+            equipo: equipo.Nombre
+        };
+
+        trabajadoresCargados = true;
+        trabajadoresListos = true;
+
+        renderizarTablaEquipos();
+
+        gestionTrabajador.value = nombre;
+        btnRegistrarTrabajador.disabled = true;
+        btnEditarTrabajador.disabled = false;
+        btnEliminarTrabajador.disabled = false;
+
+        mostrarMensajeGestion();
+    } catch (error) {
+        mostrarMensajeGestion();
+    } finally {
+        btnRegistrarTrabajador.textContent = "Registrar";
+
+        if (
+            equipoGestionSeleccionado &&
+            !obtenerTrabajadorEquipo(equipoGestionSeleccionado.Nombre)
+        ) {
+            btnRegistrarTrabajador.disabled = false;
+        }
+    }
+}
+
+async function editarTrabajadorPorIP() {
+    if (!equipoGestionSeleccionado) return;
+
+    const nombre = gestionTrabajador.value.trim();
+
+    if (!nombre) {
+        gestionTrabajador.focus();
+        return;
+    }
+
+    const equipo = equipoGestionSeleccionado;
+    const asignacion = obtenerTrabajadorEquipo(equipo.Nombre);
+
+    if (!asignacion || !asignacion.itemId) return;
+
+    try {
+        btnEditarTrabajador.disabled = true;
+        btnEditarTrabajador.textContent = "Guardando...";
+
+        const sitio = await obtenerSitioSharePoint();
+        const lista = await obtenerListaTrabajadores();
+        const columnas = await obtenerColumnasTrabajadores();
+
+        const campoTrabajador = obtenerNombreInternoColumna(
+            columnas,
+            "NombreTrabajador"
+        );
+
+        if (!campoTrabajador) {
+            throw new Error("No se encontró la columna del trabajador.");
+        }
+
+        const fields = {};
+        fields[campoTrabajador] = nombre;
+
+        const respuesta = await graphFetch(
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacion.itemId}/fields`,
+            {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(fields)
+            }
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo actualizar la asignación.");
+        }
+
+        trabajadoresPorEquipo[normalizarTexto(equipo.Nombre)].nombre = nombre;
+
+        renderizarTablaEquipos();
+        gestionTrabajador.value = nombre;
+
+        mostrarMensajeGestion();
+    } catch (error) {
+        mostrarMensajeGestion();
+    } finally {
+        btnEditarTrabajador.disabled = false;
+        btnEditarTrabajador.textContent = "Editar";
+    }
+}
+
+async function eliminarTrabajadorPorIP() {
+    if (!equipoGestionSeleccionado) return;
+
+    const equipo = equipoGestionSeleccionado;
+    const asignacion = obtenerTrabajadorEquipo(equipo.Nombre);
+
+    if (!asignacion || !asignacion.itemId) return;
+
+    /*
+     * Confirmación eliminada.
+     * La asignación se elimina directamente al pulsar el botón.
+     */
+
+    try {
+        btnEliminarTrabajador.disabled = true;
+        btnEliminarTrabajador.textContent = "Eliminando...";
+
+        const sitio = await obtenerSitioSharePoint();
+        const lista = await obtenerListaTrabajadores();
+
+        const respuesta = await graphFetch(
+            `https://graph.microsoft.com/v1.0/sites/${sitio.id}/lists/${lista.id}/items/${asignacion.itemId}`,
+            { method: "DELETE" }
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo eliminar la asignación.");
+        }
+
+        delete trabajadoresPorEquipo[normalizarTexto(equipo.Nombre)];
+
+        renderizarTablaEquipos();
+
+        gestionTrabajador.value = "";
+
+        btnRegistrarTrabajador.disabled = false;
+        btnEditarTrabajador.disabled = true;
+        btnEliminarTrabajador.disabled = true;
+
+        mostrarMensajeGestion();
+    } catch (error) {
+        mostrarMensajeGestion();
+    } finally {
+        btnEliminarTrabajador.textContent = "Eliminar";
+    }
+}
+
+/* =========================================================
+   EVENTOS DE GESTIÓN
+========================================================= */
+
+if (btnGestionarTrabajadores) {
+    btnGestionarTrabajadores.addEventListener(
+        "click",
+        abrirGestionTrabajadores
+    );
+}
+
+if (buscarEquipoIP) {
+    buscarEquipoIP.addEventListener("click", buscarEquipoPorIP);
+}
+
+if (gestionIP) {
+    gestionIP.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            buscarEquipoPorIP();
+        }
+
+        if (event.key === "Escape") {
+            cerrarGestionTrabajadores();
+        }
+    });
+}
+
+if (gestionTrabajador) {
+    gestionTrabajador.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            cerrarGestionTrabajadores();
+        }
+    });
+}
+
+if (btnRegistrarTrabajador) {
+    btnRegistrarTrabajador.addEventListener(
+        "click",
+        registrarTrabajadorPorIP
+    );
+}
+
+if (btnEditarTrabajador) {
+    btnEditarTrabajador.addEventListener(
+        "click",
+        editarTrabajadorPorIP
+    );
+}
+
+if (btnEliminarTrabajador) {
+    btnEliminarTrabajador.addEventListener(
+        "click",
+        eliminarTrabajadorPorIP
+    );
+}
+
+if (cerrarGestionTrabajadorModal) {
+    cerrarGestionTrabajadorModal.addEventListener(
+        "click",
+        cerrarGestionTrabajadores
+    );
+}
+
+if (cancelarGestionTrabajador) {
+    cancelarGestionTrabajador.addEventListener(
+        "click",
+        cerrarGestionTrabajadores
+    );
+}
+
+if (gestionTrabajadorModal) {
+    gestionTrabajadorModal.addEventListener("click", event => {
+        if (event.target === gestionTrabajadorModal) {
+            cerrarGestionTrabajadores();
+        }
+    });
+}
+
+if (buscarEquipo) {
+    let temporizadorBusqueda = null;
+
+    buscarEquipo.addEventListener("input", () => {
+        clearTimeout(temporizadorBusqueda);
+
+        temporizadorBusqueda = setTimeout(
+            () => aplicarFiltrosEquipos(),
+            200
+        );
+    });
+}
+
+if (filtroEstadoEquipo) {
+    filtroEstadoEquipo.addEventListener(
+        "change",
+        () => aplicarFiltrosEquipos()
+    );
+}
+
+if (filtroAreaEquipo) {
+    filtroAreaEquipo.addEventListener(
+        "change",
+        () => aplicarFiltrosEquipos()
+    );
+}
+
+/* =========================================================
+   PERMISOS DE INVENTARIO
+========================================================= */
+
+function usuarioPuedeVerInventario() {
+    const permisos = window.alferzaPermisos || {};
+
+    return String(permisos.grupo || "")
+        .trim()
+        .toUpperCase() === "TI";
+}
+
+async function verificarPermisosInventario() {
+    if (
+        window.alferzaAccessReady &&
+        typeof window.alferzaAccessReady.then === "function"
+    ) {
+        try {
+            await window.alferzaAccessReady;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    return usuarioPuedeVerInventario();
+}
+
+/* =========================================================
+   CARGA DE INVENTARIO
+========================================================= */
+
+async function cargarEquipos() {
+    if (cargandoEquipos) return;
+
+    cargandoEquipos = true;
+
+    try {
+        equiposEstado.textContent = "● ACTUALIZANDO";
+        equiposEstado.className = "section-status warning";
+
+        const equipos = await obtenerEquiposDesdeSharePoint();
+
+        if (equipos) {
+            aplicarDatosEquipos(equipos);
+
+            guardarCache("equipos", {
+                etag: etagEquipos,
+                datos: equipos
+            });
+        }
+
+        lastUpdate.textContent = obtenerFechaActual();
+
+        equiposEstado.textContent = "● ACTUALIZADO";
+        equiposEstado.className = "section-status online";
+    } catch (error) {
+        if (equiposData.length > 0) {
+            equiposEstado.textContent = "● SIN ACTUALIZAR";
+            equiposEstado.className = "section-status warning";
+        } else {
+            equiposEstado.textContent = "";
+            equiposEstado.className = "section-status";
+            equiposTableBody.innerHTML = "";
+
+            if (equiposResultados) {
+                equiposResultados.textContent = "";
+            }
+        }
+    } finally {
+        cargandoEquipos = false;
+    }
+}
+
+/* =========================================================
+   CARGA DE SERVICIOS
+========================================================= */
+
+async function cargarServicios() {
+    try {
+        const servicios = await obtenerMonitoreoTI();
+        renderizarServicios(servicios);
+    } catch (error) {
+        if (serviciosGrid) {
+            serviciosGrid.innerHTML = "";
+        }
+
+        if (estadoGeneral) {
+            estadoGeneral.textContent = "";
+            estadoGeneral.className = "section-status";
+        }
+    }
+}
+
+/* =========================================================
+   INICIO DE SESIÓN
+========================================================= */
+
+function mostrarBotonLogin() {
+    if (loadingOverlay) {
+        loadingOverlay.style.display = "flex";
+    }
+
+    if (loadingMessage) {
+        loadingMessage.textContent = "";
+    }
+
+    if (document.getElementById("btnLoginMs")) return;
+
+    const boton = document.createElement("button");
+
+    boton.id = "btnLoginMs";
+    boton.type = "button";
+    boton.className = "loading-btn";
+    boton.textContent = "Iniciar sesión con Microsoft";
+
+    boton.addEventListener("click", async () => {
+        boton.disabled = true;
+
+        try {
+            if (await iniciarSesion(true)) {
+                boton.remove();
+                ocultarLoading();
+                iniciarCargas();
+            }
+        } catch (error) {
+            if (loadingMessage) {
+                loadingMessage.textContent = "";
+            }
+        } finally {
+            boton.disabled = false;
+        }
+    });
+
+    const caja =
+        loadingOverlay.querySelector(".loading-content") ||
+        loadingOverlay.querySelector(".loading-card");
+
+    if (caja) {
+        caja.appendChild(boton);
+    }
+}
+
+/* =========================================================
+   CARGA DEL DASHBOARD
+========================================================= */
+
+async function iniciarCargas() {
+    ultimaActualizacion = Date.now();
+
+    // Los servicios están disponibles para usuarios autorizados.
+    cargarServicios();
+
+    // El inventario solo se consulta para el grupo TI.
+    if (await verificarPermisosInventario()) {
+        cargarEquipos()
+            .then(() => {
+                if (equiposData.length > 0) {
+                    return obtenerTrabajadores();
+                }
+            })
+            .catch(() => {});
+    }
+}
+
+async function cargarDashboard() {
+    try {
+        if (!msalInstanceInfraestructura) {
+            mostrarLoading();
             return;
         }
 
-        conversationId = generarId();
-        historial = [];
-        cache = {};
+        let conCache = false;
 
-        try {
-            sessionStorage.setItem(STORAGE_KEY, conversationId);
-        } catch (_) {}
+        if (msalInstanceInfraestructura.getAllAccounts().length > 0) {
+            const cache = leerCache("equipos");
 
-        guardarHistorial();
-        guardarCache();
-
-        elements.messages.replaceChildren();
-
-        agregarMensaje(
-            "bot",
-            "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
-            "Has iniciado una conversación nueva. " +
-            "Puedo buscar coincidencias en los procedimientos PDF disponibles."
-        );
-
-        elements.input.value = "";
-        actualizarContador();
-        elements.input.focus();
-    });
-
-    /* =====================================================
-       EVENTOS
-    ===================================================== */
-
-    elements.form.addEventListener("submit", function (evento) {
-        evento.preventDefault();
-        enviarMensaje(elements.input.value);
-    });
-
-    elements.input.addEventListener("input", actualizarContador);
-
-    elements.input.addEventListener("keydown", function (evento) {
-        if (
-            evento.key === "Enter" &&
-            !evento.shiftKey &&
-            !evento.isComposing
-        ) {
-            evento.preventDefault();
-
-            if (!procesandoMensaje) {
-                elements.form.requestSubmit();
+            if (
+                cache &&
+                Array.isArray(cache.datos) &&
+                cache.datos.length > 0
+            ) {
+                etagEquipos = cache.etag || null;
+                aplicarDatosEquipos(cache.datos);
+                conCache = true;
             }
         }
-    });
 
-    elements.suggestions.forEach(boton => {
-        boton.addEventListener("click", function () {
-            const pregunta = boton.dataset.question;
-
-            if (pregunta) {
-                enviarMensaje(pregunta);
-            }
-        });
-    });
-
-    /* =====================================================
-       INICIALIZACIÓN
-    ===================================================== */
-
-    async function iniciarChatbot() {
-        instalarEstilos();
-        actualizarContador();
-
-        agregarMensaje(
-            "bot",
-            "¡Hola! Soy el asistente de TI de ALFERZA.\n\n" +
-            "Estoy preparado para buscar información en los procedimientos PDF. " +
-            "La primera consulta puede tardar mientras se cargan los documentos."
-        );
-
-        try {
-            await inicializarMSAL();
-
-            if (!cuentaActual) {
-                agregarMensaje(
-                    "bot",
-                    "No encuentro una cuenta Microsoft disponible para Graph. " +
-                    "Si ya iniciaste sesión en ALFERZA y sigue apareciendo este mensaje, " +
-                    "conecta tu cuenta con el botón de abajo."
-                );
-
-                mostrarBotonConexion();
-                return;
-            }
-
-            await obtenerTokenSilencioso();
-
-            // Recuperar el historial guardado para esta conversación.
-            // Si la consulta filtrada no está soportada por la lista,
-            // se conserva el historial local y se registra el error.
-            try {
-                const mensajes = await cargarHistorialDesdeSharePoint();
-
-                if (mensajes.length) {
-                    elements.messages.replaceChildren();
-
-                    agregarMensaje(
-                        "bot",
-                        "He recuperado el historial de esta conversación."
-                    );
-
-                    mensajes.forEach(mensaje => {
-                        agregarMensaje(
-                            mensaje.role === "user" ? "user" : "bot",
-                            mensaje.content
-                        );
-                    });
-                }
-            } catch (error) {
-                console.warn(
-                    "[ALFERZA] No se pudo recuperar el historial remoto:",
-                    error.message
-                );
-            }
-
-            console.info(
-                "[ALFERZA CHATBOT] Listo.",
-                {
-                    correo: usuarioCorreo,
-                    conversationId,
-                    lista: LIST_NAME,
-                    carpeta: DOCS_FOLDER
-                }
-            );
-
-        } catch (error) {
-            console.error("[ALFERZA CHATBOT] Inicio:", error);
-
-            agregarMensaje(
-                "bot",
-                "No se pudo preparar la conexión con Microsoft Graph. " +
-                "Verifica que la sesión Microsoft esté activa y que la aplicación " +
-                "tenga permisos para consultar SharePoint."
-            );
-
-            mostrarBotonConexion();
+        if (!conCache) {
+            mostrarLoading();
         }
 
-        desplazarAlFinal();
+        const token = await iniciarSesion(false);
+
+        if (!token) {
+            mostrarBotonLogin();
+            return;
+        }
+
+        ocultarLoading();
+        iniciarCargas();
+    } catch (error) {
+        mostrarDiagnostico();
+        mostrarBotonLogin();
     }
+}
 
-    iniciarChatbot();
-})();
+async function actualizarDashboard() {
+    if (document.hidden || !tokenActual) return;
+
+    try {
+        if (!(await obtenerTokenSilencioso())) return;
+
+        ultimaActualizacion = Date.now();
+
+        await Promise.all([
+            cargarServicios(),
+            verificarPermisosInventario().then(puedeVer => {
+                if (puedeVer) return cargarEquipos();
+            })
+        ]);
+    } catch (error) {
+        // Sin mensajes visuales.
+    }
+}
+
+/* =========================================================
+   INICIALIZACIÓN
+========================================================= */
+
+function iniciarInfraestructura() {
+    cargarDashboard();
+
+    setInterval(
+        actualizarDashboard,
+        INTERVALO_ACTUALIZACION
+    );
+
+    document.addEventListener("visibilitychange", () => {
+        if (
+            !document.hidden &&
+            Date.now() - ultimaActualizacion > 30000
+        ) {
+            actualizarDashboard();
+        }
+    });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        iniciarInfraestructura
+    );
+} else {
+    iniciarInfraestructura();
+}

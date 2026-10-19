@@ -432,6 +432,7 @@ function buscarColumna(columnas, alternativas) {
     ) || null;
 }
 
+
 async function obtenerEsquemaTrabajadores() {
     const columnas = await obtenerColumnasTrabajadores();
 
@@ -449,14 +450,9 @@ async function obtenerEsquemaTrabajadores() {
 
     if (!columnaEquipo || !columnaTrabajador) {
         throw new Error(
-            "No se encontraron las columnas del equipo y trabajador. " +
-            "Revisa los nombres de las columnas en TrabajadoresEquipos."
-        );
-    }
-
-    if (columnaEquipo.readOnly || columnaTrabajador.readOnly) {
-        throw new Error(
-            "Una de las columnas necesarias es de solo lectura."
+            "No se encontraron las columnas necesarias en " +
+            "TrabajadoresEquipos. Columnas disponibles: " +
+            columnas.map(c => `${c.displayName} (${c.name})`).join(", ")
         );
     }
 
@@ -465,6 +461,7 @@ async function obtenerEsquemaTrabajadores() {
         trabajador: columnaTrabajador.name
     };
 }
+
 
 /* ========================= INVENTARIO EQUIPOS.JSON ========================= */
 

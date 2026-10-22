@@ -1452,3 +1452,439 @@ main.content.chatbot-page > .chatbot-app {
         gap: 5px;
     }
 }
+
+
+/* =========================================================
+   ALFERZA LIVE OFFICE — CHATBOT
+   Conversación amplia, elegante y profesional
+========================================================= */
+
+.chatbot-page {
+    width: 100%;
+    min-width: 0;
+    padding: 18px 22px 16px !important;
+    box-sizing: border-box;
+}
+
+/* Panel principal: aprovecha la altura disponible */
+.chatbot-app {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    height: calc(100vh - 115px) !important;
+    min-height: 720px !important;
+    max-height: 1050px;
+    overflow: hidden !important;
+    background: #ffffff;
+    border: 1px solid #d8e3f2;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0, 32, 92, 0.10);
+    box-sizing: border-box;
+}
+
+/* Barra superior del chatbot */
+.chatbot-app .chat-header {
+    flex: 0 0 auto;
+    min-height: 72px;
+    padding: 14px 22px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e4ebf5;
+    box-sizing: border-box;
+}
+
+/* Icono de marca */
+.chatbot-app .brand-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #0a84ff, #00205c);
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.20);
+}
+
+/* Zona central */
+.chatbot-app .chat-content {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    padding: 16px 22px 10px !important;
+    gap: 12px;
+    overflow: hidden !important;
+    background-color: #f7faff;
+    background-image: radial-gradient(#e4ebf5 0.7px, transparent 0.7px);
+    background-size: 18px 18px;
+    box-sizing: border-box;
+}
+
+/* Bienvenida compacta para dar espacio al historial */
+.chatbot-app .welcome-panel {
+    flex: 0 0 auto;
+    padding: 15px 20px !important;
+    margin: 0 !important;
+    border: 1px solid #d8e7fb;
+    border-left: 4px solid #0a84ff;
+    border-radius: 13px;
+    background: linear-gradient(110deg, #ffffff, #edf5ff);
+    box-shadow: 0 3px 10px rgba(0, 32, 92, 0.035);
+}
+
+.chatbot-app .welcome-panel h1,
+.chatbot-app .welcome-panel h2,
+.chatbot-app .welcome-panel h3 {
+    margin: 5px 0 !important;
+    color: #00205c;
+    font-size: 19px;
+    line-height: 1.35;
+}
+
+.chatbot-app .welcome-panel p {
+    margin: 5px 0 0 !important;
+    line-height: 1.5;
+}
+
+/* CONVERSACIÓN: ocupa todo el espacio sobrante */
+.chatbot-app #messages.messages {
+    display: flex !important;
+    flex: 1 1 0% !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+    width: 100%;
+    min-height: 420px !important;
+    max-height: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 20px 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: 1px solid #d9e4f2;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: inset 0 1px 3px rgba(0, 32, 92, 0.025);
+    scrollbar-width: thin;
+    scrollbar-color: #b8c9df #f2f6fc;
+    box-sizing: border-box;
+}
+
+/* Barra de desplazamiento */
+.chatbot-app #messages.messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chatbot-app #messages.messages::-webkit-scrollbar-track {
+    background: #f2f6fc;
+    border-radius: 10px;
+}
+
+.chatbot-app #messages.messages::-webkit-scrollbar-thumb {
+    background: #b8c9df;
+    border-radius: 10px;
+}
+
+.chatbot-app #messages.messages::-webkit-scrollbar-thumb:hover {
+    background: #829bbd;
+}
+
+/* Filas de mensajes */
+.chatbot-app .message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    width: 100%;
+    margin: 0 !important;
+}
+
+.chatbot-app .message-row.bot {
+    justify-content: flex-start;
+}
+
+.chatbot-app .message-row.user {
+    justify-content: flex-end;
+}
+
+/* Avatares */
+.chatbot-app .message-avatar {
+    display: flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #ffffff;
+    background: linear-gradient(145deg, #0a84ff, #00205c);
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(0, 32, 92, 0.13);
+}
+
+/* Contenido de cada mensaje */
+.chatbot-app .message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: min(78%, 850px);
+    min-width: 0;
+}
+
+.chatbot-app .message-row.user .message-content {
+    align-items: flex-end;
+}
+
+.chatbot-app .message-row.bot .message-content {
+    align-items: flex-start;
+}
+
+.chatbot-app .message-bubble {
+    padding: 13px 16px !important;
+    border: 1px solid #dce6f3;
+    border-radius: 15px 15px 15px 5px;
+    background: #ffffff;
+    color: #243b5a;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+    box-shadow: 0 3px 9px rgba(0, 32, 92, 0.045);
+}
+
+.chatbot-app .message-row.user .message-bubble {
+    border-color: #bcebc0;
+    border-radius: 15px 15px 5px 15px;
+    background: #dcfce0;
+    color: #16452a;
+}
+
+.chatbot-app .message-time {
+    padding: 0 4px;
+    color: #8294ad;
+    font-size: 10px;
+}
+
+.chatbot-app .response-formatted {
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+.chatbot-app .response-formatted p {
+    margin: 0 0 9px;
+}
+
+.chatbot-app .response-formatted p:last-child {
+    margin-bottom: 0;
+}
+
+.chatbot-app .response-formatted ul,
+.chatbot-app .response-formatted ol {
+    padding-left: 22px;
+    margin: 8px 0;
+}
+
+/* Indicador de respuesta */
+.chatbot-app #typingIndicator {
+    flex: 0 0 auto;
+    margin: 0 4px;
+}
+
+/* Consultas frecuentes: compactas debajo de la conversación */
+.chatbot-app .suggestions-section {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.chatbot-app .suggestions-section h3,
+.chatbot-app .suggestions-section h4 {
+    margin: 0 0 7px !important;
+    color: #617590;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.chatbot-app .suggestions-section button {
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 1px solid #d7e3f2;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #173b70;
+    font-size: 12px;
+    font-weight: 600;
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.chatbot-app .suggestions-section button:hover {
+    border-color: #0a84ff;
+    background: #eef6ff;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   COMPOSITOR: elimina el texto amarillo redundante
+========================================================= */
+
+.chatbot-app .chat-footer {
+    flex: 0 0 auto;
+    padding: 12px 20px 8px !important;
+    border-top: 1px solid #e1eaf5;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+/* Oculta únicamente la etiqueta del campo, no el textarea */
+.chatbot-app .composer > label,
+.chatbot-app .composer .input-label,
+.chatbot-app .composer-label,
+.chatbot-app .chat-footer > label {
+    display: none !important;
+}
+
+/* Formulario de escritura */
+.chatbot-app #chatForm.composer {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px;
+    width: 100%;
+    min-height: 60px;
+    margin: 0 !important;
+    padding: 7px 8px 7px 18px !important;
+    border: 1px solid #b9d5fb;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.06);
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chatbot-app #chatForm.composer:focus-within {
+    border-color: #0a84ff;
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.12);
+}
+
+/* Caja donde se escribe */
+.chatbot-app #messageInput {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px !important;
+    max-height: 120px;
+    margin: 0 !important;
+    padding: 12px 4px !important;
+    resize: vertical;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    color: #19385f;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: none !important;
+}
+
+.chatbot-app #messageInput::placeholder {
+    color: #8b9db5;
+    opacity: 1;
+}
+
+.chatbot-app #messageInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Botón enviar */
+.chatbot-app #sendButton {
+    display: flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #0a84ff, #0065d5);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(10, 132, 255, 0.23);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.chatbot-app #sendButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(10, 132, 255, 0.30);
+}
+
+.chatbot-app #sendButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+/* Contador y pie */
+.chatbot-app #characterCount {
+    margin: 5px 4px 0;
+    color: #8294ad;
+    font-size: 10px;
+    text-align: right;
+}
+
+.chatbot-page-footer {
+    margin-top: 8px;
+    color: #8294ad;
+    font-size: 10px;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .chatbot-page {
+        padding: 10px !important;
+    }
+
+    .chatbot-app {
+        height: calc(100dvh - 105px) !important;
+        min-height: 600px !important;
+        border-radius: 14px;
+    }
+
+    .chatbot-app .chat-header {
+        min-height: 62px;
+        padding: 10px 13px !important;
+    }
+
+    .chatbot-app .chat-content {
+        padding: 10px !important;
+        gap: 9px;
+    }
+
+    .chatbot-app #messages.messages {
+        min-height: 300px !important;
+        padding: 13px 10px !important;
+    }
+
+    .chatbot-app .message-content {
+        max-width: 86%;
+    }
+
+    .chatbot-app .message-bubble {
+        padding: 10px 12px !important;
+        font-size: 13px;
+    }
+
+    .chatbot-app .chat-footer {
+        padding: 9px 10px 7px !important;
+    }
+
+    .chatbot-app #chatForm.composer {
+        gap: 8px;
+        padding-left: 12px !important;
+    }
+
+    .chatbot-app .suggestions-section button {
+        font-size: 11px;
+    }
+}

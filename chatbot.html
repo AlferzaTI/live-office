@@ -1,201 +1,371 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00205c">
     <meta name="description" content="Asistente de soporte TI de ALFERZA LIVE OFFICE">
 
-    <title>Asistente TI | ALFERZA</title>
+    <title>Asistente TI | ALFERZA LIVE OFFICE</title>
 
+    <!-- Estilos generales de ALFERZA LIVE OFFICE -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Estilos propios del chatbot -->
     <link rel="stylesheet" href="chatbot.css">
 
-    <!-- 1. Cargar la biblioteca de autenticación Microsoft -->
+    <!-- Microsoft Authentication -->
     <script
         src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"
         defer>
     </script>
 
-    <!-- 2. Cargar el chatbot después de MSAL -->
+    <!-- JavaScript original del chatbot -->
     <script src="chatbot.js" defer></script>
 </head>
 
 <body>
-    <main class="chatbot-app">
 
-        <header class="chat-header">
-            <div class="brand-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M12 3 14.3 9.7 21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linejoin="round"/>
-                </svg>
-            </div>
+    <!-- ==========================================
+         BARRA SUPERIOR DE ALFERZA LIVE OFFICE
+    =========================================== -->
 
-            <div class="header-info">
-                <h1>Asistente ALFERZA</h1>
+    <header class="topbar">
 
-                <div class="assistant-status">
-                    <span class="status-dot"></span>
-                    <span>Asistente de soporte TI</span>
-                </div>
-            </div>
+        <div class="logo">
+            <h1>ALFERZA LIVE OFFICE</h1>
+            <span>Monitoreo en tiempo real</span>
+        </div>
 
-            <button
-                id="clearChat"
-                class="icon-button"
-                type="button"
-                title="Nueva conversación"
-                aria-label="Iniciar nueva conversación">
+        <div class="live-status">
+            <span class="live-status-dot"></span>
+            <span>EN VIVO</span>
+        </div>
 
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M4 7V3m0 0h4M4 3l4 4M5 12a7 7 0 1 0 2-5"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"/>
-                </svg>
-            </button>
-        </header>
+    </header>
 
-        <section class="chat-content">
 
-            <div class="welcome-panel">
-                <span class="welcome-label">
-                    ALFERZA HOLDING · ÁREA DE TI
-                </span>
+    <!-- ==========================================
+         ESTRUCTURA PRINCIPAL
+    =========================================== -->
 
-                <h2>¿En qué puedo ayudarte?</h2>
+    <div class="container">
 
-                <p>
-                    Puedo orientarte con problemas informáticos,
-                    instalaciones y consultas de soporte.
-                </p>
-            </div>
+        <!-- MENÚ LATERAL -->
 
-            <div
-                id="messages"
-                class="messages"
-                role="log"
-                aria-live="polite"
-                aria-label="Conversación con el asistente">
-            </div>
+        <aside class="sidebar">
 
-            <div
-                id="typingIndicator"
-                class="typing-indicator"
-                hidden>
+            <h2>MENÚ</h2>
 
-                <span></span>
-                <span></span>
-                <span></span>
+            <ul>
 
-                <span class="typing-label">
-                    Preparando respuesta...
-                </span>
-            </div>
+                <li onclick="window.location.href='index.html'">
+                    🏢 Oficina
+                </li>
 
-            <div class="suggestions-section">
-                <p class="suggestions-title">
-                    CONSULTAS FRECUENTES
-                </p>
+                <li onclick="window.location.href='personal.html'">
+                    👥 Personal
+                </li>
 
-                <div class="suggestions">
+                <li onclick="window.location.href='reserva.html'">
+                    📝 Reservas
+                </li>
 
-                    <button
-                        type="button"
-                        class="suggestion-button"
-                        data-question="Necesito instalar un programa">
+                <li onclick="window.location.href='salas/salas.html'">
+                    📅 Salas
+                </li>
 
-                        <span class="suggestion-icon">↓</span>
-                        <span>Instalar software</span>
-                    </button>
+                <li onclick="window.location.href='comunicados.html'">
+                    📢 Comunicados
+                </li>
 
-                    <button
-                        type="button"
-                        class="suggestion-button"
-                        data-question="Tengo problemas con mi conexión a internet">
+                <li onclick="window.location.href='seguridad.html'">
+                    🔐 Seguridad
+                </li>
 
-                        <span class="suggestion-icon">⌁</span>
-                        <span>Problemas de red</span>
-                    </button>
+                <li onclick="window.location.href='infraestructura.html'">
+                    🏗️ Infraestructura
+                </li>
 
-                    <button
-                        type="button"
-                        class="suggestion-button"
-                        data-question="Tengo problemas con Outlook">
+                <li onclick="window.location.href='tickets.html'">
+                    🎫 Tickets
+                </li>
 
-                        <span class="suggestion-icon">✉</span>
-                        <span>Outlook y correo</span>
-                    </button>
+                <li onclick="window.location.href='permisos.html'">
+                    🔑 Permisos
+                </li>
 
-                    <button
-                        type="button"
-                        class="suggestion-button"
-                        data-question="Necesito registrar un ticket de soporte">
+                <li onclick="window.location.href='configuracion.html'">
+                    ⚙️ Configuración
+                </li>
 
-                        <span class="suggestion-icon">＋</span>
-                        <span>Solicitar soporte</span>
-                    </button>
+                <li class="active"
+                    onclick="window.location.href='chatbot.html'">
+                    🤖 Asistente TI
+                </li>
 
-                </div>
-            </div>
+            </ul>
 
-        </section>
+        </aside>
 
-        <footer class="chat-footer">
 
-            <form id="chatForm" class="composer">
+        <!-- ==========================================
+             CONTENIDO PRINCIPAL
+        =========================================== -->
 
-                <label
-                    for="messageInput"
-                    class="sr-only">
-                    Escribe tu consulta
-                </label>
+        <main class="content chatbot-page">
 
-                <textarea
-                    id="messageInput"
-                    rows="1"
-                    maxlength="1000"
-                    placeholder="Escribe tu consulta..."
-                    autocomplete="off"
-                    required>
-                </textarea>
+            <!-- ENCABEZADO DE LA PÁGINA -->
 
-                <button
-                    id="sendButton"
-                    class="send-button"
-                    type="submit"
-                    aria-label="Enviar mensaje">
+            <section class="chatbot-page-header">
 
-                    <svg viewBox="0 0 24 24" fill="none">
+                <div class="chatbot-page-header-icon">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         aria-hidden="true">
                         <path
-                            d="M22 2 15 22l-4-9-9-4 20-7ZM22 2 11 13"
+                            d="M12 3 14.3 9.7 21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"
                             stroke="currentColor"
                             stroke-width="1.8"
-                            stroke-linecap="round"
                             stroke-linejoin="round"/>
                     </svg>
-                </button>
+                </div>
 
-            </form>
+                <div class="chatbot-page-header-text">
 
-            <div class="footer-note">
+                    <div class="chatbot-breadcrumb">
+                        OFICINA <span>/</span> ASISTENTE TI
+                    </div>
+
+                    <h2>Asistente de soporte TI</h2>
+
+                    <p>
+                        Consulta procedimientos y recibe orientación
+                        sobre los servicios tecnológicos de ALFERZA.
+                    </p>
+
+                </div>
+
+                <div class="chatbot-office-status">
+                    <span></span>
+                    Asistente disponible
+                </div>
+
+            </section>
+
+
+            <!-- ==========================================
+                 CHATBOT ORIGINAL
+            =========================================== -->
+
+            <section class="chatbot-app">
+
+                <header class="chat-header">
+
+                    <div class="brand-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 3 14.3 9.7 21 12l-6.7 2.3L12 21l-2.3-6.7L3 12l6.7-2.3L12 3Z"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+
+                    <div class="header-info">
+
+                        <h1>Asistente ALFERZA</h1>
+
+                        <div class="assistant-status">
+                            <span class="status-dot"></span>
+                            <span>Asistente de soporte TI</span>
+                        </div>
+
+                    </div>
+
+                    <button
+                        id="clearChat"
+                        class="icon-button"
+                        type="button"
+                        title="Nueva conversación"
+                        aria-label="Iniciar nueva conversación">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M4 7V3m0 0h4M4 3l4 4M5 12a7 7 0 1 0 2-5"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"/>
+                        </svg>
+
+                    </button>
+
+                </header>
+
+
+                <section class="chat-content">
+
+                    <div class="welcome-panel">
+
+                        <span class="welcome-label">
+                            ALFERZA HOLDING · ÁREA DE TI
+                        </span>
+
+                        <h2>¿En qué puedo ayudarte?</h2>
+
+                        <p>
+                            Puedo orientarte con problemas informáticos,
+                            instalaciones y consultas de soporte.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="messages"
+                        class="messages"
+                        role="log"
+                        aria-live="polite"
+                        aria-label="Conversación con el asistente">
+                    </div>
+
+
+                    <div
+                        id="typingIndicator"
+                        class="typing-indicator"
+                        hidden>
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                        <span class="typing-label">
+                            Preparando respuesta...
+                        </span>
+
+                    </div>
+
+
+                    <div class="suggestions-section">
+
+                        <p class="suggestions-title">
+                            CONSULTAS FRECUENTES
+                        </p>
+
+                        <div class="suggestions">
+
+                            <button
+                                type="button"
+                                class="suggestion-button"
+                                data-question="Necesito instalar un programa">
+
+                                <span class="suggestion-icon">↓</span>
+                                <span>Instalar software</span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-button"
+                                data-question="Tengo problemas con mi conexión a internet">
+
+                                <span class="suggestion-icon">⌁</span>
+                                <span>Problemas de red</span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-button"
+                                data-question="Tengo problemas con Outlook">
+
+                                <span class="suggestion-icon">✉</span>
+                                <span>Outlook y correo</span>
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="suggestion-button"
+                                data-question="Necesito registrar un ticket de soporte">
+
+                                <span class="suggestion-icon">＋</span>
+                                <span>Solicitar soporte</span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <footer class="chat-footer">
+
+                    <form id="chatForm" class="composer">
+
+                        <label
+                            for="messageInput"
+                            class="sr-only">
+                            Escribe tu consulta
+                        </label>
+
+                        <textarea
+                            id="messageInput"
+                            rows="1"
+                            maxlength="1000"
+                            placeholder="Escribe tu consulta..."
+                            autocomplete="off"
+                            required></textarea>
+
+                        <button
+                            id="sendButton"
+                            class="send-button"
+                            type="submit"
+                            aria-label="Enviar mensaje">
+
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M22 2 15 22l-4-9-9-4 20-7ZM22 2 11 13"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"/>
+                            </svg>
+
+                        </button>
+
+                    </form>
+
+
+                    <div class="footer-note">
+                        <span>ALFERZA LIVE OFFICE</span>
+                        <span id="characterCount">0/1000</span>
+                    </div>
+
+                    <p class="disclaimer">
+                        Asistente en fase inicial. Verifica los procedimientos
+                        antes de realizar cambios en tu equipo.
+                    </p>
+
+                </footer>
+
+            </section>
+
+
+            <!-- PIE DE PÁGINA DEL CONTENIDO -->
+
+            <footer class="chatbot-page-footer">
                 <span>ALFERZA LIVE OFFICE</span>
-                <span id="characterCount">0/1000</span>
-            </div>
+                <span>Asistente interno de soporte TI</span>
+            </footer>
 
-            <p class="disclaimer">
-                Asistente en fase inicial. Verifica los procedimientos
-                antes de realizar cambios en tu equipo.
-            </p>
+        </main>
 
-        </footer>
+    </div>
 
-    </main>
 </body>
 </html>

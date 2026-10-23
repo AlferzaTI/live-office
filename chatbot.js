@@ -12,13 +12,13 @@
     lista: { host: "alferzaholding-my.sharepoint.com", site: "/personal/soporte1_alferza_pe", name: "Conversaciones-CHATBOT" },
     ollama: {
       url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
-      model: "llama3:latest",
-      timeoutMs: 120000,
-      stallMs: 60000,
+      model: "llama3.2:3b",
+      timeoutMs: 30000,
+      stallMs: 15000,
       temperature: 0.2,
-      numCtx: 3072,
-      numPredict: 400,
-      keepAlive: "60m"
+      numCtx: 2048,
+      numPredict: 160,
+      keepAlive: "24h"
     },
     pdfJs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
     pdfWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
@@ -26,8 +26,9 @@
     maxPaginasPdf: 300,
     concurrencia: 4,
     reintentoDocsMs: 60000,
-    rec: { topK: 3, maxChars: 2200, chunkChars: 900, overlap: 150 },
-    hist: { max: 50, turnosIA: 4, recorteIA: 500 }
+    esperaDocsMs: 1500,
+    rec: { topK: 2, maxChars: 1400, chunkChars: 900, overlap: 150 },
+    hist: { max: 50, turnosIA: 2, recorteIA: 300 }
   };
 
   const GRAPH = "https://graph.microsoft.com/v1.0";
@@ -48,6 +49,7 @@
   const $$ = (s) => document.querySelectorAll(s);
   const log = (...a) => console.log("[ALFERZA]", ...a);
   const warn = (...a) => console.warn("[ALFERZA]", ...a);
+  const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 
   const norm = (t) => String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const normalizar = (t) => norm(t).replace(/[^a-z0-9@._/-]+/g, " ").trim();
@@ -372,7 +374,7 @@
 
     if ((response.status === 429 || response.status === 503) && intento < 2) {
       const espera = Number(response.headers.get("Retry-After")) || 2;
-      await new Promise((r) => setTimeout(r, espera * 1000));
+      await pausa(espera * 1000);
       return graph(url, opts, intento + 1);
     }
 
@@ -545,7 +547,7 @@
     const limite = Math.min(pdf.numPages, CFG.maxPaginasPdf);
     const frags = [];
 
-    // Lotes de 5 páginas: más rápido sin saturar el navegador.
+    // Lotes de 5 páginas, cediendo el hilo principal entre lotes para no congelar la página.
     for (let inicio = 1; inicio <= limite; inicio += 5) {
       const fin = Math.min(inicio + 4, limite);
       const paginas = await Promise.all(
@@ -556,6 +558,7 @@
         })
       );
       for (const { n, texto } of paginas) frags.push(...fragmentar(texto, n));
+      await pausa(0);
     }
 
     pdf.destroy?.();
@@ -694,27 +697,14 @@
   // =========================================================
 
   function construirPrompt(contexto) {
-    return `Eres el asistente interno de soporte de ALFERZA. Atiendes TI, Microsoft 365, Outlook, Teams, equipos, redes, accesos y procedimientos internos.
+    return `Eres el asistente de soporte interno de ALFERZA (TI, Microsoft 365, Outlook, Teams, redes, accesos).
+Responde en español, directo, en 2 a 5 líneas. Sin saludos, sin emojis, sin relleno. La primera frase debe ser la respuesta o la acción.
+Si el CONTEXTO responde la pregunta, basa el procedimiento en él. Si no, da orientación general y dilo en una frase.
+Nunca inventes rutas, nombres, extensiones ni acciones realizadas.
+Si la pregunta no es de trabajo, responde en una frase y ofrece ayuda con TI.
 
-FORMA DE RESPONDER
-- Responde directamente. La primera frase debe ser la respuesta o la acción a seguir.
-- Sin relleno: nada de "¡Claro!", "Con gusto", "Espero que te sirva" ni repetir la pregunta.
-- Sin emojis. No saludes salvo que el usuario salude.
-- Breve por defecto (2 a 6 líneas). Si pide pasos, usa una lista numerada corta y concreta. Si pide más detalle, amplía.
-- Responde en el idioma del usuario; por defecto, en español.
-- Mantén el hilo: si dice "eso", "y si no funciona" o "¿y después?", aplícalo al tema anterior. Si cambia de tema, sigue el nuevo.
-- Si falta un dato clave para ayudar (qué sistema, qué mensaje de error), pídelo en una sola frase al final.
-
-FUENTES
-- Si hay CONTEXTO DOCUMENTAL que responde la pregunta, basa los procedimientos internos en él.
-- Si no hay contexto o no cubre la pregunta, da orientación técnica general y aclara en una frase que no es un procedimiento interno confirmado.
-- Nunca inventes políticas, nombres de personas, extensiones, rutas, enlaces ni acciones realizadas. No digas que revisaste, cambiaste o reiniciaste algo.
-
-TEMAS AJENOS AL TRABAJO
-- Puedes responder preguntas generales de forma breve. Si no tienen relación con el trabajo, responde en una o dos frases y ofrece ayudar con TI o procedimientos internos.
-
-CONTEXTO DOCUMENTAL:
-${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
+CONTEXTO:
+${contexto || "(sin fragmentos relevantes)"}`;
   }
 
   async function consultarIA(pregunta, contexto, historial, alParcial) {
@@ -994,35 +984,42 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     const social = detectarSocial(pregunta);
     if (social) return { respuesta: RESPUESTAS_SOCIALES[social], fuentes: [] };
 
-    if (!S.ready && Date.now() - S.ultimoIntentoInit > CFG.reintentoDocsMs) {
-      estadoCarga("Conectando con los documentos de ALFERZA…");
-      await iniciarChatbot().catch((e) => warn("Sin documentos disponibles:", e.message));
-    } else if (!S.ready && S.initPromise) {
-      estadoCarga("Esperando los documentos de ALFERZA…");
-      await S.initPromise.catch(() => {});
+    // Reintento en segundo plano, sin bloquear al usuario.
+    if (!S.ready && !S.initPromise && Date.now() - S.ultimoIntentoInit > CFG.reintentoDocsMs) {
+      iniciarChatbot().catch((e) => warn("Sin documentos disponibles:", e.message));
+    }
+
+    // Como máximo esperamos un tiempo corto; si no está listo, respondemos sin documentos.
+    if (!S.ready && S.initPromise) {
+      estadoCarga("Preparando la respuesta…");
+      await Promise.race([S.initPromise.catch(() => {}), pausa(CFG.esperaDocsMs)]);
     }
 
     let contexto = "";
     let fuentes = [];
+    const tBusqueda = performance.now();
 
     if (S.indice?.N) {
-      estadoCarga("Buscando en los documentos…");
       const combinada = consultaParaBusqueda(pregunta);
       let hallados = buscar(combinada);
       if (!hallados.length && combinada !== pregunta) hallados = buscar(pregunta);
       ({ contexto, fuentes } = contextoDe(hallados));
     }
+    log(`Búsqueda: ${(performance.now() - tBusqueda).toFixed(0)} ms`);
 
     estadoCarga("Preparando la respuesta…");
 
+    const tIA = performance.now();
     let primerTexto = true;
     const respuesta = await consultarIA(pregunta, contexto, S.historial, (texto) => {
       if (primerTexto) {
         primerTexto = false;
+        log(`Primer token: ${(performance.now() - tIA).toFixed(0)} ms`);
         ocultarCarga();
       }
       alParcial?.(texto);
     });
+    log(`IA total: ${(performance.now() - tIA).toFixed(0)} ms`);
 
     return { respuesta, fuentes };
   }
@@ -1142,100 +1139,69 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 })();
 
 
-
 /* =========================================================
-   ALFERZA LIVE OFFICE - CUPHEAD ANIMADO
-   Normal: frames 0001–0022
-   Espera: frames 0025–0071
+   ALFERZA LIVE OFFICE - CUPHEAD (solo animado mientras procesa)
+   Reposo: cuadro fijo, sin timers
+   Espera: frames 0025–0071 a 10 fps, pausado con pestaña oculta
 ========================================================= */
 
 (() => {
-    "use strict";
+  "use strict";
 
-    const cupheadFrame = document.getElementById("cupheadFrame");
+  const frame = document.getElementById("cupheadFrame");
+  if (!frame) {
+    console.warn("[CUPHEAD] No se encontró #cupheadFrame. Revisa el HTML.");
+    return;
+  }
 
-    if (!cupheadFrame) {
-        console.warn(
-            "[CUPHEAD] No se encontró #cupheadFrame. Revisa el HTML."
-        );
-        return;
+  const BASE = "img/Cuphead/Cuphead/";
+  const ANIM = {
+    normal: { inicio: 1, fin: 1, fps: 0 },
+    espera: { inicio: 25, fin: 71, fps: 10 }
+  };
+
+  const cache = new Map();
+  let timer = 0;
+  let n = 1;
+
+  function cuadro(i) {
+    if (!cache.has(i)) {
+      const img = new Image();
+      img.decoding = "async";
+      img.src = `${BASE}mc_reg_intro_cuphead_${String(i).padStart(4, "0")}.png`;
+      cache.set(i, img);
     }
+    return cache.get(i).src;
+  }
 
-    const CUPHEAD_BASE = "img/Cuphead/Cuphead/";
+  function mostrar(i) {
+    const src = cuadro(i);
+    if (frame.getAttribute("src") !== src) frame.src = src;
+  }
 
-    const CUPHEAD_ANIMACIONES = {
-        normal: {
-            inicio: 1,
-            fin: 22,
-            velocidad: 110
-        },
-        espera: {
-            inicio: 25,
-            fin: 71,
-            velocidad: 90
-        }
-    };
+  function reproducirCuphead(modo) {
+    const a = ANIM[modo];
+    if (!a) return;
 
-    let cupheadTimer = null;
-    let cupheadModoActual = null;
-    let cupheadNumeroFrame = 1;
+    clearInterval(timer);
+    timer = 0;
+    n = a.inicio;
+    mostrar(n);
 
-    // Precargar los fotogramas para reducir parpadeos.
-    const cupheadImagenes = {};
+    if (!a.fps) return;
 
-    for (let i = 1; i <= 71; i++) {
-        const numero = String(i).padStart(4, "0");
-        const imagen = new Image();
+    timer = setInterval(() => {
+      if (document.hidden) return;
+      n = n >= a.fin ? a.inicio : n + 1;
+      mostrar(n);
+    }, 1000 / a.fps);
+  }
 
-        imagen.src =
-            `${CUPHEAD_BASE}mc_reg_intro_cuphead_${numero}.png`;
+  window.reproducirCuphead = reproducirCuphead;
 
-        cupheadImagenes[i] = imagen;
-    }
+  // Precarga de los cuadros de espera cuando el navegador esté libre.
+  const precargar = () => { for (let i = 25; i <= 71; i++) cuadro(i); };
+  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(precargar);
 
-    function reproducirCuphead(modo) {
-        const animacion = CUPHEAD_ANIMACIONES[modo];
-
-        if (!animacion) {
-            console.warn(`[CUPHEAD] Animación desconocida: ${modo}`);
-            return;
-        }
-
-        // Detener cualquier animación anterior.
-        clearTimeout(cupheadTimer);
-
-        cupheadModoActual = modo;
-        cupheadNumeroFrame = animacion.inicio;
-
-        function siguienteFrame() {
-            // Evitar que continúe una animación reemplazada.
-            if (cupheadModoActual !== modo) return;
-
-            const imagen = cupheadImagenes[cupheadNumeroFrame];
-
-            if (imagen && imagen.complete && imagen.naturalWidth > 0) {
-                cupheadFrame.src = imagen.src;
-            }
-
-            cupheadNumeroFrame++;
-
-            if (cupheadNumeroFrame > animacion.fin) {
-                cupheadNumeroFrame = animacion.inicio;
-            }
-
-            cupheadTimer = setTimeout(
-                siguienteFrame,
-                animacion.velocidad
-            );
-        }
-
-        siguienteFrame();
-    }
-
-    // Permitir que procesarPregunta() controle la animación.
-    window.reproducirCuphead = reproducirCuphead;
-
-    // Empezar en modo normal al abrir el chatbot.
-    reproducirCuphead("normal");
-
+  reproducirCuphead("normal");
 })();

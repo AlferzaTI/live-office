@@ -1142,100 +1142,76 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
 
 /* =========================================
-   CUPHEAD - ANIMACIÓN CONTINUA
+   CUPHEAD - ANIMACIÓN NORMAL Y ESPERA
 ========================================= */
 
-(() => {
-    const frame = document.getElementById("cupheadFrame");
-    const typingIndicator = document.getElementById("typingIndicator");
-    const chatForm = document.getElementById("chatForm");
+const cupheadFrame = document.getElementById("cupheadFrame");
 
-    if (!frame) return;
+const CUPHEAD_BASE = "img/Cuphead/Cuphead/";
 
-    const TOTAL_FRAMES = 22;
-    const FRAME_DELAY_IDLE = 110;
-    const FRAME_DELAY_ACTIVE = 75;
+const CUPHEAD_ANIMACIONES = {
+    normal: {
+        inicio: 1,
+        fin: 22,
+        velocidad: 110
+    },
+    espera: {
+        inicio: 25,
+        fin: 71,
+        velocidad: 90
+    }
+};
 
-    let currentFrame = 1;
-    let timer = null;
-    let active = false;
+let cupheadTimer = null;
+let cupheadModoActual = null;
+let cupheadNumeroFrame = 1;
 
-    // Precargar los 22 fotogramas.
-    const frames = [];
+// Precargar todos los fotogramas.
+const cupheadImagenes = {};
 
-    for (let i = 1; i <= TOTAL_FRAMES; i++) {
-    const number = String(i).padStart(4, "0");
-    const image = new Image();
+for (let i = 1; i <= 71; i++) {
+    const numero = String(i).padStart(4, "0");
+    const imagen = new Image();
 
-    image.src = `img/Cuphead/Cuphead/mc_reg_intro_cuphead_${number}.png`;
-
-    frames.push(image);
+    imagen.src = `${CUPHEAD_BASE}mc_reg_intro_cuphead_${numero}.png`;
+    cupheadImagenes[i] = imagen;
 }
 
-    function animate() {
-        currentFrame++;
+function reproducirCuphead(modo) {
+    const animacion = CUPHEAD_ANIMACIONES[modo];
 
-        if (currentFrame > TOTAL_FRAMES) {
-            currentFrame = 1;
+    if (!cupheadFrame || !animacion) return;
+
+    // Detiene por completo la secuencia anterior.
+    clearTimeout(cupheadTimer);
+
+    cupheadModoActual = modo;
+    cupheadNumeroFrame = animacion.inicio;
+
+    function siguienteFrame() {
+        // Evita que una animación anterior siga ejecutándose.
+        if (cupheadModoActual !== modo) return;
+
+        const imagen = cupheadImagenes[cupheadNumeroFrame];
+
+        if (imagen && imagen.complete && imagen.naturalWidth > 0) {
+            cupheadFrame.src = imagen.src;
         }
 
-        const nextFrame = frames[currentFrame - 1];
+        cupheadNumeroFrame++;
 
-        if (nextFrame && nextFrame.complete && nextFrame.naturalWidth > 0) {
-            frame.src = nextFrame.src;
+        if (cupheadNumeroFrame > animacion.fin) {
+            cupheadNumeroFrame = animacion.inicio;
         }
 
-        timer = setTimeout(
-            animate,
-            active ? FRAME_DELAY_ACTIVE : FRAME_DELAY_IDLE
+        cupheadTimer = setTimeout(
+            siguienteFrame,
+            animacion.velocidad
         );
     }
 
-    function setActive(value) {
-        active = value;
-    }
+    siguienteFrame();
+}
 
-    // Animación continua al abrir la página.
-    const firstFrame = frames[0];
-
-    if (firstFrame) {
-        firstFrame.onload = () => {
-            frame.src = firstFrame.src;
-        };
-
-        if (firstFrame.complete && firstFrame.naturalWidth > 0) {
-            frame.src = firstFrame.src;
-        }
-    }
-
-    animate();
-
-    // Acelera la animación cuando se envía una consulta.
-    if (chatForm) {
-        chatForm.addEventListener("submit", () => {
-            setActive(true);
-        });
-    }
-
-    // Mantiene el ritmo rápido mientras el asistente responde.
-    if (typingIndicator) {
-        const observer = new MutationObserver(() => {
-            setActive(!typingIndicator.hidden);
-        });
-
-        observer.observe(typingIndicator, {
-            attributes: true,
-            attributeFilter: ["hidden", "class", "style"]
-        });
-    }
-
-    // Vuelve al ritmo normal cuando termina la respuesta.
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            clearTimeout(timer);
-        } else {
-            clearTimeout(timer);
-            animate();
-        }
-    });
-})();
+// Inicia la animación normal al abrir el chatbot.
+reproducirCuphead("normal");

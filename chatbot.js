@@ -1141,77 +1141,99 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
 
 
-/* =========================================
-   CUPHEAD - ANIMACIÓN NORMAL Y ESPERA
-========================================= */
+/* =========================================================
+   ALFERZA LIVE OFFICE - CUPHEAD ANIMADO
+   Normal: frames 0001–0022
+   Espera: frames 0025–0071
+========================================================= */
 
-const cupheadFrame = document.getElementById("cupheadFrame");
+(() => {
+    "use strict";
 
-const CUPHEAD_BASE = "img/Cuphead/Cuphead/";
+    const cupheadFrame = document.getElementById("cupheadFrame");
 
-const CUPHEAD_ANIMACIONES = {
-    normal: {
-        inicio: 1,
-        fin: 22,
-        velocidad: 110
-    },
-    espera: {
-        inicio: 25,
-        fin: 71,
-        velocidad: 90
-    }
-};
-
-let cupheadTimer = null;
-let cupheadModoActual = null;
-let cupheadNumeroFrame = 1;
-
-// Precargar todos los fotogramas.
-const cupheadImagenes = {};
-
-for (let i = 1; i <= 71; i++) {
-    const numero = String(i).padStart(4, "0");
-    const imagen = new Image();
-
-    imagen.src = `${CUPHEAD_BASE}mc_reg_intro_cuphead_${numero}.png`;
-    cupheadImagenes[i] = imagen;
-}
-
-function reproducirCuphead(modo) {
-    const animacion = CUPHEAD_ANIMACIONES[modo];
-
-    if (!cupheadFrame || !animacion) return;
-
-    // Detiene por completo la secuencia anterior.
-    clearTimeout(cupheadTimer);
-
-    cupheadModoActual = modo;
-    cupheadNumeroFrame = animacion.inicio;
-
-    function siguienteFrame() {
-        // Evita que una animación anterior siga ejecutándose.
-        if (cupheadModoActual !== modo) return;
-
-        const imagen = cupheadImagenes[cupheadNumeroFrame];
-
-        if (imagen && imagen.complete && imagen.naturalWidth > 0) {
-            cupheadFrame.src = imagen.src;
-        }
-
-        cupheadNumeroFrame++;
-
-        if (cupheadNumeroFrame > animacion.fin) {
-            cupheadNumeroFrame = animacion.inicio;
-        }
-
-        cupheadTimer = setTimeout(
-            siguienteFrame,
-            animacion.velocidad
+    if (!cupheadFrame) {
+        console.warn(
+            "[CUPHEAD] No se encontró #cupheadFrame. Revisa el HTML."
         );
+        return;
     }
 
-    siguienteFrame();
-}
+    const CUPHEAD_BASE = "img/Cuphead/Cuphead/";
 
-// Inicia la animación normal al abrir el chatbot.
-reproducirCuphead("normal");
+    const CUPHEAD_ANIMACIONES = {
+        normal: {
+            inicio: 1,
+            fin: 22,
+            velocidad: 110
+        },
+        espera: {
+            inicio: 25,
+            fin: 71,
+            velocidad: 90
+        }
+    };
+
+    let cupheadTimer = null;
+    let cupheadModoActual = null;
+    let cupheadNumeroFrame = 1;
+
+    // Precargar los fotogramas para reducir parpadeos.
+    const cupheadImagenes = {};
+
+    for (let i = 1; i <= 71; i++) {
+        const numero = String(i).padStart(4, "0");
+        const imagen = new Image();
+
+        imagen.src =
+            `${CUPHEAD_BASE}mc_reg_intro_cuphead_${numero}.png`;
+
+        cupheadImagenes[i] = imagen;
+    }
+
+    function reproducirCuphead(modo) {
+        const animacion = CUPHEAD_ANIMACIONES[modo];
+
+        if (!animacion) {
+            console.warn(`[CUPHEAD] Animación desconocida: ${modo}`);
+            return;
+        }
+
+        // Detener cualquier animación anterior.
+        clearTimeout(cupheadTimer);
+
+        cupheadModoActual = modo;
+        cupheadNumeroFrame = animacion.inicio;
+
+        function siguienteFrame() {
+            // Evitar que continúe una animación reemplazada.
+            if (cupheadModoActual !== modo) return;
+
+            const imagen = cupheadImagenes[cupheadNumeroFrame];
+
+            if (imagen && imagen.complete && imagen.naturalWidth > 0) {
+                cupheadFrame.src = imagen.src;
+            }
+
+            cupheadNumeroFrame++;
+
+            if (cupheadNumeroFrame > animacion.fin) {
+                cupheadNumeroFrame = animacion.inicio;
+            }
+
+            cupheadTimer = setTimeout(
+                siguienteFrame,
+                animacion.velocidad
+            );
+        }
+
+        siguienteFrame();
+    }
+
+    // Permitir que procesarPregunta() controle la animación.
+    window.reproducirCuphead = reproducirCuphead;
+
+    // Empezar en modo normal al abrir el chatbot.
+    reproducirCuphead("normal");
+
+})();

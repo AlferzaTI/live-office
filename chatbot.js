@@ -13,8 +13,8 @@
     ollama: {
       url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
       model: "llama3:latest",
-      timeoutMs: 30000,
-      stallMs: 15000,
+      timeoutMs: 60000,
+      stallMs: 20000,
       temperature: 0.2,
       numCtx: 2048,
       numPredict: 160,
@@ -26,8 +26,8 @@
     maxPaginasPdf: 300,
     concurrencia: 4,
     reintentoDocsMs: 60000,
-    esperaDocsMs: 1500,
-    rec: { topK: 2, maxChars: 1400, chunkChars: 900, overlap: 150 },
+    esperaDocsMs: 1200,
+    rec: { topK: 2, maxChars: 1200, chunkChars: 900, overlap: 150 },
     hist: { max: 50, turnosIA: 2, recorteIA: 300 }
   };
 
@@ -791,7 +791,7 @@ ${contexto || "(sin fragmentos relevantes)"}`;
     return texto;
   }
 
-  // Carga el modelo en memoria al iniciar para que la primera consulta no espere.
+  // Carga el modelo en memoria apenas se abre la página, sin esperar a SharePoint.
   function calentarIA() {
     fetch(CFG.ollama.url, {
       method: "POST",
@@ -967,7 +967,6 @@ ${contexto || "(sin fragmentos relevantes)"}`;
         await prepararSharePoint();
         await cargarDocumentos();
         S.ready = true;
-        calentarIA();
         cargarHistorialRemotoSiVacio();
         log("Chatbot listo.");
       })()
@@ -989,9 +988,8 @@ ${contexto || "(sin fragmentos relevantes)"}`;
       iniciarChatbot().catch((e) => warn("Sin documentos disponibles:", e.message));
     }
 
-    // Como máximo esperamos un tiempo corto; si no está listo, respondemos sin documentos.
+    // Esperamos un tiempo corto; si no está listo, respondemos sin documentos.
     if (!S.ready && S.initPromise) {
-      estadoCarga("Preparando la respuesta…");
       await Promise.race([S.initPromise.catch(() => {}), pausa(CFG.esperaDocsMs)]);
     }
 
@@ -1103,6 +1101,10 @@ ${contexto || "(sin fragmentos relevantes)"}`;
     conectarEventos();
     iniciarHistorialLocal();
     renderHistorial();
+
+    // Primero el modelo: así la primera pregunta no paga la carga en memoria.
+    calentarIA();
+
     estadoCarga("Conectando con Microsoft 365…");
 
     iniciarChatbot().catch((e) => {
@@ -1139,69 +1141,100 @@ ${contexto || "(sin fragmentos relevantes)"}`;
 })();
 
 
+
 /* =========================================================
-   ALFERZA LIVE OFFICE - CUPHEAD (solo animado mientras procesa)
-   Reposo: cuadro fijo, sin timers
-   Espera: frames 0025–0071 a 10 fps, pausado con pestaña oculta
+   ALFERZA LIVE OFFICE - CUPHEAD ANIMADO
+   Normal: frames 0001–0022
+   Espera: frames 0025–0071
 ========================================================= */
 
 (() => {
-  "use strict";
+    "use strict";
 
-  const frame = document.getElementById("cupheadFrame");
-  if (!frame) {
-    console.warn("[CUPHEAD] No se encontró #cupheadFrame. Revisa el HTML.");
-    return;
-  }
+    const cupheadFrame = document.getElementById("cupheadFrame");
 
-  const BASE = "img/Cuphead/Cuphead/";
-  const ANIM = {
-    normal: { inicio: 1, fin: 1, fps: 0 },
-    espera: { inicio: 25, fin: 71, fps: 10 }
-  };
-
-  const cache = new Map();
-  let timer = 0;
-  let n = 1;
-
-  function cuadro(i) {
-    if (!cache.has(i)) {
-      const img = new Image();
-      img.decoding = "async";
-      img.src = `${BASE}mc_reg_intro_cuphead_${String(i).padStart(4, "0")}.png`;
-      cache.set(i, img);
+    if (!cupheadFrame) {
+        console.warn(
+            "[CUPHEAD] No se encontró #cupheadFrame. Revisa el HTML."
+        );
+        return;
     }
-    return cache.get(i).src;
-  }
 
-  function mostrar(i) {
-    const src = cuadro(i);
-    if (frame.getAttribute("src") !== src) frame.src = src;
-  }
+    const CUPHEAD_BASE = "img/Cuphead/Cuphead/";
 
-  function reproducirCuphead(modo) {
-    const a = ANIM[modo];
-    if (!a) return;
+    const CUPHEAD_ANIMACIONES = {
+        normal: {
+            inicio: 1,
+            fin: 22,
+            velocidad: 110
+        },
+        espera: {
+            inicio: 25,
+            fin: 71,
+            velocidad: 90
+        }
+    };
 
-    clearInterval(timer);
-    timer = 0;
-    n = a.inicio;
-    mostrar(n);
+    let cupheadTimer = null;
+    let cupheadModoActual = null;
+    let cupheadNumeroFrame = 1;
 
-    if (!a.fps) return;
+    // Precargar los fotogramas para reducir parpadeos.
+    const cupheadImagenes = {};
 
-    timer = setInterval(() => {
-      if (document.hidden) return;
-      n = n >= a.fin ? a.inicio : n + 1;
-      mostrar(n);
-    }, 1000 / a.fps);
-  }
+    for (let i = 1; i <= 71; i++) {
+        const numero = String(i).padStart(4, "0");
+        const imagen = new Image();
 
-  window.reproducirCuphead = reproducirCuphead;
+        imagen.src =
+            `${CUPHEAD_BASE}mc_reg_intro_cuphead_${numero}.png`;
 
-  // Precarga de los cuadros de espera cuando el navegador esté libre.
-  const precargar = () => { for (let i = 25; i <= 71; i++) cuadro(i); };
-  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(precargar);
+        cupheadImagenes[i] = imagen;
+    }
 
-  reproducirCuphead("normal");
+    function reproducirCuphead(modo) {
+        const animacion = CUPHEAD_ANIMACIONES[modo];
+
+        if (!animacion) {
+            console.warn(`[CUPHEAD] Animación desconocida: ${modo}`);
+            return;
+        }
+
+        // Detener cualquier animación anterior.
+        clearTimeout(cupheadTimer);
+
+        cupheadModoActual = modo;
+        cupheadNumeroFrame = animacion.inicio;
+
+        function siguienteFrame() {
+            // Evitar que continúe una animación reemplazada.
+            if (cupheadModoActual !== modo) return;
+
+            const imagen = cupheadImagenes[cupheadNumeroFrame];
+
+            if (imagen && imagen.complete && imagen.naturalWidth > 0) {
+                cupheadFrame.src = imagen.src;
+            }
+
+            cupheadNumeroFrame++;
+
+            if (cupheadNumeroFrame > animacion.fin) {
+                cupheadNumeroFrame = animacion.inicio;
+            }
+
+            cupheadTimer = setTimeout(
+                siguienteFrame,
+                animacion.velocidad
+            );
+        }
+
+        siguienteFrame();
+    }
+
+    // Permitir que procesarPregunta() controle la animación.
+    window.reproducirCuphead = reproducirCuphead;
+
+    // Empezar en modo normal al abrir el chatbot.
+    reproducirCuphead("normal");
+
 })();

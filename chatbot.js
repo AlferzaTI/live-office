@@ -1,231 +1,119 @@
 "use strict";
 
 (() => {
-  // =========================================================
-  // ALFERZA CHATBOT v3
-  // Microsoft Graph + SharePoint (PDF) + Microsoft Lists + Ollama
-  // =========================================================
-
-  // =========================================================
-  // CONFIGURACIÓN
-  // =========================================================
-
   const CFG = {
     clientId: "5d98417c-74a7-4fab-8f2c-41ac127be696",
     tenantId: "dbab984f-4bb1-4b60-9dff-da59f54acdf1",
-
-    redirectUri: (() => {
-      const host = location.hostname;
-      return host === "localhost" || host === "192.168.2.30"
-        ? `${location.origin}/blank.html`
-        : "https://alferzati.github.io/live-office/blank.html";
-    })(),
-
+    redirectUri: ["localhost", "192.168.2.30"].includes(location.hostname)
+      ? `${location.origin}/blank.html`
+      : "https://alferzati.github.io/live-office/blank.html",
     scopes: ["User.Read", "Sites.Read.All", "Sites.ReadWrite.All"],
-
-    docs: {
-      host: "alferzaholding.sharepoint.com",
-      site: "/sites/TI",
-      folder: "Procedimientos-TI"
-    },
-
-    lista: {
-      host: "alferzaholding-my.sharepoint.com",
-      site: "/personal/soporte1_alferza_pe",
-      name: "Conversaciones-CHATBOT"
-    },
-
+    docs: { host: "alferzaholding.sharepoint.com", site: "/sites/TI", folder: "Procedimientos-TI" },
+    lista: { host: "alferzaholding-my.sharepoint.com", site: "/personal/soporte1_alferza_pe", name: "Conversaciones-CHATBOT" },
     ollama: {
       url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
-      model: "llama3:latest",   // Un modelo más pequeño (p. ej. llama3.2:3b) responde mucho más rápido.
-      timeoutMs: 120000,         // Tiempo máximo total de una respuesta.
-      stallMs: 60000,            // Tiempo máximo sin recibir texto nuevo.
+      model: "llama3:latest",
+      timeoutMs: 120000,
+      stallMs: 60000,
       temperature: 0.2,
       numCtx: 3072,
       numPredict: 400,
       keepAlive: "60m"
     },
-
     pdfJs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
     pdfWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
     msalJs: "https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js",
-
     maxPaginasPdf: 300,
     concurrencia: 4,
-
-    recuperacion: {
-      topK: 3,           // Fragmentos enviados a la IA.
-      maxChars: 2200,    // Límite de texto documental por consulta.
-      chunkChars: 900,
-      overlap: 150
-    },
-
-    historial: {
-      max: 50,
-      turnosIA: 4,       // Intercambios previos que la IA recuerda.
-      recorteIA: 500     // Máximo de caracteres de cada mensaje previo enviado a la IA.
-    },
-
-    reintentoDocsMs: 60000
+    reintentoDocsMs: 60000,
+    rec: { topK: 3, maxChars: 2200, chunkChars: 900, overlap: 150 },
+    hist: { max: 50, turnosIA: 4, recorteIA: 500 }
   };
 
   const GRAPH = "https://graph.microsoft.com/v1.0";
-
-  const LS_KEYS = {
-    history: "alferza_chat_history_v3",
-    conv: "alferza_chat_conversation_v3"
-  };
-
-  const IDB_NAME = "alferza-chatbot";
-  const IDB_STORE = "kv";
-
-  // Sin tildes (el texto se normaliza antes de comparar).
+  const LS_HIST = "alferza_chat_history_v3";
+  const LS_CONV = "alferza_chat_conversation_v3";
   const STOP = new Set(
-    (
-      "a al algo algun alguna ante con como cual cuales cuando de del desde donde " +
-      "e el ella ellas ellos en era es esa ese eso esta estas este esto estos fue " +
-      "ha hacer hay la las le les lo los mas me mi mis mucho muy no o para pero por " +
-      "porque puedo que quien quiero se sin sobre son su sus te tener tengo tu tus " +
-      "un una uno unos y ya yo ayuda favor necesito quisiera dime hola gracias " +
-      "buenas buenos dias tambien si"
-    ).split(/\s+/)
+    ("a al algo algun alguna ante con como cual cuales cuando de del desde donde e el ella ellas ellos en era es esa ese eso esta estas este esto estos fue ha hacer hay la las le les lo los mas me mi mis mucho muy no o para pero por porque puedo que quien quiero se sin sobre son su sus te tener tengo tu tus un una uno unos y ya yo ayuda favor necesito quisiera dime hola gracias buenas buenos dias tambien si").split(" ")
   );
 
-  // =========================================================
-  // ESTADO
-  // =========================================================
-
   const S = {
-    msal: null,
-    account: null,
-    user: "",
-    token: null,            // { valor, expira }
-    sitioDocs: null,
-    sitioLista: null,
-    driveId: null,
-    listaId: null,
-    columnas: [],
-    docs: [],
-    indice: null,           // índice de búsqueda BM25
-    historial: [],
-    convId: "",
-    ready: false,
-    initPromise: null,
-    ultimoIntentoInit: 0,
-    busy: false,
-    pdfJs: null
+    msal: null, account: null, user: "", token: null,
+    sitioDocs: null, sitioLista: null, driveId: null, listaId: null,
+    columnas: [], indice: null, historial: [], convId: "",
+    ready: false, initPromise: null, ultimoIntentoInit: 0, busy: false, pdfJs: null
   };
-
-  // =========================================================
-  // UTILIDADES
-  // =========================================================
 
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
-
   const log = (...a) => console.log("[ALFERZA]", ...a);
   const warn = (...a) => console.warn("[ALFERZA]", ...a);
 
-  const norm = (t) =>
-    String(t ?? "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-
+  const norm = (t) => String(t ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const normalizar = (t) => norm(t).replace(/[^a-z0-9@._/-]+/g, " ").trim();
   const normCol = (t) => normalizar(t).replace(/\s/g, "");
-
-  const uid = () =>
-    crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
+  const uid = () => crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const recortar = (t, max) => String(t ?? "").slice(0, max);
+  const horaActual = () => new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+  const el = (tag, clase, texto) => {
+    const n = document.createElement(tag);
+    if (clase) n.className = clase;
+    if (texto != null) n.textContent = texto;
+    return n;
+  };
 
   const leerSesion = (k, def) => {
-    try {
-      return JSON.parse(sessionStorage.getItem(k)) ?? def;
-    } catch {
-      return def;
-    }
+    try { return JSON.parse(sessionStorage.getItem(k)) ?? def; } catch { return def; }
   };
-
   const guardarSesion = (k, v) => {
-    try {
-      sessionStorage.setItem(k, JSON.stringify(v));
-    } catch (e) {
-      warn("No se pudo guardar en sessionStorage:", e);
-    }
+    try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { warn("sessionStorage:", e); }
   };
 
-  const el = (tag, clase, texto) => {
-    const nodo = document.createElement(tag);
-    if (clase) nodo.className = clase;
-    if (texto != null) nodo.textContent = texto;
-    return nodo;
-  };
-
-  // Ejecuta fn sobre los elementos con un máximo de `n` tareas simultáneas.
   async function enParalelo(items, n, fn) {
     let i = 0;
-    const workers = Array.from({ length: Math.min(n, items.length) }, async () => {
+    await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
       while (i < items.length) {
         const idx = i++;
         await fn(items[idx], idx);
       }
-    });
-    await Promise.all(workers);
+    }));
   }
 
-  // =========================================================
-  // ALMACENAMIENTO PERSISTENTE (IndexedDB)
-  // sessionStorage tiene poco espacio; aquí se guardan los PDF procesados.
-  // =========================================================
-
+  // IndexedDB: los PDF procesados son demasiado grandes para sessionStorage.
   let dbPromise = null;
-
-  function abrirDB() {
-    if (!dbPromise) {
-      dbPromise = new Promise((resolve, reject) => {
-        const req = indexedDB.open(IDB_NAME, 1);
-        req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-    return dbPromise;
-  }
+  const abrirDB = () => (dbPromise ??= new Promise((res, rej) => {
+    const req = indexedDB.open("alferza-chatbot", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("kv");
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  }));
 
   async function idbGet(clave) {
     const db = await abrirDB();
-    return new Promise((resolve, reject) => {
-      const req = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(clave);
-      req.onsuccess = () => resolve(req.result ?? null);
-      req.onerror = () => reject(req.error);
+    return new Promise((res, rej) => {
+      const req = db.transaction("kv").objectStore("kv").get(clave);
+      req.onsuccess = () => res(req.result ?? null);
+      req.onerror = () => rej(req.error);
     });
   }
 
   async function idbSet(clave, valor) {
     const db = await abrirDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(IDB_STORE, "readwrite");
-      tx.objectStore(IDB_STORE).put(valor, clave);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
+    return new Promise((res, rej) => {
+      const tx = db.transaction("kv", "readwrite");
+      tx.objectStore("kv").put(valor, clave);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
     });
   }
 
-  // =========================================================
-  // FORMATO DE RESPUESTAS (texto seguro, sin HTML)
-  // =========================================================
-
+  // Convierte **negrita** y `código` en nodos DOM (sin innerHTML).
   function textoConFormato(elemento, contenido) {
-    const partes = String(contenido ?? "").split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
-
-    for (const parte of partes) {
+    for (const parte of String(contenido ?? "").split(/(\*\*[^*]+\*\*|`[^`]+`)/g)) {
       if (!parte) continue;
-
-      if (parte.startsWith("**") && parte.endsWith("**") && parte.length > 4) {
+      if (parte.length > 4 && parte.startsWith("**") && parte.endsWith("**")) {
         elemento.appendChild(el("strong", null, parte.slice(2, -2)));
-      } else if (parte.startsWith("`") && parte.endsWith("`") && parte.length > 2) {
+      } else if (parte.length > 2 && parte.startsWith("`") && parte.endsWith("`")) {
         elemento.appendChild(el("code", null, parte.slice(1, -1)));
       } else {
         elemento.appendChild(document.createTextNode(parte));
@@ -236,57 +124,35 @@
   function formatearRespuesta(texto) {
     const cont = el("div", "response-formatted");
     let lista = null;
-
-    const cerrarLista = () => {
-      if (lista) {
-        cont.appendChild(lista);
-        lista = null;
-      }
-    };
+    const cerrarLista = () => { if (lista) { cont.appendChild(lista); lista = null; } };
 
     for (const original of String(texto || "").replace(/\r\n?/g, "\n").split("\n")) {
       const linea = original.trim();
-
-      if (!linea) {
-        cerrarLista();
-        continue;
-      }
+      if (!linea) { cerrarLista(); continue; }
 
       const titulo = linea.match(/^#{1,3}\s+(.+)$/);
-      const numero = linea.match(/^\d+[.)]\s+(.+)$/);
-      const vineta = linea.match(/^[-*•]\s+(.+)$/);
+      const item = linea.match(/^(\d+[.)]|[-*•])\s+(.+)$/);
 
       if (titulo) {
         cerrarLista();
         const h = el("div", "response-heading");
-        h.style.cssText = "font-weight:700;margin:10px 0 6px";
         textoConFormato(h, titulo[1]);
         cont.appendChild(h);
-        continue;
-      }
-
-      if (numero || vineta) {
-        const tipo = numero ? "ol" : "ul";
-
-        if (!lista || lista.dataset.tipo !== tipo) {
+      } else if (item) {
+        const tipo = /^\d/.test(item[1]) ? "ol" : "ul";
+        if (!lista || lista.tagName.toLowerCase() !== tipo) {
           cerrarLista();
           lista = el(tipo);
-          lista.dataset.tipo = tipo;
-          lista.style.cssText = "margin:5px 0 10px;padding-left:24px";
         }
-
         const li = el("li");
-        li.style.marginBottom = "5px";
-        textoConFormato(li, (numero || vineta)[1]);
+        textoConFormato(li, item[2]);
         lista.appendChild(li);
-        continue;
+      } else {
+        cerrarLista();
+        const p = el("p");
+        textoConFormato(p, linea);
+        cont.appendChild(p);
       }
-
-      cerrarLista();
-      const p = el("p");
-      p.style.cssText = "margin:0 0 9px;line-height:1.55";
-      textoConFormato(p, linea);
-      cont.appendChild(p);
     }
 
     cerrarLista();
@@ -297,32 +163,28 @@
   // INTERFAZ
   // =========================================================
 
-  const horaActual = () =>
-    new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
-
-  function scrollAbajo() {
+  const scrollAbajo = () => {
     const cont = $("#messages");
     if (cont) cont.scrollTop = cont.scrollHeight;
-  }
+  };
 
   function crearMensaje(tipo) {
-    const cont = $("#messages");
     const usuario = tipo === "user";
-
     const fila = el("div", `message-row ${usuario ? "user" : "bot"}`);
     const avatar = el("div", "message-avatar", usuario ? "TÚ" : "AI");
     const cuerpo = el("div", "message-content");
-    const nombre = el("div", "message-name", usuario ? "Tú" : "Asistente ALFERZA");
     const burbuja = el("div", "message-bubble");
     const fuentes = el("div", "message-sources");
-    fuentes.style.cssText = "font-size:12px;opacity:.8;margin-top:8px";
     fuentes.hidden = true;
-    const hora = el("div", "message-time", horaActual());
 
-    cuerpo.append(nombre, burbuja, fuentes, hora);
+    cuerpo.append(
+      el("div", "message-name", usuario ? "Tú" : "Asistente ALFERZA"),
+      burbuja,
+      fuentes,
+      el("div", "message-time", horaActual())
+    );
     fila.append(...(usuario ? [cuerpo, avatar] : [avatar, cuerpo]));
-
-    cont?.appendChild(fila);
+    $("#messages")?.appendChild(fila);
     scrollAbajo();
 
     return { burbuja, fuentes };
@@ -330,29 +192,26 @@
 
   function pintarBot(msg, texto, fuentes = []) {
     msg.burbuja.replaceChildren(formatearRespuesta(texto));
-
     const unicas = [...new Set(fuentes)];
     msg.fuentes.textContent = unicas.length ? `Fuentes: ${unicas.join(", ")}` : "";
     msg.fuentes.hidden = unicas.length === 0;
-
     scrollAbajo();
   }
 
-  // Actualiza la burbuja mientras llega la respuesta, limitado a un repintado por frame.
+  // Repinta la burbuja como máximo una vez por frame mientras llega el streaming.
   function renderizadorDiferido(msg) {
     let pendiente = null;
     let frame = 0;
-
-    const pintar = () => {
-      frame = 0;
-      msg.burbuja.replaceChildren(formatearRespuesta(pendiente));
-      scrollAbajo();
-    };
-
     return {
       actualizar(texto) {
         pendiente = texto;
-        if (!frame) frame = requestAnimationFrame(pintar);
+        if (!frame) {
+          frame = requestAnimationFrame(() => {
+            frame = 0;
+            msg.burbuja.replaceChildren(formatearRespuesta(pendiente));
+            scrollAbajo();
+          });
+        }
       },
       cancelar() {
         if (frame) cancelAnimationFrame(frame);
@@ -364,15 +223,12 @@
   function estadoCarga(texto) {
     const cont = $("#messages");
     if (!cont) return;
-
     let aviso = $("#alferzaLoadingStatus");
     if (!aviso) {
       aviso = el("div");
       aviso.id = "alferzaLoadingStatus";
-      aviso.style.cssText = "font-size:13px;opacity:.8;padding:8px 12px";
       cont.appendChild(aviso);
     }
-
     aviso.textContent = texto;
     scrollAbajo();
   }
@@ -401,12 +257,10 @@
 
   function renderHistorial() {
     $("#messages")?.replaceChildren();
-
     if (!S.historial.length) {
       pintarBot(crearMensaje("bot"), "Hola. Soy el asistente de ALFERZA. ¿En qué te ayudo?");
       return;
     }
-
     for (const item of S.historial) {
       crearMensaje("user").burbuja.textContent = item.pregunta;
       pintarBot(crearMensaje("bot"), item.respuesta, item.fuentes || []);
@@ -414,76 +268,49 @@
   }
 
   // =========================================================
-  // SALUDOS Y CORTESÍA (respuesta instantánea, sin IA)
+  // SALUDOS (respuesta instantánea, sin IA)
   // =========================================================
 
-  function detectarSocial(pregunta) {
-    const t = norm(pregunta)
-      .replace(/[^a-z0-9 ]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
+  const RESPUESTAS_SOCIALES = {
+    saludo: "Hola. ¿En qué te ayudo?",
+    agradecimiento: "Perfecto. ¿Necesitas algo más?",
+    despedida: "Hasta luego.",
+    estado: "Bien, gracias. ¿En qué te ayudo?"
+  };
 
+  function detectarSocial(pregunta) {
+    const t = norm(pregunta).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
     if (!t || t.length > 40) return "";
 
-    if (/^(hola+|hey|holi|buenas( tardes| noches| dias)?|buen(os)? dias?|saludos|que tal|hola buenas|hola que tal)( a todos| equipo| amigo)?( que tal| como estas| como va)?$/.test(t)) {
-      return "saludo";
-    }
-    if (/^(muchas )?gracias( mil| totales)?$|^(ok|okay|vale|listo|perfecto|genial|excelente|entendido|claro|dale|ya|bien)( gracias)?$/.test(t)) {
-      return "agradecimiento";
-    }
-    if (/^(chau|chao|adios|hasta luego|hasta pronto|nos vemos|bye|me voy)$/.test(t)) {
-      return "despedida";
-    }
-    if (/^(como estas|como va|todo bien|que tal estas|como te va)$/.test(t)) {
-      return "estado";
-    }
+    if (/^(hola+|hey|holi|buenas( tardes| noches| dias)?|buen(os)? dias?|saludos|que tal|hola buenas|hola que tal)( a todos| equipo| amigo)?( que tal| como estas| como va)?$/.test(t)) return "saludo";
+    if (/^(muchas )?gracias( mil| totales)?$|^(ok|okay|vale|listo|perfecto|genial|excelente|entendido|claro|dale|ya|bien)( gracias)?$/.test(t)) return "agradecimiento";
+    if (/^(chau|chao|adios|hasta luego|hasta pronto|nos vemos|bye|me voy)$/.test(t)) return "despedida";
+    if (/^(como estas|como va|todo bien|que tal estas|como te va)$/.test(t)) return "estado";
     return "";
   }
 
-  function respuestaSocial(tipo) {
-    switch (tipo) {
-      case "saludo":
-        return "Hola. ¿En qué te ayudo?";
-      case "agradecimiento":
-        return "Perfecto. ¿Necesitas algo más?";
-      case "despedida":
-        return "Hasta luego.";
-      case "estado":
-        return "Bien, gracias. ¿En qué te ayudo?";
-      default:
-        return "¿En qué te ayudo?";
-    }
-  }
-
   // =========================================================
-  // CARGA DE LIBRERÍAS
+  // CARGA DE LIBRERÍAS Y AUTENTICACIÓN
   // =========================================================
 
   async function cargarScript(src, global) {
     if (window[global]) return;
-
-    await new Promise((resolve, reject) => {
+    await new Promise((res, rej) => {
       const script = el("script");
       script.src = src;
-      script.onload = resolve;
-      script.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+      script.onload = res;
+      script.onerror = () => rej(new Error(`No se pudo cargar ${src}`));
       document.head.appendChild(script);
     });
-
     if (!window[global]) throw new Error(`${global} no está disponible.`);
   }
 
   async function cargarPdfJs() {
     if (S.pdfJs) return;
-
     await cargarScript(CFG.pdfJs, "pdfjsLib");
     S.pdfJs = window.pdfjsLib;
     S.pdfJs.GlobalWorkerOptions.workerSrc = CFG.pdfWorker;
   }
-
-  // =========================================================
-  // AUTENTICACIÓN MICROSOFT
-  // =========================================================
 
   async function iniciarMSAL() {
     await cargarScript(CFG.msalJs, "msal");
@@ -495,52 +322,36 @@
         redirectUri: CFG.redirectUri,
         navigateToLoginRequestUrl: false
       },
-      cache: {
-        cacheLocation: "sessionStorage",
-        storeAuthStateInCookie: false
-      }
+      cache: { cacheLocation: "sessionStorage", storeAuthStateInCookie: false }
     });
 
     await S.msal.initialize();
-
     const redirect = await S.msal.handleRedirectPromise();
     S.account = redirect?.account || S.msal.getAllAccounts()[0] || null;
 
     if (!S.account) {
-      const login = await S.msal.loginPopup({
-        scopes: CFG.scopes,
-        prompt: "select_account"
-      });
+      const login = await S.msal.loginPopup({ scopes: CFG.scopes, prompt: "select_account" });
       S.account = login.account;
     }
-
     if (!S.account) throw new Error("No se pudo identificar la cuenta Microsoft.");
 
     S.user = S.account.username || S.account.name || "";
     log("Sesión Microsoft lista:", S.user);
   }
 
-  // Token en memoria: evita pedirlo a MSAL en cada llamada.
+  // Token en memoria para no pedirlo a MSAL en cada llamada.
   async function obtenerToken() {
     if (S.token && S.token.expira - Date.now() > 60000) return S.token.valor;
 
-    const pedir = (metodo) =>
-      S.msal[metodo]({ scopes: CFG.scopes, account: S.account });
-
     let resultado;
     try {
-      resultado = await pedir("acquireTokenSilent");
+      resultado = await S.msal.acquireTokenSilent({ scopes: CFG.scopes, account: S.account });
     } catch (e) {
-      if (e.name !== "InteractionRequiredAuthError" && e.errorCode !== "interaction_required") {
-        throw e;
-      }
-      resultado = await pedir("acquireTokenPopup");
+      if (e.name !== "InteractionRequiredAuthError" && e.errorCode !== "interaction_required") throw e;
+      resultado = await S.msal.acquireTokenPopup({ scopes: CFG.scopes, account: S.account });
     }
 
-    S.token = {
-      valor: resultado.accessToken,
-      expira: new Date(resultado.expiresOn).getTime()
-    };
+    S.token = { valor: resultado.accessToken, expira: new Date(resultado.expiresOn).getTime() };
     return S.token.valor;
   }
 
@@ -549,18 +360,16 @@
   // =========================================================
 
   async function graph(url, opts = {}, intento = 0) {
-    const accessToken = await obtenerToken();
-
+    const token = await obtenerToken();
     const response = await fetch(url.startsWith("https://") ? url : GRAPH + url, {
       ...opts,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${token}`,
         ...(opts.body ? { "Content-Type": "application/json" } : {}),
         ...(opts.headers || {})
       }
     });
 
-    // Reintento simple si Graph limita las peticiones.
     if ((response.status === 429 || response.status === 503) && intento < 2) {
       const espera = Number(response.headers.get("Retry-After")) || 2;
       await new Promise((r) => setTimeout(r, espera * 1000));
@@ -570,16 +379,11 @@
     if (!response.ok) {
       const txt = await response.text();
       let detalle = txt;
-      try {
-        detalle = JSON.parse(txt)?.error?.message || txt;
-      } catch {
-        // El cuerpo no es JSON: se usa el texto plano.
-      }
+      try { detalle = JSON.parse(txt)?.error?.message || txt; } catch {}
       throw new Error(`Graph ${response.status}: ${detalle || response.statusText}`);
     }
 
     if (response.status === 204) return null;
-
     return (response.headers.get("content-type") || "").includes("application/json")
       ? response.json()
       : response;
@@ -588,13 +392,11 @@
   async function paginar(url) {
     const resultados = [];
     let siguiente = url;
-
     while (siguiente) {
       const pagina = await graph(siguiente);
       resultados.push(...(pagina.value || []));
       siguiente = pagina["@odata.nextLink"] || null;
     }
-
     return resultados;
   }
 
@@ -607,7 +409,6 @@
 
   function buscarColumna(nombres, soloEscribibles = false) {
     const buscados = nombres.map(normCol);
-
     return S.columnas.find(
       (c) =>
         (!soloEscribibles || (!c.hidden && !c.readOnly)) &&
@@ -627,10 +428,7 @@
     );
 
     for (const { id, listas } of respuestas) {
-      const lista = listas.find(
-        (l) => normalizar(l.displayName) === normalizar(CFG.lista.name)
-      );
-
+      const lista = listas.find((l) => normalizar(l.displayName) === normalizar(CFG.lista.name));
       if (lista) {
         S.listaId = lista.id;
         S.sitioLista = { id };
@@ -641,14 +439,6 @@
 
     warn(`No se encontró la lista "${CFG.lista.name}".`);
     return false;
-  }
-
-  async function cargarColumnas() {
-    if (!S.listaId || !S.sitioLista) return;
-
-    S.columnas = await paginar(
-      `/sites/${S.sitioLista.id}/lists/${S.listaId}/columns?$select=name,displayName,hidden,readOnly`
-    );
   }
 
   async function prepararSharePoint() {
@@ -664,7 +454,6 @@
     S.sitioLista = sitioLista;
 
     const drives = await paginar(`/sites/${sitioDocs.id}/drives?$select=id,name,driveType`);
-
     const drive =
       drives.find((d) => /documentos compartidos|shared documents|documentos/i.test(d.name)) ||
       drives.find((d) => d.driveType === "documentLibrary") ||
@@ -674,7 +463,9 @@
     S.driveId = drive.id;
 
     if (await encontrarLista()) {
-      await cargarColumnas();
+      S.columnas = await paginar(
+        `/sites/${S.sitioLista.id}/lists/${S.listaId}/columns?$select=name,displayName,hidden,readOnly`
+      );
     } else {
       warn("No se podrán guardar conversaciones en Microsoft Lists.");
     }
@@ -682,11 +473,8 @@
 
   async function encontrarCarpeta() {
     const nombre = CFG.docs.folder;
-
     try {
-      const carpeta = await graph(
-        `/drives/${S.driveId}/root:/${encodeURIComponent(nombre)}?$select=id,name,folder`
-      );
+      const carpeta = await graph(`/drives/${S.driveId}/root:/${encodeURIComponent(nombre)}?$select=id,name,folder`);
       if (carpeta.folder) return carpeta;
     } catch {
       warn("No se encontró la ruta exacta de la carpeta; se busca en la raíz.");
@@ -694,30 +482,22 @@
 
     const raiz = await paginar(`/drives/${S.driveId}/root/children?$select=id,name,folder`);
     const carpeta = raiz.find((i) => i.folder && normalizar(i.name) === normalizar(nombre));
-
     if (!carpeta) throw new Error(`No se encontró la carpeta "${nombre}".`);
     return carpeta;
   }
 
-  // Recorre subcarpetas en paralelo.
+  // Recorre subcarpetas en paralelo y devuelve todos los PDF.
   async function listarPDF(carpetaId, ruta = "") {
     const items = await paginar(
       `/drives/${S.driveId}/items/${carpetaId}/children?$select=id,name,file,folder,webUrl,eTag`
     );
 
-    const subcarpetas = items.filter((i) => i.folder);
     const archivos = items
       .filter((i) => i.file && /\.pdf$/i.test(i.name))
-      .map((i) => ({
-        id: i.id,
-        nombre: i.name,
-        ruta: ruta ? `${ruta}/${i.name}` : i.name,
-        webUrl: i.webUrl,
-        eTag: i.eTag
-      }));
+      .map((i) => ({ id: i.id, nombre: i.name, ruta: ruta ? `${ruta}/${i.name}` : i.name, eTag: i.eTag }));
 
     const anidados = await Promise.all(
-      subcarpetas.map((c) => listarPDF(c.id, ruta ? `${ruta}/${c.name}` : c.name))
+      items.filter((i) => i.folder).map((c) => listarPDF(c.id, ruta ? `${ruta}/${c.name}` : c.name))
     );
 
     return [...archivos, ...anidados.flat()];
@@ -728,28 +508,23 @@
   // =========================================================
 
   async function descargarBytes(id) {
-    const accessToken = await obtenerToken();
-
+    const token = await obtenerToken();
     const response = await fetch(`${GRAPH}/drives/${S.driveId}/items/${id}/content`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
-
     if (!response.ok) throw new Error(`No se pudo descargar el PDF (${response.status}).`);
     return new Uint8Array(await response.arrayBuffer());
   }
 
-  // Divide el texto en fragmentos cortando preferentemente al final de una oración.
+  // Divide el texto cortando preferentemente al final de una oración.
   function fragmentar(texto, pagina) {
     const limpio = String(texto || "").replace(/\s+/g, " ").trim();
-    if (!limpio) return [];
-
-    const { chunkChars, overlap } = CFG.recuperacion;
+    const { chunkChars, overlap } = CFG.rec;
     const salida = [];
     let inicio = 0;
 
     while (inicio < limpio.length) {
       let fin = Math.min(inicio + chunkChars, limpio.length);
-
       if (fin < limpio.length) {
         const corte = Math.max(limpio.lastIndexOf(". ", fin), limpio.lastIndexOf("; ", fin));
         if (corte > inicio + chunkChars * 0.55) fin = corte + 1;
@@ -761,7 +536,6 @@
       if (fin >= limpio.length) break;
       inicio = Math.max(fin - overlap, inicio + 1);
     }
-
     return salida;
   }
 
@@ -769,30 +543,22 @@
     const bytes = await descargarBytes(archivo.id);
     const pdf = await S.pdfJs.getDocument({ data: bytes }).promise;
     const limite = Math.min(pdf.numPages, CFG.maxPaginasPdf);
-
     const frags = [];
 
-    // Las páginas se leen en lotes pequeños para ganar velocidad sin saturar el navegador.
+    // Lotes de 5 páginas: más rápido sin saturar el navegador.
     for (let inicio = 1; inicio <= limite; inicio += 5) {
       const fin = Math.min(inicio + 4, limite);
-      const lote = [];
-
-      for (let n = inicio; n <= fin; n++) {
-        lote.push(
-          pdf.getPage(n).then((pagina) => pagina.getTextContent().then((c) => ({
-            n,
-            texto: c.items.map((i) => i.str || "").join(" ")
-          })))
-        );
-      }
-
-      for (const { n, texto } of await Promise.all(lote)) {
-        frags.push(...fragmentar(texto, n));
-      }
+      const paginas = await Promise.all(
+        Array.from({ length: fin - inicio + 1 }, (_, k) => inicio + k).map(async (n) => {
+          const page = await pdf.getPage(n);
+          const c = await page.getTextContent();
+          return { n, texto: c.items.map((i) => i.str || "").join(" ") };
+        })
+      );
+      for (const { n, texto } of paginas) frags.push(...fragmentar(texto, n));
     }
 
     pdf.destroy?.();
-
     return { paginas: pdf.numPages, frags };
   }
 
@@ -800,16 +566,11 @@
   // ÍNDICE DE BÚSQUEDA (BM25 ligero)
   // =========================================================
 
-  // Tokeniza, quita tildes, stopwords y plural simple.
   function tokens(texto) {
-    const salida = [];
-
-    for (const palabra of norm(texto).split(/[^a-z0-9]+/)) {
-      if (palabra.length < 2 || STOP.has(palabra) || /^\d+$/.test(palabra)) continue;
-      salida.push(palabra.length > 4 && palabra.endsWith("s") ? palabra.slice(0, -1) : palabra);
-    }
-
-    return salida;
+    return norm(texto)
+      .split(/[^a-z0-9]+/)
+      .filter((p) => p.length >= 2 && !STOP.has(p) && !/^\d+$/.test(p))
+      .map((p) => (p.length > 4 && p.endsWith("s") ? p.slice(0, -1) : p));
   }
 
   function frecuencias(lista) {
@@ -822,28 +583,26 @@
   function construirIndice(entradas) {
     const frags = entradas.map((e) => {
       const tks = tokens(e.text);
+      const tkDoc = tokens(e.doc);
       return {
         doc: e.doc,
         page: e.page,
         text: e.text,
-        // Nombre del documento incluido en el conteo para dar peso a títulos.
-        tf: frecuencias([...tokens(e.doc), ...tokens(e.doc), ...tks]),
-        len: tks.length + tokens(e.doc).length * 2,
+        // El nombre del documento cuenta doble para dar peso a los títulos.
+        tf: frecuencias([...tkDoc, ...tkDoc, ...tks]),
+        len: tks.length + tkDoc.length * 2,
         clave: ` ${tks.join(" ")} `
       };
     });
 
     const df = new Map();
-    for (const f of frags) {
-      for (const t of f.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
-    }
+    for (const f of frags) for (const t of f.tf.keys()) df.set(t, (df.get(t) || 0) + 1);
 
     const avg = frags.reduce((s, f) => s + f.len, 0) / (frags.length || 1);
-
     return { frags, df, N: frags.length, avg };
   }
 
-  // Devuelve los fragmentos más relevantes, máximo uno por página.
+  // Fragmentos más relevantes, máximo uno por página.
   function buscar(consulta) {
     const idx = S.indice;
     if (!idx?.N) return [];
@@ -852,11 +611,7 @@
     const unicos = [...new Set(lista)];
     if (!unicos.length) return [];
 
-    const bigramas = [];
-    for (let i = 0; i < lista.length - 1; i++) {
-      bigramas.push(` ${lista[i]} ${lista[i + 1]} `);
-    }
-
+    const bigramas = lista.slice(0, -1).map((t, i) => ` ${t} ${lista[i + 1]} `);
     const K1 = 1.2;
     const B = 0.75;
 
@@ -868,7 +623,6 @@
     );
 
     const puntuados = [];
-
     for (const f of idx.frags) {
       let puntos = 0;
       let coincidencias = 0;
@@ -876,27 +630,18 @@
       for (const t of unicos) {
         const tf = f.tf.get(t);
         if (!tf) continue;
-
         coincidencias++;
-        puntos +=
-          (idf.get(t) * (tf * (K1 + 1))) /
-          (tf + K1 * (1 - B + (B * f.len) / idx.avg));
+        puntos += (idf.get(t) * tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * f.len) / idx.avg));
       }
 
       if (!coincidencias) continue;
-
-      // Premia fragmentos que contienen varias palabras de la consulta.
       puntos *= 0.5 + (0.5 * coincidencias) / unicos.length;
-
-      for (const b of bigramas) {
-        if (f.clave.includes(b)) puntos += 1.5;
-      }
+      for (const b of bigramas) if (f.clave.includes(b)) puntos += 1.5;
 
       puntuados.push({ f, puntos });
     }
 
     puntuados.sort((a, b) => b.puntos - a.puntos);
-
     const top = puntuados.slice(0, 15);
     if (!top.length || top[0].puntos < 1) return [];
 
@@ -906,14 +651,11 @@
 
     for (const { f, puntos } of top) {
       if (puntos < umbral) break;
-
       const clave = `${f.doc}|${f.page}`;
       if (paginasUsadas.has(clave)) continue;
-
       paginasUsadas.add(clave);
       elegidos.push(f);
-
-      if (elegidos.length >= CFG.recuperacion.topK) break;
+      if (elegidos.length >= CFG.rec.topK) break;
     }
 
     return elegidos;
@@ -926,37 +668,24 @@
 
     fragmentos.forEach((f, i) => {
       const ref = `${f.doc}, pág. ${f.page}`;
-
-      if (total + f.text.length > CFG.recuperacion.maxChars && partes.length) return;
-
+      if (total + f.text.length > CFG.rec.maxChars && partes.length) return;
       partes.push(`[Fuente ${i + 1}: ${ref}]\n${f.text}`);
       total += f.text.length;
       fuentes.push(ref);
     });
 
-    return {
-      contexto: partes.join("\n\n"),
-      fuentes: [...new Set(fuentes)]
-    };
+    return { contexto: partes.join("\n\n"), fuentes: [...new Set(fuentes)] };
   }
 
-  // =========================================================
-  // CONTEXTO DE LA CONVERSACIÓN
-  // =========================================================
-
-  const ultimoTurno = () => S.historial.at(-1) || null;
-
-  // Si el mensaje es corto o es una continuación ("y si no funciona", "explícame más"),
-  // se busca junto con la pregunta anterior para mantener el tema.
+  // Si la pregunta es corta o es continuación, se busca junto con la anterior.
   function consultaParaBusqueda(pregunta) {
-    const anterior = ultimoTurno();
+    const anterior = S.historial.at(-1);
     if (!anterior) return pregunta;
 
     const corta = tokens(pregunta).length <= 3;
     const continuacion = /^(y|pero|entonces|eso|esto|si|por que|porque|explica|amplia|detalla|y ahora|y despues|y luego)\b/.test(
       norm(pregunta).trim()
     );
-
     return corta || continuacion ? `${anterior.pregunta} ${pregunta}` : pregunta;
   }
 
@@ -990,12 +719,10 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
   async function consultarIA(pregunta, contexto, historial, alParcial) {
     const mensajes = [{ role: "system", content: construirPrompt(contexto) }];
-
-    for (const item of historial.slice(-CFG.historial.turnosIA)) {
-      mensajes.push({ role: "user", content: recortar(item.pregunta, CFG.historial.recorteIA) });
-      mensajes.push({ role: "assistant", content: recortar(item.respuesta, CFG.historial.recorteIA) });
+    for (const item of historial.slice(-CFG.hist.turnosIA)) {
+      mensajes.push({ role: "user", content: recortar(item.pregunta, CFG.hist.recorteIA) });
+      mensajes.push({ role: "assistant", content: recortar(item.respuesta, CFG.hist.recorteIA) });
     }
-
     mensajes.push({ role: "user", content: recortar(pregunta, 900) });
 
     const controller = new AbortController();
@@ -1012,7 +739,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
       if (!linea.trim()) return;
       const data = JSON.parse(linea);
       if (data.error) throw new Error(data.error);
-
       const parte = data.message?.content || "";
       if (parte) {
         texto += parte;
@@ -1049,7 +775,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-
         reiniciarTemporizador();
         buffer += decoder.decode(value, { stream: true });
 
@@ -1060,16 +785,11 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
           procesarLinea(linea);
         }
       }
-
       procesarLinea(buffer);
     } catch (e) {
-      if (e.name === "AbortError") {
-        throw new Error("La IA tardó demasiado en responder. Inténtalo de nuevo.");
-      }
+      if (e.name === "AbortError") throw new Error("La IA tardó demasiado en responder. Inténtalo de nuevo.");
       if (e instanceof TypeError) {
-        throw new Error(
-          "No se pudo conectar con Ollama. Revisa que el equipo servidor esté encendido y en la red de ALFERZA."
-        );
+        throw new Error("No se pudo conectar con Ollama. Revisa que el equipo servidor esté encendido y en la red de ALFERZA.");
       }
       throw e;
     } finally {
@@ -1081,7 +801,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     return texto;
   }
 
-  // Carga el modelo en memoria al iniciar; así la primera consulta del usuario no espera la carga.
+  // Carga el modelo en memoria al iniciar para que la primera consulta no espere.
   function calentarIA() {
     fetch(CFG.ollama.url, {
       method: "POST",
@@ -1097,8 +817,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
   }
 
   // =========================================================
-  // DOCUMENTOS: CARGA CON CACHÉ INCREMENTAL
-  // Cada PDF se identifica por su eTag. Solo se reprocesan los que cambiaron.
+  // DOCUMENTOS CON CACHÉ INCREMENTAL (por eTag)
   // =========================================================
 
   async function cargarDocumentos() {
@@ -1106,22 +825,16 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     const carpeta = await encontrarCarpeta();
     const archivos = await listarPDF(carpeta.id);
-
     if (!archivos.length) throw new Error(`No hay PDF en "${CFG.docs.folder}".`);
 
-    const cache = await Promise.all(
-      archivos.map((a) => idbGet(`pdf:${a.id}`).catch(() => null))
-    );
+    const cache = await Promise.all(archivos.map((a) => idbGet(`pdf:${a.id}`).catch(() => null)));
 
-    const docs = [];
     const entradas = [];
     const pendientes = [];
 
     archivos.forEach((archivo, i) => {
       const guardado = cache[i];
-
-      if (guardado && guardado.eTag === archivo.eTag && Array.isArray(guardado.frags)) {
-        docs.push({ nombre: archivo.nombre, paginas: guardado.paginas, fragmentos: guardado.frags.length });
+      if (guardado?.eTag === archivo.eTag && Array.isArray(guardado.frags)) {
         entradas.push(...guardado.frags.map((f) => ({ doc: archivo.nombre, page: f.p, text: f.t })));
       } else {
         pendientes.push(archivo);
@@ -1130,40 +843,26 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     if (pendientes.length) {
       await cargarPdfJs();
-
       let listos = 0;
       estadoCarga(`Procesando ${pendientes.length} documento(s) nuevo(s)…`);
 
       await enParalelo(pendientes, CFG.concurrencia, async (archivo) => {
         try {
           const resultado = await extraerPDF(archivo);
-
-          docs.push({
-            nombre: archivo.nombre,
-            paginas: resultado.paginas,
-            fragmentos: resultado.frags.length
-          });
           entradas.push(...resultado.frags.map((f) => ({ doc: archivo.nombre, page: f.p, text: f.t })));
-
-          idbSet(`pdf:${archivo.id}`, {
-            eTag: archivo.eTag,
-            paginas: resultado.paginas,
-            frags: resultado.frags
-          }).catch((e) => warn("No se pudo guardar caché:", e.message));
+          idbSet(`pdf:${archivo.id}`, { eTag: archivo.eTag, paginas: resultado.paginas, frags: resultado.frags })
+            .catch((e) => warn("No se pudo guardar caché:", e.message));
         } catch (e) {
           warn(`No se pudo leer ${archivo.nombre}:`, e.message);
         }
-
-        listos++;
-        estadoCarga(`Procesando documentos ${listos}/${pendientes.length}…`);
+        estadoCarga(`Procesando documentos ${++listos}/${pendientes.length}…`);
       });
     }
 
     if (!entradas.length) throw new Error("No se pudo extraer texto de los PDF.");
 
-    S.docs = docs;
     S.indice = construirIndice(entradas);
-    log(`Índice listo: ${S.indice.N} fragmentos de ${docs.length} documento(s).`);
+    log(`Índice listo: ${S.indice.N} fragmentos.`);
   }
 
   // =========================================================
@@ -1171,28 +870,22 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
   // =========================================================
 
   function iniciarHistorialLocal() {
-    S.convId = sessionStorage.getItem(LS_KEYS.conv) || uid();
-    sessionStorage.setItem(LS_KEYS.conv, S.convId);
+    S.convId = sessionStorage.getItem(LS_CONV) || uid();
+    sessionStorage.setItem(LS_CONV, S.convId);
 
-    const guardado = leerSesion(LS_KEYS.history, []);
-
+    const guardado = leerSesion(LS_HIST, []);
     S.historial = (Array.isArray(guardado) ? guardado : [])
       .filter((i) => typeof i?.pregunta === "string" && typeof i?.respuesta === "string")
-      .slice(-CFG.historial.max);
+      .slice(-CFG.hist.max);
   }
 
-  function guardarHistorialLocal() {
-    guardarSesion(LS_KEYS.history, S.historial.slice(-CFG.historial.max));
-  }
+  const guardarHistorialLocal = () => guardarSesion(LS_HIST, S.historial.slice(-CFG.hist.max));
 
   function registrarIntercambio(pregunta, respuesta, fuentes = []) {
     const item = { pregunta, respuesta, fuentes, fecha: new Date().toISOString() };
-
-    S.historial = [...S.historial, item].slice(-CFG.historial.max);
+    S.historial = [...S.historial, item].slice(-CFG.hist.max);
     guardarHistorialLocal();
-
     guardarIntercambio(item).catch(() => {});
-    return item;
   }
 
   // =========================================================
@@ -1204,7 +897,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     try {
       const campos = {};
-
       const asignar = (nombres, valor) => {
         const columna = buscarColumna(nombres, true);
         if (columna && valor != null && valor !== "") campos[columna.name] = String(valor);
@@ -1226,7 +918,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
         method: "POST",
         body: JSON.stringify({ fields: campos })
       });
-
       return true;
     } catch (e) {
       warn("No se pudo guardar el intercambio en Microsoft Lists:", e.message);
@@ -1234,7 +925,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     }
   }
 
-  // Solo se consulta Lists si no hay historial local (por ejemplo, tras recargar con la sesión borrada).
+  // Solo se consulta Lists si no hay historial local (p. ej., tras borrar la sesión).
   async function cargarHistorialRemotoSiVacio() {
     if (S.historial.length || !S.listaId || !S.sitioLista) return;
 
@@ -1243,14 +934,10 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     const cPreg = buscarColumna(["Pregunta", "Consulta", "Mensaje"]);
     const cResp = buscarColumna(["Respuesta", "RespuestaBot"]);
     const cFecha = buscarColumna(["Fecha", "FechaHora", "FechaCreacion"]);
-
     if (!cPreg || !cResp) return;
 
     try {
-      const pagina = await graph(
-        `/sites/${S.sitioLista.id}/lists/${S.listaId}/items?$expand=fields&$top=200`
-      );
-
+      const pagina = await graph(`/sites/${S.sitioLista.id}/lists/${S.listaId}/items?$expand=fields&$top=200`);
       const propios = (pagina.value || [])
         .map((item) => item.fields || {})
         .filter(
@@ -1267,7 +954,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
         .filter((i) => i.pregunta && i.respuesta);
 
       if (propios.length) {
-        S.historial = propios.slice(-CFG.historial.max);
+        S.historial = propios.slice(-CFG.hist.max);
         guardarHistorialLocal();
         renderHistorial();
       }
@@ -1277,8 +964,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
   }
 
   // =========================================================
-  // INICIALIZACIÓN
-  // Una sola promesa compartida. Si falla, puede reintentarse.
+  // INICIALIZACIÓN Y FLUJO DE RESPUESTA
   // =========================================================
 
   function iniciarChatbot() {
@@ -1286,12 +972,10 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     if (!S.initPromise) {
       S.ultimoIntentoInit = Date.now();
-
       S.initPromise = (async () => {
         await iniciarMSAL();
         await prepararSharePoint();
         await cargarDocumentos();
-
         S.ready = true;
         calentarIA();
         cargarHistorialRemotoSiVacio();
@@ -1303,35 +987,19 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
         })
         .finally(ocultarCarga);
     }
-
     return S.initPromise;
   }
 
-  // =========================================================
-  // FLUJO DE RESPUESTA
-  // =========================================================
-
   async function obtenerRespuesta(pregunta, alParcial) {
     const social = detectarSocial(pregunta);
-    if (social) {
-      return { respuesta: respuestaSocial(social), fuentes: [] };
-    }
+    if (social) return { respuesta: RESPUESTAS_SOCIALES[social], fuentes: [] };
 
-    // Reintenta la conexión documental si falló hace más de un minuto.
     if (!S.ready && Date.now() - S.ultimoIntentoInit > CFG.reintentoDocsMs) {
       estadoCarga("Conectando con los documentos de ALFERZA…");
-      try {
-        await iniciarChatbot();
-      } catch (e) {
-        warn("Sin documentos disponibles:", e.message);
-      }
+      await iniciarChatbot().catch((e) => warn("Sin documentos disponibles:", e.message));
     } else if (!S.ready && S.initPromise) {
       estadoCarga("Esperando los documentos de ALFERZA…");
-      try {
-        await S.initPromise;
-      } catch {
-        // Se responde sin documentos.
-      }
+      await S.initPromise.catch(() => {});
     }
 
     let contexto = "";
@@ -1339,26 +1007,22 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     if (S.indice?.N) {
       estadoCarga("Buscando en los documentos…");
-
       const combinada = consultaParaBusqueda(pregunta);
       let hallados = buscar(combinada);
       if (!hallados.length && combinada !== pregunta) hallados = buscar(pregunta);
-
       ({ contexto, fuentes } = contextoDe(hallados));
     }
 
     estadoCarga("Preparando la respuesta…");
 
     let primerTexto = true;
-    const alRecibirTexto = (texto) => {
+    const respuesta = await consultarIA(pregunta, contexto, S.historial, (texto) => {
       if (primerTexto) {
         primerTexto = false;
         ocultarCarga();
       }
       alParcial?.(texto);
-    };
-
-    const respuesta = await consultarIA(pregunta, contexto, S.historial, alRecibirTexto);
+    });
 
     return { respuesta, fuentes };
   }
@@ -1368,28 +1032,22 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     if (!pregunta || S.busy) return;
 
     const entrada = $("#messageInput");
-
     S.busy = true;
     setControles();
 
     crearMensaje("user").burbuja.textContent = pregunta;
-
     if (entrada) {
       entrada.value = "";
       actualizarContador();
     }
 
     escribiendo(true);
-
     const msg = crearMensaje("bot");
     msg.burbuja.textContent = "…";
     const render = renderizadorDiferido(msg);
 
     try {
-      const { respuesta, fuentes } = await obtenerRespuesta(pregunta, (parcial) =>
-        render.actualizar(parcial)
-      );
-
+      const { respuesta, fuentes } = await obtenerRespuesta(pregunta, (parcial) => render.actualizar(parcial));
       render.cancelar();
       pintarBot(msg, respuesta, fuentes);
       registrarIntercambio(pregunta, respuesta, fuentes);
@@ -1400,7 +1058,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     } finally {
       ocultarCarga();
       escribiendo(false);
-
       S.busy = false;
       setControles();
       entrada?.focus();
@@ -1408,7 +1065,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
   }
 
   // =========================================================
-  // EVENTOS
+  // EVENTOS Y ARRANQUE
   // =========================================================
 
   function conectarEventos() {
@@ -1421,7 +1078,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     });
 
     entrada?.addEventListener("input", actualizarContador);
-
     entrada?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -1432,30 +1088,22 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     $("#clearChat")?.addEventListener("click", () => {
       S.historial = [];
       S.convId = uid();
-      sessionStorage.setItem(LS_KEYS.conv, S.convId);
+      sessionStorage.setItem(LS_CONV, S.convId);
       guardarHistorialLocal();
       renderHistorial();
     });
 
     $$(".suggestion-button").forEach((boton) => {
-      boton.addEventListener("click", () => {
-        procesarPregunta(boton.dataset.question || boton.textContent.trim());
-      });
+      boton.addEventListener("click", () => procesarPregunta(boton.dataset.question || boton.textContent.trim()));
     });
 
     actualizarContador();
   }
 
-  // =========================================================
-  // ARRANQUE
-  // La interfaz aparece de inmediato; los documentos cargan en segundo plano.
-  // =========================================================
-
   function iniciar() {
     conectarEventos();
     iniciarHistorialLocal();
     renderHistorial();
-
     estadoCarga("Conectando con Microsoft 365…");
 
     iniciarChatbot().catch((e) => {
@@ -1473,10 +1121,6 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     iniciar();
   }
 
-  // =========================================================
-  // DIAGNÓSTICO (consola del navegador)
-  // =========================================================
-
   window.alferzaChatbotDiagnostico = () => ({
     listo: S.ready,
     usuario: S.user,
@@ -1484,19 +1128,111 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     ollama: CFG.ollama.url,
     modelo: CFG.ollama.model,
     redirectUri: CFG.redirectUri,
-    documentos: S.docs,
     totalFragmentos: S.indice?.N || 0,
     mensajesEnHistorial: S.historial.length
   });
 
   window.alferzaProbarOllama = async () => {
-    const respuesta = await consultarIA(
-      "Responde solamente: Ollama funciona correctamente.",
-      "",
-      [],
-      null
-    );
+    const respuesta = await consultarIA("Responde solamente: Ollama funciona correctamente.", "", [], null);
     console.log("[ALFERZA] Prueba Ollama:", respuesta);
     return respuesta;
   };
+})();
+
+
+
+/* =========================================
+   CUPHEAD - ANIMACIÓN CONTINUA
+========================================= */
+
+(() => {
+    const frame = document.getElementById("cupheadFrame");
+    const typingIndicator = document.getElementById("typingIndicator");
+    const chatForm = document.getElementById("chatForm");
+
+    if (!frame) return;
+
+    const TOTAL_FRAMES = 22;
+    const FRAME_DELAY_IDLE = 110;
+    const FRAME_DELAY_ACTIVE = 75;
+
+    let currentFrame = 1;
+    let timer = null;
+    let active = false;
+
+    // Precargar los 22 fotogramas.
+    const frames = [];
+
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+        const image = new Image();
+        image.src = `img/Cuphead/Cuphead/cuphead_intro_b_${i}.png`;
+        frames.push(image);
+    }
+
+    function animate() {
+        currentFrame++;
+
+        if (currentFrame > TOTAL_FRAMES) {
+            currentFrame = 1;
+        }
+
+        const nextFrame = frames[currentFrame - 1];
+
+        if (nextFrame && nextFrame.complete && nextFrame.naturalWidth > 0) {
+            frame.src = nextFrame.src;
+        }
+
+        timer = setTimeout(
+            animate,
+            active ? FRAME_DELAY_ACTIVE : FRAME_DELAY_IDLE
+        );
+    }
+
+    function setActive(value) {
+        active = value;
+    }
+
+    // Animación continua al abrir la página.
+    const firstFrame = frames[0];
+
+    if (firstFrame) {
+        firstFrame.onload = () => {
+            frame.src = firstFrame.src;
+        };
+
+        if (firstFrame.complete && firstFrame.naturalWidth > 0) {
+            frame.src = firstFrame.src;
+        }
+    }
+
+    animate();
+
+    // Acelera la animación cuando se envía una consulta.
+    if (chatForm) {
+        chatForm.addEventListener("submit", () => {
+            setActive(true);
+        });
+    }
+
+    // Mantiene el ritmo rápido mientras el asistente responde.
+    if (typingIndicator) {
+        const observer = new MutationObserver(() => {
+            setActive(!typingIndicator.hidden);
+        });
+
+        observer.observe(typingIndicator, {
+            attributes: true,
+            attributeFilter: ["hidden", "class", "style"]
+        });
+    }
+
+    // Vuelve al ritmo normal cuando termina la respuesta.
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            clearTimeout(timer);
+        } else {
+            clearTimeout(timer);
+            animate();
+        }
+    });
 })();

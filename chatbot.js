@@ -1165,7 +1165,7 @@ ${contexto || "(sin fragmentos relevantes)"}`;
     const CUPHEAD_ANIMACIONES = {
         normal: {
             inicio: 1,
-            fin: 22,
+            fin: 13,
             velocidad: 110
         },
         espera: {

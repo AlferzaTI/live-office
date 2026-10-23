@@ -57,6 +57,7 @@ const ui = {
     total: $("totalEquipos"),
     conectados: $("equiposConectados"),
     desconectados: $("equiposDesconectados"),
+    noVerificables: $("equiposNoVerificables"),
     estado: $("equiposEstado"),
     ultimaRevision: $("lastUpdate"),
 

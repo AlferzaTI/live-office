@@ -1033,6 +1033,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
 
     const entrada = $("#messageInput");
     S.busy = true;
+    reproducirCuphead("espera");
     setControles();
 
     crearMensaje("user").burbuja.textContent = pregunta;
@@ -1058,6 +1059,7 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     } finally {
       ocultarCarga();
       escribiendo(false);
+      reproducirCuphead("normal");
       S.busy = false;
       setControles();
       entrada?.focus();

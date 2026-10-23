@@ -1487,7 +1487,7 @@
                 const prioridad = obtenerCampo(fields, ["Prioridad"]);
                 const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
                 const fecha = obtenerFechaTicket(item);
-                const usuario = obtenerCampo(fields, ["Usuario"]);
+                //const usuario = obtenerCampo(fields, ["Usuario"]);
                 const asignado = obtenerCampo(fields, ["AsignadoA"]);
 
                 return [
@@ -1497,7 +1497,7 @@
                     textoPDF(prioridad),
                     textoPDF(estado),
                     formatearFecha(fecha),
-                    textoPDF(usuario),
+                    //textoPDF(usuario),
                     textoPDF(asignado)
                 ];
             });
@@ -1517,7 +1517,7 @@
                     "Prioridad",
                     "Estado",
                     "Fecha",
-                    "Solicitante",
+                    //"Solicitante",
                     "Asignado"
                 ]],
                 body: filasGenerales,
@@ -1537,6 +1537,15 @@
                     valign: "middle"
                 },
                 columnStyles: {
+                    0: { cellWidth: 25 },
+                    1: { cellWidth: 55 },
+                    2: { cellWidth: 35 },
+                    3: { cellWidth: 22, halign: "center" },
+                    4: { cellWidth: 28, halign: "center" },
+                    5: { cellWidth: 38, halign: "center" },
+                    6: { cellWidth: 45 }
+                }
+                /*columnStyles: {
                     0: { cellWidth: 22 },
                     1: { cellWidth: 43 },
                     2: { cellWidth: 28 },
@@ -1545,7 +1554,8 @@
                     5: { cellWidth: 31, halign: "center" },
                     6: { cellWidth: 42 },
                     7: { cellWidth: 28 }
-                }
+                }*/
+               
             });
 
             // Descripciones y resultados.

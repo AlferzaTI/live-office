@@ -1164,10 +1164,13 @@ ${contexto || "(Sin fragmentos relevantes para esta consulta.)"}`;
     const frames = [];
 
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
-        const image = new Image();
-        image.src = `img/Cuphead/Cuphead/cuphead_intro_b_${i}.png`;
-        frames.push(image);
-    }
+    const number = String(i).padStart(4, "0");
+    const image = new Image();
+
+    image.src = `img/Cuphead/Cuphead/mc_reg_intro_cuphead_${number}.png`;
+
+    frames.push(image);
+}
 
     function animate() {
         currentFrame++;

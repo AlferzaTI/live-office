@@ -1085,6 +1085,7 @@ async function cargarServicios() {
 
 /* ======================== TABLA DE INVENTARIO ======================== */
 
+
 function actualizarResumenEquipos() {
     const total = equiposData.length;
 
@@ -1096,9 +1097,39 @@ function actualizarResumenEquipos() {
         equipo => normalizar(equipo.Estado) === "desconectado"
     ).length;
 
-    if (ui.total) ui.total.textContent = total;
-    if (ui.conectados) ui.conectados.textContent = conectados;
-    if (ui.desconectados) ui.desconectados.textContent = desconectados;
+    // Todo equipo que no esté conectado ni desconectado
+    // se considera no verificable.
+    const noVerificables = equiposData.filter(equipo => {
+        const estado = normalizar(equipo.Estado);
+
+        return estado !== "conectado" &&
+               estado !== "desconectado";
+    }).length;
+
+    if (ui.total) {
+        ui.total.textContent = total;
+    }
+
+    if (ui.conectados) {
+        ui.conectados.textContent = conectados;
+    }
+
+    if (ui.desconectados) {
+        ui.desconectados.textContent = desconectados;
+    }
+
+    if (ui.noVerificables) {
+        ui.noVerificables.textContent = noVerificables;
+    }
+
+    console.log("[ALFERZA] Resumen de equipos:", {
+        total,
+        conectados,
+        desconectados,
+        noVerificables,
+        suma: conectados + desconectados + noVerificables,
+        diferencia: total - conectados - desconectados - noVerificables
+    });
 }
 
 function actualizarFiltroAreas() {

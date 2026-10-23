@@ -12,7 +12,7 @@
     lista: { host: "alferzaholding-my.sharepoint.com", site: "/personal/soporte1_alferza_pe", name: "Conversaciones-CHATBOT" },
     ollama: {
       url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
-      model: "llama3.2:3b",
+      model: "llama3:latest",
       timeoutMs: 30000,
       stallMs: 15000,
       temperature: 0.2,

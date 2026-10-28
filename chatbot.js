@@ -13,11 +13,11 @@
     ollama: {
       url: "https://LT-0010.AD.ALFERZA/ollama/api/chat",
       model: "llama3:latest",
-      timeoutMs: 60000,
-      stallMs: 20000,
-      temperature: 0.2,
+      timeoutMs: 45000,
+      stallMs: 14000,
+      temperature: 0.1,
       numCtx: 2048,
-      numPredict: 160,
+      numPredict: 110,
       keepAlive: "24h"
     },
     pdfJs: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
@@ -26,9 +26,9 @@
     maxPaginasPdf: 300,
     concurrencia: 4,
     reintentoDocsMs: 60000,
-    esperaDocsMs: 1200,
-    rec: { topK: 2, maxChars: 1200, chunkChars: 900, overlap: 150 },
-    hist: { max: 50, turnosIA: 2, recorteIA: 300 }
+    esperaDocsMs: 4000,
+    rec: { topK: 4, maxChars: 1600, chunkChars: 700, overlap: 80, umbral: 0.28 },
+    hist: { max: 50, turnosIA: 6, recorteIA: 280 }
   };
 
   const GRAPH = "https://graph.microsoft.com/v1.0";
@@ -37,6 +37,34 @@
   const STOP = new Set(
     ("a al algo algun alguna ante con como cual cuales cuando de del desde donde e el ella ellas ellos en era es esa ese eso esta estas este esto estos fue ha hacer hay la las le les lo los mas me mi mis mucho muy no o para pero por porque puedo que quien quiero se sin sobre son su sus te tener tengo tu tus un una uno unos y ya yo ayuda favor necesito quisiera dime hola gracias buenas buenos dias tambien si").split(" ")
   );
+
+  const SINONIMOS = {
+    correo: ["outlook", "email", "mail", "o365"],
+    outlook: ["correo", "email", "mail"],
+    email: ["outlook", "correo"],
+    wifi: ["red", "internet", "wireless", "conexion"],
+    internet: ["wifi", "red", "conexion"],
+    red: ["wifi", "internet", "lan", "vpn"],
+    impresora: ["impresion", "print", "scanner"],
+    contrasena: ["password", "clave", "passwd"],
+    clave: ["contrasena", "password"],
+    vpn: ["forticlient", "fortinet", "tunel"],
+    teams: ["reunion", "videollamada"],
+    office: ["microsoft365", "word", "excel"],
+    ticket: ["soporte", "incidencia", "mesa"],
+    usuario: ["cuenta", "acceso", "login"],
+    acceso: ["permiso", "cuenta", "login"],
+    pc: ["equipo", "computadora", "laptop"],
+    computadora: ["equipo", "pc", "laptop"]
+  };
+
+  const TEMAS_TI = new Set(
+    ("ti soporte helpdesk mesa ticket incidencia procedimiento alferza outlook correo email mail teams office excel word powerpoint onedrive sharepoint windows laptop pc equipo computadora impresora scanner wifi red internet vpn forticlient fortinet dominio usuario cuenta acceso permiso contrasena password clave login mfa autenticacion bitlocker antivirus licencia software instalar desinstalar actualizacion driver monitor teclado mouse auricular dock cisco activo entra azure intune o365 microsoft365 calendario reunion sala reserva sap qin activo directorio active directory bloqueo pin usb disco backup copia seguridad wifi lan wan dhcp dns proxy firewall").split(" ")
+  );
+
+  const FUERA_DE_TEMA = /\b(futbol|futbolista|receta|cocinar|cocina|chiste|chistes|novia|novio|amor|politica|presidente|eleccion|crypto|criptomoneda|bitcoin|apuesta|apuestas|porno|pornografia|sexo|horoscopo|pokemon|minecraft|fortnite|netflix|pelicula|serie|cancion|letra de|tarea de|examen de|historia universal|chisme)\b/;
+
+  const NEGACION_FUERA = "Solo puedo ayudarte con temas de soporte TI y procedimientos de ALFERZA. Reformula tu consulta en ese ámbito.";
 
   const S = {
     msal: null, account: null, user: "", token: null,
@@ -192,11 +220,10 @@
     return { burbuja, fuentes };
   }
 
-  function pintarBot(msg, texto, fuentes = []) {
+  function pintarBot(msg, texto, _fuentes = []) {
     msg.burbuja.replaceChildren(formatearRespuesta(texto));
-    const unicas = [...new Set(fuentes)];
-    msg.fuentes.textContent = unicas.length ? `Fuentes: ${unicas.join(", ")}` : "";
-    msg.fuentes.hidden = unicas.length === 0;
+    msg.fuentes.textContent = "";
+    msg.fuentes.hidden = true;
     scrollAbajo();
   }
 
@@ -576,6 +603,35 @@
       .map((p) => (p.length > 4 && p.endsWith("s") ? p.slice(0, -1) : p));
   }
 
+  function expandirConsulta(texto) {
+    const extra = [];
+    for (const t of tokens(texto)) {
+      const sin = SINONIMOS[t];
+      if (sin) extra.push(...sin);
+    }
+    return extra.length ? `${texto} ${extra.join(" ")}` : texto;
+  }
+
+  function esContinuacion(pregunta) {
+    const t = norm(pregunta).trim();
+    if (tokens(pregunta).length <= 4) return true;
+    return /^(y |pero |entonces |eso |esto |si |ok |y si |por que|porque|explica|amplia|detalla|y ahora|y despues|y luego|lo mismo|igual|otra vez|aun|todavia|no funciona|sigue igual|y despues)\b/.test(t);
+  }
+
+  function esTemaTI(pregunta) {
+    const t = norm(pregunta);
+    if (/\b(outlook|teams|wifi|vpn|excel|office|windows|impresora|sharepoint|onedrive|alferza|ticket|soporte|correo|password|contrasena)\b/.test(t)) {
+      return true;
+    }
+    return tokens(pregunta).some((p) => TEMAS_TI.has(p));
+  }
+
+  function esFueraDeTema(pregunta) {
+    if (esTemaTI(pregunta)) return false;
+    if (S.historial.length && esContinuacion(pregunta)) return false;
+    return FUERA_DE_TEMA.test(norm(pregunta));
+  }
+
   function frecuencias(lista) {
     const mapa = new Map();
     for (const t of lista) mapa.set(t, (mapa.get(t) || 0) + 1);
@@ -645,18 +701,18 @@
     }
 
     puntuados.sort((a, b) => b.puntos - a.puntos);
-    const top = puntuados.slice(0, 15);
-    if (!top.length || top[0].puntos < 1) return [];
+    const top = puntuados.slice(0, 24);
+    if (!top.length || top[0].puntos < 0.7) return [];
 
-    const umbral = top[0].puntos * 0.4;
-    const paginasUsadas = new Set();
+    const umbral = top[0].puntos * CFG.rec.umbral;
+    const usados = new Set();
     const elegidos = [];
 
     for (const { f, puntos } of top) {
       if (puntos < umbral) break;
-      const clave = `${f.doc}|${f.page}`;
-      if (paginasUsadas.has(clave)) continue;
-      paginasUsadas.add(clave);
+      const clave = `${f.doc}|${f.page}|${f.text.slice(0, 40)}`;
+      if (usados.has(clave)) continue;
+      usados.add(clave);
       elegidos.push(f);
       if (elegidos.length >= CFG.rec.topK) break;
     }
@@ -667,29 +723,41 @@
   function contextoDe(fragmentos) {
     let total = 0;
     const partes = [];
-    const fuentes = [];
 
-    fragmentos.forEach((f, i) => {
-      const ref = `${f.doc}, pág. ${f.page}`;
-      if (total + f.text.length > CFG.rec.maxChars && partes.length) return;
-      partes.push(`[Fuente ${i + 1}: ${ref}]\n${f.text}`);
+    for (const f of fragmentos) {
+      if (total + f.text.length > CFG.rec.maxChars && partes.length) break;
+      partes.push(f.text);
       total += f.text.length;
-      fuentes.push(ref);
-    });
+    }
 
-    return { contexto: partes.join("\n\n"), fuentes: [...new Set(fuentes)] };
+    return { contexto: partes.join("\n\n"), fuentes: [] };
   }
 
-  // Si la pregunta es corta o es continuación, se busca junto con la anterior.
   function consultaParaBusqueda(pregunta) {
-    const anterior = S.historial.at(-1);
-    if (!anterior) return pregunta;
+    const reciente = S.historial.slice(-2);
+    if (!reciente.length || !esContinuacion(pregunta)) return expandirConsulta(pregunta);
 
-    const corta = tokens(pregunta).length <= 3;
-    const continuacion = /^(y|pero|entonces|eso|esto|si|por que|porque|explica|amplia|detalla|y ahora|y despues|y luego)\b/.test(
-      norm(pregunta).trim()
-    );
-    return corta || continuacion ? `${anterior.pregunta} ${pregunta}` : pregunta;
+    const hilo = reciente
+      .map((item) => `${item.pregunta} ${recortar(item.respuesta, 120)}`)
+      .join(" ");
+    return expandirConsulta(`${hilo} ${pregunta}`);
+  }
+
+  function limpiarRespuesta(texto) {
+    let t = String(texto || "").trim();
+    t = t.replace(/^\s*(claro|por supuesto|con gusto|entendido|okey|okay)[,.]?\s+/i, "");
+    t = t.replace(/\b(según|segun|en|del|de)\s+(el\s+)?(documento|pdf|archivo|procedimiento|manual)[^\n.]{0,80}/gi, "");
+    t = t.replace(/\b(fuente\s*\d+|p[áa]g(?:ina|\.)?\s*\d+|sharepoint|procedimientos-ti)\b/gi, "");
+    t = t.replace(/\[fuente[^\]]*\]/gi, "");
+    t = t.replace(/\n{3,}/g, "\n\n").trim();
+
+    const lineas = t.split(/\n+/).filter(Boolean);
+    if (lineas.length > 6) t = lineas.slice(0, 6).join("\n");
+    if (t.length > 650) {
+      const corte = t.lastIndexOf(".", 650);
+      t = (corte > 200 ? t.slice(0, corte + 1) : t.slice(0, 650)).trim();
+    }
+    return t;
   }
 
   // =========================================================
@@ -697,14 +765,17 @@
   // =========================================================
 
   function construirPrompt(contexto) {
-    return `Eres el asistente de soporte interno de ALFERZA (TI, Microsoft 365, Outlook, Teams, redes, accesos).
-Responde en español, directo, en 2 a 5 líneas. Sin saludos, sin emojis, sin relleno. La primera frase debe ser la respuesta o la acción.
-Si el CONTEXTO responde la pregunta, basa el procedimiento en él. Si no, da orientación general y dilo en una frase.
-Nunca inventes rutas, nombres, extensiones ni acciones realizadas.
-Si la pregunta no es de trabajo, responde en una frase y ofrece ayuda con TI.
+    return `Eres el asistente de soporte TI interno de ALFERZA.
+Responde en español, directo, en 2 a 5 líneas (máximo 90 palabras). Sin saludos, emojis ni relleno.
+La primera frase debe resolver la duda o indicar el siguiente paso.
+Usa el conocimiento interno para contestar AQUÍ MISMO. No digas “revisa el documento”, no cites PDF, carpetas, páginas ni rutas.
+Si el conocimiento cubre la pregunta, síguelo. Si es de TI pero no aparece ahí, da una orientación breve y honesta, sin inventar nombres de sistemas ni acciones ya hechas.
+Si la pregunta no tiene nada que ver con TI, Microsoft 365, equipos, redes, accesos o procedimientos de ALFERZA, responde exactamente:
+"${NEGACION_FUERA}"
+Si el usuario continúa un tema anterior (“eso”, “y si no funciona”, “y luego”), sigue ese hilo.
 
-CONTEXTO:
-${contexto || "(sin fragmentos relevantes)"}`;
+CONOCIMIENTO INTERNO:
+${contexto || "(sin procedimiento específico)"}`;
   }
 
   async function consultarIA(pregunta, contexto, historial, alParcial) {
@@ -748,7 +819,10 @@ ${contexto || "(sin fragmentos relevantes)"}`;
           options: {
             temperature: CFG.ollama.temperature,
             num_ctx: CFG.ollama.numCtx,
-            num_predict: CFG.ollama.numPredict
+            num_predict: CFG.ollama.numPredict,
+            top_p: 0.8,
+            repeat_penalty: 1.15,
+            stop: ["Usuario:", "User:", "###"]
           }
         }),
         signal: controller.signal
@@ -786,7 +860,7 @@ ${contexto || "(sin fragmentos relevantes)"}`;
       clearTimeout(temporizador);
     }
 
-    texto = texto.trim();
+    texto = limpiarRespuesta(texto);
     if (!texto) throw new Error("La IA devolvió una respuesta vacía.");
     return texto;
   }
@@ -983,27 +1057,33 @@ ${contexto || "(sin fragmentos relevantes)"}`;
     const social = detectarSocial(pregunta);
     if (social) return { respuesta: RESPUESTAS_SOCIALES[social], fuentes: [] };
 
-    // Reintento en segundo plano, sin bloquear al usuario.
+    if (esFueraDeTema(pregunta)) {
+      return { respuesta: NEGACION_FUERA, fuentes: [] };
+    }
+
     if (!S.ready && !S.initPromise && Date.now() - S.ultimoIntentoInit > CFG.reintentoDocsMs) {
       iniciarChatbot().catch((e) => warn("Sin documentos disponibles:", e.message));
     }
 
-    // Esperamos un tiempo corto; si no está listo, respondemos sin documentos.
     if (!S.ready && S.initPromise) {
       await Promise.race([S.initPromise.catch(() => {}), pausa(CFG.esperaDocsMs)]);
     }
 
     let contexto = "";
-    let fuentes = [];
     const tBusqueda = performance.now();
 
     if (S.indice?.N) {
       const combinada = consultaParaBusqueda(pregunta);
       let hallados = buscar(combinada);
+      if (!hallados.length) hallados = buscar(expandirConsulta(pregunta));
       if (!hallados.length && combinada !== pregunta) hallados = buscar(pregunta);
-      ({ contexto, fuentes } = contextoDe(hallados));
+      ({ contexto } = contextoDe(hallados));
     }
     log(`Búsqueda: ${(performance.now() - tBusqueda).toFixed(0)} ms`);
+
+    if (!contexto && !esTemaTI(pregunta) && !(S.historial.length && esContinuacion(pregunta))) {
+      return { respuesta: NEGACION_FUERA, fuentes: [] };
+    }
 
     estadoCarga("Preparando la respuesta…");
 
@@ -1015,11 +1095,11 @@ ${contexto || "(sin fragmentos relevantes)"}`;
         log(`Primer token: ${(performance.now() - tIA).toFixed(0)} ms`);
         ocultarCarga();
       }
-      alParcial?.(texto);
+      alParcial?.(limpiarRespuesta(texto));
     });
     log(`IA total: ${(performance.now() - tIA).toFixed(0)} ms`);
 
-    return { respuesta, fuentes };
+    return { respuesta, fuentes: [] };
   }
 
   async function procesarPregunta(texto) {
@@ -1111,7 +1191,7 @@ ${contexto || "(sin fragmentos relevantes)"}`;
       console.error("[ALFERZA] Error de inicialización:", e);
       pintarBot(
         crearMensaje("bot"),
-        "No pude conectar con los documentos de ALFERZA. Puedo responder con orientación general; cuando se restablezca la conexión, volverán a estar disponibles."
+        "No pude cargar los procedimientos de ALFERZA. Si tu consulta es de TI, inténtalo de nuevo en un momento."
       );
     });
   }

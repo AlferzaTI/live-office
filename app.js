@@ -88,6 +88,28 @@ presenciaPorId[presencia.id]=presencia;
 return presenciaPorId;
 }
 
+const ETIQUETAS_ESTADO={
+Available:"Disponible",
+AvailableIdle:"Disponible",
+Busy:"Ocupado",
+BusyIdle:"Ocupado",
+InAMeeting:"En reunión",
+OnACall:"En llamada",
+InACall:"En llamada",
+InAConferenceCall:"En conferencia",
+DoNotDisturb:"No molestar",
+Away:"Ausente",
+BeRightBack:"Vuelvo pronto",
+Offline:"Desconectado",
+OffWork:"Fuera de trabajo",
+OutOfOffice:"Fuera de oficina",
+PresenceUnknown:"Desconocido"
+};
+
+function etiquetaEstado(estado){
+return ETIQUETAS_ESTADO[estado]||"Desconectado";
+}
+
 function renderizarUsuarios(usuarios,presenciaPorId){
 const contenedor=document.getElementById("officeGrid");
 
@@ -106,19 +128,25 @@ let clase="offline";
 
 switch(estado){
 case "Available":
+case "AvailableIdle":
 clase="disponible";
 disponibles++;
 break;
 
 case "Busy":
+case "BusyIdle":
 case "InAMeeting":
 case "OnACall":
+case "InACall":
+case "InAConferenceCall":
+case "DoNotDisturb":
 clase="ocupado";
 ocupados++;
 break;
 
 case "Away":
 case "BeRightBack":
+case "OutOfOffice":
 clase="ausente";
 ausentes++;
 break;
@@ -133,7 +161,7 @@ html+=`
 <div class="card" data-estado="${estado}">
 <h3>${usuario.displayName}</h3>
 <p>${usuario.mail}</p>
-<div class="status ${clase}">${estado}</div>
+<div class="status ${clase}">${etiquetaEstado(estado)}</div>
 </div>
 `;
 });
@@ -222,19 +250,19 @@ let mostrar=false;
 
 switch(tipo){
 case "Available":
-mostrar=estado==="Available";
+mostrar=estado==="Available"||estado==="AvailableIdle";
 break;
 
 case "Busy":
-mostrar=estado==="Busy"||estado==="InAMeeting"||estado==="OnACall";
+mostrar=estado==="Busy"||estado==="BusyIdle"||estado==="InAMeeting"||estado==="OnACall"||estado==="InACall"||estado==="InAConferenceCall"||estado==="DoNotDisturb";
 break;
 
 case "Away":
-mostrar=estado==="Away"||estado==="BeRightBack";
+mostrar=estado==="Away"||estado==="BeRightBack"||estado==="OutOfOffice";
 break;
 
 case "Offline":
-mostrar=estado==="Offline";
+mostrar=estado==="Offline"||estado==="OffWork"||estado==="PresenceUnknown";
 break;
 
 default:

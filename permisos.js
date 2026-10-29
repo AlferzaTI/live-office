@@ -63,6 +63,10 @@ const USUARIOS_TI_INICIALES = [
    MÓDULOS
 ========================================================= */
 
+/* =========================================================
+   MÓDULOS
+========================================================= */
+
 const MODULOS_PERMISOS = [
     "Oficina",
     "Personal",
@@ -72,9 +76,9 @@ const MODULOS_PERMISOS = [
     "Seguridad",
     "Infraestructura",
     "Tickets",
-    "Configuracion"
+    "Configuracion",
+    "AsistenteTI"
 ];
-
 
 /* =========================================================
    VALIDAR MSAL

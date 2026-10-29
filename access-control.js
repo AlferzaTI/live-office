@@ -12,7 +12,18 @@ listName:"PermisosTI",
 adminEmails:["soporte1@alferza.pe"]
 };
 
-const MODULOS=["Oficina","Personal","Reservas","Salas","Comunicados","Seguridad","Infraestructura","Tickets","Configuracion"];
+const MODULOS = [
+    "Oficina",
+    "Personal",
+    "Reservas",
+    "Salas",
+    "Comunicados",
+    "Seguridad",
+    "Infraestructura",
+    "Tickets",
+    "Configuracion",
+    "AsistenteTI"
+];
 
 const PAGINAS={
 "index.html":"Oficina",
@@ -24,6 +35,7 @@ const PAGINAS={
 "seguridad.html":"Seguridad",
 "infraestructura.html":"Infraestructura",
 "tickets.html":"Tickets",
+"chatbot.html": "AsistenteTI",
 "configuracion.html":"Configuracion"
 };
 

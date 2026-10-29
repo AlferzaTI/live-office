@@ -1837,6 +1837,18 @@
         }
     });
 
+        /* =========================================================
+    INICIO AUTOMÁTICO DE TICKETS
+    ========================================================= */
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            iniciarTickets();
+        }, { once: true });
+    } else {
+        iniciarTickets();
+    }
+
     cerrarReporteModal.addEventListener("click", cerrarReporte);
     cancelarReporte.addEventListener("click", cerrarReporte);
     generarReportePDFBtn.addEventListener("click", generarInformePDF);

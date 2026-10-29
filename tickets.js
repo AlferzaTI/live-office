@@ -624,101 +624,142 @@
     }
 
     function renderizarTickets() {
-        if (!esUsuarioTI()) {
-            return;
-        }
-
-        const busqueda = buscarTicket.value.toLowerCase().trim();
-        const estadoFiltro = filtroEstado.value;
-        const prioridadFiltro = filtroPrioridad.value;
-
-        const filtrados = ticketsData.filter(function (item) {
-            const fields = item.fields || {};
-
-            const titulo = obtenerCampo(fields, ["Title", "Título"]);
-            const ticketId = obtenerCampo(fields, ["TicketID"]);
-            const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
-            const prioridad = obtenerCampo(fields, ["Prioridad"]);
-            const estado = obtenerCampo(fields, ["Estado"]);
-
-            const coincideBusqueda =
-                !busqueda ||
-                String(titulo).toLowerCase().includes(busqueda) ||
-                String(ticketId).toLowerCase().includes(busqueda) ||
-                String(categoria).toLowerCase().includes(busqueda);
-
-            const coincideEstado =
-                !estadoFiltro || estado === estadoFiltro;
-
-            const coincidePrioridad =
-                !prioridadFiltro || prioridad === prioridadFiltro;
-
-            return (
-                coincideBusqueda &&
-                coincideEstado &&
-                coincidePrioridad
-            );
-        });
-
-        if (!filtrados.length) {
-            ticketsTableBody.innerHTML = "";
-            ticketsEmpty.style.display = "block";
-            return;
-        }
-
-        ticketsEmpty.style.display = "none";
-
-        ticketsTableBody.innerHTML = filtrados.map(function (item) {
-            const fields = item.fields || {};
-
-            const titulo = obtenerCampo(fields, ["Title", "Título"]);
-
-            const ticketId = obtenerCampo(fields, ["TicketID"]) ||
-                `TKT-${String(item.id).padStart(6, "0")}`;
-
-            const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
-            const prioridad = obtenerCampo(fields, ["Prioridad"]);
-            const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
-            const fecha = obtenerCampo(fields, ["FechaCreacion", "FechaCreación"]);
-
-            const accion =
-                estado === "Resuelto" || estado === "Cerrado"
-                    ? `<span class="sin-accion">—</span>`
-                    : `
-                        <button
-                            type="button"
-                            class="btn-resolver"
-                            onclick="abrirResolverTicket(event, '${escaparHTML(item.id)}')"
-                        >
-                            ✓ Resolver
-                        </button>
-                    `;
-
-            return `
-                <tr onclick="mostrarDetalleTicket('${escaparHTML(item.id)}')">
-                    <td>
-                        <span class="ticket-id">
-                            ${escaparHTML(ticketId)}
-                        </span>
-                    </td>
-                    <td>${escaparHTML(titulo)}</td>
-                    <td>${escaparHTML(categoria)}</td>
-                    <td>
-                        <span class="prioridad-badge ${clasePrioridad(prioridad)}">
-                            ${escaparHTML(prioridad)}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="estado-badge ${claseEstado(estado)}">
-                            ${escaparHTML(estado)}
-                        </span>
-                    </td>
-                    <td>${formatearFecha(fecha)}</td>
-                    <td class="ticket-action-cell">${accion}</td>
-                </tr>
-            `;
-        }).join("");
+    if (!esUsuarioTI()) {
+        return;
     }
+
+    const busqueda = buscarTicket.value.toLowerCase().trim();
+    const estadoFiltro = filtroEstado.value;
+    const prioridadFiltro = filtroPrioridad.value;
+
+    // 1. Filtrar tickets según búsqueda, estado y prioridad.
+    const filtrados = ticketsData.filter(function (item) {
+        const fields = item.fields || {};
+
+        const titulo = obtenerCampo(fields, ["Title", "Título"]);
+        const ticketId = obtenerCampo(fields, ["TicketID"]);
+        const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
+        const prioridad = obtenerCampo(fields, ["Prioridad"]);
+        const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
+
+        const coincideBusqueda =
+            !busqueda ||
+            String(titulo).toLowerCase().includes(busqueda) ||
+            String(ticketId).toLowerCase().includes(busqueda) ||
+            String(categoria).toLowerCase().includes(busqueda);
+
+        const coincideEstado =
+            !estadoFiltro || estado === estadoFiltro;
+
+        const coincidePrioridad =
+            !prioridadFiltro || prioridad === prioridadFiltro;
+
+        return (
+            coincideBusqueda &&
+            coincideEstado &&
+            coincidePrioridad
+        );
+    });
+
+    // 2. Ordenar por estado y después por fecha de creación.
+    // Los tickets más antiguos aparecen primero dentro de cada estado.
+    filtrados.sort(function (a, b) {
+        function obtenerOrdenEstado(item) {
+            const estado = String(
+                obtenerCampo(item.fields || {}, ["Estado"]) || "Pendiente"
+            ).trim().toLowerCase();
+
+            if (estado === "pendiente") return 0;
+            if (estado === "en proceso") return 1;
+            if (estado === "sin resolver") return 2;
+            if (estado === "resuelto" || estado === "cerrado") return 3;
+
+            return 4;
+        }
+
+        const ordenA = obtenerOrdenEstado(a);
+        const ordenB = obtenerOrdenEstado(b);
+
+        // Primero se ordenan los grupos según el estado.
+        if (ordenA !== ordenB) {
+            return ordenA - ordenB;
+        }
+
+        // Dentro de cada grupo, ordenar por fecha ascendente.
+        const fechaA = obtenerFechaTicket(a) || a.createdDateTime || "";
+        const fechaB = obtenerFechaTicket(b) || b.createdDateTime || "";
+
+        const tiempoA = new Date(fechaA).getTime();
+        const tiempoB = new Date(fechaB).getTime();
+
+        const fechaValidaA = Number.isFinite(tiempoA) ? tiempoA : 0;
+        const fechaValidaB = Number.isFinite(tiempoB) ? tiempoB : 0;
+
+        return fechaValidaA - fechaValidaB;
+    });
+
+    // 3. Mostrar mensaje cuando no existen resultados.
+    if (!filtrados.length) {
+        ticketsTableBody.innerHTML = "";
+        ticketsEmpty.style.display = "block";
+        return;
+    }
+
+    ticketsEmpty.style.display = "none";
+
+    // 4. Dibujar la tabla conservando el diseño y las acciones actuales.
+    ticketsTableBody.innerHTML = filtrados.map(function (item) {
+        const fields = item.fields || {};
+
+        const titulo = obtenerCampo(fields, ["Title", "Título"]);
+
+        const ticketId = obtenerCampo(fields, ["TicketID"]) ||
+            `TKT-${String(item.id).padStart(6, "0")}`;
+
+        const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
+        const prioridad = obtenerCampo(fields, ["Prioridad"]);
+        const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
+
+        const fecha = obtenerFechaTicket(item);
+
+        const accion =
+            estado === "Resuelto" || estado === "Cerrado"
+                ? `<span class="sin-accion">—</span>`
+                : `
+                    <button
+                        type="button"
+                        class="btn-resolver"
+                        onclick="abrirResolverTicket(event, '${escaparHTML(item.id)}')"
+                    >
+                        ✓ Resolver
+                    </button>
+                `;
+
+        return `
+            <tr onclick="mostrarDetalleTicket('${escaparHTML(item.id)}')">
+                <td>
+                    <span class="ticket-id">
+                        ${escaparHTML(ticketId)}
+                    </span>
+                </td>
+                <td>${escaparHTML(titulo)}</td>
+                <td>${escaparHTML(categoria)}</td>
+                <td>
+                    <span class="prioridad-badge ${clasePrioridad(prioridad)}">
+                        ${escaparHTML(prioridad)}
+                    </span>
+                </td>
+                <td>
+                    <span class="estado-badge ${claseEstado(estado)}">
+                        ${escaparHTML(estado)}
+                    </span>
+                </td>
+                <td>${formatearFecha(fecha)}</td>
+                <td class="ticket-action-cell">${accion}</td>
+            </tr>
+        `;
+    }).join("");
+}
 
     function actualizarResumen() {
         const total = ticketsData.length;

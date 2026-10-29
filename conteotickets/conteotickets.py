@@ -1,14 +1,13 @@
 
 import json
-import os
 import sys
 import threading
 import tkinter as tk
-import webbrowser
+from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote
 
 import msal
+import msal_extensions
 import requests
 
 
@@ -23,8 +22,15 @@ def obtener_carpeta():
 
 
 CARPETA = obtener_carpeta()
+ARCHIVO_CONFIG = CARPETA / "config.json"
+ARCHIVO_CACHE = CARPETA / "cache_msal.bin"
 
-with open(CARPETA / "config.json", "r", encoding="utf-8") as archivo:
+if not ARCHIVO_CONFIG.exists():
+    raise FileNotFoundError(
+        f"No se encontró config.json en: {CARPETA}"
+    )
+
+with open(ARCHIVO_CONFIG, "r", encoding="utf-8") as archivo:
     CONFIG = json.load(archivo)
 
 CLIENT_ID = CONFIG["client_id"]
@@ -38,86 +44,189 @@ AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 SCOPES = ["User.Read", "Sites.Read.All"]
 
 COLOR_FONDO = "#00205c"
-COLOR_AZUL = "#0A84FF"
 COLOR_TEXTO = "#FFFFFF"
 
 sesion_http = requests.Session()
+
 token_actual = None
 sitio_id = None
 lista_id = None
 cerrando = False
+
+# Evita abrir varias ventanas de autenticación en la misma ejecución.
+intento_interactivo_realizado = False
+
+bloqueo_auth = threading.RLock()
+
+
+# =========================================================
+# CACHE PERSISTENTE DE MICROSOFT
+# =========================================================
+
+persistencia = msal_extensions.FilePersistenceWithDataProtection(
+    str(ARCHIVO_CACHE)
+)
+
+cache_msal = msal_extensions.PersistedTokenCache(persistencia)
+
+app_msal = msal.PublicClientApplication(
+    CLIENT_ID,
+    authority=AUTHORITY,
+    token_cache=cache_msal
+)
 
 
 # =========================================================
 # AUTENTICACION MICROSOFT
 # =========================================================
 
-app_msal = msal.PublicClientApplication(
-    CLIENT_ID,
-    authority=AUTHORITY
-)
+def obtener_token(
+    permitir_interactivo=False,
+    forzar_renovacion=False
+):
+    global token_actual, intento_interactivo_realizado
 
+    with bloqueo_auth:
 
-def obtener_token():
-    global token_actual
+        # 1. Buscar una sesión guardada.
+        cuentas = app_msal.get_accounts()
 
-    cuentas = app_msal.get_accounts()
+        if cuentas:
+            resultado = app_msal.acquire_token_silent(
+                SCOPES,
+                account=cuentas[0],
+                force_refresh=forzar_renovacion
+            )
 
-    if cuentas:
-        resultado = app_msal.acquire_token_silent(
-            SCOPES,
-            account=cuentas[0]
+            if resultado and resultado.get("access_token"):
+                token_actual = resultado["access_token"]
+                return token_actual
+
+            if resultado:
+                print(
+                    "Renovación silenciosa:",
+                    resultado.get(
+                        "error_description",
+                        resultado.get("error", "Sin detalles")
+                    ),
+                    flush=True
+                )
+
+        # 2. Si no hay sesión y no se permite iniciar sesión,
+        # devolver un error sin abrir otra ventana.
+        if not permitir_interactivo:
+            raise RuntimeError(
+                "No se pudo renovar la sesión de Microsoft. "
+                "Cierra y vuelve a abrir el contador para iniciar "
+                "sesión nuevamente."
+            )
+
+        if intento_interactivo_realizado:
+            raise RuntimeError(
+                "Ya se intentó iniciar sesión en esta ejecución. "
+                "Cierra y vuelve a abrir el contador."
+            )
+
+        intento_interactivo_realizado = True
+
+        # 3. Inicio de sesión normal de Microsoft.
+        print(
+            "Abriendo inicio de sesión de Microsoft...",
+            flush=True
         )
 
-        if resultado and resultado.get("access_token"):
-            token_actual = resultado["access_token"]
-            return token_actual
+        try:
+            resultado = app_msal.acquire_token_interactive(
+                scopes=SCOPES,
+                prompt="select_account"
+            )
+        except Exception as error:
+            raise RuntimeError(
+                f"No se pudo abrir el inicio de sesión: {error}"
+            )
 
-    # Autenticacion interactiva. Abre el navegador para iniciar sesion.
-    resultado = app_msal.acquire_token_interactive(
-        scopes=SCOPES,
-        prompt="select_account"
-    )
+        if not resultado or not resultado.get("access_token"):
+            detalle = (
+                resultado.get(
+                    "error_description",
+                    resultado.get("error", "Error desconocido")
+                )
+                if resultado else
+                "Microsoft no devolvió un token."
+            )
 
-    if not resultado or not resultado.get("access_token"):
-        raise RuntimeError(
-            resultado.get(
-                "error_description",
-                "No se pudo autenticar con Microsoft."
-            ) if resultado else "Microsoft no devolvio un token."
+            raise RuntimeError(
+                f"Falló el inicio de sesión: {detalle}"
+            )
+
+        token_actual = resultado["access_token"]
+
+        print(
+            "Inicio de sesión completado correctamente.",
+            flush=True
         )
 
-    token_actual = resultado["access_token"]
-    return token_actual
+        return token_actual
+
+
+# =========================================================
+# MICROSOFT GRAPH
+# =========================================================
+
+def interpretar_error(respuesta):
+    try:
+        datos = respuesta.json()
+        error = datos.get("error", {})
+
+        codigo = error.get("code", "GraphError")
+        mensaje = error.get("message", respuesta.text)
+
+    except (ValueError, AttributeError):
+        codigo = f"HTTP {respuesta.status_code}"
+        mensaje = respuesta.text
+
+    return f"{codigo} ({respuesta.status_code}): {mensaje}"
 
 
 def graph_get(url):
-    token = obtener_token()
+    global token_actual
+
+    # La primera conexión puede abrir el inicio de sesión.
+    permitir_interactivo = not intento_interactivo_realizado
+
+    token = obtener_token(
+        permitir_interactivo=permitir_interactivo
+    )
 
     respuesta = sesion_http.get(
         url,
         headers={"Authorization": f"Bearer {token}"},
-        timeout=25
+        timeout=30
     )
 
+    # Si Microsoft rechaza el token, intentamos renovarlo.
     if respuesta.status_code == 401:
-        global token_actual
         token_actual = None
 
-        token = obtener_token()
+        token = obtener_token(
+            permitir_interactivo=False,
+            forzar_renovacion=True
+        )
 
         respuesta = sesion_http.get(
             url,
             headers={"Authorization": f"Bearer {token}"},
-            timeout=25
+            timeout=30
         )
 
-    respuesta.raise_for_status()
+    if not respuesta.ok:
+        raise RuntimeError(interpretar_error(respuesta))
+
     return respuesta.json()
 
 
 # =========================================================
-# CONSULTA SHAREPOINT
+# CONSULTA DE SHAREPOINT
 # =========================================================
 
 def obtener_ids():
@@ -136,28 +245,48 @@ def obtener_ids():
 
     url_listas = (
         "https://graph.microsoft.com/v1.0/sites/"
-        f"{sitio_id}/lists?$select=id,name,displayName&$top=200"
+        f"{sitio_id}/lists"
+        "?$select=id,name,displayName&$top=200"
     )
 
-    listas = graph_get(url_listas).get("value", [])
+    resultado_listas = graph_get(url_listas)
+    listas = resultado_listas.get("value", [])
 
-    objetivo = LIST_NAME.casefold()
+    # Seguir paginación por si hay muchas listas.
+    siguiente = resultado_listas.get("@odata.nextLink")
+
+    while siguiente:
+        pagina = graph_get(siguiente)
+        listas.extend(pagina.get("value", []))
+        siguiente = pagina.get("@odata.nextLink")
+
+    objetivo = LIST_NAME.strip().casefold()
 
     lista = next(
         (
             item for item in listas
-            if str(item.get("displayName", "")).casefold() == objetivo
-            or str(item.get("name", "")).casefold() == objetivo
+            if str(item.get("displayName", "")).strip().casefold()
+            == objetivo
+            or str(item.get("name", "")).strip().casefold()
+            == objetivo
         ),
         None
     )
 
     if not lista:
         raise RuntimeError(
-            f"No se encontro la lista {LIST_NAME}."
+            f"No se encontró la lista '{LIST_NAME}'. "
+            "Comprueba el nombre de la lista."
         )
 
     lista_id = lista["id"]
+
+    print(
+        f"SharePoint conectado. Lista: "
+        f"{lista.get('displayName', LIST_NAME)}",
+        flush=True
+    )
+
     return sitio_id, lista_id
 
 
@@ -167,7 +296,7 @@ def obtener_conteos():
     url = (
         "https://graph.microsoft.com/v1.0/sites/"
         f"{sitio}/lists/{lista}/items"
-        "?$expand=fields($select=Estado)&$top=999"
+        "?$expand=fields($select=Estado)&$top=200"
     )
 
     pendientes = 0
@@ -178,10 +307,14 @@ def obtener_conteos():
 
         for item in resultado.get("value", []):
             fields = item.get("fields", {})
-            estado = str(fields.get("Estado", "Pendiente")).strip().casefold()
+
+            estado = str(
+                fields.get("Estado", "")
+            ).strip().casefold()
 
             if estado == "pendiente":
                 pendientes += 1
+
             elif estado == "en proceso":
                 proceso += 1
 
@@ -206,7 +339,11 @@ try:
 except tk.TclError:
     pass
 
-barra = tk.Frame(root, bg=COLOR_FONDO, height=38)
+barra = tk.Frame(
+    root,
+    bg=COLOR_FONDO,
+    height=38
+)
 barra.pack(fill="x")
 barra.pack_propagate(False)
 
@@ -219,24 +356,16 @@ titulo = tk.Label(
 )
 titulo.pack(side="left", padx=9)
 
-boton_cerrar = tk.Button(
-    barra,
-    text="×",
-    command=root.destroy,
-    bg="#D92D20",
-    fg="white",
-    activebackground="#B42318",
-    activeforeground="white",
-    relief="flat",
-    bd=0,
-    font=("Segoe UI", 15, "bold"),
-    cursor="hand2",
-    width=2
+contenido = tk.Frame(
+    root,
+    bg=COLOR_FONDO
 )
-boton_cerrar.pack(side="right", padx=4, pady=4)
-
-contenido = tk.Frame(root, bg=COLOR_FONDO)
-contenido.pack(fill="both", expand=True, padx=12, pady=(3, 8))
+contenido.pack(
+    fill="both",
+    expand=True,
+    padx=12,
+    pady=(3, 8)
+)
 
 tk.Label(
     contenido,
@@ -255,7 +384,10 @@ etiqueta_pendientes = tk.Label(
 )
 etiqueta_pendientes.pack(anchor="w")
 
-fila = tk.Frame(contenido, bg=COLOR_FONDO)
+fila = tk.Frame(
+    contenido,
+    bg=COLOR_FONDO
+)
 fila.pack(fill="x")
 
 tk.Label(
@@ -277,16 +409,21 @@ etiqueta_proceso.pack(side="left", padx=5)
 
 etiqueta_estado = tk.Label(
     contenido,
-    text="Conectando...",
+    text="Preparando conexión...",
     bg=COLOR_FONDO,
     fg="#CBD5E1",
-    font=("Segoe UI", 8)
+    font=("Segoe UI", 8),
+    wraplength=195,
+    justify="left"
 )
-etiqueta_estado.pack(anchor="w", pady=(5, 0))
+etiqueta_estado.pack(
+    anchor="w",
+    pady=(5, 0)
+)
 
 
 # =========================================================
-# ARRASTRAR LA VENTANA
+# ARRASTRAR Y CERRAR
 # =========================================================
 
 posicion = {"x": 0, "y": 0}
@@ -300,8 +437,36 @@ def iniciar_arrastre(event):
 def arrastrar(event):
     x = event.x_root - posicion["x"]
     y = event.y_root - posicion["y"]
+
     root.geometry(f"+{x}+{y}")
 
+
+def al_cerrar():
+    global cerrando
+
+    cerrando = True
+    root.destroy()
+
+
+boton_cerrar = tk.Button(
+    barra,
+    text="×",
+    command=al_cerrar,
+    bg="#D92D20",
+    fg="white",
+    activebackground="#B42318",
+    activeforeground="white",
+    relief="flat",
+    bd=0,
+    font=("Segoe UI", 15, "bold"),
+    cursor="hand2",
+    width=2
+)
+boton_cerrar.pack(
+    side="right",
+    padx=4,
+    pady=4
+)
 
 for elemento in (barra, titulo):
     elemento.bind("<Button-1>", iniciar_arrastre)
@@ -309,17 +474,23 @@ for elemento in (barra, titulo):
 
 
 # =========================================================
-# ACTUALIZACION AUTOMATICA
+# ACTUALIZACION DE INTERFAZ
 # =========================================================
 
 def actualizar_interfaz(pendientes, proceso):
     if cerrando:
         return
 
-    etiqueta_pendientes.config(text=str(pendientes))
-    etiqueta_proceso.config(text=str(proceso))
+    etiqueta_pendientes.config(
+        text=str(pendientes)
+    )
+
+    etiqueta_proceso.config(
+        text=str(proceso)
+    )
+
     etiqueta_estado.config(
-        text=f"Actualizado {__import__('datetime').datetime.now().strftime('%H:%M:%S')}",
+        text=f"Actualizado {datetime.now():%H:%M:%S}",
         fg="#86EFAC"
     )
 
@@ -329,13 +500,18 @@ def mostrar_error(mensaje):
         return
 
     etiqueta_estado.config(
-        text=mensaje[:55],
+        text=mensaje[:180],
         fg="#FCA5A5"
     )
 
 
+# =========================================================
+# CICLO DE ACTUALIZACION
+# =========================================================
+
 def ciclo_actualizacion():
     while not cerrando:
+
         try:
             pendientes, proceso = obtener_conteos()
 
@@ -347,28 +523,40 @@ def ciclo_actualizacion():
                 )
 
         except Exception as error:
-            print("Error actualizando tickets:", error)
+            detalle = str(error)
+
+            print(
+                f"[{datetime.now():%H:%M:%S}] "
+                f"Error actualizando tickets: {detalle}",
+                flush=True
+            )
 
             if not cerrando:
-                root.after(
-                    0,
-                    lambda: mostrar_error("Error de conexion / acceso")
-                )
+                try:
+                    root.after(
+                        0,
+                        lambda m=detalle:
+                        mostrar_error(m)
+                    )
+                except tk.TclError:
+                    return
 
-        # Esperar el intervalo sin bloquear la ventana.
+        # Esperar el intervalo sin congelar la ventana.
         for _ in range(INTERVALO * 10):
             if cerrando:
                 return
+
             threading.Event().wait(0.1)
 
 
-def al_cerrar():
-    global cerrando
-    cerrando = True
-    root.destroy()
+# =========================================================
+# INICIO
+# =========================================================
 
-
-root.protocol("WM_DELETE_WINDOW", al_cerrar)
+root.protocol(
+    "WM_DELETE_WINDOW",
+    al_cerrar
+)
 
 threading.Thread(
     target=ciclo_actualizacion,

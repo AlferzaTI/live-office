@@ -573,7 +573,7 @@
         try {
             ticketsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="table-loading">
+                    <td colspan="8" class="table-loading">
                         Cargando tickets...
                     </td>
                 </tr>
@@ -612,7 +612,7 @@
 
             ticketsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="table-loading">
+                    <td colspan="8" class="table-loading">
                         No se pudieron cargar los tickets.<br>
                         <small>
                             ${escaparHTML(String(error.message).slice(0, 500))}
@@ -637,6 +637,8 @@
         const fields = item.fields || {};
 
         const titulo = obtenerCampo(fields, ["Title", "Título"]);
+        const usuario = obtenerCampo(fields, ["Usuario"]);
+        const correo = obtenerCampo(fields, ["Correo"]);
         const ticketId = obtenerCampo(fields, ["TicketID"]);
         const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
         const prioridad = obtenerCampo(fields, ["Prioridad"]);
@@ -743,7 +745,13 @@
                     </span>
                 </td>
                 <td>${escaparHTML(titulo)}</td>
-                <td>${escaparHTML(categoria)}</td>
+<td>
+    <div class="solicitante-info">
+        <strong>${escaparHTML(usuario || "Sin nombre")}</strong>
+        <small>${escaparHTML(correo || "Sin correo")}</small>
+    </div>
+</td>
+<td>${escaparHTML(categoria)}</td>
                 <td>
                     <span class="prioridad-badge ${clasePrioridad(prioridad)}">
                         ${escaparHTML(prioridad)}
@@ -1761,7 +1769,7 @@
 
         ticketsTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="table-loading">
+                <td colspan="8" class="table-loading">
                     <button
                         type="button"
                         class="btn-primary"

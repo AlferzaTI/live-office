@@ -84,6 +84,7 @@
             return;
         }
 
+        document.documentElement.classList.remove("alferza-access-pending");
         document.body.innerHTML = `
             <main style="
                 min-height:100vh;

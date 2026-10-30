@@ -1,4 +1,3 @@
-
 (function () {
     "use strict";
 
@@ -112,7 +111,6 @@
        Normal: puede crear tickets, pero no ver los registros.
     ========================================================= */
 
-    // Denegar visualización mientras se validan los permisos.
     if (registrosSection) {
         registrosSection.style.display = "none";
     }
@@ -133,18 +131,15 @@
     function aplicarPermisosReportes() {
         const autorizado = esUsuarioTI();
 
-        // Controlar la sección completa: título, filtros, tabla y botones.
         if (registrosSection) {
             registrosSection.style.display = autorizado ? "" : "none";
         }
 
-        // Controlar también el botón de reportes.
         if (abrirReporte) {
             abrirReporte.hidden = !autorizado;
             abrirReporte.style.display = autorizado ? "" : "none";
         }
 
-        // Cerrar el reporte si el usuario no tiene permisos.
         if (!autorizado && reporteModal) {
             cerrarReporte();
         }
@@ -162,7 +157,6 @@
     }
 
     function inicializarPermisosReportes() {
-        // Capturar el evento de validación de acceso.
         document.addEventListener(
             "alferza:access-granted",
             function (event) {
@@ -174,7 +168,6 @@
             }
         );
 
-        // Cubrir el caso en que la validación ya esté en curso.
         if (window.alferzaAccessReady) {
             window.alferzaAccessReady
                 .then(function (resultado) {
@@ -210,7 +203,6 @@
             return;
         }
 
-        // Sin permisos confirmados, ocultar la sección.
         aplicarPermisosReportes();
     }
 
@@ -564,7 +556,6 @@
     ========================================================= */
 
     async function cargarTickets() {
-        // Evitar consultas desde los controles de registros para usuarios normales.
         if (!esUsuarioTI()) {
             aplicarPermisosReportes();
             return;
@@ -624,150 +615,162 @@
     }
 
     function renderizarTickets() {
-    if (!esUsuarioTI()) {
-        return;
-    }
-
-    const busqueda = buscarTicket.value.toLowerCase().trim();
-    const estadoFiltro = filtroEstado.value;
-    const prioridadFiltro = filtroPrioridad.value;
-
-    // 1. Filtrar tickets según búsqueda, estado y prioridad.
-    const filtrados = ticketsData.filter(function (item) {
-        const fields = item.fields || {};
-
-        const titulo = obtenerCampo(fields, ["Title", "Título"]);
-        const usuario = obtenerCampo(fields, ["Usuario"]);
-        const correo = obtenerCampo(fields, ["Correo"]);
-        const ticketId = obtenerCampo(fields, ["TicketID"]);
-        const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
-        const prioridad = obtenerCampo(fields, ["Prioridad"]);
-        const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
-
-        const coincideBusqueda =
-            !busqueda ||
-            String(titulo).toLowerCase().includes(busqueda) ||
-            String(ticketId).toLowerCase().includes(busqueda) ||
-            String(categoria).toLowerCase().includes(busqueda);
-
-        const coincideEstado =
-            !estadoFiltro || estado === estadoFiltro;
-
-        const coincidePrioridad =
-            !prioridadFiltro || prioridad === prioridadFiltro;
-
-        return (
-            coincideBusqueda &&
-            coincideEstado &&
-            coincidePrioridad
-        );
-    });
-
-    // 2. Ordenar por estado y después por fecha de creación.
-    // Los tickets más antiguos aparecen primero dentro de cada estado.
-    filtrados.sort(function (a, b) {
-        function obtenerOrdenEstado(item) {
-            const estado = String(
-                obtenerCampo(item.fields || {}, ["Estado"]) || "Pendiente"
-            ).trim().toLowerCase();
-
-            if (estado === "pendiente") return 0;
-            if (estado === "en proceso") return 1;
-            if (estado === "sin resolver") return 2;
-            if (estado === "resuelto" || estado === "cerrado") return 3;
-
-            return 4;
+        if (!esUsuarioTI()) {
+            return;
         }
 
-        const ordenA = obtenerOrdenEstado(a);
-        const ordenB = obtenerOrdenEstado(b);
+        const busqueda = buscarTicket.value.toLowerCase().trim();
+        const estadoFiltro = filtroEstado.value;
+        const prioridadFiltro = filtroPrioridad.value;
 
-        // Primero se ordenan los grupos según el estado.
-        if (ordenA !== ordenB) {
-            return ordenA - ordenB;
+        // 1. Filtrar tickets según búsqueda, estado y prioridad.
+        const filtrados = ticketsData.filter(function (item) {
+            const fields = item.fields || {};
+
+            const titulo = obtenerCampo(fields, ["Title", "Título"]);
+            const usuario = obtenerCampo(fields, ["Usuario"]);
+            const correo = obtenerCampo(fields, ["Correo"]);
+            const ticketId = obtenerCampo(fields, ["TicketID"]);
+            const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
+            const prioridad = obtenerCampo(fields, ["Prioridad"]);
+            const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
+
+            const coincideBusqueda =
+                !busqueda ||
+                String(titulo).toLowerCase().includes(busqueda) ||
+                String(usuario).toLowerCase().includes(busqueda) ||
+                String(correo).toLowerCase().includes(busqueda) ||
+                String(ticketId).toLowerCase().includes(busqueda) ||
+                String(categoria).toLowerCase().includes(busqueda);
+
+            const coincideEstado =
+                !estadoFiltro || estado === estadoFiltro;
+
+            const coincidePrioridad =
+                !prioridadFiltro || prioridad === prioridadFiltro;
+
+            return (
+                coincideBusqueda &&
+                coincideEstado &&
+                coincidePrioridad
+            );
+        });
+
+        // 2. Ordenar por estado y después por fecha de creación.
+        // Los tickets más antiguos aparecen primero dentro de cada estado.
+        filtrados.sort(function (a, b) {
+            function obtenerOrdenEstado(item) {
+                const estado = String(
+                    obtenerCampo(item.fields || {}, ["Estado"]) || "Pendiente"
+                ).trim().toLowerCase();
+
+                if (estado === "pendiente") return 0;
+                if (estado === "en proceso") return 1;
+                if (estado === "sin resolver") return 2;
+                if (estado === "resuelto" || estado === "cerrado") return 3;
+
+                return 4;
+            }
+
+            const ordenA = obtenerOrdenEstado(a);
+            const ordenB = obtenerOrdenEstado(b);
+
+            if (ordenA !== ordenB) {
+                return ordenA - ordenB;
+            }
+
+            const fechaA = obtenerFechaTicket(a) || a.createdDateTime || "";
+            const fechaB = obtenerFechaTicket(b) || b.createdDateTime || "";
+
+            const tiempoA = new Date(fechaA).getTime();
+            const tiempoB = new Date(fechaB).getTime();
+
+            const fechaValidaA = Number.isFinite(tiempoA) ? tiempoA : 0;
+            const fechaValidaB = Number.isFinite(tiempoB) ? tiempoB : 0;
+
+            return fechaValidaA - fechaValidaB;
+        });
+
+        // 3. Mostrar mensaje cuando no existen resultados.
+        if (!filtrados.length) {
+            ticketsTableBody.innerHTML = "";
+            ticketsEmpty.style.display = "block";
+            return;
         }
 
-        // Dentro de cada grupo, ordenar por fecha ascendente.
-        const fechaA = obtenerFechaTicket(a) || a.createdDateTime || "";
-        const fechaB = obtenerFechaTicket(b) || b.createdDateTime || "";
+        ticketsEmpty.style.display = "none";
 
-        const tiempoA = new Date(fechaA).getTime();
-        const tiempoB = new Date(fechaB).getTime();
+        // 4. Dibujar la tabla conservando el diseño y las acciones actuales.
+        ticketsTableBody.innerHTML = filtrados.map(function (item) {
+            const fields = item.fields || {};
 
-        const fechaValidaA = Number.isFinite(tiempoA) ? tiempoA : 0;
-        const fechaValidaB = Number.isFinite(tiempoB) ? tiempoB : 0;
+            const titulo = obtenerCampo(fields, ["Title", "Título"]);
 
-        return fechaValidaA - fechaValidaB;
-    });
+            const ticketId = obtenerCampo(fields, ["TicketID"]) ||
+                `TKT-${String(item.id).padStart(6, "0")}`;
 
-    // 3. Mostrar mensaje cuando no existen resultados.
-    if (!filtrados.length) {
-        ticketsTableBody.innerHTML = "";
-        ticketsEmpty.style.display = "block";
-        return;
+            // SOLICITANTE: nombre y correo del usuario que creó el ticket.
+            // Se declaran dentro del map para que estén disponibles en la fila.
+            const usuario = obtenerCampo(fields, ["Usuario"]);
+            const correo = obtenerCampo(fields, ["Correo"]);
+
+            const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
+            const prioridad = obtenerCampo(fields, ["Prioridad"]);
+            const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
+
+            const fecha = obtenerFechaTicket(item);
+
+            const accion =
+                estado === "Resuelto" || estado === "Cerrado"
+                    ? `<span class="sin-accion">—</span>`
+                    : `
+                        <button
+                            type="button"
+                            class="btn-resolver"
+                            onclick="abrirResolverTicket(event, '${escaparHTML(item.id)}')"
+                        >
+                            ✓ Resolver
+                        </button>
+                    `;
+
+            return `
+                <tr onclick="mostrarDetalleTicket('${escaparHTML(item.id)}')">
+                    <td>
+                        <span class="ticket-id">
+                            ${escaparHTML(ticketId)}
+                        </span>
+                    </td>
+
+                    <td>${escaparHTML(titulo)}</td>
+
+                    <td>
+                        <div class="solicitante-info">
+                            <strong>${escaparHTML(usuario || "Sin nombre")}</strong>
+                            <small>${escaparHTML(correo || "Sin correo")}</small>
+                        </div>
+                    </td>
+
+                    <td>${escaparHTML(categoria)}</td>
+
+                    <td>
+                        <span class="prioridad-badge ${clasePrioridad(prioridad)}">
+                            ${escaparHTML(prioridad)}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="estado-badge ${claseEstado(estado)}">
+                            ${escaparHTML(estado)}
+                        </span>
+                    </td>
+
+                    <td>${formatearFecha(fecha)}</td>
+
+                    <td class="ticket-action-cell">${accion}</td>
+                </tr>
+            `;
+        }).join("");
     }
-
-    ticketsEmpty.style.display = "none";
-
-    // 4. Dibujar la tabla conservando el diseño y las acciones actuales.
-    ticketsTableBody.innerHTML = filtrados.map(function (item) {
-        const fields = item.fields || {};
-
-        const titulo = obtenerCampo(fields, ["Title", "Título"]);
-
-        const ticketId = obtenerCampo(fields, ["TicketID"]) ||
-            `TKT-${String(item.id).padStart(6, "0")}`;
-
-        const categoria = obtenerCampo(fields, ["Categoria", "Categoría"]);
-        const prioridad = obtenerCampo(fields, ["Prioridad"]);
-        const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
-
-        const fecha = obtenerFechaTicket(item);
-
-        const accion =
-            estado === "Resuelto" || estado === "Cerrado"
-                ? `<span class="sin-accion">—</span>`
-                : `
-                    <button
-                        type="button"
-                        class="btn-resolver"
-                        onclick="abrirResolverTicket(event, '${escaparHTML(item.id)}')"
-                    >
-                        ✓ Resolver
-                    </button>
-                `;
-
-        return `
-            <tr onclick="mostrarDetalleTicket('${escaparHTML(item.id)}')">
-                <td>
-                    <span class="ticket-id">
-                        ${escaparHTML(ticketId)}
-                    </span>
-                </td>
-                <td>${escaparHTML(titulo)}</td>
-<td>
-    <div class="solicitante-info">
-        <strong>${escaparHTML(usuario || "Sin nombre")}</strong>
-        <small>${escaparHTML(correo || "Sin correo")}</small>
-    </div>
-</td>
-<td>${escaparHTML(categoria)}</td>
-                <td>
-                    <span class="prioridad-badge ${clasePrioridad(prioridad)}">
-                        ${escaparHTML(prioridad)}
-                    </span>
-                </td>
-                <td>
-                    <span class="estado-badge ${claseEstado(estado)}">
-                        ${escaparHTML(estado)}
-                    </span>
-                </td>
-                <td>${formatearFecha(fecha)}</td>
-                <td class="ticket-action-cell">${accion}</td>
-            </tr>
-        `;
-    }).join("");
-}
 
     function actualizarResumen() {
         const total = ticketsData.length;
@@ -871,7 +874,6 @@
             ticketForm.reset();
             ticketPrioridad.value = "Media";
 
-            // Los usuarios normales pueden crear tickets sin ver registros.
             if (esUsuarioTI()) {
                 await cargarTickets();
             }
@@ -1266,7 +1268,6 @@
     ========================================================= */
 
     function generarInformePDF() {
-        // Verificación de permisos antes de generar el archivo.
         if (!aplicarPermisosReportes()) {
             return;
         }
@@ -1536,7 +1537,6 @@
                 const prioridad = obtenerCampo(fields, ["Prioridad"]);
                 const estado = obtenerCampo(fields, ["Estado"]) || "Pendiente";
                 const fecha = obtenerFechaTicket(item);
-                //const usuario = obtenerCampo(fields, ["Usuario"]);
                 const asignado = obtenerCampo(fields, ["AsignadoA"]);
 
                 return [
@@ -1546,7 +1546,6 @@
                     textoPDF(prioridad),
                     textoPDF(estado),
                     formatearFecha(fecha),
-                    //textoPDF(usuario),
                     textoPDF(asignado)
                 ];
             });
@@ -1566,7 +1565,6 @@
                     "Prioridad",
                     "Estado",
                     "Fecha",
-                    //"Solicitante",
                     "Asignado"
                 ]],
                 body: filasGenerales,
@@ -1594,17 +1592,6 @@
                     5: { cellWidth: 38, halign: "center" },
                     6: { cellWidth: 45 }
                 }
-                /*columnStyles: {
-                    0: { cellWidth: 22 },
-                    1: { cellWidth: 43 },
-                    2: { cellWidth: 28 },
-                    3: { cellWidth: 20, halign: "center" },
-                    4: { cellWidth: 25, halign: "center" },
-                    5: { cellWidth: 31, halign: "center" },
-                    6: { cellWidth: 42 },
-                    7: { cellWidth: 28 }
-                }*/
-               
             });
 
             // Descripciones y resultados.
@@ -1762,7 +1749,6 @@
         usuarioNombre.textContent = "Sesión de Microsoft requerida";
         usuarioCorreo.textContent = texto;
 
-        // No mostrar datos de registros mientras no exista sesión válida.
         if (registrosSection) {
             registrosSection.style.display = "none";
         }
@@ -1824,7 +1810,6 @@
 
             await obtenerUsuarioActual();
 
-            // La consulta de registros solo se ejecuta para el grupo TI.
             if (esUsuarioTI()) {
                 await cargarTickets();
             } else {
@@ -1886,8 +1871,8 @@
         }
     });
 
-        /* =========================================================
-    INICIO AUTOMÁTICO DE TICKETS
+    /* =========================================================
+       INICIO AUTOMÁTICO DE TICKETS
     ========================================================= */
 
     if (document.readyState === "loading") {

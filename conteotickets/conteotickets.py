@@ -3,16 +3,18 @@ import json
 import sys
 import threading
 import tkinter as tk
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 
 import msal
 import msal_extensions
 import requests
+from PIL import Image, ImageTk
 
 
 # =========================================================
-# CONFIGURACION
+# CONFIGURACION ORIGINAL
 # =========================================================
 
 def obtener_carpeta():
@@ -21,9 +23,25 @@ def obtener_carpeta():
     return Path(__file__).resolve().parent
 
 
+def obtener_recursos():
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent
+
+
 CARPETA = obtener_carpeta()
+RECURSOS = obtener_recursos()
+
 ARCHIVO_CONFIG = CARPETA / "config.json"
 ARCHIVO_CACHE = CARPETA / "cache_msal.bin"
+
+CARPETA_CUPHEAD = (
+    RECURSOS / "img" / "Cuphead" / "Cuphead"
+)
+
+URL_REPORTE = (
+    "https://alferzati.github.io/live-office/tickets.html"
+)
 
 if not ARCHIVO_CONFIG.exists():
     raise FileNotFoundError(
@@ -43,8 +61,15 @@ INTERVALO = max(15, int(CONFIG.get("refresh_seconds", 30)))
 AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
 SCOPES = ["User.Read", "Sites.Read.All"]
 
-COLOR_FONDO = "#00205c"
+COLOR_FONDO = "#07162E"
+COLOR_PANEL = "#102746"
+COLOR_PANEL_CLARO = "#16365C"
+COLOR_AZUL = "#1685F8"
+COLOR_AZUL_CLARO = "#63B3FF"
 COLOR_TEXTO = "#FFFFFF"
+COLOR_SECUNDARIO = "#A9BDD8"
+COLOR_VERDE = "#36D399"
+COLOR_ROJO = "#F87171"
 
 sesion_http = requests.Session()
 
@@ -53,14 +78,13 @@ sitio_id = None
 lista_id = None
 cerrando = False
 
-# Evita abrir varias ventanas de autenticación en la misma ejecución.
 intento_interactivo_realizado = False
-
 bloqueo_auth = threading.RLock()
+evento_cierre = threading.Event()
 
 
 # =========================================================
-# CACHE PERSISTENTE DE MICROSOFT
+# CACHE PERSISTENTE ORIGINAL
 # =========================================================
 
 persistencia = msal_extensions.FilePersistenceWithDataProtection(
@@ -77,7 +101,7 @@ app_msal = msal.PublicClientApplication(
 
 
 # =========================================================
-# AUTENTICACION MICROSOFT
+# AUTENTICACION ORIGINAL
 # =========================================================
 
 def obtener_token(
@@ -88,7 +112,6 @@ def obtener_token(
 
     with bloqueo_auth:
 
-        # 1. Buscar una sesión guardada.
         cuentas = app_msal.get_accounts()
 
         if cuentas:
@@ -112,8 +135,6 @@ def obtener_token(
                     flush=True
                 )
 
-        # 2. Si no hay sesión y no se permite iniciar sesión,
-        # devolver un error sin abrir otra ventana.
         if not permitir_interactivo:
             raise RuntimeError(
                 "No se pudo renovar la sesión de Microsoft. "
@@ -129,7 +150,6 @@ def obtener_token(
 
         intento_interactivo_realizado = True
 
-        # 3. Inicio de sesión normal de Microsoft.
         print(
             "Abriendo inicio de sesión de Microsoft...",
             flush=True
@@ -170,7 +190,7 @@ def obtener_token(
 
 
 # =========================================================
-# MICROSOFT GRAPH
+# MICROSOFT GRAPH ORIGINAL
 # =========================================================
 
 def interpretar_error(respuesta):
@@ -191,7 +211,6 @@ def interpretar_error(respuesta):
 def graph_get(url):
     global token_actual
 
-    # La primera conexión puede abrir el inicio de sesión.
     permitir_interactivo = not intento_interactivo_realizado
 
     token = obtener_token(
@@ -204,7 +223,6 @@ def graph_get(url):
         timeout=30
     )
 
-    # Si Microsoft rechaza el token, intentamos renovarlo.
     if respuesta.status_code == 401:
         token_actual = None
 
@@ -226,7 +244,7 @@ def graph_get(url):
 
 
 # =========================================================
-# CONSULTA DE SHAREPOINT
+# CONSULTA SHAREPOINT ORIGINAL
 # =========================================================
 
 def obtener_ids():
@@ -252,7 +270,6 @@ def obtener_ids():
     resultado_listas = graph_get(url_listas)
     listas = resultado_listas.get("value", [])
 
-    # Seguir paginación por si hay muchas listas.
     siguiente = resultado_listas.get("@odata.nextLink")
 
     while siguiente:
@@ -324,106 +341,413 @@ def obtener_conteos():
 
 
 # =========================================================
-# VENTANA FLOTANTE
+# CARGA DE LOS 44 FRAMES DE CUPHEAD
+# =========================================================
+
+def cargar_frames():
+    frames = []
+
+    for i in range(1, 45):
+
+        numero = str(i).zfill(4)
+
+        archivo = (
+            CARPETA_CUPHEAD
+            / f"cuphead_intro_b_{numero}.png"
+        )
+
+        if not archivo.exists():
+            print(
+                f"No se encontró el frame: {archivo}",
+                flush=True
+            )
+            continue
+
+        try:
+            imagen = Image.open(archivo).convert("RGBA")
+
+            imagen.thumbnail(
+                (82, 82),
+                Image.Resampling.LANCZOS
+            )
+
+            frames.append(ImageTk.PhotoImage(imagen))
+
+        except Exception as error:
+            print(
+                f"Error cargando frame {i}: {error}",
+                flush=True
+            )
+
+    print(
+        f"Cuphead: {len(frames)} de 44 frames cargados.",
+        flush=True
+    )
+
+    return frames
+
+
+# =========================================================
+# VENTANA PRINCIPAL
 # =========================================================
 
 root = tk.Tk()
-root.title("ALFERZA - ConteoTickets")
-root.geometry("220x185+30+120")
+root.title("ALFERZA | ConteoTickets")
+root.geometry("365x280+30+120")
 root.resizable(False, False)
 root.configure(bg=COLOR_FONDO)
 root.attributes("-topmost", True)
 
 try:
-    root.attributes("-alpha", 0.97)
+    root.attributes("-alpha", 0.98)
 except tk.TclError:
     pass
+
+
+# =========================================================
+# CABECERA
+# =========================================================
 
 barra = tk.Frame(
     root,
     bg=COLOR_FONDO,
-    height=38
+    height=43
 )
+
 barra.pack(fill="x")
 barra.pack_propagate(False)
 
 titulo = tk.Label(
     barra,
-    text="ALFERZA | TICKETS TI",
+    text="ALFERZA",
     bg=COLOR_FONDO,
     fg=COLOR_TEXTO,
+    font=("Segoe UI", 12, "bold")
+)
+
+titulo.pack(
+    side="left",
+    padx=(14, 5),
+    pady=8
+)
+
+subtitulo = tk.Label(
+    barra,
+    text="| LIVE OFFICE",
+    bg=COLOR_FONDO,
+    fg=COLOR_AZUL_CLARO,
     font=("Segoe UI", 9, "bold")
 )
-titulo.pack(side="left", padx=9)
+
+subtitulo.pack(
+    side="left",
+    pady=10
+)
+
+indicador_live = tk.Label(
+    barra,
+    text="● LIVE",
+    bg=COLOR_FONDO,
+    fg=COLOR_VERDE,
+    font=("Segoe UI", 8, "bold")
+)
+
+indicador_live.pack(
+    side="right",
+    padx=(0, 7)
+)
+
+
+def al_cerrar():
+    global cerrando
+
+    if cerrando:
+        return
+
+    cerrando = True
+    evento_cierre.set()
+
+    try:
+        root.destroy()
+    except tk.TclError:
+        pass
+
+
+boton_cerrar = tk.Button(
+    barra,
+    text="×",
+    command=al_cerrar,
+    bg=COLOR_FONDO,
+    fg=COLOR_SECUNDARIO,
+    activebackground="#B42318",
+    activeforeground=COLOR_TEXTO,
+    relief="flat",
+    bd=0,
+    font=("Segoe UI", 15, "bold"),
+    cursor="hand2",
+    width=2
+)
+
+boton_cerrar.pack(
+    side="right",
+    padx=5
+)
+
+
+# =========================================================
+# CONTENIDO
+# =========================================================
 
 contenido = tk.Frame(
     root,
     bg=COLOR_FONDO
 )
+
 contenido.pack(
     fill="both",
     expand=True,
     padx=12,
-    pady=(3, 8)
-)
-
-tk.Label(
-    contenido,
-    text="PENDIENTES",
-    bg=COLOR_FONDO,
-    fg="#B8D7FF",
-    font=("Segoe UI", 9, "bold")
-).pack(anchor="w")
-
-etiqueta_pendientes = tk.Label(
-    contenido,
-    text="—",
-    bg=COLOR_FONDO,
-    fg=COLOR_TEXTO,
-    font=("Segoe UI", 27, "bold")
-)
-etiqueta_pendientes.pack(anchor="w")
-
-fila = tk.Frame(
-    contenido,
-    bg=COLOR_FONDO
-)
-fila.pack(fill="x")
-
-tk.Label(
-    fila,
-    text="En proceso:",
-    bg=COLOR_FONDO,
-    fg="#DCE8FF",
-    font=("Segoe UI", 9)
-).pack(side="left")
-
-etiqueta_proceso = tk.Label(
-    fila,
-    text="—",
-    bg=COLOR_FONDO,
-    fg="#60A5FA",
-    font=("Segoe UI", 10, "bold")
-)
-etiqueta_proceso.pack(side="left", padx=5)
-
-etiqueta_estado = tk.Label(
-    contenido,
-    text="Preparando conexión...",
-    bg=COLOR_FONDO,
-    fg="#CBD5E1",
-    font=("Segoe UI", 8),
-    wraplength=195,
-    justify="left"
-)
-etiqueta_estado.pack(
-    anchor="w",
-    pady=(5, 0)
+    pady=(2, 8)
 )
 
 
 # =========================================================
-# ARRASTRAR Y CERRAR
+# PANEL DE PENDIENTES + CUPHEAD
+# =========================================================
+
+panel_principal = tk.Frame(
+    contenido,
+    bg=COLOR_PANEL,
+    height=112
+)
+
+panel_principal.pack(
+    fill="x",
+    pady=(0, 9)
+)
+
+panel_principal.pack_propagate(False)
+
+# Zona izquierda: contador
+
+zona_pendientes = tk.Frame(
+    panel_principal,
+    bg=COLOR_PANEL
+)
+
+zona_pendientes.pack(
+    side="left",
+    fill="both",
+    expand=True,
+    padx=(13, 0),
+    pady=9
+)
+
+tk.Label(
+    zona_pendientes,
+    text="TICKETS PENDIENTES",
+    bg=COLOR_PANEL,
+    fg=COLOR_SECUNDARIO,
+    font=("Segoe UI", 8, "bold")
+).pack(anchor="w")
+
+etiqueta_pendientes = tk.Label(
+    zona_pendientes,
+    text="—",
+    bg=COLOR_PANEL,
+    fg=COLOR_TEXTO,
+    font=("Segoe UI", 35, "bold")
+)
+
+etiqueta_pendientes.pack(
+    anchor="w",
+    pady=(0, 0)
+)
+
+tk.Label(
+    zona_pendientes,
+    text="Requieren atención",
+    bg=COLOR_PANEL,
+    fg=COLOR_AZUL_CLARO,
+    font=("Segoe UI", 8)
+).pack(anchor="w")
+
+
+# Zona derecha: animación Cuphead
+
+zona_cuphead = tk.Frame(
+    panel_principal,
+    bg=COLOR_PANEL,
+    width=105
+)
+
+zona_cuphead.pack(
+    side="right",
+    fill="y",
+    padx=(0, 8),
+    pady=5
+)
+
+zona_cuphead.pack_propagate(False)
+
+etiqueta_cuphead = tk.Label(
+    zona_cuphead,
+    bg=COLOR_PANEL,
+    bd=0
+)
+
+etiqueta_cuphead.pack(
+    expand=True
+)
+
+frames_cuphead = cargar_frames()
+indice_frame = 0
+
+
+def animar_cuphead():
+    global indice_frame
+
+    if cerrando:
+        return
+
+    if frames_cuphead:
+
+        etiqueta_cuphead.config(
+            image=frames_cuphead[indice_frame]
+        )
+
+        indice_frame += 1
+
+        if indice_frame >= len(frames_cuphead):
+            indice_frame = 0
+
+    else:
+        etiqueta_cuphead.config(
+            text="ALFERZA",
+            fg=COLOR_AZUL_CLARO,
+            font=("Segoe UI", 9, "bold")
+        )
+
+    root.after(80, animar_cuphead)
+
+
+# =========================================================
+# PANEL EN PROCESO
+# =========================================================
+
+panel_proceso = tk.Frame(
+    contenido,
+    bg=COLOR_PANEL_CLARO
+)
+
+panel_proceso.pack(
+    fill="x",
+    pady=(0, 9)
+)
+
+fila_proceso = tk.Frame(
+    panel_proceso,
+    bg=COLOR_PANEL_CLARO
+)
+
+fila_proceso.pack(
+    fill="x",
+    padx=13,
+    pady=8
+)
+
+tk.Label(
+    fila_proceso,
+    text="TICKETS EN PROCESO",
+    bg=COLOR_PANEL_CLARO,
+    fg=COLOR_SECUNDARIO,
+    font=("Segoe UI", 8, "bold")
+).pack(side="left")
+
+etiqueta_proceso = tk.Label(
+    fila_proceso,
+    text="—",
+    bg=COLOR_PANEL_CLARO,
+    fg=COLOR_AZUL_CLARO,
+    font=("Segoe UI", 15, "bold")
+)
+
+etiqueta_proceso.pack(side="right")
+
+
+# =========================================================
+# BOTON ABRIR REPORTE
+# =========================================================
+
+def abrir_reporte():
+
+    try:
+        webbrowser.open_new_tab(URL_REPORTE)
+
+        etiqueta_estado.config(
+            text="Reporte abierto en el navegador",
+            fg=COLOR_VERDE
+        )
+
+    except Exception as error:
+
+        etiqueta_estado.config(
+            text=f"No se pudo abrir el reporte: {error}",
+            fg=COLOR_ROJO
+        )
+
+
+boton_reporte = tk.Button(
+    contenido,
+    text="↗   ABRIR REPORTE DE TICKETS",
+    command=abrir_reporte,
+    bg=COLOR_AZUL,
+    fg=COLOR_TEXTO,
+    activebackground="#0867CC",
+    activeforeground=COLOR_TEXTO,
+    relief="flat",
+    bd=0,
+    font=("Segoe UI", 9, "bold"),
+    cursor="hand2",
+    pady=9
+)
+
+boton_reporte.pack(
+    fill="x",
+    pady=(0, 8)
+)
+
+
+def boton_entrar(event):
+    boton_reporte.config(bg="#0867CC")
+
+
+def boton_salir(event):
+    boton_reporte.config(bg=COLOR_AZUL)
+
+
+boton_reporte.bind("<Enter>", boton_entrar)
+boton_reporte.bind("<Leave>", boton_salir)
+
+
+# =========================================================
+# ESTADO DE CONEXION
+# =========================================================
+
+etiqueta_estado = tk.Label(
+    contenido,
+    text="Preparando conexión con SharePoint...",
+    bg=COLOR_FONDO,
+    fg=COLOR_SECUNDARIO,
+    font=("Segoe UI", 8),
+    anchor="w"
+)
+
+etiqueta_estado.pack(fill="x")
+
+
+# =========================================================
+# ARRASTRAR VENTANA
 # =========================================================
 
 posicion = {"x": 0, "y": 0}
@@ -441,34 +765,13 @@ def arrastrar(event):
     root.geometry(f"+{x}+{y}")
 
 
-def al_cerrar():
-    global cerrando
-
-    cerrando = True
-    root.destroy()
-
-
-boton_cerrar = tk.Button(
+# Solo la cabecera permite arrastrar.
+for elemento in (
     barra,
-    text="×",
-    command=al_cerrar,
-    bg="#D92D20",
-    fg="white",
-    activebackground="#B42318",
-    activeforeground="white",
-    relief="flat",
-    bd=0,
-    font=("Segoe UI", 15, "bold"),
-    cursor="hand2",
-    width=2
-)
-boton_cerrar.pack(
-    side="right",
-    padx=4,
-    pady=4
-)
-
-for elemento in (barra, titulo):
+    titulo,
+    subtitulo,
+    indicador_live
+):
     elemento.bind("<Button-1>", iniciar_arrastre)
     elemento.bind("<B1-Motion>", arrastrar)
 
@@ -478,6 +781,7 @@ for elemento in (barra, titulo):
 # =========================================================
 
 def actualizar_interfaz(pendientes, proceso):
+
     if cerrando:
         return
 
@@ -490,32 +794,34 @@ def actualizar_interfaz(pendientes, proceso):
     )
 
     etiqueta_estado.config(
-        text=f"Actualizado {datetime.now():%H:%M:%S}",
-        fg="#86EFAC"
+        text=f"● Actualizado: {datetime.now():%H:%M:%S}",
+        fg=COLOR_VERDE
     )
 
 
 def mostrar_error(mensaje):
+
     if cerrando:
         return
 
     etiqueta_estado.config(
-        text=mensaje[:180],
-        fg="#FCA5A5"
+        text=f"● {mensaje[:110]}",
+        fg=COLOR_ROJO
     )
 
 
 # =========================================================
-# CICLO DE ACTUALIZACION
+# CICLO DE ACTUALIZACION ORIGINAL
 # =========================================================
 
 def ciclo_actualizacion():
-    while not cerrando:
+
+    while not evento_cierre.is_set():
 
         try:
             pendientes, proceso = obtener_conteos()
 
-            if not cerrando:
+            if not evento_cierre.is_set():
                 root.after(
                     0,
                     lambda p=pendientes, e=proceso:
@@ -523,6 +829,7 @@ def ciclo_actualizacion():
                 )
 
         except Exception as error:
+
             detalle = str(error)
 
             print(
@@ -531,7 +838,7 @@ def ciclo_actualizacion():
                 flush=True
             )
 
-            if not cerrando:
+            if not evento_cierre.is_set():
                 try:
                     root.after(
                         0,
@@ -541,12 +848,8 @@ def ciclo_actualizacion():
                 except tk.TclError:
                     return
 
-        # Esperar el intervalo sin congelar la ventana.
-        for _ in range(INTERVALO * 10):
-            if cerrando:
-                return
-
-            threading.Event().wait(0.1)
+        if evento_cierre.wait(INTERVALO):
+            return
 
 
 # =========================================================
@@ -557,6 +860,8 @@ root.protocol(
     "WM_DELETE_WINDOW",
     al_cerrar
 )
+
+animar_cuphead()
 
 threading.Thread(
     target=ciclo_actualizacion,

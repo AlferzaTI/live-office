@@ -1,0 +1,3 @@
+dar permisos a todos los usuarios que van a dar la aplicación de lectura a lista 
+- TicketsTI
+- PermisosTI

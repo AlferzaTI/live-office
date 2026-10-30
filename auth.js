@@ -34,7 +34,11 @@
     const sesion = sessionStorage.getItem("alferza_login");
 
     if (sesion !== "true") {
-        sessionStorage.setItem("alferza_return_url", rutaActual);
+        sessionStorage.setItem(
+            "alferza_return_url",
+            rutaActual
+        );
+
         window.location.replace(LOGIN_URL);
         return;
     }
@@ -49,7 +53,7 @@
         return;
     }
 
-    // 3. Esperar a que termine la validación de permisos.
+    // 3. Esperar el resultado de la validación central.
     try {
         const resultado = await window.alferzaAccessReady;
 
@@ -61,7 +65,9 @@
         }
 
         console.info(
-            "ALFERZA: acceso autorizado correctamente."
+            resultado.desdeCache
+                ? "ALFERZA: acceso autorizado desde caché."
+                : "ALFERZA: acceso autorizado mediante validación."
         );
 
     } catch (error) {
@@ -73,7 +79,10 @@
         mostrarErrorAcceso();
     }
 
-    // Mostrar un mensaje si el control central no pudo cargarse.
+    // =====================================================
+    // ERROR SI NO SE PUDO CARGAR EL CONTROL CENTRAL
+    // =====================================================
+
     function mostrarErrorAcceso() {
         if (!document.body) {
             document.addEventListener(
@@ -84,7 +93,6 @@
             return;
         }
 
-        document.documentElement.classList.remove("alferza-access-pending");
         document.body.innerHTML = `
             <main style="
                 min-height:100vh;
@@ -117,7 +125,9 @@
                         Si el problema continúa, contacta con TI.
                     </p>
 
-                    <button id="alferza-auth-login" type="button"
+                    <button
+                        id="alferza-auth-login"
+                        type="button"
                         style="
                             margin-top:16px;
                             padding:12px 20px;
@@ -126,17 +136,24 @@
                             background:#00205c;
                             color:white;
                             cursor:pointer;
-                        ">
+                        "
+                    >
                         Volver al inicio de sesión
                     </button>
                 </section>
             </main>
         `;
 
+        document.documentElement.classList.remove(
+            "alferza-access-pending"
+        );
+
         document
             .getElementById("alferza-auth-login")
             .addEventListener("click", function () {
                 sessionStorage.removeItem("alferza_login");
+                sessionStorage.removeItem("alferza_permisos_cache");
+
                 window.location.replace(LOGIN_URL);
             });
     }

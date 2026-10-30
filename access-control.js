@@ -42,9 +42,17 @@
 
     const PAGINAS_PUBLICAS = ["login.html", "blank.html"];
 
+    // Caché temporal de permisos: 2 minutos.
+    const CACHE_KEY = "alferza_permisos_cache";
+    const CACHE_TTL = 2 * 60 * 1000;
+
     let instanciaMSAL = null;
     let tokenGraph = null;
     let cuentaActual = null;
+
+    // =====================================================
+    // FUNCIONES GENERALES
+    // =====================================================
 
     function normalizar(valor) {
         return String(valor ?? "")
@@ -81,8 +89,150 @@
         return undefined;
     }
 
+    function esperarDOM() {
+        if (document.readyState !== "loading") {
+            return Promise.resolve();
+        }
+
+        return new Promise(function (resolve) {
+            document.addEventListener(
+                "DOMContentLoaded",
+                resolve,
+                { once: true }
+            );
+        });
+    }
+
     // =====================================================
-    // MOSTRAR PANTALLA DE ACCESO RESTRINGIDO
+    // CACHÉ DE PERMISOS
+    // =====================================================
+
+    function obtenerCachePermisos() {
+        try {
+            const contenido = sessionStorage.getItem(CACHE_KEY);
+
+            if (!contenido) return null;
+
+            const cache = JSON.parse(contenido);
+
+            if (!cache || !cache.permisos || !cache.timestamp) {
+                sessionStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+
+            const antiguedad = Date.now() - Number(cache.timestamp);
+
+            if (
+                !Number.isFinite(antiguedad) ||
+                antiguedad < 0 ||
+                antiguedad > CACHE_TTL
+            ) {
+                sessionStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+
+            const cuentaGuardada = normalizarCorreo(
+                sessionStorage.getItem("alferza_account_username")
+            );
+
+            const cuentaCache = normalizarCorreo(cache.cuenta);
+
+            if (
+                !cuentaGuardada ||
+                !cuentaCache ||
+                cuentaGuardada !== cuentaCache
+            ) {
+                sessionStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+
+            if (
+                !["TI", "Normal"].includes(cache.permisos.grupo) ||
+                !Array.isArray(cache.permisos.modulos)
+            ) {
+                sessionStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+
+            return cache;
+
+        } catch (error) {
+            console.warn(
+                "[ALFERZA ACCESO] No se pudo leer la caché:",
+                error
+            );
+
+            sessionStorage.removeItem(CACHE_KEY);
+            return null;
+        }
+    }
+
+    function guardarCachePermisos(permisos, cuenta) {
+        try {
+            const cache = {
+                cuenta: normalizarCorreo(cuenta),
+                timestamp: Date.now(),
+                permisos: {
+                    correo: permisos.correo,
+                    grupo: permisos.grupo,
+                    modulos: [...permisos.modulos]
+                }
+            };
+
+            sessionStorage.setItem(
+                CACHE_KEY,
+                JSON.stringify(cache)
+            );
+
+        } catch (error) {
+            console.warn(
+                "[ALFERZA ACCESO] No se pudo guardar la caché:",
+                error
+            );
+        }
+    }
+
+    function eliminarCachePermisos() {
+        sessionStorage.removeItem(CACHE_KEY);
+    }
+
+    // =====================================================
+    // IDENTIFICAR MÓDULO ACTUAL
+    // =====================================================
+
+    function obtenerModuloActual() {
+        const archivo = window.location.pathname
+            .toLowerCase()
+            .split("/")
+            .pop();
+
+        if (!archivo || archivo === "index.html") {
+            return "Oficina";
+        }
+
+        if (archivo === "permisos.html") {
+            return "Permisos";
+        }
+
+        return PAGINAS[archivo] || null;
+    }
+
+    // =====================================================
+    // COMPROBAR PERMISO DE UN MÓDULO
+    // =====================================================
+
+    function tienePermiso(permisos, modulo) {
+        if (!modulo) return true;
+
+        if (modulo === "Permisos") {
+            return permisos.grupo === "TI";
+        }
+
+        return permisos.modulos.includes(modulo);
+    }
+
+    // =====================================================
+    // MOSTRAR ACCESO RESTRINGIDO
     // =====================================================
 
     function mostrarDenegacion(mensaje, volverAlLogin, detalle) {
@@ -90,8 +240,7 @@
         function renderizar() {
             if (!document.body) return;
 
-            // Primero reemplazamos el contenido original.
-            // La página todavía permanece oculta en este momento.
+            // Reemplazar primero todo el contenido protegido.
             document.body.innerHTML = `
                 <main style="
                     min-height:100vh;
@@ -101,7 +250,7 @@
                     padding:24px;
                     box-sizing:border-box;
                     background:#f3f6fb;
-                    font-family:Arial, sans-serif;
+                    font-family:Arial,sans-serif;
                     color:#172033;
                     text-align:center;
                 ">
@@ -109,13 +258,12 @@
                         width:100%;
                         max-width:440px;
                         padding:42px 32px;
-                        background:#ffffff;
+                        background:#fff;
                         border:1px solid #e5eaf2;
                         border-radius:18px;
-                        box-shadow:0 12px 40px rgba(0,32,92,0.08);
+                        box-shadow:0 12px 40px rgba(0,32,92,.08);
                         box-sizing:border-box;
                     ">
-
                         <div style="
                             width:68px;
                             height:68px;
@@ -160,11 +308,10 @@
                                 border:0;
                                 border-radius:9px;
                                 background:#00205c;
-                                color:#ffffff;
+                                color:#fff;
                                 font-size:14px;
                                 font-weight:600;
                                 cursor:pointer;
-                                transition:background .2s ease;
                             "
                         >
                             Volver a Oficina
@@ -177,18 +324,18 @@
                         ">
                             ALFERZA LIVE OFFICE
                         </p>
-
                     </section>
                 </main>
             `;
 
-            // Mostrar únicamente la pantalla de acceso restringido.
-            // IMPORTANTE: esta instrucción va DESPUÉS de reemplazar el body.
+            // Mostrar el aviso después de eliminar el contenido original.
             document.documentElement.classList.remove(
                 "alferza-access-pending"
             );
 
-            const boton = document.getElementById("alferza-access-back");
+            const boton = document.getElementById(
+                "alferza-access-back"
+            );
 
             if (boton) {
                 boton.addEventListener("click", function () {
@@ -202,9 +349,11 @@
         if (document.body) {
             renderizar();
         } else {
-            document.addEventListener("DOMContentLoaded", renderizar, {
-                once: true
-            });
+            document.addEventListener(
+                "DOMContentLoaded",
+                renderizar,
+                { once: true }
+            );
         }
     }
 
@@ -214,7 +363,9 @@
 
     async function graph(endpoint) {
         if (!tokenGraph) {
-            throw new Error("No se obtuvo un token de Microsoft Graph.");
+            throw new Error(
+                "No se obtuvo un token de Microsoft Graph."
+            );
         }
 
         const url = endpoint.startsWith("https://")
@@ -326,7 +477,6 @@
 
     async function obtenerPermisos(correos) {
         const registros = await obtenerListaPermisos();
-
         const registro = buscarRegistro(registros, correos);
 
         if (!registro) {
@@ -389,27 +539,6 @@
     }
 
     // =====================================================
-    // IDENTIFICAR MÓDULO ACTUAL
-    // =====================================================
-
-    function obtenerModuloActual() {
-        const archivo = window.location.pathname
-            .toLowerCase()
-            .split("/")
-            .pop();
-
-        if (!archivo || archivo === "index.html") {
-            return "Oficina";
-        }
-
-        if (archivo === "permisos.html") {
-            return "Permisos";
-        }
-
-        return PAGINAS[archivo] || null;
-    }
-
-    // =====================================================
     // FILTRAR MENÚ SEGÚN PERMISOS
     // =====================================================
 
@@ -418,14 +547,20 @@
             let destino;
 
             try {
-                destino = new URL(enlace.getAttribute("href"), location.href);
+                destino = new URL(
+                    enlace.getAttribute("href"),
+                    location.href
+                );
             } catch (_) {
                 return;
             }
 
             if (destino.origin !== location.origin) return;
 
-            const archivo = destino.pathname.toLowerCase().split("/").pop();
+            const archivo = destino.pathname
+                .toLowerCase()
+                .split("/")
+                .pop();
 
             let modulo = PAGINAS[archivo] || null;
 
@@ -439,17 +574,69 @@
 
             if (!modulo) return;
 
-            const permitido = modulo === "Permisos"
-                ? permisos.grupo === "TI"
-                : permisos.modulos.includes(modulo);
-
-            if (!permitido) {
+            if (!tienePermiso(permisos, modulo)) {
                 const contenedor = enlace.closest("li") || enlace;
+
                 contenedor.style.display = "none";
                 enlace.setAttribute("aria-hidden", "true");
                 enlace.setAttribute("tabindex", "-1");
             }
         });
+    }
+
+    // =====================================================
+    // APLICAR PERMISOS Y MOSTRAR LA PÁGINA
+    // =====================================================
+
+    async function autorizarPagina(permisos, desdeCache) {
+        const moduloActual = obtenerModuloActual();
+
+        if (!tienePermiso(permisos, moduloActual)) {
+            throw new Error(
+                "La cuenta no tiene habilitado el módulo solicitado."
+            );
+        }
+
+        await esperarDOM();
+
+        window.alferzaPermisos = permisos;
+
+        if (instanciaMSAL) {
+            window.alferzaMSAL = instanciaMSAL;
+        }
+
+        filtrarMenu(permisos);
+
+        // Mostrar el HTML solo después de confirmar el permiso.
+        document.documentElement.classList.remove(
+            "alferza-access-pending"
+        );
+
+        window.dispatchEvent(
+            new CustomEvent("alferza:access-granted", {
+                detail: {
+                    ...permisos,
+                    desdeCache: Boolean(desdeCache)
+                }
+            })
+        );
+
+        console.info(
+            desdeCache
+                ? "[ALFERZA ACCESO] Acceso autorizado desde caché."
+                : "[ALFERZA ACCESO] Acceso autorizado mediante SharePoint.",
+            {
+                correo: permisos.correo,
+                grupo: permisos.grupo,
+                modulos: permisos.modulos
+            }
+        );
+
+        return {
+            autorizado: true,
+            permisos: permisos,
+            desdeCache: Boolean(desdeCache)
+        };
     }
 
     // =====================================================
@@ -462,7 +649,6 @@
             .split("/")
             .pop();
 
-        // Las páginas públicas no necesitan validación de módulos.
         if (PAGINAS_PUBLICAS.includes(archivo)) {
             document.documentElement.classList.remove(
                 "alferza-access-pending"
@@ -474,7 +660,6 @@
             };
         }
 
-        // Comprobar sesión.
         if (sessionStorage.getItem("alferza_login") !== "true") {
             sessionStorage.setItem(
                 "alferza_return_url",
@@ -483,14 +668,43 @@
                 window.location.hash
             );
 
-            window.location.replace(CONFIG.basePath + "login.html");
+            window.location.replace(
+                CONFIG.basePath + "login.html"
+            );
 
             return {
                 autorizado: false
             };
         }
 
-        // Comprobar que MSAL esté cargado.
+        // -------------------------------------------------
+        // 1. INTENTAR AUTORIZAR DESDE LA CACHÉ
+        // -------------------------------------------------
+
+        const cache = obtenerCachePermisos();
+
+        if (cache) {
+            console.info(
+                "[ALFERZA ACCESO] Se encontró una caché vigente."
+            );
+
+            try {
+                return await autorizarPagina(
+                    cache.permisos,
+                    true
+                );
+            } catch (error) {
+                // La caché no autoriza el módulo solicitado.
+                // No continuar como si tuviera acceso.
+                eliminarCachePermisos();
+                throw error;
+            }
+        }
+
+        // -------------------------------------------------
+        // 2. SI NO HAY CACHÉ, VALIDAR CON MICROSOFT
+        // -------------------------------------------------
+
         if (typeof msal === "undefined") {
             throw new Error("No se cargó la librería MSAL.");
         }
@@ -499,7 +713,8 @@
             auth: {
                 clientId: CONFIG.clientId,
                 authority:
-                    "https://login.microsoftonline.com/" + CONFIG.tenantId,
+                    "https://login.microsoftonline.com/" +
+                    CONFIG.tenantId,
                 redirectUri: CONFIG.redirectUri
             },
             cache: {
@@ -517,12 +732,15 @@
             respuestaRedirect &&
             respuestaRedirect.account
         ) {
-            instanciaMSAL.setActiveAccount(respuestaRedirect.account);
+            instanciaMSAL.setActiveAccount(
+                respuestaRedirect.account
+            );
         }
 
         const cuentas = instanciaMSAL.getAllAccounts();
 
         if (!cuentas.length) {
+            eliminarCachePermisos();
             sessionStorage.removeItem("alferza_login");
 
             window.location.replace(
@@ -607,9 +825,6 @@
             cuentaMSAL: cuentaActual.username || ""
         });
 
-        // Consultar SharePoint para obtener los permisos actuales.
-        sessionStorage.removeItem("alferza_permisos");
-
         const correoAdmin = correosUnicos.some(correo =>
             CONFIG.adminEmails
                 .map(normalizarCorreo)
@@ -628,7 +843,10 @@
             permisos = await obtenerPermisos(correosUnicos);
         }
 
-        // Comprobar autorización del módulo actual.
+        // -------------------------------------------------
+        // 3. COMPROBAR EL MÓDULO SOLICITADO
+        // -------------------------------------------------
+
         const moduloActual = obtenerModuloActual();
 
         if (
@@ -646,84 +864,67 @@
             !permisos.modulos.includes(moduloActual)
         ) {
             throw new Error(
-                "La cuenta fue identificada como '" + permisos.correo +
+                "La cuenta fue identificada como '" +
+                permisos.correo +
                 "', pero no tiene habilitado el módulo '" +
-                moduloActual + "' en PermisosTI."
+                moduloActual +
+                "' en PermisosTI."
             );
         }
 
-        // Guardar permisos únicamente después de validar el acceso.
-        window.alferzaPermisos = permisos;
-        window.alferzaMSAL = instanciaMSAL;
+        // -------------------------------------------------
+        // 4. GUARDAR IDENTIDAD Y CACHÉ DE PERMISOS
+        // -------------------------------------------------
 
         sessionStorage.setItem(
             "alferza_account_username",
             cuentaActual.username || ""
         );
 
-        // Esperar a que el HTML esté disponible.
-        if (document.readyState === "loading") {
-            await new Promise(function (resolve) {
-                document.addEventListener(
-                    "DOMContentLoaded",
-                    resolve,
-                    { once: true }
-                );
-            });
-        }
-
-        // Filtrar el menú antes de mostrar la página.
-        filtrarMenu(permisos);
-
-        // QUITAR EL BLOQUEO SOLAMENTE DESPUÉS DE AUTORIZAR.
-        document.documentElement.classList.remove(
-            "alferza-access-pending"
+        guardarCachePermisos(
+            permisos,
+            cuentaActual.username
         );
 
-        window.dispatchEvent(
-            new CustomEvent("alferza:access-granted", {
-                detail: permisos
-            })
+        // -------------------------------------------------
+        // 5. MOSTRAR LA PÁGINA AUTORIZADA
+        // -------------------------------------------------
+
+        return await autorizarPagina(
+            permisos,
+            false
         );
-
-        console.info("[ALFERZA ACCESO] Acceso autorizado:", {
-            correo: permisos.correo,
-            grupo: permisos.grupo,
-            modulos: permisos.modulos
-        });
-
-        return {
-            autorizado: true,
-            permisos: permisos
-        };
     }
 
     // =====================================================
     // INICIAR VALIDACIÓN CENTRAL
     // =====================================================
 
-    window.alferzaAccessReady = validarAcceso().catch(function (error) {
-        console.error(
-            "[ALFERZA ACCESO] Error de validación:",
-            error
-        );
+    window.alferzaAccessReady = validarAcceso().catch(
+        function (error) {
+            console.error(
+                "[ALFERZA ACCESO] Error de validación:",
+                error
+            );
 
-        // La pantalla original permanece oculta.
-        // Se reemplaza por el aviso de acceso restringido.
-        mostrarDenegacion(
-            "No se pudo autorizar el acceso.",
-            false,
-            error && error.message
-                ? error.message
-                : "Error desconocido durante la validación."
-        );
+            // No conservar permisos antiguos si falla la validación.
+            eliminarCachePermisos();
 
-        return {
-            autorizado: false,
-            error: error && error.message
-                ? error.message
-                : "Error desconocido"
-        };
-    });
+            mostrarDenegacion(
+                "No se pudo autorizar el acceso.",
+                false,
+                error && error.message
+                    ? error.message
+                    : "Error desconocido durante la validación."
+            );
+
+            return {
+                autorizado: false,
+                error: error && error.message
+                    ? error.message
+                    : "Error desconocido"
+            };
+        }
+    );
 
 })();

@@ -81,123 +81,136 @@
         return undefined;
     }
 
+    // =====================================================
+    // MOSTRAR PANTALLA DE ACCESO RESTRINGIDO
+    // =====================================================
+
     function mostrarDenegacion(mensaje, volverAlLogin, detalle) {
 
-    function renderizar() {
-        if (!document.body) return;
+        function renderizar() {
+            if (!document.body) return;
 
-        // Liberar el bloqueo visual para mostrar únicamente el aviso.
-        document.documentElement.classList.remove("alferza-access-pending");
-
-        document.body.innerHTML = `
-            <main style="
-                min-height:100vh;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                padding:24px;
-                box-sizing:border-box;
-                background:#f3f6fb;
-                font-family:Arial, sans-serif;
-                color:#172033;
-                text-align:center;
-            ">
-                <section style="
-                    width:100%;
-                    max-width:440px;
-                    padding:42px 32px;
-                    background:#ffffff;
-                    border:1px solid #e5eaf2;
-                    border-radius:18px;
-                    box-shadow:0 12px 40px rgba(0,32,92,0.08);
+            // Primero reemplazamos el contenido original.
+            // La página todavía permanece oculta en este momento.
+            document.body.innerHTML = `
+                <main style="
+                    min-height:100vh;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    padding:24px;
                     box-sizing:border-box;
+                    background:#f3f6fb;
+                    font-family:Arial, sans-serif;
+                    color:#172033;
+                    text-align:center;
                 ">
-
-                    <div style="
-                        width:68px;
-                        height:68px;
-                        margin:0 auto 22px;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        border-radius:50%;
-                        background:#eef3fc;
-                        color:#00205c;
-                        font-size:30px;
+                    <section style="
+                        width:100%;
+                        max-width:440px;
+                        padding:42px 32px;
+                        background:#ffffff;
+                        border:1px solid #e5eaf2;
+                        border-radius:18px;
+                        box-shadow:0 12px 40px rgba(0,32,92,0.08);
+                        box-sizing:border-box;
                     ">
-                        🔒
-                    </div>
 
-                    <h1 style="
-                        margin:0 0 12px;
-                        color:#00205c;
-                        font-size:25px;
-                        font-weight:700;
-                    ">
-                        Acceso restringido
-                    </h1>
+                        <div style="
+                            width:68px;
+                            height:68px;
+                            margin:0 auto 22px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            border-radius:50%;
+                            background:#eef3fc;
+                            color:#00205c;
+                            font-size:30px;
+                        ">
+                            🔒
+                        </div>
 
-                    <p style="
-                        margin:0;
-                        color:#647084;
-                        font-size:15px;
-                        line-height:1.7;
-                    ">
-                        No tienes autorización para acceder a esta sección.
-                        Si necesitas acceso, comunícate con el área de TI.
-                    </p>
+                        <h1 style="
+                            margin:0 0 12px;
+                            color:#00205c;
+                            font-size:25px;
+                            font-weight:700;
+                        ">
+                            Acceso restringido
+                        </h1>
 
-                    <button
-                        id="alferza-access-back"
-                        type="button"
-                        style="
-                            width:100%;
-                            margin-top:28px;
-                            padding:14px 20px;
-                            border:0;
-                            border-radius:9px;
-                            background:#00205c;
-                            color:#ffffff;
-                            font-size:14px;
-                            font-weight:600;
-                            cursor:pointer;
-                            transition:background .2s ease;
-                        "
-                        onmouseover="this.style.background='#0A84FF'"
-                        onmouseout="this.style.background='#00205c'"
-                    >
-                        Volver a Oficina
-                    </button>
+                        <p style="
+                            margin:0;
+                            color:#647084;
+                            font-size:15px;
+                            line-height:1.7;
+                        ">
+                            No tienes autorización para acceder a esta sección.
+                            Si necesitas acceso, comunícate con el área de TI.
+                        </p>
 
-                    <p style="
-                        margin:22px 0 0;
-                        color:#9aa4b2;
-                        font-size:12px;
-                    ">
-                        ALFERZA LIVE OFFICE
-                    </p>
+                        <button
+                            id="alferza-access-back"
+                            type="button"
+                            style="
+                                width:100%;
+                                margin-top:28px;
+                                padding:14px 20px;
+                                border:0;
+                                border-radius:9px;
+                                background:#00205c;
+                                color:#ffffff;
+                                font-size:14px;
+                                font-weight:600;
+                                cursor:pointer;
+                                transition:background .2s ease;
+                            "
+                        >
+                            Volver a Oficina
+                        </button>
 
-                </section>
-            </main>
-        `;
+                        <p style="
+                            margin:22px 0 0;
+                            color:#9aa4b2;
+                            font-size:12px;
+                        ">
+                            ALFERZA LIVE OFFICE
+                        </p>
 
-        document
-            .getElementById("alferza-access-back")
-            .addEventListener("click", function () {
-                window.location.replace(
-                    CONFIG.basePath + "index.html"
-                );
+                    </section>
+                </main>
+            `;
+
+            // Mostrar únicamente la pantalla de acceso restringido.
+            // IMPORTANTE: esta instrucción va DESPUÉS de reemplazar el body.
+            document.documentElement.classList.remove(
+                "alferza-access-pending"
+            );
+
+            const boton = document.getElementById("alferza-access-back");
+
+            if (boton) {
+                boton.addEventListener("click", function () {
+                    window.location.replace(
+                        CONFIG.basePath + "index.html"
+                    );
+                });
+            }
+        }
+
+        if (document.body) {
+            renderizar();
+        } else {
+            document.addEventListener("DOMContentLoaded", renderizar, {
+                once: true
             });
+        }
     }
 
-    if (document.body) {
-        renderizar();
-    } else {
-        document.addEventListener("DOMContentLoaded", renderizar, {
-            once: true
-        });
-    }
-}
+    // =====================================================
+    // MICROSOFT GRAPH
+    // =====================================================
 
     async function graph(endpoint) {
         if (!tokenGraph) {
@@ -245,6 +258,10 @@
 
         return resultados;
     }
+
+    // =====================================================
+    // OBTENER LISTA DE PERMISOS DE SHAREPOINT
+    // =====================================================
 
     async function obtenerListaPermisos() {
         const sitio = await graph(
@@ -371,6 +388,10 @@
         };
     }
 
+    // =====================================================
+    // IDENTIFICAR MÓDULO ACTUAL
+    // =====================================================
+
     function obtenerModuloActual() {
         const archivo = window.location.pathname
             .toLowerCase()
@@ -388,8 +409,10 @@
         return PAGINAS[archivo] || null;
     }
 
-    // La autorización fue confirmada: mostrar la página.
-    document.documentElement.classList.remove("alferza-access-pending");
+    // =====================================================
+    // FILTRAR MENÚ SEGÚN PERMISOS
+    // =====================================================
+
     function filtrarMenu(permisos) {
         document.querySelectorAll("a[href]").forEach(function (enlace) {
             let destino;
@@ -429,16 +452,29 @@
         });
     }
 
+    // =====================================================
+    // VALIDAR ACCESO
+    // =====================================================
+
     async function validarAcceso() {
         const archivo = window.location.pathname
             .toLowerCase()
             .split("/")
             .pop();
 
+        // Las páginas públicas no necesitan validación de módulos.
         if (PAGINAS_PUBLICAS.includes(archivo)) {
-            return { autorizado: true, publico: true };
+            document.documentElement.classList.remove(
+                "alferza-access-pending"
+            );
+
+            return {
+                autorizado: true,
+                publico: true
+            };
         }
 
+        // Comprobar sesión.
         if (sessionStorage.getItem("alferza_login") !== "true") {
             sessionStorage.setItem(
                 "alferza_return_url",
@@ -449,9 +485,12 @@
 
             window.location.replace(CONFIG.basePath + "login.html");
 
-            return { autorizado: false };
+            return {
+                autorizado: false
+            };
         }
 
+        // Comprobar que MSAL esté cargado.
         if (typeof msal === "undefined") {
             throw new Error("No se cargó la librería MSAL.");
         }
@@ -485,9 +524,14 @@
 
         if (!cuentas.length) {
             sessionStorage.removeItem("alferza_login");
-            window.location.replace(CONFIG.basePath + "login.html");
 
-            return { autorizado: false };
+            window.location.replace(
+                CONFIG.basePath + "login.html"
+            );
+
+            return {
+                autorizado: false
+            };
         }
 
         const cuentaActiva = instanciaMSAL.getActiveAccount();
@@ -521,7 +565,10 @@
             ""
         ).toLowerCase();
 
-        if (tenantCuenta && tenantCuenta !== CONFIG.tenantId.toLowerCase()) {
+        if (
+            tenantCuenta &&
+            tenantCuenta !== CONFIG.tenantId.toLowerCase()
+        ) {
             throw new Error(
                 "La cuenta seleccionada pertenece a otro tenant de Microsoft."
             );
@@ -536,7 +583,9 @@
 
         tokenGraph = respuestaToken.accessToken;
 
-        const usuario = await graph("/me?$select=mail,userPrincipalName");
+        const usuario = await graph(
+            "/me?$select=mail,userPrincipalName"
+        );
 
         const correos = [
             usuario.mail,
@@ -558,7 +607,7 @@
             cuentaMSAL: cuentaActual.username || ""
         });
 
-        // Se vuelve a consultar SharePoint para no conservar permisos antiguos.
+        // Consultar SharePoint para obtener los permisos actuales.
         sessionStorage.removeItem("alferza_permisos");
 
         const correoAdmin = correosUnicos.some(correo =>
@@ -579,6 +628,7 @@
             permisos = await obtenerPermisos(correosUnicos);
         }
 
+        // Comprobar autorización del módulo actual.
         const moduloActual = obtenerModuloActual();
 
         if (
@@ -602,6 +652,7 @@
             );
         }
 
+        // Guardar permisos únicamente después de validar el acceso.
         window.alferzaPermisos = permisos;
         window.alferzaMSAL = instanciaMSAL;
 
@@ -610,6 +661,7 @@
             cuentaActual.username || ""
         );
 
+        // Esperar a que el HTML esté disponible.
         if (document.readyState === "loading") {
             await new Promise(function (resolve) {
                 document.addEventListener(
@@ -620,7 +672,13 @@
             });
         }
 
+        // Filtrar el menú antes de mostrar la página.
         filtrarMenu(permisos);
+
+        // QUITAR EL BLOQUEO SOLAMENTE DESPUÉS DE AUTORIZAR.
+        document.documentElement.classList.remove(
+            "alferza-access-pending"
+        );
 
         window.dispatchEvent(
             new CustomEvent("alferza:access-granted", {
@@ -640,11 +698,20 @@
         };
     }
 
-    window.alferzaAccessReady = validarAcceso().catch(function (error) {
-        console.error("[ALFERZA ACCESO] Error de validación:", error);
+    // =====================================================
+    // INICIAR VALIDACIÓN CENTRAL
+    // =====================================================
 
+    window.alferzaAccessReady = validarAcceso().catch(function (error) {
+        console.error(
+            "[ALFERZA ACCESO] Error de validación:",
+            error
+        );
+
+        // La pantalla original permanece oculta.
+        // Se reemplaza por el aviso de acceso restringido.
         mostrarDenegacion(
-            "No se pudo autorizar el acceso. Revisa el detalle para identificar la causa.",
+            "No se pudo autorizar el acceso.",
             false,
             error && error.message
                 ? error.message

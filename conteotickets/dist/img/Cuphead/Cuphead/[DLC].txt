@@ -1,0 +1,13 @@
+The following animations were added post-launch:
+
+ch_intro_scared_portal
+cuphead_duck_0003
+cuphead_duck_turn_0001
+cuphead_intro_b
+cuphead_intro_b_boil
+cuphead_intro_no_cookie
+cuphead_intro_no_cookie_break
+cuphead_super_beam_air
+cuphead_super_beam_0024-0041
+mc_reg_intro_cuphead
+player_ch_powerup_*_super

@@ -35,9 +35,8 @@ RECURSOS = obtener_recursos()
 ARCHIVO_CONFIG = CARPETA / "config.json"
 ARCHIVO_CACHE = CARPETA / "cache_msal.bin"
 
-CARPETA_CUPHEAD = (
-    RECURSOS / "img" / "Cuphead" / "Cuphead"
-)
+# La carpeta img está al mismo nivel que conteotickets.
+CARPETA_CUPHEAD = CARPETA.parent / "img" / "Cuphead" / "Cuphead"
 
 URL_REPORTE = (
     "https://alferzati.github.io/live-office/tickets.html"
@@ -158,8 +157,10 @@ def obtener_token(
         try:
             resultado = app_msal.acquire_token_interactive(
                 scopes=SCOPES,
-                prompt="select_account"
+                prompt="select_account",
+                port=8400
             )
+
         except Exception as error:
             raise RuntimeError(
                 f"No se pudo abrir el inicio de sesión: {error}"
@@ -190,7 +191,7 @@ def obtener_token(
 
 
 # =========================================================
-# MICROSOFT GRAPH ORIGINAL
+# MICROSOFT GRAPH
 # =========================================================
 
 def interpretar_error(respuesta):
@@ -244,7 +245,7 @@ def graph_get(url):
 
 
 # =========================================================
-# CONSULTA SHAREPOINT ORIGINAL
+# CONSULTA SHAREPOINT
 # =========================================================
 
 def obtener_ids():
@@ -307,23 +308,88 @@ def obtener_ids():
     return sitio_id, lista_id
 
 
+# =========================================================
+# CONVERTIR FECHA DE SHAREPOINT A FECHA LOCAL
+# =========================================================
+
+def obtener_fecha_local(valor_fecha):
+    """
+    Convierte una fecha ISO de SharePoint a la fecha local
+    de Windows.
+
+    Acepta fechas como:
+    2026-10-29T14:30:00Z
+    2026-10-29T14:30:00+00:00
+
+    Si la fecha no contiene zona horaria, utiliza su fecha
+    directamente.
+    """
+
+    if not valor_fecha:
+        return None
+
+    try:
+        if isinstance(valor_fecha, datetime):
+            fecha = valor_fecha
+        else:
+            texto = str(valor_fecha).strip()
+
+            if not texto:
+                return None
+
+            # Compatibilidad con fechas UTC terminadas en Z.
+            if texto.endswith("Z"):
+                texto = texto[:-1] + "+00:00"
+
+            fecha = datetime.fromisoformat(texto)
+
+        # Si SharePoint devuelve una fecha con zona horaria,
+        # la convertimos a la zona horaria local de Windows.
+        if fecha.tzinfo is not None:
+            fecha = fecha.astimezone()
+
+        return fecha.date()
+
+    except (ValueError, TypeError, OverflowError) as error:
+        print(
+            f"No se pudo interpretar la fecha '{valor_fecha}': {error}",
+            flush=True
+        )
+        return None
+
+
+# =========================================================
+# OBTENER PENDIENTES Y TICKETS REGISTRADOS HOY
+# =========================================================
+
 def obtener_conteos():
     sitio, lista = obtener_ids()
 
+    # Solicitamos el Estado y el campo Created de SharePoint.
+    # createdDateTime también se recibe como propiedad del elemento.
     url = (
         "https://graph.microsoft.com/v1.0/sites/"
         f"{sitio}/lists/{lista}/items"
-        "?$expand=fields($select=Estado)&$top=200"
+        "?$expand=fields($select=Estado,Created)&$top=200"
     )
 
     pendientes = 0
-    proceso = 0
+    registrados_hoy = 0
+
+    # Fecha actual de la computadora.
+    # La computadora debe tener configurada la zona horaria de Perú.
+    hoy = datetime.now().astimezone().date()
 
     while url:
         resultado = graph_get(url)
 
         for item in resultado.get("value", []):
+
             fields = item.get("fields", {})
+
+            # -------------------------------------------------
+            # 1. CONTAR TICKETS PENDIENTES
+            # -------------------------------------------------
 
             estado = str(
                 fields.get("Estado", "")
@@ -332,29 +398,87 @@ def obtener_conteos():
             if estado == "pendiente":
                 pendientes += 1
 
-            elif estado == "en proceso":
-                proceso += 1
+            # -------------------------------------------------
+            # 2. CONTAR TICKETS CREADOS HOY
+            # -------------------------------------------------
 
+            # Primero usamos createdDateTime, que es el metadato
+            # de creación del elemento en Microsoft Graph.
+            #
+            # Si no está disponible, utilizamos Created,
+            # el campo de creación integrado de SharePoint.
+
+            fecha_creacion = (
+                item.get("createdDateTime")
+                or fields.get("Created")
+            )
+
+            fecha_local = obtener_fecha_local(fecha_creacion)
+
+            if fecha_local == hoy:
+                registrados_hoy += 1
+
+        # Continuar leyendo todas las páginas de la lista.
         url = resultado.get("@odata.nextLink")
 
-    return pendientes, proceso
+    print(
+        f"Pendientes: {pendientes} | "
+        f"Registrados hoy: {registrados_hoy}",
+        flush=True
+    )
+
+    return pendientes, registrados_hoy
 
 
 # =========================================================
-# CARGA DE LOS 44 FRAMES DE CUPHEAD
+# DEFINICION DE ANIMACIONES CUPHEAD
 # =========================================================
 
-def cargar_frames():
+ANIMACIONES_CUPHEAD = {
+    "idle": {
+        "prefijo": "cuphead_intro_no_cookie_",
+        "inicio": 1,
+        "fin": 53,
+        "velocidad": 80
+    },
+    "click": {
+        "prefijo": "cuphead_intro_b_",
+        "inicio": 1,
+        "fin": 44,
+        "velocidad": 80
+    },
+    "reporte": {
+        "prefijo": "ch_intro_scared_portal_",
+        "inicio": 1,
+        "fin": 55,
+        "velocidad": 80
+    }
+}
+
+TAMANO_CUPHEAD = (95, 95)
+
+frames_animaciones = {}
+animacion_actual = None
+indice_frame = 0
+id_animacion = None
+version_animacion = 0
+reporte_en_curso = False
+
+
+def cargar_animacion(nombre, configuracion):
     frames = []
 
-    for i in range(1, 45):
+    prefijo = configuracion["prefijo"]
+    inicio = configuracion["inicio"]
+    fin = configuracion["fin"]
+
+    encontrados = 0
+
+    for i in range(inicio, fin + 1):
 
         numero = str(i).zfill(4)
 
-        archivo = (
-            CARPETA_CUPHEAD
-            / f"cuphead_intro_b_{numero}.png"
-        )
+        archivo = CARPETA_CUPHEAD / f"{prefijo}{numero}.png"
 
         if not archivo.exists():
             print(
@@ -364,27 +488,40 @@ def cargar_frames():
             continue
 
         try:
-            imagen = Image.open(archivo).convert("RGBA")
+            with Image.open(archivo) as imagen_original:
 
-            imagen.thumbnail(
-                (82, 82),
-                Image.Resampling.LANCZOS
-            )
+                imagen = imagen_original.convert("RGBA")
 
-            frames.append(ImageTk.PhotoImage(imagen))
+                imagen.thumbnail(
+                    TAMANO_CUPHEAD,
+                    Image.Resampling.LANCZOS
+                )
+
+                frames.append(ImageTk.PhotoImage(imagen))
+
+                encontrados += 1
 
         except Exception as error:
             print(
-                f"Error cargando frame {i}: {error}",
+                f"Error cargando {archivo.name}: {error}",
                 flush=True
             )
 
     print(
-        f"Cuphead: {len(frames)} de 44 frames cargados.",
+        f"Animación {nombre}: {encontrados} de "
+        f"{fin - inicio + 1} frames cargados.",
         flush=True
     )
 
     return frames
+
+
+def cargar_todas_las_animaciones():
+    for nombre, configuracion in ANIMACIONES_CUPHEAD.items():
+        frames_animaciones[nombre] = cargar_animacion(
+            nombre,
+            configuracion
+        )
 
 
 # =========================================================
@@ -393,6 +530,7 @@ def cargar_frames():
 
 root = tk.Tk()
 root.title("ALFERZA | ConteoTickets")
+root.overrideredirect(True)
 root.geometry("365x280+30+120")
 root.resizable(False, False)
 root.configure(bg=COLOR_FONDO)
@@ -459,12 +597,13 @@ indicador_live.pack(
 
 
 def al_cerrar():
-    global cerrando
+    global cerrando, version_animacion
 
     if cerrando:
         return
 
     cerrando = True
+    version_animacion += 1
     evento_cierre.set()
 
     try:
@@ -528,8 +667,6 @@ panel_principal.pack(
 
 panel_principal.pack_propagate(False)
 
-# Zona izquierda: contador
-
 zona_pendientes = tk.Frame(
     panel_principal,
     bg=COLOR_PANEL
@@ -573,12 +710,14 @@ tk.Label(
 ).pack(anchor="w")
 
 
-# Zona derecha: animación Cuphead
+# =========================================================
+# ZONA DE ANIMACION CUPHEAD
+# =========================================================
 
 zona_cuphead = tk.Frame(
     panel_principal,
     bg=COLOR_PANEL,
-    width=105
+    width=115
 )
 
 zona_cuphead.pack(
@@ -600,101 +739,204 @@ etiqueta_cuphead.pack(
     expand=True
 )
 
-frames_cuphead = cargar_frames()
-indice_frame = 0
+
+# Cargar los tres grupos de frames.
+cargar_todas_las_animaciones()
 
 
-def animar_cuphead():
+# =========================================================
+# CONTROLADOR DE ANIMACIONES
+# =========================================================
+
+def mostrar_frame(frames, indice):
+    if not frames or cerrando:
+        return
+
+    indice_seguro = indice % len(frames)
+
+    etiqueta_cuphead.config(
+        image=frames[indice_seguro],
+        text=""
+    )
+
+
+def cancelar_animacion_programada():
+    global id_animacion
+
+    if id_animacion is not None:
+        try:
+            root.after_cancel(id_animacion)
+        except tk.TclError:
+            pass
+
+        id_animacion = None
+
+
+def iniciar_animacion(nombre, repetir=True, al_terminar=None):
+    global animacion_actual
     global indice_frame
+    global version_animacion
+    global id_animacion
 
     if cerrando:
         return
 
-    if frames_cuphead:
+    frames = frames_animaciones.get(nombre, [])
 
-        etiqueta_cuphead.config(
-            image=frames_cuphead[indice_frame]
-        )
+    cancelar_animacion_programada()
 
+    version_animacion += 1
+    version_actual = version_animacion
+
+    animacion_actual = nombre
+    indice_frame = 0
+
+    if not frames:
+        if al_terminar:
+            al_terminar()
+        elif nombre != "idle":
+            iniciar_animacion("idle", repetir=True)
+        return
+
+    configuracion = ANIMACIONES_CUPHEAD[nombre]
+    velocidad = configuracion["velocidad"]
+
+    def avanzar():
+        global indice_frame, id_animacion
+
+        if cerrando or version_actual != version_animacion:
+            return
+
+        if indice_frame >= len(frames):
+
+            if repetir:
+                indice_frame = 0
+
+            else:
+                id_animacion = None
+
+                if al_terminar:
+                    al_terminar()
+                elif nombre != "idle":
+                    iniciar_animacion("idle", repetir=True)
+
+                return
+
+        mostrar_frame(frames, indice_frame)
         indice_frame += 1
 
-        if indice_frame >= len(frames_cuphead):
-            indice_frame = 0
-
-    else:
-        etiqueta_cuphead.config(
-            text="ALFERZA",
-            fg=COLOR_AZUL_CLARO,
-            font=("Segoe UI", 9, "bold")
+        id_animacion = root.after(
+            velocidad,
+            avanzar
         )
 
-    root.after(80, animar_cuphead)
+    avanzar()
+
+
+def animar_cuphead():
+    iniciar_animacion("idle", repetir=True)
 
 
 # =========================================================
-# PANEL EN PROCESO
+# PANEL DE TICKETS REGISTRADOS HOY
 # =========================================================
 
-panel_proceso = tk.Frame(
+panel_hoy = tk.Frame(
     contenido,
     bg=COLOR_PANEL_CLARO
 )
 
-panel_proceso.pack(
+panel_hoy.pack(
     fill="x",
     pady=(0, 9)
 )
 
-fila_proceso = tk.Frame(
-    panel_proceso,
+fila_hoy = tk.Frame(
+    panel_hoy,
     bg=COLOR_PANEL_CLARO
 )
 
-fila_proceso.pack(
+fila_hoy.pack(
     fill="x",
     padx=13,
     pady=8
 )
 
 tk.Label(
-    fila_proceso,
-    text="TICKETS EN PROCESO",
+    fila_hoy,
+    text="TICKETS REGISTRADOS HOY",
     bg=COLOR_PANEL_CLARO,
     fg=COLOR_SECUNDARIO,
     font=("Segoe UI", 8, "bold")
 ).pack(side="left")
 
-etiqueta_proceso = tk.Label(
-    fila_proceso,
+etiqueta_hoy = tk.Label(
+    fila_hoy,
     text="—",
     bg=COLOR_PANEL_CLARO,
-    fg=COLOR_AZUL_CLARO,
+    fg=COLOR_VERDE,
     font=("Segoe UI", 15, "bold")
 )
 
-etiqueta_proceso.pack(side="right")
+etiqueta_hoy.pack(side="right")
 
 
 # =========================================================
 # BOTON ABRIR REPORTE
 # =========================================================
 
-def abrir_reporte():
+def abrir_reporte_en_navegador():
+    global reporte_en_curso
+
+    if cerrando:
+        return
 
     try:
-        webbrowser.open_new_tab(URL_REPORTE)
+        resultado = webbrowser.open_new_tab(URL_REPORTE)
 
-        etiqueta_estado.config(
-            text="Reporte abierto en el navegador",
-            fg=COLOR_VERDE
-        )
+        if resultado:
+            etiqueta_estado.config(
+                text="Reporte abierto en el navegador",
+                fg=COLOR_VERDE
+            )
+        else:
+            etiqueta_estado.config(
+                text="Se solicitó abrir el reporte",
+                fg=COLOR_VERDE
+            )
 
     except Exception as error:
-
         etiqueta_estado.config(
             text=f"No se pudo abrir el reporte: {error}",
             fg=COLOR_ROJO
         )
+
+    reporte_en_curso = False
+
+    if not cerrando:
+        iniciar_animacion("idle", repetir=True)
+
+
+def abrir_reporte():
+    global reporte_en_curso
+
+    if cerrando or reporte_en_curso:
+        return
+
+    reporte_en_curso = True
+
+    etiqueta_estado.config(
+        text="Abriendo reporte de tickets...",
+        fg=COLOR_AZUL_CLARO
+    )
+
+    # Primero reproduce la animación especial.
+    # Al terminar, abre el reporte en el navegador.
+    iniciar_animacion(
+        "reporte",
+        repetir=False,
+        al_terminar=abrir_reporte_en_navegador
+    )
 
 
 boton_reporte = tk.Button(
@@ -747,6 +989,50 @@ etiqueta_estado.pack(fill="x")
 
 
 # =========================================================
+# CLIC GENERAL EN LA VENTANA
+# =========================================================
+
+def pertenece_a(widget, elemento):
+    actual = widget
+
+    while actual is not None:
+        if actual == elemento:
+            return True
+
+        actual = getattr(actual, "master", None)
+
+    return False
+
+
+def manejar_clic_ventana(event):
+    if cerrando or reporte_en_curso:
+        return
+
+    widget = event.widget
+
+    # No activar la animación general al pulsar botones.
+    if pertenece_a(widget, boton_reporte):
+        return
+
+    if pertenece_a(widget, boton_cerrar):
+        return
+
+    # Un clic normal reproduce la animación de reacción.
+    # Al terminar vuelve a la animación predeterminada.
+    iniciar_animacion(
+        "click",
+        repetir=False
+    )
+
+
+root.bind_all(
+    "<Button-1>",
+    manejar_clic_ventana,
+    add="+"
+)
+
+
+# =========================================================
 # ARRASTRAR VENTANA
 # =========================================================
 
@@ -780,7 +1066,7 @@ for elemento in (
 # ACTUALIZACION DE INTERFAZ
 # =========================================================
 
-def actualizar_interfaz(pendientes, proceso):
+def actualizar_interfaz(pendientes, registrados_hoy):
 
     if cerrando:
         return
@@ -789,8 +1075,8 @@ def actualizar_interfaz(pendientes, proceso):
         text=str(pendientes)
     )
 
-    etiqueta_proceso.config(
-        text=str(proceso)
+    etiqueta_hoy.config(
+        text=str(registrados_hoy)
     )
 
     etiqueta_estado.config(
@@ -811,7 +1097,7 @@ def mostrar_error(mensaje):
 
 
 # =========================================================
-# CICLO DE ACTUALIZACION ORIGINAL
+# CICLO DE ACTUALIZACION
 # =========================================================
 
 def ciclo_actualizacion():
@@ -819,13 +1105,13 @@ def ciclo_actualizacion():
     while not evento_cierre.is_set():
 
         try:
-            pendientes, proceso = obtener_conteos()
+            pendientes, registrados_hoy = obtener_conteos()
 
             if not evento_cierre.is_set():
                 root.after(
                     0,
-                    lambda p=pendientes, e=proceso:
-                    actualizar_interfaz(p, e)
+                    lambda p=pendientes, h=registrados_hoy:
+                    actualizar_interfaz(p, h)
                 )
 
         except Exception as error:
@@ -861,6 +1147,7 @@ root.protocol(
     al_cerrar
 )
 
+# Inicia con la animación predeterminada.
 animar_cuphead()
 
 threading.Thread(
